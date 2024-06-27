@@ -1,1 +1,1 @@
-# cozy-mate-Server
+# cozymate-Server
