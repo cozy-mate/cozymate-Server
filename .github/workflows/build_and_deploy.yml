@@ -93,6 +93,8 @@ jobs:
       - name: Deploy to EC2 (Release Branch)
         if: github.ref == 'refs/heads/release'
         uses: appleboy/ssh-action@master
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         with:
           host: ${{ secrets.RELEASE_EC2_HOST }}
           username: ubuntu
@@ -102,13 +104,15 @@ jobs:
             sudo docker rm $(sudo docker ps -a -q) || true
             sudo docker images -q | xargs -r docker rmi || true
             sudo docker system prune -af
-            sudo docker pull $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
+            sudo docker $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             sudo docker run --name cozymate-dev-server -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
 
       # Deploy to EC2 (Main Branch)
       - name: Deploy to EC2 (Main Branch)
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@master
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         with:
           host: ${{ secrets.MAIN_EC2_HOST }}
           username: ubuntu
@@ -118,6 +122,6 @@ jobs:
             sudo docker rm $(sudo docker ps -a -q) | true
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
-            sudo docker pull $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
+            sudo docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             sudo docker run --name cozymate-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
 
