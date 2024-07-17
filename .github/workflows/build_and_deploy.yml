@@ -4,18 +4,17 @@ on:
   push:
     branches: [ "main", "release" ]
 
-env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECR_URI: ${{ secrets.ECR_URI }}
-  IMAGE_TAG: ${{ github.sha }}
-
 jobs:
   ci:
     name: CI
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ap-northeast-2
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+      ECR_URI: ${{ secrets.ECR_URI }}
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       #체크아웃
@@ -58,7 +57,6 @@ jobs:
 
       ## Release Branch Build
       - name: Build, Tag (Release Branch)
-        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         if: github.ref == 'refs/heads/release'
@@ -67,7 +65,6 @@ jobs:
 
       ## Main Branch Build
       - name: Build, Tag (Main Branch)
-        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         if: github.ref == 'refs/heads/main'
@@ -85,6 +82,9 @@ jobs:
     needs: ci
     name: CD
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
       # Deploy to EC2 (Release Branch)
@@ -96,12 +96,12 @@ jobs:
           username: ubuntu
           key: ${{ secrets.RELEASE_SSH_KEY }}
           script: |
-            sudo docker stop $(sudo docker ps -a -q)
-            sudo docker rm $(sudo docker ps -a -q)
-            sudo docker images -q | xargs -r docker rmi
+            sudo docker stop $(sudo docker ps -a -q) || true
+            sudo docker rm $(sudo docker ps -a -q) || true
+            sudo docker images -q | xargs -r docker rmi || true
             sudo docker system prune -af
-            aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_URI && sudo docker pull $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
-            sudo docker run --name cozymate-dev-server -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -p 8080:8080 $ECR_URI/ECR_REPOSITORY:${{ github.sha }}
+            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
+            sudo docker run --name cozymate-dev-server -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
 
       # Deploy to EC2 (Main Branch)
       - name: Deploy to EC2 (Main Branch)
@@ -112,10 +112,9 @@ jobs:
           username: ubuntu
           key: ${{ secrets.MAIN_SSH_KEY }}
           script: |
-            sudo docker stop $(sudo docker ps -a -q)
-            sudo docker rm $(sudo docker ps -a -q)
+            sudo docker stop $(sudo docker ps -a -q) | true
+            sudo docker rm $(sudo docker ps -a -q) | true
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
-            aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_URI && sudo docker pull $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
-            sudo docker run --name cozymate-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -p 8080:8080 $ECR_URI/ECR_REPOSITORY:${{ github.sha }}
-
+            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
+            sudo docker run --name cozymate-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
