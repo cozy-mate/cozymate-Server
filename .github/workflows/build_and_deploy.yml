@@ -99,7 +99,7 @@ jobs:
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
             aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_URI && sudo docker pull $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
-            sudo docker run --name cozymate-dev-server -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 $ECR_URI/ECR_REPOSITORY:${{ github.sha }}
+            sudo docker run --name cozymate-dev-server -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
 
       # Deploy to EC2 (Main Branch)
       - name: Deploy to EC2 (Main Branch)
@@ -115,5 +115,5 @@ jobs:
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
             aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_URI && sudo docker pull $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
-            sudo docker run --name cozymate-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 $ECR_URI/ECR_REPOSITORY:${{ github.sha }}
+            sudo docker run --name cozymate-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
 
