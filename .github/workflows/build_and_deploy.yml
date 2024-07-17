@@ -94,9 +94,9 @@ jobs:
           username: ubuntu
           key: ${{ secrets.RELEASE_SSH_KEY }}
           script: |
-            sudo docker stop $(sudo docker ps -a -q)
-            sudo docker rm $(sudo docker ps -a -q)
-            sudo docker images -q | xargs -r docker rmi
+            sudo docker stop $(sudo docker ps -a -q) || true
+            sudo docker rm $(sudo docker ps -a -q) || true
+            sudo docker images -q | xargs -r docker rmi || true
             sudo docker system prune -af
             aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_URI && sudo docker pull $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
             sudo docker run --name cozymate-dev-server -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
@@ -110,8 +110,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.MAIN_SSH_KEY }}
           script: |
-            sudo docker stop $(sudo docker ps -a -q)
-            sudo docker rm $(sudo docker ps -a -q)
+            sudo docker stop $(sudo docker ps -a -q) | true
+            sudo docker rm $(sudo docker ps -a -q) | true
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
             aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_URI && sudo docker pull $ECR_URI/$ECR_REPOSITORY:${{ github.sha }}
