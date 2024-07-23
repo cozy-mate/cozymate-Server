@@ -34,5 +34,4 @@ public class ChatTestBuilder {
             .sender(testSenderBuild())
             .build();
     }
-
 }

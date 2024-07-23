@@ -7,7 +7,6 @@ import com.cozymate.cozymate_server.domain.chatroom.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomTestBuilder;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
-import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,24 +29,16 @@ class ChatServiceTest {
 
     @Mock
     ChatRepository chatRepository;
-
     @Mock
     MemberRepository memberRepository;
-
     @Mock
     ChatRoomRepository chatRoomRepository;
-
     @InjectMocks
     ChatService chatService;
-
     ChatRequestDto chatRequestDto;
-
     Member sender;
-
     Member recipient;
-
     ChatRoom chatRoom;
-
     Chat chat;
 
     @Nested

@@ -25,11 +25,11 @@ public class ChatService {
 
         Member sender = memberRepository.findById(chatRequestDto.getSenderId())
             .orElseThrow(
-                () -> new GeneralException(ErrorStatus._NOT_FOUND_MEMBER)
+                () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
             );
         Member recipient = memberRepository.findById(recipientId)
             .orElseThrow(
-                () -> new GeneralException(ErrorStatus._NOT_FOUND_MEMBER)
+                () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
             );
 
         Optional<ChatRoom> findChatRoom = chatRoomRepository.findByMemberAAndMemberB(sender,
