@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.memberstat.dto;
 
 import com.cozymate.cozymate_server.domain.memberstat.enums.Acceptance;
 import com.cozymate.cozymate_server.domain.memberstat.enums.SmokingState;
+import com.cozymate.cozymate_server.domain.university.University;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -10,11 +11,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberStatRequestDTO {
-
+        private Long universityId;
         private Integer admissionYear;
         private String major;
         private Integer numOfRoommate;
@@ -36,6 +36,6 @@ public class MemberStatRequestDTO {
         private String cleaningFrequency;
         private String personality;
         private String mbti;
-        private Map<String, List<Long>> options;
+        private Map<String, List<String>> options;
 
 }
