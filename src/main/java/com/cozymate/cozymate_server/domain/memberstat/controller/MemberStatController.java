@@ -20,9 +20,12 @@ public class MemberStatController {
 
     private final MemberStatCommandService memberStatCommandService;
 
+    /**
+     * [POST] 사용자 상세정보 저장
+     */
     @PostMapping("/{memberId}")
-    public ApiResponse<Long> createMemberStat(@PathVariable("memberId") Long memberId,@RequestBody MemberStatRequestDTO memberStatRequestDTO) {
-        log.info("Create member stat: {}", memberStatRequestDTO);
+    public ApiResponse<Long> createMemberStat(
+        @PathVariable("memberId") Long memberId,@RequestBody MemberStatRequestDTO memberStatRequestDTO) {
         return ApiResponse.onSuccess(memberStatCommandService.createMemberStat(memberId,memberStatRequestDTO));
     }
 
