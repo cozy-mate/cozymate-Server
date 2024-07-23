@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.memberstat.controller;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,7 @@ public class MemberStatController {
      */
     @PostMapping("/{memberId}")
     public ApiResponse<Long> createMemberStat(
-        @PathVariable("memberId") Long memberId,@RequestBody MemberStatRequestDTO memberStatRequestDTO) {
+        @PathVariable("memberId") Long memberId,@Valid @RequestBody MemberStatRequestDTO memberStatRequestDTO) {
         return ApiResponse.onSuccess(memberStatCommandService.createMemberStat(memberId,memberStatRequestDTO));
     }
 

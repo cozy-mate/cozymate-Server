@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.handler.MemberHandler;
+import com.cozymate.cozymate_server.global.response.handler.MemberStatHandler;
 import com.cozymate.cozymate_server.global.response.handler.UniversityHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +28,22 @@ public class MemberStatCommandServiceImpl implements MemberStatCommandService{
     @Override
     public Long createMemberStat(Long memberId, MemberStatRequestDTO memberStatRequestDTO) {
 
+        if (memberStatRepository.findByMemberId(memberId).isPresent()) {
+            throw new MemberStatHandler(ErrorStatus._MEMBERSTAT_EXISTS);
+        }
+
         Member member = memberRepository.findById(memberId)
             .orElseThrow(()->new MemberHandler(ErrorStatus._MEMBER_NOT_FOUND));
         University university = universityRepository.findById(memberStatRequestDTO.getUniversityId())
             .orElseThrow(()->new UniversityHandler(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
+        Integer admissionYear = Integer.parseInt(memberStatRequestDTO.getAdmissionYear());
+
         MemberStat saveMemberStat = memberStatRepository.save(
             MemberStat.builder()
                 .member(member)
                 .university(university)
-                .admissionYear(memberStatRequestDTO.getAdmissionYear())
+                .admissionYear(admissionYear)
                 .major(memberStatRequestDTO.getMajor())
                 .numOfRoommate(memberStatRequestDTO.getNumOfRoommate())
                 .acceptance(memberStatRequestDTO.getAcceptance())
