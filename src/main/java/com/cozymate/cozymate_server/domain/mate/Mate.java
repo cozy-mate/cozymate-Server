@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.mate;
 
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -35,6 +35,9 @@ public class Mate extends BaseTimeEntity {
 
     private boolean isExit = false;
 
+    // 룸메이트 대기상태 조회를 위해 EntryStatus를 추가하였습니다.
+    private EntryStatus entryStatus = EntryStatus.PENDING;
+
     private boolean isRoomManager = false;
 
     private int numOfBest = 0;
@@ -44,5 +47,6 @@ public class Mate extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Mate bestMate = null;
 
+    
 
 }

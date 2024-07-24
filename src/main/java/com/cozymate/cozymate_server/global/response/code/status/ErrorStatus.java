@@ -17,6 +17,13 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // [도메인] 관련해서 아래에 계속 추가해주시면 됩니다.
 
+    // Member
+    _MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER400", "존재하지 않는 멤버입니다."),
+
+    // Room
+    _ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM400", "존재하지 않는 방입니다."),
+    _ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOM409", "이미 활성화 또는 대기 중인 방이 존재합니다.")
+
     ;
     private final HttpStatus httpStatus;
     private final String code;
