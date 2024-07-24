@@ -18,8 +18,8 @@ public class ChatController {
 
     /**
      * [POST] 쪽지 작성
+     * TODO: ChatRequestDto의 senderId는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정
      */
-
     @PostMapping("/members/{recipientId}")
     public ApiResponse<String> createChat(
         @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId) {

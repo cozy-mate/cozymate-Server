@@ -24,36 +24,25 @@ public class ChatService {
     public void createChat(ChatRequestDto chatRequestDto, Long recipientId) {
 
         Member sender = memberRepository.findById(chatRequestDto.getSenderId())
-            .orElseThrow(
-                () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
-            );
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         Member recipient = memberRepository.findById(recipientId)
-            .orElseThrow(
-                () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
-            );
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Optional<ChatRoom> findChatRoom = chatRoomRepository.findByMemberAAndMemberB(sender,
             recipient);
 
         if (findChatRoom.isPresent()) {
-            saveChat(chatRequestDto.getContent(), findChatRoom.get(), sender);
+            saveChat(findChatRoom.get(), sender, chatRequestDto.getContent());
         } else {
-            ChatRoom chatRoom = ChatRoom.builder()
-                .memberA(sender)
-                .memberB(recipient)
-                .build();
+            ChatRoom chatRoom = ChatRoom.toEntity(sender, recipient);
             chatRoomRepository.save(chatRoom);
 
-            saveChat(chatRequestDto.getContent(), chatRoom, sender);
+            saveChat(chatRoom, sender, chatRequestDto.getContent());
         }
     }
 
-    private void saveChat(String content, ChatRoom chatRoom, Member sender) {
-        Chat chat = Chat.builder()
-            .chatRoom(chatRoom)
-            .sender(sender)
-            .content(content)
-            .build();
+    private void saveChat(ChatRoom chatRoom, Member sender, String content) {
+        Chat chat = Chat.toEntity(chatRoom, sender, content);
         chatRepository.save(chat);
     }
 }

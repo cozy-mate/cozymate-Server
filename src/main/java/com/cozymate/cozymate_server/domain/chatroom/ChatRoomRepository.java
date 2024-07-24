@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     @Query("select cr from ChatRoom cr where (cr.memberA = :sender and cr.memberB = :recipient) or (cr.memberA = :recipient and cr.memberB = :sender)")
-    Optional<ChatRoom> findByMemberAAndMemberB(@Param("sender") Member sender, @Param("recipient") Member recipient);
-
-
+    Optional<ChatRoom> findByMemberAAndMemberB(@Param("sender") Member sender,
+        @Param("recipient") Member recipient);
 }
