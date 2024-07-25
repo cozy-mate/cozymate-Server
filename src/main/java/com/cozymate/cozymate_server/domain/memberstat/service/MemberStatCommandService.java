@@ -38,7 +38,7 @@ public class MemberStatCommandService {
         Integer admissionYear = Integer.parseInt(memberStatRequestDTO.getAdmissionYear());
 
         MemberStat saveMemberStat = memberStatRepository.save(
-            MemberStat.toMemberStat(member, university,admissionYear,memberStatRequestDTO));
+            MemberStat.toEntity(member, university,admissionYear,memberStatRequestDTO));
 
         return saveMemberStat.getId();
     }

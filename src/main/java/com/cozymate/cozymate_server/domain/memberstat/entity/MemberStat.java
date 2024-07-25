@@ -90,7 +90,7 @@ public class MemberStat extends BaseTimeEntity{
     @Column(columnDefinition = "json")
     private Map<String, List<String>> options;
 
-    public static MemberStat toMemberStat(
+    public static MemberStat toEntity(
         Member member, University university, Integer admissionYear, MemberStatRequestDTO memberStatRequestDTO) {
         return MemberStat.builder()
             .member(member)
