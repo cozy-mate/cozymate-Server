@@ -65,6 +65,7 @@ public class S3Service {
     public S3UploadResponseDto uploadFiles(List<MultipartFile> multipartFiles) {
         // 입력된 파일 각각을 업로드하고 반환된 url을 List로 래핑
         List<String> fileList = multipartFiles.stream().map(this::uploadFile).toList();
+        // TODO: 07.25. [무빗] 이미지 업로드 중간에 실패시 롤백 처리하는 구문이 있어야함.
         return S3UploadResponseDto.toDto(fileList);
     }
 
