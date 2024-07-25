@@ -1,8 +1,5 @@
 package com.cozymate.cozymate_server.domain.memberstat.dto;
 
-import com.cozymate.cozymate_server.domain.memberstat.enums.Acceptance;
-import com.cozymate.cozymate_server.domain.memberstat.enums.SmokingState;
-import com.cozymate.cozymate_server.domain.university.University;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,8 +18,8 @@ public class MemberStatRequestDTO {
 
         @NotNull
         private Long universityId;
-        //학번의 경우 처리하기 해애한 부분이 있어, String 2자리로 통일함. EX) 09 학번 -> "09"
-        @NotNull
+        //학번의 경우 처리하기 애매한 부분이 있어, String 2자리로 통일함. EX) 09 학번 -> "09"
+        @NotBlank
         @Size(min=2,max=2)
         private String admissionYear;
         @NotBlank
@@ -32,22 +28,22 @@ public class MemberStatRequestDTO {
         @Min(2)
         @Max(6)
         private Integer numOfRoommate;
-        @NotNull
-        private Acceptance acceptance;
+        @NotBlank
+        private String acceptance;
         @NotNull
         @Min(0)
-        @Max(24)
+        @Max(23)
         private Integer wakeUpTime;
         @NotNull
         @Min(0)
-        @Max(24)
+        @Max(23)
         private Integer sleepingTime;
         @NotNull
         @Min(0)
-        @Max(24)
+        @Max(23)
         private Integer turnOffTime;
-        @NotNull
-        private SmokingState smokingState;
+        @NotBlank
+        private String smokingState;
         @NotBlank
         private String sleepingHabit;
         @NotBlank

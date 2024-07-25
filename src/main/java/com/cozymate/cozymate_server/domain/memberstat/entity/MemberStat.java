@@ -1,8 +1,7 @@
 package com.cozymate.cozymate_server.domain.memberstat.entity;
 
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberstat.enums.Acceptance;
-import com.cozymate.cozymate_server.domain.memberstat.enums.SmokingState;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
@@ -15,9 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -40,7 +36,7 @@ public class MemberStat extends BaseTimeEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member member;
 
@@ -54,7 +50,7 @@ public class MemberStat extends BaseTimeEntity{
 
     private Integer numOfRoommate;
 
-    private Acceptance acceptance;
+    private String acceptance;
 
     private Integer wakeUpTime;
 
@@ -62,7 +58,7 @@ public class MemberStat extends BaseTimeEntity{
 
     private Integer turnOffTime;
 
-    private SmokingState smoking;
+    private String smoking;
 
     private String sleepingHabit;
 
@@ -94,4 +90,33 @@ public class MemberStat extends BaseTimeEntity{
     @Column(columnDefinition = "json")
     private Map<String, List<String>> options;
 
+    public static MemberStat toMemberStat(
+        Member member, University university, Integer admissionYear, MemberStatRequestDTO memberStatRequestDTO) {
+        return MemberStat.builder()
+            .member(member)
+            .university(university)
+            .admissionYear(admissionYear)
+            .major(memberStatRequestDTO.getMajor())
+            .numOfRoommate(memberStatRequestDTO.getNumOfRoommate())
+            .acceptance(memberStatRequestDTO.getAcceptance())
+            .wakeUpTime(memberStatRequestDTO.getWakeUpTime())
+            .sleepingTime(memberStatRequestDTO.getSleepingTime())
+            .turnOffTime(memberStatRequestDTO.getTurnOffTime())
+            .smoking(memberStatRequestDTO.getSmokingState())
+            .sleepingHabit(memberStatRequestDTO.getSleepingHabit())
+            .constitution(memberStatRequestDTO.getConstitution())
+            .lifePattern(memberStatRequestDTO.getLifePattern())
+            .intimacy(memberStatRequestDTO.getIntimacy())
+            .canShare(memberStatRequestDTO.getCanShare())
+            .isPlayGame(memberStatRequestDTO.getIsPlayGame())
+            .isPhoneCall(memberStatRequestDTO.getIsPhoneCall())
+            .studying(memberStatRequestDTO.getStudying())
+            .cleanSensitivity(memberStatRequestDTO.getCleanSensitivity())
+            .noiseSensitivity(memberStatRequestDTO.getNoiseSensitivity())
+            .cleaningFrequency(memberStatRequestDTO.getCleaningFrequency())
+            .personality(memberStatRequestDTO.getPersonality())
+            .mbti(memberStatRequestDTO.getMbti())
+            .options(memberStatRequestDTO.getOptions())
+            .build();
+    }
 }
