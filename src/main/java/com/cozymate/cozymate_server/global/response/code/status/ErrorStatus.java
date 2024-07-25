@@ -18,7 +18,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // [도메인] 관련해서 아래에 계속 추가해주시면 됩니다.
 
     // Member 관련 에러
-    _MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER400", "멤버를 찾을 수 없습니다."),
+    _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "멤버를 찾을 수 없습니다."),
 
     ;
     private final HttpStatus httpStatus;

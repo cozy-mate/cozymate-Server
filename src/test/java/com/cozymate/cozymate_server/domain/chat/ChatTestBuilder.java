@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.chat;
 
+import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomTestBuilder;
 import com.cozymate.cozymate_server.domain.member.Member;
 

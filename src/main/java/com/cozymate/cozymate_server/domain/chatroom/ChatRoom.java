@@ -35,11 +35,4 @@ public class ChatRoom extends BaseTimeEntity {
     private LocalDateTime memberALastDeleteAt;
 
     private LocalDateTime memberBLastDeleteAt;
-
-    public static ChatRoom toEntity(Member sender, Member recipient) {
-        return ChatRoom.builder()
-            .memberA(sender)
-            .memberB(recipient)
-            .build();
-    }
 }

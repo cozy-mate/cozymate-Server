@@ -35,12 +35,4 @@ public class Chat extends BaseTimeEntity {
 
     @Column(length = 500)
     private String content;
-
-    public static Chat toEntity(ChatRoom chatRoom, Member sender, String content) {
-        return Chat.builder()
-            .chatRoom(chatRoom)
-            .sender(sender)
-            .content(content)
-            .build();
-    }
 }

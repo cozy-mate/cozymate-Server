@@ -1,9 +1,14 @@
-package com.cozymate.cozymate_server.domain.chat;
+package com.cozymate.cozymate_server.domain.chat.service;
 
+import com.cozymate.cozymate_server.domain.chat.Chat;
+import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
+import com.cozymate.cozymate_server.global.converter.ChatConverter;
+import com.cozymate.cozymate_server.global.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Optional;
@@ -12,15 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class ChatService {
+public class ChatCommandService {
 
     private final ChatRepository chatRepository;
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
 
-    @Transactional
     public void createChat(ChatRequestDto chatRequestDto, Long recipientId) {
 
         Member sender = memberRepository.findById(chatRequestDto.getSenderId())
@@ -34,7 +38,7 @@ public class ChatService {
         if (findChatRoom.isPresent()) {
             saveChat(findChatRoom.get(), sender, chatRequestDto.getContent());
         } else {
-            ChatRoom chatRoom = ChatRoom.toEntity(sender, recipient);
+            ChatRoom chatRoom = ChatRoomConverter.toEntity(sender, recipient);
             chatRoomRepository.save(chatRoom);
 
             saveChat(chatRoom, sender, chatRequestDto.getContent());
@@ -42,7 +46,7 @@ public class ChatService {
     }
 
     private void saveChat(ChatRoom chatRoom, Member sender, String content) {
-        Chat chat = Chat.toEntity(chatRoom, sender, content);
+        Chat chat = ChatConverter.toEntity(chatRoom, sender, content);
         chatRepository.save(chat);
     }
 }

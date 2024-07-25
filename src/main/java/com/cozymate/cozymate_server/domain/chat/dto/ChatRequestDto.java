@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.chat;
+package com.cozymate.cozymate_server.domain.chat.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

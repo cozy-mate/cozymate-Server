@@ -1,7 +1,8 @@
 package com.cozymate.cozymate_server.domain.chat;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
+import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomTestBuilder;
@@ -24,8 +25,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ChatService 클래스의")
-class ChatServiceTest {
+@DisplayName("ChatCommandService 클래스의")
+class ChatCommandServiceTest {
 
     @Mock
     ChatRepository chatRepository;
@@ -34,7 +35,7 @@ class ChatServiceTest {
     @Mock
     ChatRoomRepository chatRoomRepository;
     @InjectMocks
-    ChatService chatService;
+    ChatCommandService chatCommandService;
     ChatRequestDto chatRequestDto;
     Member sender;
     Member recipient;
@@ -70,7 +71,7 @@ class ChatServiceTest {
             @Test
             @DisplayName("쪽지방을 생성하고, 쪽지 작성에 성공한다.")
             void it_returns_new_chatroom_success_create_chat() {
-                chatService.createChat(chatRequestDto, recipient.getId());
+                chatCommandService.createChat(chatRequestDto, recipient.getId());
             }
         }
 
@@ -98,7 +99,7 @@ class ChatServiceTest {
             @Test
             @DisplayName("존재하던 쪽지방을 이용해서, 쪽지 작성에 성공한다.")
             void it_returns_exist_chatroom_success_create_chat() {
-                chatService.createChat(chatRequestDto, recipient.getId());
+                chatCommandService.createChat(chatRequestDto, recipient.getId());
             }
         }
 
@@ -117,7 +118,7 @@ class ChatServiceTest {
             @Test
             @DisplayName("예외를 발생시킨다.")
             void it_returns_not_found_member_exception() {
-                assertThatThrownBy(() -> chatService.createChat(chatRequestDto, recipient.getId()))
+                assertThatThrownBy(() -> chatCommandService.createChat(chatRequestDto, recipient.getId()))
                     .isInstanceOf(GeneralException.class);
             }
         }
@@ -142,7 +143,7 @@ class ChatServiceTest {
             @Test
             @DisplayName("예외를 발생시킨다.")
             void it_returns_not_found_member_exception() {
-                assertThatThrownBy(() -> chatService.createChat(chatRequestDto, recipient.getId()))
+                assertThatThrownBy(() -> chatCommandService.createChat(chatRequestDto, recipient.getId()))
                     .isInstanceOf(GeneralException.class);
             }
         }
