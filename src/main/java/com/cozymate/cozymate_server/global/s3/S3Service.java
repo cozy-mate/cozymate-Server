@@ -2,7 +2,6 @@ package com.cozymate.cozymate_server.global.s3;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.MultiObjectDeleteException;
@@ -11,10 +10,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import com.cozymate.cozymate_server.global.s3.dto.S3RequestDto;
-import com.cozymate.cozymate_server.global.s3.dto.S3ResponseDto;
+import com.cozymate.cozymate_server.global.s3.dto.S3ResponseDto.S3UploadResponseDto;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +46,7 @@ public class S3Service {
         return UUID.randomUUID().toString().concat(getFileExtension(fileName));
     }
 
-    public S3ResponseDto uploadFile(MultipartFile multipartFile) {
+    public String uploadFile(MultipartFile multipartFile) {
         String fileName = createFileName(multipartFile.getOriginalFilename());
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentLength(multipartFile.getSize());
@@ -61,20 +59,14 @@ public class S3Service {
         } catch (IOException e) {
             throw new GeneralException(ErrorStatus._FILE_UPLOAD_ERROR);
         }
-        return new S3ResponseDto(amazonS3Client.getUrl(bucket, fileName).toString());
+        return amazonS3Client.getUrl(bucket, fileName).toString();
     }
 
     @Transactional
-    public List<S3ResponseDto> uploadFiles(List<MultipartFile> multipartFiles) {
-        List<S3ResponseDto> fileList = new ArrayList<>();
-        // forEach 구문을 통해 multipartFile로 넘어온 파일들 하나씩 fileList에 추가
-        multipartFiles.forEach(file -> fileList.add(uploadFile(file)));
-        return fileList;
-    }
-
-    // TODO: 07.25. [무빗] 추후에 단일 파일 삭제 기능도 구현한다면 사용 예정
-    public void deleteFile(String fileName) {
-        amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, fileName));
+    public S3UploadResponseDto uploadFiles(List<MultipartFile> multipartFiles) {
+        // 입력된 파일 각각을 업로드하고 반환된 url을 List로 래핑
+        List<String> fileList = multipartFiles.stream().map(this::uploadFile).toList();
+        return S3UploadResponseDto.toDto(fileList);
     }
 
     public void deleteFilesByName(S3RequestDto requestDto) {

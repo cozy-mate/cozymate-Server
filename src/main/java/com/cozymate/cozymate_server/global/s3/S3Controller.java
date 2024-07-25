@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import com.cozymate.cozymate_server.global.s3.dto.S3RequestDto;
 import com.cozymate.cozymate_server.global.s3.dto.S3ResponseDto;
+import com.cozymate.cozymate_server.global.s3.dto.S3ResponseDto.S3UploadResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,35 +28,12 @@ public class S3Controller {
     private final S3Service s3Service;
 
     @PostMapping(
-        value = "api/file",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    @Operation(
-        summary = "[무빗] s3 단일 이미지 업로드",
-        description = "S3에 이미지를 업로드하는 기능입니다. 단일 파일만 업로드 가능합니다."
-    )
-    public ApiResponse<S3ResponseDto> uploadFile(
-        @Parameter(
-            description = "multipart/form-data 형식의 이미지 리스트를 input으로 받습니다. 이때 key 값은 multipartFile 입니다.",
-            content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
-        )
-        @RequestPart(value = "file") MultipartFile file
-    ) {
-        try {
-            return ApiResponse.onSuccess(s3Service.uploadFile(file));
-        } catch (Exception e) {
-            throw new GeneralException(ErrorStatus._FILE_UPLOAD_ERROR);
-        }
-    }
-
-    @PostMapping(
         value = "api/files",
         consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @Operation(summary = "[무빗] s3 다중 이미지 업로드", description = "S3에 이미지를 업로드하는 기능입니다. 여러개의 파일을 동시에 업로드 가능합니다.")
-    public ApiResponse<List<S3ResponseDto>> uploadFiles(
+    @Operation(summary = "[무빗] s3 이미지 업로드", description = "S3에 이미지를 업로드하는 기능입니다. 여러개의 파일을 동시에 업로드 가능합니다.")
+    public ApiResponse<S3UploadResponseDto> uploadFiles(
         @Parameter(
             description = "multipart/form-data 형식의 이미지 리스트를 input으로 받습니다. 이때 key 값은 multipartFile 입니다.",
             content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
