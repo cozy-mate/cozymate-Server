@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.chat.controller;
 
 import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
 import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;
+import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +23,9 @@ public class ChatController {
     // TODO: ChatRequestDto의 senderId는 추후 시큐리티 인증 객체에서 받아 오는 것으로 변경 예정
     @PostMapping("/members/{recipientId}")
     @Operation(summary = "[베로] 쪽지 작성 기능", description = "recipientId: 쪽지를 받을 멤버의 pk값, RequestBody의 content: 쪽지 내용")
-    public ResponseEntity<String> createChat(
+    public ResponseEntity<ApiResponse<String>> createChat(
         @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId) {
         chatCommandService.createChat(chatRequestDto, recipientId);
-        return ResponseEntity.ok().body("쪽지 작성 완료");
+        return ResponseEntity.ok().body(ApiResponse.onSuccess("쪽지 작성 완료"));
     }
 }
