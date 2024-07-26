@@ -30,24 +30,39 @@ public class MemberStatRequestDTO {
         private Integer numOfRoommate;
         @NotBlank
         private String acceptance;
+        @NotBlank
+        @Size(min=2,max=2)
+        private String wakeUpMeridian;
         @NotNull
-        @Min(0)
-        @Max(23)
+        @Min(1)
+        @Max(12)
         private Integer wakeUpTime;
+        @NotBlank
+        @Size(min=2,max=2)
+        private String sleepingMeridian;
         @NotNull
-        @Min(0)
-        @Max(23)
+        @Min(1)
+        @Max(12)
         private Integer sleepingTime;
+        @NotBlank
+        @Size(min=2,max=2)
+        private String turnOffMeridian;
         @NotNull
-        @Min(0)
-        @Max(23)
+        @Min(1)
+        @Max(12)
         private Integer turnOffTime;
         @NotBlank
         private String smokingState;
         @NotBlank
         private String sleepingHabit;
-        @NotBlank
-        private String constitution;
+        @NotNull
+        @Min(1)
+        @Max(3)
+        private Integer airConditioningIntensity;
+        @NotNull
+        @Min(1)
+        @Max(3)
+        private Integer heatingIntensity;
         @NotBlank
         private String lifePattern;
         @NotBlank
@@ -59,11 +74,11 @@ public class MemberStatRequestDTO {
         private String studying;
         @NotNull
         @Min(1)
-        @Max(10)
+        @Max(5)
         private Integer cleanSensitivity;
         @NotNull
         @Min(1)
-        @Max(10)
+        @Max(5)
         private Integer noiseSensitivity;
         @NotBlank
         private String cleaningFrequency;

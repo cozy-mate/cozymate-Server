@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstat.service;
 
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,5 +12,4 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @Service
 public class MemberStatQueryService {
-
 }

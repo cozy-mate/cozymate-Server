@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.member;
 
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
-import com.cozymate.cozymate_server.domain.memberstat.entity.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

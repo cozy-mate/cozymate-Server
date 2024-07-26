@@ -2,7 +2,8 @@ package com.cozymate.cozymate_server.domain.memberstat.service;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
-import com.cozymate.cozymate_server.domain.memberstat.entity.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.university.University;
@@ -24,6 +25,10 @@ public class MemberStatCommandService {
     private final MemberRepository memberRepository;
     private final UniversityRepository universityRepository;
 
+    private static final String MORNING = "오전";
+    private static final String AFTERNOON = "오후";
+    private static final Integer HALFDAY = 12;
+
     public Long createMemberStat(Long memberId, MemberStatRequestDTO memberStatRequestDTO) {
 
         if (memberStatRepository.findByMemberId(memberId).isPresent()) {
@@ -37,9 +42,35 @@ public class MemberStatCommandService {
 
         Integer admissionYear = Integer.parseInt(memberStatRequestDTO.getAdmissionYear());
 
+        Integer wakeUpTime = convertTime(memberStatRequestDTO.getWakeUpMeridian(), memberStatRequestDTO.getWakeUpTime());
+        Integer sleepingTime = convertTime(memberStatRequestDTO.getSleepingMeridian(), memberStatRequestDTO.getSleepingTime());
+        Integer turnOffTime = convertTime(memberStatRequestDTO.getTurnOffMeridian(), memberStatRequestDTO.getTurnOffTime());
+
+
         MemberStat saveMemberStat = memberStatRepository.save(
-            MemberStat.toEntity(member, university,admissionYear,memberStatRequestDTO));
+            MemberStatConverter.toEntity(
+                member, university, admissionYear, wakeUpTime, sleepingTime, turnOffTime, memberStatRequestDTO)
+            );
 
         return saveMemberStat.getId();
+    }
+
+    private Integer convertTime(String median, Integer time){
+        switch (median){
+            case MORNING:
+                if (!time.equals(HALFDAY)){
+                    return time;
+                }else{
+                    return 0;
+                }
+            case AFTERNOON:
+                if(time.equals(HALFDAY)){
+                    return time;
+                }else {
+                    return time + HALFDAY;
+                }
+            default:
+                throw new GeneralException(ErrorStatus._MEMBERSTAT_MERIDIAN_NOT_VALID);
+        }
     }
 }
