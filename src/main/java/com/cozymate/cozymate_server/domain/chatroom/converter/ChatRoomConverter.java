@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.global.converter;
+package com.cozymate.cozymate_server.domain.chatroom.converter;
 
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
