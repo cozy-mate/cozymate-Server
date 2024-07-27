@@ -35,9 +35,9 @@ public class MemberStatController {
     )
     @PostMapping("/{memberId}")
     public ResponseEntity<ApiResponse<Long>> createMemberStat(
-        @PathVariable("memberId") Long memberId,@Valid @RequestBody MemberStatRequestDTO memberStatRequestDTO) {
+        @PathVariable("memberId") Long memberId,@Valid @RequestBody MemberStatRequestDTO.MemberStatCreateRequestDTO memberStatCreateRequestDTO) {
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(
-            ApiResponse.onSuccess(memberStatCommandService.createMemberStat(memberId,memberStatRequestDTO)));
+            ApiResponse.onSuccess(memberStatCommandService.createMemberStat(memberId,memberStatCreateRequestDTO)));
     }
 
 }
