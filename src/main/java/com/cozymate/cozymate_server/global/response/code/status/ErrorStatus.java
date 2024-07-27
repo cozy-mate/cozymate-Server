@@ -17,6 +17,13 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // [도메인] 관련해서 아래에 계속 추가해주시면 됩니다.
 
+
+    // Room 관련
+    _ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM400", "해당하는 방 정보가 없습니다."),
+
+    // Mate 관련
+    _MATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE400", "해당하는 메이트 정보가 없습니다."),
+
     ;
     private final HttpStatus httpStatus;
     private final String code;
