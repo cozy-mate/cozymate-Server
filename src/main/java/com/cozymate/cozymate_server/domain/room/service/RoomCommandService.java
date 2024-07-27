@@ -29,7 +29,7 @@ public class RoomCommandService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public Room createRoom(RoomCreateRequest request) {
+    public void createRoom(RoomCreateRequest request) {
         if (roomRepository.existsByMemberIdAndStatuses(request.getCreatorId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
@@ -46,7 +46,6 @@ public class RoomCommandService {
         Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
 
-        return room;
     }
 
     // 초대코드 생성 부분
