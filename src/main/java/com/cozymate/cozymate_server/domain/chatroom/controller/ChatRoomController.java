@@ -29,7 +29,7 @@ public class ChatRoomController {
     public ResponseEntity<ApiResponse<String>> deleteChatRoom(
         @RequestParam Long myId, @PathVariable Long chatRoomId) {
         chatRoomCommandService.deleteChatRoom(myId, chatRoomId);
-        return ResponseEntity.ok().body(ApiResponse.onSuccess("쪽지방 삭제 완료"));
+        return ResponseEntity.ok(ApiResponse.onSuccess("쪽지방 삭제 완료"));
     }
 
     // TODO: memberId 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정
@@ -37,7 +37,6 @@ public class ChatRoomController {
     @Operation(summary = "[베로] 쪽지방 목록 조회", description = "파라미터에 자신의 memberId")
     public ResponseEntity<ApiResponse<List<ChatRoomResponseDto>>> getChatRoomList(
         @RequestParam Long memberId) {
-        return ResponseEntity.ok()
-            .body(ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberId)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberId)));
     }
 }

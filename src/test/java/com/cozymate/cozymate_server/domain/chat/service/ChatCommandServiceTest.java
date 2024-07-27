@@ -1,5 +1,7 @@
-package com.cozymate.cozymate_server.domain.chat;
+package com.cozymate.cozymate_server.domain.chat.service;
 
+import com.cozymate.cozymate_server.domain.chat.Chat;
+import com.cozymate.cozymate_server.domain.chat.ChatTestBuilder;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;

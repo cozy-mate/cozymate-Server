@@ -26,6 +26,6 @@ public class ChatController {
     public ResponseEntity<ApiResponse<String>> createChat(
         @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId) {
         chatCommandService.createChat(chatRequestDto, recipientId);
-        return ResponseEntity.ok().body(ApiResponse.onSuccess("쪽지 작성 완료"));
+        return ResponseEntity.ok(ApiResponse.onSuccess("쪽지 작성 완료"));
     }
 }
