@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.global.s3;
+package com.cozymate.cozymate_server.global.s3.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

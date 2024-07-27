@@ -18,8 +18,8 @@ public enum ErrorStatus implements BaseErrorCode {
     // [도메인] 관련해서 아래에 계속 추가해주시면 됩니다.
 
     // S3 관련
-    _FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_001", "파일 업로드에 실패했습니다."),
-    _FILE_DELETE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_002", "파일 삭제에 실패했습니다."),
+    _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
+    _FILE_DELETE_ERROR(HttpStatus.BAD_REQUEST, "FILE_002", "파일 삭제에 실패했습니다."),
     _FILE_EXTENSTION_ERROR(HttpStatus.BAD_REQUEST, "FILE_003", "유효하지 않은 파일 확장자입니다."),
 
     ;
