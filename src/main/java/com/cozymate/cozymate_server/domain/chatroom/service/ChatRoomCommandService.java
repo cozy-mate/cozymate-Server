@@ -2,7 +2,7 @@ package com.cozymate.cozymate_server.domain.chatroom.service;
 
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
-import com.cozymate.cozymate_server.domain.chatroom.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
