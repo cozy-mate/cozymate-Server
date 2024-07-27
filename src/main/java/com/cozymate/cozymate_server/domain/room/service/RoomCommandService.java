@@ -1,48 +1,41 @@
-package com.cozymate.cozymate_server.domain.room;
+package com.cozymate.cozymate_server.domain.room.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
-import com.cozymate.cozymate_server.domain.mate.MateRepository;
-import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
+import com.cozymate.cozymate_server.domain.mate.converter.MateConverter;
+import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
+import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
+import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RoomService {
+@RequiredArgsConstructor
+public class RoomCommandService {
 
     private static final String UPPERCASE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int KEY_LENGTH = 8;
 
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
-    private final MemberRepository memberRepository; // 추가
+    private final MemberRepository memberRepository;
 
-
-    public RoomService(RoomRepository roomRepository, MateRepository mateRepository, MemberRepository memberRepository) {
-        this.roomRepository = roomRepository;
-        this.mateRepository = mateRepository;
-        this.memberRepository = memberRepository;
-    }
-
+    @Transactional
     public Room createRoom(RoomCreateRequest request) {
         if (roomRepository.existsByMemberIdAndStatuses(request.getCreatorId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = Room.builder()
-            .name(request.getName())
-            .profileImage(request.getProfileImage())
-            .maxMateNum(request.getMaxMateNum())
-            .inviteCode(inviteCode)
-            .status(RoomStatus.WAITING)
-            .numOfArrival(1)
-            .build();
+        Room room = RoomConverter.toEntity(request, inviteCode);
         roomRepository.save(room);
 
         // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
@@ -50,12 +43,7 @@ public class RoomService {
         Member creator = memberRepository.findById(request.getCreatorId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        Mate mate = Mate.builder()
-            .room(room)
-            .member(creator)
-            .isRoomManager(true)
-            .entryStatus(EntryStatus.JOINED)
-            .build();
+        Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
 
         return room;
