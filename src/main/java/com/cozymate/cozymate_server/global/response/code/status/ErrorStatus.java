@@ -20,6 +20,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // Member 관련 에러
     _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "멤버를 찾을 수 없습니다."),
 
+    // ChatRoom 관련 애러
+    _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
+    _CHATROOM_FORBIDDEN(HttpStatus.BAD_REQUEST,"CHATROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
     ;
     private final HttpStatus httpStatus;
     private final String code;
