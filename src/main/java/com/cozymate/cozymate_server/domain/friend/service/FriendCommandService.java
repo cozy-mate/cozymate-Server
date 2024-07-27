@@ -1,2 +1,13 @@
-package com.cozymate.cozymate_server.domain.friend.service;public class FriendCommandService {
+package com.cozymate.cozymate_server.domain.friend.service;
+
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@RequiredArgsConstructor
+@Transactional
+@Service
+public class FriendCommandService {
+
 }
