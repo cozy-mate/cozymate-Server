@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
-import com.cozymate.cozymate_server.domain.mate.MateRepository;
+import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
