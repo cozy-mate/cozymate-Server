@@ -1,5 +1,5 @@
 package com.cozymate.cozymate_server.domain.todo.dto;
 
-public class ToDoResponseDto {
+public class TodoResponseDto {
 
 }

@@ -6,15 +6,17 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public class ToDoRequestDto {
+public class TodoRequestDto {
 
     @AllArgsConstructor
     @Getter
     public static class CreateTodoRequestDto {
 
         @NotBlank
+        @Length(min = 1, max = 100)
         private String content;
 
         @NotNull
