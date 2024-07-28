@@ -1,5 +1,6 @@
-package com.cozymate.cozymate_server.domain.chatroom;
+package com.cozymate.cozymate_server.domain.chatroom.repository;
 
+import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

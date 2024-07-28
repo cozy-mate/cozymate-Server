@@ -21,7 +21,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Room
     _ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM400", "존재하지 않는 방입니다."),
-    _ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOM409", "이미 활성화 또는 대기 중인 방이 존재합니다.")
+    _ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOM409", "이미 활성화 또는 대기 중인 방이 존재합니다."),
 
     // University 관련 에러
     _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST,"UNIVERSITY400","대학을 찾을 수 없습니다."),
@@ -29,6 +29,10 @@ public enum ErrorStatus implements BaseErrorCode {
     // MemberStat 관련 에러
     _MEMBERSTAT_EXISTS(HttpStatus.BAD_REQUEST,"MEMBERSTAT400","멤버 상세정보가 이미 존재합니다."),
     _MEMBERSTAT_MERIDIAN_NOT_VALID(HttpStatus.BAD_REQUEST,"MEMBERSTAT401","오전, 오후를 정확하게 입력하세요."),
+
+    // ChatRoom 관련 애러
+    _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
+    _CHATROOM_FORBIDDEN(HttpStatus.BAD_REQUEST,"CHATROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
     ;
 
 
