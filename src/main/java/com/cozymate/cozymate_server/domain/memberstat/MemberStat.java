@@ -1,25 +1,47 @@
 package com.cozymate.cozymate_server.domain.memberstat;
 
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberstat.enums.Acceptance;
-import com.cozymate.cozymate_server.domain.memberstat.enums.SmokingState;
+import com.cozymate.cozymate_server.domain.university.University;
+import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 
-
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 @Entity
-public class MemberStat extends Member {
+public class MemberStat extends BaseTimeEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", referencedColumnName = "id")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id")
+    private University university;
 
     private Integer admissionYear;
 
@@ -27,7 +49,7 @@ public class MemberStat extends Member {
 
     private Integer numOfRoommate;
 
-    private Acceptance acceptance;
+    private String acceptance;
 
     private Integer wakeUpTime;
 
@@ -35,11 +57,13 @@ public class MemberStat extends Member {
 
     private Integer turnOffTime;
 
-    private SmokingState smoking;
+    private String smoking;
 
     private String sleepingHabit;
 
-    private String constitution;
+    private Integer airConditioningIntensity;
+
+    private Integer heatingIntensity;
 
     private String lifePattern;
 
@@ -65,6 +89,5 @@ public class MemberStat extends Member {
 
     @Type(JsonType.class)
     @Column(columnDefinition = "json")
-    private Map<String, List<Long>> options;
-
+    private Map<String, List<String>> options;
 }
