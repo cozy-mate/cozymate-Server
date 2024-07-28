@@ -1,9 +1,7 @@
 package com.cozymate.cozymate_server.domain.todo.dto;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
@@ -15,12 +13,11 @@ public class TodoRequestDto {
     @Getter
     public static class CreateTodoRequestDto {
 
-        @Length(min = 1, max = 100)
+        @Length(min = 1, max = 30)
         private String content;
 
         @NotNull
-        @Size(min = 1)
         @DateTimeFormat(pattern = "yyyy-MM-dd")
-        private List<LocalDate> deadlineList;
+        private LocalDate deadline;
     }
 }
