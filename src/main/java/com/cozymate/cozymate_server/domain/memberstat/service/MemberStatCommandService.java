@@ -50,24 +50,22 @@ public class MemberStatCommandService {
     }
 
     public Long modifyMemberStat(
+
         Long memberId, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
 
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
         University university = universityRepository.findById(
                 memberStatCommandRequestDTO.getUniversityId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
-        Optional<MemberStat> memberStat = memberStatRepository.findByMemberId(memberId);
-        if (memberStat.isPresent()) {
-            Long memberStatId = memberStat.get().getId();
-            MemberStat updateMemberStat = MemberStatConverter.toEntity(
-                memberStatId, member, university, memberStatCommandRequestDTO
-            );
-            memberStatRepository.save(updateMemberStat);
-            return updateMemberStat.getId();
-        } else {
-            throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
-        }
+        MemberStat updatedMemberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+        );
+
+        updatedMemberStat.update(member,university,memberStatCommandRequestDTO);
+        return updatedMemberStat.getId();
+
     }
 }
