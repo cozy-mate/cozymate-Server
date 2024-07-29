@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +27,13 @@ public class RoomController {
         // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
         roomCommandService.createRoom(request);
         return ResponseEntity.ok(ApiResponse.onSuccess("방 생성 완료"));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "[바니] 방 삭제 기능", description = "해당 roomId의 방을 삭제합니다.")
+    public ResponseEntity<ApiResponse<String>> deleteRoom(@PathVariable Long id) {
+        roomCommandService.deleteRoom(id);
+        return ResponseEntity.ok(ApiResponse.onSuccess("방 삭제 완료"));
     }
 
 }

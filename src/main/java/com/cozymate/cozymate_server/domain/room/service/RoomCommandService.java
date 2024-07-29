@@ -10,10 +10,12 @@ import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.todo.ToDoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ public class RoomCommandService {
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
+    private final ToDoRepository todoRepository;
 
     @Transactional
     public void createRoom(RoomCreateRequest request) {
@@ -46,6 +49,19 @@ public class RoomCommandService {
         Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
 
+    }
+
+    @Transactional
+    public void deleteRoom(Long id) {
+        Room room = roomRepository.findById(id)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        // 연관된 Mate, To do 엔티티 삭제
+        List<Mate> mates = mateRepository.findByRoomId(id);
+        for (Mate mate : mates) {
+            todoRepository.deleteByMateId(mate.getId());
+        }
+        mateRepository.deleteAll(mates);
+        roomRepository.delete(room);
     }
 
     // 초대코드 생성 부분
