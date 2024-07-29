@@ -8,7 +8,6 @@ import com.cozymate.cozymate_server.domain.member.MemberRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -47,12 +46,6 @@ public class RoomCommandService {
         Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
 
-    }
-
-    public RoomCreateResponse getRoomById(Long id) {
-        Room room = roomRepository.findById(id)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-        return new RoomCreateResponse(room.getName(), room.getInviteCode(), room.getProfileImage());
     }
 
     // 초대코드 생성 부분

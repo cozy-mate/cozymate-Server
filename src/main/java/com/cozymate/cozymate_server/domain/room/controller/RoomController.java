@@ -4,6 +4,7 @@ package com.cozymate.cozymate_server.domain.room.controller;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
+import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomController {
 
     private final RoomCommandService roomCommandService;
+    private final RoomQueryService roomQueryService;
 
     @PostMapping("/create")
     @Operation(summary = "[바니] 방생성 기능", description = "방이름, 프로필이미지, 인원수를 입력합니다.")
@@ -35,7 +37,7 @@ public class RoomController {
     @GetMapping("/{id}")
     @Operation(summary = "[바니] 생성한 방 정보 조회 기능", description = "방 아이디를 입력합니다.")
     public ResponseEntity<ApiResponse<RoomCreateResponse>> getRoom(@PathVariable Long id) {
-        RoomCreateResponse response = roomCommandService.getRoomById(id);
+        RoomCreateResponse response = roomQueryService.getRoomById(id);
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
             .body(ApiResponse.onSuccess(response));
     }
