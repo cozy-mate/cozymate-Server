@@ -1,15 +1,20 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
-import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
+import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
+import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomController {
 
     private final RoomCommandService roomCommandService;
+    private final RoomQueryService roomQueryService;
 
     @PostMapping("/create")
     @Operation(summary = "[바니] 방생성 기능", description = "방이름, 프로필이미지, 인원수를 입력합니다.")
@@ -26,5 +32,20 @@ public class RoomController {
         roomCommandService.createRoom(request);
         return ResponseEntity.ok(ApiResponse.onSuccess("방 생성 완료"));
     }
+
+    @GetMapping("/join")
+    @Operation(summary = "[바니] 초대코드로 방 정보 조회 기능", description = "초대코드를 입력하면 방 정보를 조회합니다. (팝업창에 뜰 정보)")
+    public ResponseEntity<ApiResponse<RoomJoinResponse>> getRoomInfo(@RequestParam String inviteCode) {
+        RoomJoinResponse roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode);
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomJoinResponse));
+    }
+
+    @PostMapping("/{roomId}/join")
+    @Operation(summary = "[바니] 방 참여 확인 버튼", description = "방에 참여됩니다.")
+    public ResponseEntity<ApiResponse<String>> joinRoom(@PathVariable Long roomId, @RequestBody Long memberId) {
+        roomCommandService.joinRoom(roomId, memberId);
+        return ResponseEntity.ok(ApiResponse.onSuccess("방 참여 완료"));
+    }
+
 
 }

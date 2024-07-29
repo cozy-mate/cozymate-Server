@@ -48,6 +48,33 @@ public class RoomCommandService {
 
     }
 
+    @Transactional
+    public void joinRoom(Long roomId, Long memberId) {
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        boolean alreadyJoined = mateRepository.findByRoomIdAndMemberId(room.getId(), memberId).isPresent();
+        if (alreadyJoined) {
+            throw new GeneralException(ErrorStatus._ALREADY_JOINED_ROOM);
+        }
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        if (mateRepository.countByRoomId(roomId) >= room.getMaxMateNum()) {
+            throw new GeneralException(ErrorStatus._ROOM_FULL);
+        }
+
+        Mate mate = MateConverter.toEntity(room, member, false);
+        mateRepository.save(mate);
+        room.setNumOfArrival(room.getNumOfArrival()+1);
+        if (room.getNumOfArrival()==room.getMaxMateNum()) {
+            room.setStatus(RoomStatus.ENABLE);
+        }
+        roomRepository.save(room);
+
+    }
+
     // 초대코드 생성 부분
 
     private String generateUniqueUppercaseKey() {
