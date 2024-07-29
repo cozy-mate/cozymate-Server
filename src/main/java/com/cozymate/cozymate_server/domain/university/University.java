@@ -32,5 +32,5 @@ public class University extends BaseTimeEntity {
 
     @Type(JsonType.class)
     @Column(columnDefinition = "json")
-    private List<Long> departments;
+    private List<String> departments;
 }
