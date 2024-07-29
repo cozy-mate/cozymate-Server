@@ -35,9 +35,10 @@ public class MemberStatCommandService {
         }
 
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(()->new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-        University university = universityRepository.findById(memberStatCommandRequestDTO.getUniversityId())
-            .orElseThrow(()->new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        University university = universityRepository.findById(
+                memberStatCommandRequestDTO.getUniversityId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
         MemberStat saveMemberStat = memberStatRepository.save(
             MemberStatConverter.toEntity(
@@ -52,20 +53,21 @@ public class MemberStatCommandService {
         Long memberId, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
 
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(()->new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-        University university = universityRepository.findById(memberStatCommandRequestDTO.getUniversityId())
-            .orElseThrow(()->new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        University university = universityRepository.findById(
+                memberStatCommandRequestDTO.getUniversityId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
         Optional<MemberStat> memberStat = memberStatRepository.findByMemberId(memberId);
-        if(memberStat.isPresent()) {
+        if (memberStat.isPresent()) {
             Long memberStatId = memberStat.get().getId();
             MemberStat updateMemberStat = MemberStatConverter.toEntity(
-                memberStatId,member,university, memberStatCommandRequestDTO
+                memberStatId, member, university, memberStatCommandRequestDTO
             );
             memberStatRepository.save(updateMemberStat);
             return updateMemberStat.getId();
-        }
-        else{
+        } else {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
         }
     }
+}
