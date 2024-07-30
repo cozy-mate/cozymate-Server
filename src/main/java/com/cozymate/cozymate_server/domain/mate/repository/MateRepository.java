@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findByRoomId(Long roomId);
+    void deleteByRoomId(Long roomId);
+
 }

@@ -1,15 +1,24 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.feed.Feed;
+import com.cozymate.cozymate_server.domain.feed.FeedRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.converter.MateConverter;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
+import com.cozymate.cozymate_server.domain.post.Post;
+import com.cozymate.cozymate_server.domain.post.PostRepository;
+import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
+import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
+import com.cozymate.cozymate_server.domain.role.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.roomlog.RoomLogRepository;
+import com.cozymate.cozymate_server.domain.rule.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.ToDoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -30,6 +39,13 @@ public class RoomCommandService {
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
     private final ToDoRepository todoRepository;
+    private final RuleRepository ruleRepository;
+    private final RoomLogRepository roomLogRepository;
+    private final PostRepository postRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final PostImageRepository postImageRepository;
+    private final RoleRepository roleRepository;
+    private final FeedRepository feedRepository;
 
     @Transactional
     public void createRoom(RoomCreateRequest request) {
@@ -51,16 +67,41 @@ public class RoomCommandService {
 
     }
 
+//    @Transactional
+//    public void deleteRoom(Long id) {
+//        Room room = roomRepository.findById(id)
+//            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+//        List<Mate> mates = mateRepository.findByRoomId(id);
+//        mateRepository.deleteAll(mates);
+//        roomRepository.delete(room);
+//    }
+
     @Transactional
     public void deleteRoom(Long id) {
         Room room = roomRepository.findById(id)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-        // 연관된 Mate, To do 엔티티 삭제
+
+        // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
         List<Mate> mates = mateRepository.findByRoomId(id);
         for (Mate mate : mates) {
+            roleRepository.deleteByMateId(mate.getId());
             todoRepository.deleteByMateId(mate.getId());
         }
-        mateRepository.deleteAll(mates);
+        mateRepository.deleteByRoomId(id);
+        ruleRepository.deleteByRoomId(id);
+        roomLogRepository.deleteByRoomId(id);
+
+        List<Feed> feeds = feedRepository.findByRoomId(id);
+        for (Feed feed : feeds) {
+            List<Post> posts = postRepository.findByFeedId(feed.getId());
+            for (Post post : posts) {
+                postCommentRepository.deleteByPostId(post.getId());
+                postImageRepository.deleteByPostId(post.getId());
+            }
+            postRepository.deleteByFeedId(feed.getId());
+        }
+        feedRepository.deleteByRoomId(id);
+
         roomRepository.delete(room);
     }
 
