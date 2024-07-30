@@ -53,6 +53,9 @@ dependencies {
     // TODO: 07.25. [무빗] 위 패키지는 18년이 마지막 업데이트된 레거시, 추후 아래 패키지로 변경 예정
     // implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3Z:3.1.1'
 
+    // Firebase Admin SDK
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+
 }
 
 tasks.named('test') {

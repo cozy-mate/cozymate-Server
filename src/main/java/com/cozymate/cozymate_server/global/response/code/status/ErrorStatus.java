@@ -38,6 +38,8 @@ public enum ErrorStatus implements BaseErrorCode {
     // Mate 관련
     _MATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE400", "해당하는 메이트 정보가 없습니다."),
 
+    // Notification 관련
+    _NOTIFICATION_FAILED(HttpStatus.BAD_REQUEST, "NOTIFICATION400", "알림 전송에 실패했습니다."),
     ;
 
 
