@@ -66,5 +66,6 @@ processResources.dependsOn('copyGitSubmodule')
 tasks.register('copyGitSubmodule', Copy) {
     from './config'
     include '*.yml'
+    include 'firebase-service-account.json'
     into 'src/main/resources'
 }
