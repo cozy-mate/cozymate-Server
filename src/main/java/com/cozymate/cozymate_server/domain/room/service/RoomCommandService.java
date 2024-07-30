@@ -50,12 +50,15 @@ public class RoomCommandService {
 
     @Transactional
     public void joinRoom(Long roomId, Long memberId) {
+        // TODO: 추후 memberId 부분 수정 예정
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        boolean alreadyJoined = mateRepository.findByRoomIdAndMemberId(room.getId(), memberId).isPresent();
-        if (alreadyJoined) {
+        if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
             throw new GeneralException(ErrorStatus._ALREADY_JOINED_ROOM);
+        }
+
+        if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
+            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
         Member member = memberRepository.findById(memberId)

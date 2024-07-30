@@ -43,6 +43,7 @@ public class RoomController {
     @PostMapping("/{roomId}/join")
     @Operation(summary = "[바니] 방 참여 확인 버튼", description = "방에 참여됩니다.")
     public ResponseEntity<ApiResponse<String>> joinRoom(@PathVariable Long roomId, @RequestBody Long memberId) {
+        // TODO: 추후 memberId 수정 예정
         roomCommandService.joinRoom(roomId, memberId);
         return ResponseEntity.ok(ApiResponse.onSuccess("방 참여 완료"));
     }
