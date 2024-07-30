@@ -39,6 +39,8 @@ public class Todo extends BaseTimeEntity {
 
     private String content;
 
-    private LocalDate deadline;
+    private LocalDate timePoint;
+
+    private boolean isCompleted;
 
 }
