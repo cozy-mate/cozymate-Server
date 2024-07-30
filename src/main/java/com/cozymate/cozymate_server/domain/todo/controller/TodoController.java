@@ -2,12 +2,14 @@ package com.cozymate.cozymate_server.domain.todo.controller;
 
 
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,5 +34,15 @@ public class TodoController {
         toDoCommandService.createTodo(createTodoRequestDto, roomId, memberId);
         return ResponseEntity.ok(ApiResponse.onSuccess("Todo를 정상 생성하였습니다."));
 
+    }
+
+    @PatchMapping("/state")
+    @Operation(summary = "[무빗] Todo 완료 여부를 변경", description = "boolean 값을 같이 넘겨받습니다.")
+    public ResponseEntity<ApiResponse<String>> updateTodoCompleteState(
+        @Valid @RequestBody UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto,
+        @RequestParam Long memberId) {
+        // TODO: 소셜로그인 후...
+        toDoCommandService.updateTodoCompleteState(updateTodoCompleteStateRequestDto, memberId);
+        return ResponseEntity.ok(ApiResponse.onSuccess("완료되었습니다."));
     }
 }
