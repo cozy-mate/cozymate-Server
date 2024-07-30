@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -31,12 +32,7 @@ public class RoomQueryService {
         Member manager = memberRepository.findById(managerMate.getMember().getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        return new RoomJoinResponse(
-            room.getId(),
-            room.getName(),
-            manager.getName(),
-            room.getMaxMateNum()
-        );
+        return RoomConverter.toRoomJoinResponse(room, manager);
     }
 
 }
