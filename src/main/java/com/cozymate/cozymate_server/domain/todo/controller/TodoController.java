@@ -53,9 +53,7 @@ public class TodoController {
         if (timePoint == null) {
             timePoint = LocalDate.now();
         }
-        TodoListResponseDto todoListResponseDto = todoQueryService.getTodo(roomId, memberId,
-            timePoint);
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(todoListResponseDto));
+            ApiResponse.onSuccess(todoQueryService.getTodo(roomId, memberId, timePoint)));
     }
 }
