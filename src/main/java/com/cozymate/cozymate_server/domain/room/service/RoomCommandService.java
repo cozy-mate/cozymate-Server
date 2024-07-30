@@ -67,15 +67,6 @@ public class RoomCommandService {
 
     }
 
-//    @Transactional
-//    public void deleteRoom(Long id) {
-//        Room room = roomRepository.findById(id)
-//            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-//        List<Mate> mates = mateRepository.findByRoomId(id);
-//        mateRepository.deleteAll(mates);
-//        roomRepository.delete(room);
-//    }
-
     @Transactional
     public void deleteRoom(Long id) {
         Room room = roomRepository.findById(id)
