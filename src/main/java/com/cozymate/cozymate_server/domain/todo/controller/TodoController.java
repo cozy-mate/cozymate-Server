@@ -24,7 +24,7 @@ public class TodoController {
 
     @PostMapping("/{roomId}")
     @Operation(summary = "[무빗] 특정 방에 본인의 Todo 생성", description = "Todo는 본인한테만 할당할 수 있습니다.")
-    public ResponseEntity<ApiResponse<String>> createChat(
+    public ResponseEntity<ApiResponse<String>> createTodo(
         @Valid @RequestBody CreateTodoRequestDto createTodoRequestDto, @PathVariable Long roomId,
         @RequestParam Long memberId) {
         // TODO: 소셜로그인 구현 후 RequestParam의 userId는 JWT를 인증할 때 수정 예정
