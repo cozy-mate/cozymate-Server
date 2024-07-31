@@ -19,6 +19,11 @@ public enum ErrorStatus implements BaseErrorCode {
     // Member 관련 에러
     _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "멤버를 찾을 수 없습니다."),
 
+    // S3 관련
+    _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
+    _FILE_DELETE_ERROR(HttpStatus.BAD_REQUEST, "FILE_002", "파일 삭제에 실패했습니다."),
+    _FILE_EXTENSTION_ERROR(HttpStatus.BAD_REQUEST, "FILE_003", "유효하지 않은 파일 확장자입니다."),
+
     // Room
     _ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM400", "존재하지 않는 방입니다."),
     _ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOM409", "이미 활성화 또는 대기 중인 방이 존재합니다."),
@@ -29,7 +34,10 @@ public enum ErrorStatus implements BaseErrorCode {
     // MemberStat 관련 에러
     _MEMBERSTAT_EXISTS(HttpStatus.BAD_REQUEST,"MEMBERSTAT400","멤버 상세정보가 이미 존재합니다."),
     _MEMBERSTAT_MERIDIAN_NOT_VALID(HttpStatus.BAD_REQUEST,"MEMBERSTAT401","오전, 오후를 정확하게 입력하세요."),
-    _MEMBERSTAT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT402", "멤버 상세정보가 존재하지 않습니다.")
+    _MEMBERSTAT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT402", "멤버 상세정보가 존재하지 않습니다."),
+
+    // Mate 관련
+    _MATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE400", "해당하는 메이트 정보가 없습니다."),
     ;
 
 
