@@ -13,10 +13,12 @@ import lombok.NoArgsConstructor;
 
 
 public class MemberStatRequestDTO {
+
+        // Create, Update를 Command DTO로 관리하기
         @Data
         @NoArgsConstructor
         @AllArgsConstructor
-        public static class MemberStatCreateRequestDTO {
+        public static class MemberStatCommandRequestDTO {
                 @NotNull
                 private Long universityId;
                 //학번의 경우 처리하기 애매한 부분이 있어, String 2자리로 통일함. EX) 09 학번 -> "09"
@@ -90,6 +92,4 @@ public class MemberStatRequestDTO {
                 private String mbti;
                 private Map<String, List<String>> options;
         }
-
-
 }
