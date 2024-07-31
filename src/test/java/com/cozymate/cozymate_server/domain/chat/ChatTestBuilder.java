@@ -18,6 +18,8 @@ public class ChatTestBuilder {
         return Member.builder()
             .id(SENDER_ID)
             .name("멤버1")
+            .nickname("베로")
+            .clientId("TEST_TOKEN")
             .build();
     }
 
@@ -25,6 +27,8 @@ public class ChatTestBuilder {
         return Member.builder()
             .id(RECIPIENT_ID)
             .name("멤버2")
+            .nickname("로베")
+            .clientId("TEST_TOKEN2")
             .build();
     }
 

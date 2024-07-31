@@ -31,38 +31,46 @@ public class NotificationSender {
     private final MemberRepository memberRepository;
     private final NotificationLogCommandService notificationLogCommandService;
 
-    public void sendNotification(OneTargetVO target) {
+    public NotificationLog sendNotification(OneTargetVO target) {
         Member member = findMember(target.getMemberId());
 
         if (target.getRoomName() == null) {
-            sendNotificationToMember(member, target.getNotificationType());
+            return sendNotificationToMember(member,
+                target.getNotificationType());
         } else {
-            sendNotificationToMember(member, target.getRoomName(),
+            return sendNotificationToMember(member, target.getRoomName(),
                 target.getNotificationType());
         }
     }
 
-    public void sendNotification(OneTargetReverseVO target) {
+    public NotificationLog sendNotification(OneTargetReverseVO target) {
         Member me = findMember(target.getMyId());
         Member recipient = findMember(target.getRecipientId());
 
-        sendNotificationToMember(recipient, target.getNotificationType());
+        return sendNotificationToMember(recipient, me, target.getNotificationType());
     }
 
-    public void sendNotification(TwoTargetVO target) {
+    public List<NotificationLog> sendNotification(TwoTargetVO target) {
         Member recipient = findMember(target.getRecipientId());
         Member me = findMember(target.getMyId());
 
-        sendNotificationToMember(recipient, me, target.getRecipientNotificationType());
-        sendNotificationToMember(me, recipient, target.getMyNotificationType());
+        NotificationLog notificationLog = sendNotificationToMember(recipient, me,
+            target.getRecipientNotificationType());
+        NotificationLog notificationLog2 = sendNotificationToMember(me, recipient,
+            target.getMyNotificationType());
+
+        return List.of(notificationLog, notificationLog2);
     }
 
-    public void sendNotification(GroupTargetVO target) {
+    public List<NotificationLog> sendNotification(GroupTargetVO target) {
         List<Member> memberList = target.getMemberIdList().stream()
             .map(this::findMember).collect(Collectors.toList());
 
-        memberList.forEach(
-            member -> sendNotificationToMember(member, target.getNotificationType()));
+        return memberList.stream().map(member -> {
+            NotificationLog notificationLog = sendNotificationToMember(member,
+                target.getNotificationType());
+            return notificationLog;
+        }).collect(Collectors.toList());
     }
 
     private Member findMember(Long memberId) {
@@ -70,7 +78,8 @@ public class NotificationSender {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
     }
 
-    private void sendNotificationToMember(Member member, NotificationType notificationType) {
+    private NotificationLog sendNotificationToMember(Member member,
+        NotificationType notificationType) {
         Message message = createMessage(member, notificationType);
 
         try {
@@ -83,12 +92,14 @@ public class NotificationSender {
                 .build();
 
             notificationLogCommandService.saveLog(notificationLog);
+
+            return notificationLog;
         } catch (FirebaseMessagingException e) {
             throw new GeneralException(ErrorStatus._NOTIFICATION_FAILED);
         }
     }
 
-    private void sendNotificationToMember(Member member, String roomName,
+    private NotificationLog sendNotificationToMember(Member member, String roomName,
         NotificationType notificationType) {
         Message message = createMessage(member, roomName, notificationType);
 
@@ -102,12 +113,14 @@ public class NotificationSender {
                 .build();
 
             notificationLogCommandService.saveLog(notificationLog);
+
+            return notificationLog;
         } catch (FirebaseMessagingException e) {
             throw new GeneralException(ErrorStatus._NOTIFICATION_FAILED);
         }
     }
 
-    private void sendNotificationToMember(Member recipient, Member sender,
+    private NotificationLog sendNotificationToMember(Member recipient, Member sender,
         NotificationType notificationType) {
         Message message = createMessage(sender, notificationType);
         try {
@@ -120,6 +133,8 @@ public class NotificationSender {
                 .build();
 
             notificationLogCommandService.saveLog(notificationLog);
+
+            return notificationLog;
         } catch (FirebaseMessagingException e) {
             throw new GeneralException(ErrorStatus._NOTIFICATION_FAILED);
         }
