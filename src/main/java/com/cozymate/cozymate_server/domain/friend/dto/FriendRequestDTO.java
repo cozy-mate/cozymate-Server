@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FriendRequestDTO {
         // 아직은 이 경우 말고 생각해본적이 없어, static class는 만들지 않았습니다.
-        Long receiverId;
+        Long requesterId;
 }

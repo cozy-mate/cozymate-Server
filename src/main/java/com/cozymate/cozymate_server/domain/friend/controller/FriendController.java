@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,12 +39,12 @@ public class FriendController {
         summary = "[포비] 친구 신청 요청",
         description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
     )
-    @PostMapping("/request/{memberId}")
-    public ResponseEntity<ApiResponse<Long>> createFriendRequest( @PathVariable("memberId") Long memberId,
+    @PostMapping("/request/{senderId}")
+    public ResponseEntity<ApiResponse<Long>> createFriendRequest( @PathVariable("senderId") Long senderId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(friendCommandService.requestFriend(memberId, sendFriendRequestDTO)));
+            ApiResponse.onSuccess(friendCommandService.requestFriend(senderId, sendFriendRequestDTO)));
     }
 
     /**
@@ -53,12 +54,12 @@ public class FriendController {
         summary = "[포비] 친구 신청 수락",
         description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
     )
-    @PatchMapping("/accept/{memberId}")
-    public ResponseEntity<ApiResponse<Long>> acceptFriendRequest( @PathVariable("memberId") Long memberId,
+    @PutMapping("/accept/{accepterId}")
+    public ResponseEntity<ApiResponse<Long>> acceptFriendRequest( @PathVariable("accepterId") Long accepterId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(friendCommandService.acceptFriendRequest(memberId, sendFriendRequestDTO)));
+            ApiResponse.onSuccess(friendCommandService.acceptFriendRequest(accepterId, sendFriendRequestDTO)));
     }
 
     /**
@@ -68,11 +69,11 @@ public class FriendController {
         summary = "[포비] 친구 신청 삭제",
         description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
     )
-    @DeleteMapping("/deny/{memberId}")
-    public ResponseEntity<ApiResponse<Long>> denyFriendRequest( @PathVariable("memberId") Long memberId,
+    @DeleteMapping("/deny/{accepterId}")
+    public ResponseEntity<ApiResponse<Long>> denyFriendRequest( @PathVariable("accepterId") Long accepterId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(friendCommandService.denyFriendRequest(memberId, sendFriendRequestDTO)));
+            ApiResponse.onSuccess(friendCommandService.denyFriendRequest(accepterId, sendFriendRequestDTO)));
     }
 }

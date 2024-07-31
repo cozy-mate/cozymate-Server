@@ -28,6 +28,10 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Friend 관련 에러
     _FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST,"FRIEND400","친구요청을 찾을 수 없습니다."),
+    _FRIEND_REQUEST_SENT(HttpStatus.BAD_REQUEST,"FRIEND401","보낸 친구요청입니다."),
+    _FRIEND_REQUEST_RECEIVED(HttpStatus.BAD_REQUEST,"FRIEND402","받은 친구요청입니다."),
+    _FRIEND_REQUEST_ACCEPTED(HttpStatus.BAD_REQUEST,"FRIEND403","이미 수락한 친구요청입니다."),
+
 
     // Room
     _ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM400", "존재하지 않는 방입니다."),

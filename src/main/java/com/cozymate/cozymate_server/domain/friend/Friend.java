@@ -41,8 +41,8 @@ public class Friend extends BaseTimeEntity {
     private FriendStatus status = FriendStatus.WAITING;
 
     public void accept(){
-        if(this.getStatus() != FriendStatus.WAITING){
-            throw new GeneralException(ErrorStatus._FRIEND_REQUEST_NOT_FOUND);
+        if(this.getStatus().equals(FriendStatus.ACCEPT)){
+            throw new GeneralException(ErrorStatus._FRIEND_REQUEST_ACCEPTED);
         }
         this.status = FriendStatus.ACCEPT;
     }
