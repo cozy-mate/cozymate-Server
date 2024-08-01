@@ -32,6 +32,6 @@ public class Rule extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String content;
 
-    @Column(length = 100)
-    private String description;
+    @Column(length = 40)
+    private String memo;
 }
