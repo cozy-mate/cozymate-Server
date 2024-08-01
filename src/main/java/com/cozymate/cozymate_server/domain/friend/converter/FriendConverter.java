@@ -7,7 +7,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 
 public class FriendConverter {
 
-    public static Friend toEntity(Member sender,Member receiver){
+    public static Friend toEntity(Member sender, Member receiver) {
         return Friend.builder()
             .sender(sender)
             .receiver(receiver)

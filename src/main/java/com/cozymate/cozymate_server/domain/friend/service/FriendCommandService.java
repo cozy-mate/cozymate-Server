@@ -34,14 +34,15 @@ public class FriendCommandService {
         );
 
         //요청 여부 양방향 체크
-        if(friendRepository.existsBySenderIdAndReceiverId(sender.getId(), receiver.getId())){
+        if (friendRepository.existsBySenderIdAndReceiverId(sender.getId(), receiver.getId())) {
             throw new GeneralException(ErrorStatus._FRIEND_REQUEST_SENT);
-        }else if(friendRepository.existsBySenderIdAndReceiverId(receiver.getId(), sender.getId())){
+        } else if (friendRepository.existsBySenderIdAndReceiverId(receiver.getId(),
+            sender.getId())) {
             throw new GeneralException(ErrorStatus._FRIEND_REQUEST_RECEIVED);
-        }else{
+        } else {
             //요청 여부가 없었다면, 친구 요청 전송
             Friend friendRequest = friendRepository.save(
-                FriendConverter.toEntity(sender,receiver)
+                FriendConverter.toEntity(sender, receiver)
             );
             return friendRequest.getId();
         }
@@ -60,7 +61,8 @@ public class FriendCommandService {
         );
 
         //친구 요청이 있었는지 검사
-        Friend friendRequest = friendRepository.findBySenderIdAndReceiverId(sender.getId(),receiver.getId())
+        Friend friendRequest = friendRepository.findBySenderIdAndReceiverId(sender.getId(),
+                receiver.getId())
             .orElseThrow(
                 () -> new GeneralException(ErrorStatus._FRIEND_REQUEST_NOT_FOUND)
             );
@@ -83,12 +85,13 @@ public class FriendCommandService {
         );
 
         //친구 요청이 있었는지 검사
-        Friend friendRequest = friendRepository.findBySenderIdAndReceiverId(sender.getId(),receiver.getId()).orElseThrow(
+        Friend friendRequest = friendRepository.findBySenderIdAndReceiverId(sender.getId(),
+            receiver.getId()).orElseThrow(
             () -> new GeneralException(ErrorStatus._FRIEND_REQUEST_NOT_FOUND)
         );
 
         // 이미 수락한 친구요청인지 검사
-        if(friendRequest.getStatus().equals(FriendStatus.ACCEPT)){
+        if (friendRequest.getStatus().equals(FriendStatus.ACCEPT)) {
             throw new GeneralException(ErrorStatus._FRIEND_REQUEST_ACCEPTED);
         }
 

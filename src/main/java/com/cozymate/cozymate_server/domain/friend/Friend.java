@@ -40,8 +40,8 @@ public class Friend extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private FriendStatus status = FriendStatus.WAITING;
 
-    public void accept(){
-        if(this.getStatus().equals(FriendStatus.ACCEPT)){
+    public void accept() {
+        if (this.getStatus().equals(FriendStatus.ACCEPT)) {
             throw new GeneralException(ErrorStatus._FRIEND_REQUEST_ACCEPTED);
         }
         this.status = FriendStatus.ACCEPT;

@@ -40,11 +40,13 @@ public class FriendController {
         description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
     )
     @PostMapping("/request/{senderId}")
-    public ResponseEntity<ApiResponse<Long>> createFriendRequest( @PathVariable("senderId") Long senderId,
+    public ResponseEntity<ApiResponse<Long>> createFriendRequest(
+        @PathVariable("senderId") Long senderId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(friendCommandService.requestFriend(senderId, sendFriendRequestDTO)));
+            ApiResponse.onSuccess(
+                friendCommandService.requestFriend(senderId, sendFriendRequestDTO)));
     }
 
     /**
@@ -55,11 +57,13 @@ public class FriendController {
         description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
     )
     @PutMapping("/accept/{accepterId}")
-    public ResponseEntity<ApiResponse<Long>> acceptFriendRequest( @PathVariable("accepterId") Long accepterId,
+    public ResponseEntity<ApiResponse<Long>> acceptFriendRequest(
+        @PathVariable("accepterId") Long accepterId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(friendCommandService.acceptFriendRequest(accepterId, sendFriendRequestDTO)));
+            ApiResponse.onSuccess(
+                friendCommandService.acceptFriendRequest(accepterId, sendFriendRequestDTO)));
     }
 
     /**
@@ -70,10 +74,12 @@ public class FriendController {
         description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
     )
     @DeleteMapping("/deny/{accepterId}")
-    public ResponseEntity<ApiResponse<Long>> denyFriendRequest( @PathVariable("accepterId") Long accepterId,
+    public ResponseEntity<ApiResponse<Long>> denyFriendRequest(
+        @PathVariable("accepterId") Long accepterId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(friendCommandService.denyFriendRequest(accepterId, sendFriendRequestDTO)));
+            ApiResponse.onSuccess(
+                friendCommandService.denyFriendRequest(accepterId, sendFriendRequestDTO)));
     }
 }
