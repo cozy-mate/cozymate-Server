@@ -13,9 +13,9 @@ public class ChatRoomConverter {
             .build();
     }
 
-    public static ChatRoomResponseDto toResponseDto(String name, String content) {
+    public static ChatRoomResponseDto toResponseDto(String nickName, String content) {
         return ChatRoomResponseDto.builder()
-            .name(name)
+            .nickName(nickName)
             .lastContent(content)
             .build();
     }

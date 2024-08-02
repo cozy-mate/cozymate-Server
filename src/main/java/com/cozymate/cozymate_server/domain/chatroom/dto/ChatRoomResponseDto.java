@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ChatRoomResponseDto {
-    private String name; // 상대 유저이름
+    private String nickName;
     private String lastContent;
 }

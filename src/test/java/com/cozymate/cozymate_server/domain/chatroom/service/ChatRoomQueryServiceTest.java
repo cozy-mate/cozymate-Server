@@ -93,10 +93,10 @@ class ChatRoomQueryServiceTest {
                     sender.getId());
                 assertThat(result.size()).isEqualTo(2);
 
-                assertThat(result.get(0).getName()).isEqualTo(chat2.getSender().getName());
+                assertThat(result.get(0).getNickName()).isEqualTo(recipient.getNickname());
                 assertThat(result.get(0).getLastContent()).isEqualTo(chat2.getContent());
 
-                assertThat(result.get(1).getName()).isEqualTo(chat4.getSender().getName());
+                assertThat(result.get(1).getNickName()).isEqualTo(otherMember.getNickname());
                 assertThat(result.get(1).getLastContent()).isEqualTo(chat4.getContent());
             }
         }
@@ -146,7 +146,7 @@ class ChatRoomQueryServiceTest {
                     List<ChatRoomResponseDto> result = chatRoomQueryService.getChatRoomList(
                         sender.getId());
                     assertThat(result.size()).isEqualTo(1);
-                    assertThat(result.get(0).getName()).isEqualTo(otherMember.getName());
+                    assertThat(result.get(0).getNickName()).isEqualTo(otherMember.getNickname());
                     assertThat(result.get(0).getLastContent()).isEqualTo(chat4.getContent());
                 }
             }
@@ -169,6 +169,7 @@ class ChatRoomQueryServiceTest {
                     chat = ChatTestBuilder.testChatBuild();
                     chatRoom.updateMemberALastDeleteAt(); // sender(나) - 쪽지방 논리적 삭제
                     chat2 = mock(Chat.class);
+
                     given(chat2.getCreatedAt()).willReturn(LocalDateTime.now());
                     given(chat2.getContent()).willReturn("Chat2 내용");
 
@@ -188,13 +189,16 @@ class ChatRoomQueryServiceTest {
                 }
 
                 @Test
-                @DisplayName("쪽지방 목록 2개 중 1개를 삭제했지만, 삭제한 쪽지방의 상대가 새로운 쪽지를 보냈기 때문에 쪽지방 목록 2개를 반환한다. ")
+                @DisplayName("쪽지방 목록 2개 중 1개를 삭제했지만, 삭제한 쪽지방의 상대가 새로운 쪽지를 보냈기 때문에 쪽지방 목록 2개를 반환한다.")
                 void it_returns_chat_room_list() {
                     List<ChatRoomResponseDto> result = chatRoomQueryService.getChatRoomList(
                         sender.getId());
+
                     assertThat(result.size()).isEqualTo(2);
-                    assertThat(result.get(0).getName()).isEqualTo(recipient.getName());
+                    assertThat(result.get(0).getNickName()).isEqualTo(recipient.getNickname());
                     assertThat(result.get(0).getLastContent()).isEqualTo(chat2.getContent());
+                    assertThat(result.get(1).getNickName()).isEqualTo(otherMember.getNickname());
+                    assertThat(result.get(1).getLastContent()).isEqualTo(chat4.getContent());
                 }
             }
         }
