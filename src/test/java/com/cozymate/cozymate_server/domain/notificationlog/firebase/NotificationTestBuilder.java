@@ -3,10 +3,10 @@ package com.cozymate.cozymate_server.domain.notificationlog.firebase;
 import com.cozymate.cozymate_server.domain.chat.ChatTestBuilder;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
-import com.cozymate.cozymate_server.domain.notificationlog.firebase.NotificationTargetVO.GroupTargetVO;
-import com.cozymate.cozymate_server.domain.notificationlog.firebase.NotificationTargetVO.OneTargetReverseVO;
-import com.cozymate.cozymate_server.domain.notificationlog.firebase.NotificationTargetVO.OneTargetVO;
-import com.cozymate.cozymate_server.domain.notificationlog.firebase.NotificationTargetVO.TwoTargetVO;
+import com.cozymate.cozymate_server.global.fcm.NotificationTargetVO.GroupTargetVO;
+import com.cozymate.cozymate_server.global.fcm.NotificationTargetVO.OneTargetReverseVO;
+import com.cozymate.cozymate_server.global.fcm.NotificationTargetVO.OneTargetVO;
+import com.cozymate.cozymate_server.global.fcm.NotificationTargetVO.TwoTargetVO;
 import java.util.List;
 
 public class NotificationTestBuilder {

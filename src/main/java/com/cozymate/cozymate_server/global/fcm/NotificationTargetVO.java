@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.notificationlog.firebase;
+package com.cozymate.cozymate_server.global.fcm;
 
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import java.util.List;

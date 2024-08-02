@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.notificationlog.enums;
 
-import com.cozymate.cozymate_server.domain.notificationlog.firebase.NotificationContentVO;
+import com.cozymate.cozymate_server.global.fcm.NotificationContentVO;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.AllArgsConstructor;

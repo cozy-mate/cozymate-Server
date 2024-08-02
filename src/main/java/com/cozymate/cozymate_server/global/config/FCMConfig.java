@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 @Configuration
-public class FirebaseConfig {
+public class FCMConfig {
 
     @Bean
     public FirebaseMessaging firebaseMessaging() throws IOException {
