@@ -9,8 +9,8 @@ public class TimeUtil {
     private static final String AFTERNOON = "오후";
     private static final Integer HALFDAY = 12;
 
-    public static Integer convertTime(String median, Integer time){
-        switch (median){
+    public static Integer convertTime(String meridian, Integer time){
+        switch (meridian){
             case MORNING:
                 if (!time.equals(HALFDAY)){
                     return time;

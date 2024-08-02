@@ -1,8 +1,10 @@
 package com.cozymate.cozymate_server.domain.memberstat;
 
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
+import com.cozymate.cozymate_server.global.utils.TimeUtil;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -90,4 +92,32 @@ public class MemberStat extends BaseTimeEntity{
     @Type(JsonType.class)
     @Column(columnDefinition = "json")
     private Map<String, List<String>> options;
+
+    public void update(Member member, University university, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        this.member = member;
+        this.university = university;
+        this.acceptance = memberStatCommandRequestDTO.getAcceptance();
+        this.admissionYear = Integer.parseInt(memberStatCommandRequestDTO.getAdmissionYear());
+        this.major = memberStatCommandRequestDTO.getMajor();
+        this.numOfRoommate = memberStatCommandRequestDTO.getNumOfRoommate();
+        this.wakeUpTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),memberStatCommandRequestDTO.getWakeUpTime());
+        this.sleepingTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),memberStatCommandRequestDTO.getSleepingTime());
+        this.turnOffTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(),memberStatCommandRequestDTO.getTurnOffTime());
+        this.smoking = memberStatCommandRequestDTO.getSmokingState();
+        this.sleepingHabit = memberStatCommandRequestDTO.getSleepingHabit();
+        this.airConditioningIntensity = memberStatCommandRequestDTO.getAirConditioningIntensity();
+        this.heatingIntensity = memberStatCommandRequestDTO.getHeatingIntensity();
+        this.lifePattern = memberStatCommandRequestDTO.getLifePattern();
+        this.intimacy = memberStatCommandRequestDTO.getIntimacy();
+        this.canShare = memberStatCommandRequestDTO.getCanShare();
+        this.isPlayGame = memberStatCommandRequestDTO.getIsPlayGame();
+        this.isPhoneCall = memberStatCommandRequestDTO.getIsPhoneCall();
+        this.studying = memberStatCommandRequestDTO.getStudying();
+        this.cleanSensitivity = memberStatCommandRequestDTO.getCleanSensitivity();
+        this.noiseSensitivity = memberStatCommandRequestDTO.getNoiseSensitivity();
+        this.cleaningFrequency = memberStatCommandRequestDTO.getCleaningFrequency();
+        this.personality = memberStatCommandRequestDTO.getPersonality();
+        this.mbti = memberStatCommandRequestDTO.getMbti();
+        this.options = memberStatCommandRequestDTO.getOptions();
+    }
 }

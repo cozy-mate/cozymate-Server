@@ -4,6 +4,8 @@ package com.cozymate.cozymate_server.domain.todo.controller;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class TodoController {
 
     @PostMapping("/{roomId}")
     @Operation(summary = "[무빗] 특정 방에 본인의 Todo 생성", description = "Todo는 본인한테만 할당할 수 있습니다.")
+    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> createTodo(
         @Valid @RequestBody CreateTodoRequestDto createTodoRequestDto, @PathVariable Long roomId,
         @RequestParam Long memberId) {
