@@ -10,5 +10,4 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Optional<Chat> findTopByChatRoomOrderByIdDesc(ChatRoom chatRoom);
 
     void deleteAllByChatRoom(ChatRoom chatRoom);
-
 }

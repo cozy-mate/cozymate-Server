@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,15 +19,12 @@ public class ChatRoomCommandService {
     private final ChatRepository chatRepository;
 
     public void deleteChatRoom(Long myId, Long chatRoomId) {
-        //chatRoomId로 chatRoom 조회
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
 
-        // chatRoom의 memberA와 memberB 중 나와 일치 하는 A or B를 찾고 마지막 삭제 시간을 업데이트 (논리적 삭제)
         softDeleteChatRoom(chatRoom, myId);
 
-        // chatRoom에 두 멤버의 삭제 시간이 해당 chatRoom의 마지막 chat의 생성시간 보다 이후 일 경우 db 물리적 삭제
-        hardDeleteChatRoom(chatRoom);
+        tryHardDeleteChatRoom(chatRoom);
     }
 
     private void softDeleteChatRoom(ChatRoom chatRoom, Long myId) {
@@ -39,20 +37,26 @@ public class ChatRoomCommandService {
         }
     }
 
-    private void hardDeleteChatRoom(ChatRoom chatRoom) {
-        chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)
-            .ifPresent(chat -> {
-                boolean deleteByMemberA =
-                    chatRoom.getMemberALastDeleteAt() != null && chat.getCreatedAt()
-                        .isBefore(chatRoom.getMemberALastDeleteAt());
-                boolean deleteByMemberB =
-                    chatRoom.getMemberBLastDeleteAt() != null && chat.getCreatedAt()
-                        .isBefore(chatRoom.getMemberBLastDeleteAt());
+    private void tryHardDeleteChatRoom(ChatRoom chatRoom) {
+        LocalDateTime memberALastDeleteAt = chatRoom.getMemberALastDeleteAt();
+        LocalDateTime memberBLastDeleteAt = chatRoom.getMemberBLastDeleteAt();
 
-                if (deleteByMemberA && deleteByMemberB) {
-                    chatRepository.deleteAllByChatRoom(chatRoom);
-                    chatRoomRepository.delete(chatRoom);
-                }
-            });
+        if (memberALastDeleteAt != null && memberBLastDeleteAt != null && canHardDelete(chatRoom,
+            memberALastDeleteAt, memberBLastDeleteAt)) {
+            hardDeleteChatRoom(chatRoom);
+        }
+    }
+
+    private boolean canHardDelete(ChatRoom chatRoom, LocalDateTime memberALastDeleteAt,
+        LocalDateTime memberBLastDeleteAt) {
+        return chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)
+            .map(chat -> chat.getCreatedAt().isBefore(memberALastDeleteAt) && chat.getCreatedAt()
+                .isBefore(memberBLastDeleteAt))
+            .orElse(false);
+    }
+
+    private void hardDeleteChatRoom(ChatRoom chatRoom) {
+        chatRepository.deleteAllByChatRoom(chatRoom);
+        chatRoomRepository.delete(chatRoom);
     }
 }

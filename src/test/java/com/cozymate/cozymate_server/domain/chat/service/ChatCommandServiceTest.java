@@ -4,7 +4,6 @@ import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.ChatTestBuilder;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
-import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomTestBuilder;

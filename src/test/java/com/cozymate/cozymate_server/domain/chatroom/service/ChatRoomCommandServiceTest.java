@@ -55,9 +55,6 @@ public class ChatRoomCommandServiceTest {
 
                 given(chatRoomRepository.findById(chatRoom.getId())).willReturn(
                     Optional.of(chatRoom));
-                given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
-                    Optional.of(chat));
-                given(chat.getCreatedAt()).willReturn(LocalDateTime.now().minusDays(1));
             }
 
             @Test
@@ -75,7 +72,7 @@ public class ChatRoomCommandServiceTest {
         class 쪽지방을_두명_다_삭제한_경우 {
 
             @Nested
-            @DisplayName("두명의 deleteAt 시간 보다 가장 최신 Chat의 createdAt이 빠른 경우")
+            @DisplayName("둘의 deleteAt 시간 보다 가장 최신 Chat의 createdAt이 빠른 경우")
             class Context_with_chat_createAt_earlier_than_two_member_deleteAt {
 
                 @BeforeEach
@@ -103,7 +100,7 @@ public class ChatRoomCommandServiceTest {
             }
 
             @Nested
-            @DisplayName("가장 최신의 Chat의 createdAt 시간이 두명의 deleteAt 시간 중에서 하나라도 보다 더 느린 경우")
+            @DisplayName("가장 최신 쪽지 생성일이 두 명의 deleteAt 중에서 적어도 하나 보다 최근인 경우")
             class Context_with_chat_createdAt_later_than_any_deleteAt {
 
                 @BeforeEach
