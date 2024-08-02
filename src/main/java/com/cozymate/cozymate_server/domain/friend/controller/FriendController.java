@@ -41,7 +41,7 @@ public class FriendController {
     )
     @PostMapping("/request/{senderId}")
     public ResponseEntity<ApiResponse<Long>> createFriendRequest(
-        @PathVariable("senderId") Long senderId,
+        @PathVariable Long senderId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
@@ -58,7 +58,7 @@ public class FriendController {
     )
     @PutMapping("/accept/{accepterId}")
     public ResponseEntity<ApiResponse<Long>> acceptFriendRequest(
-        @PathVariable("accepterId") Long accepterId,
+        @PathVariable Long accepterId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
@@ -75,7 +75,7 @@ public class FriendController {
     )
     @DeleteMapping("/deny/{accepterId}")
     public ResponseEntity<ApiResponse<Long>> denyFriendRequest(
-        @PathVariable("accepterId") Long accepterId,
+        @PathVariable Long accepterId,
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
 
         return ResponseEntity.ok(
