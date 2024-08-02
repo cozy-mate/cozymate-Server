@@ -13,10 +13,11 @@ public class ChatRoomConverter {
             .build();
     }
 
-    public static ChatRoomResponseDto toResponseDto(String nickName, String content) {
+    public static ChatRoomResponseDto toResponseDto(String nickName, String content, Long chatRoomId) {
         return ChatRoomResponseDto.builder()
             .nickName(nickName)
             .lastContent(content)
+            .chatRoomId(chatRoomId)
             .build();
     }
 }
