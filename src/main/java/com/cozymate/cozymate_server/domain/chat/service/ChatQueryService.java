@@ -30,35 +30,40 @@ public class ChatQueryService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        //chatRoomId으로 채팅방 찾아오기
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
 
-        //chatRoom의 chat 전부 찾아오기
-        List<Chat> findChatList = chatRepository.findAllByChatRoom(chatRoom);
+        List<Chat> filteredChatList = getFilteredChatList(chatRoom, member);
 
-        //chatRoom에서 내가 delete한 시간 이후에 오고 간 chat만 분류하기
-        LocalDateTime memberLastDeleteAt =
-            chatRoom.getMemberA().getNickname().equals(member.getNickname())
-                ? chatRoom.getMemberALastDeleteAt()
-                : chatRoom.getMemberBLastDeleteAt();
-
-        List<Chat> chatList = findChatList.stream()
-            .filter(chat -> memberLastDeleteAt == null || chat.getCreatedAt()
-                .isAfter(memberLastDeleteAt))
-            .collect(Collectors.toList());
-
-        List<ChatResponseDto> chatResponseDtoList = chatList.stream()
-            .map(chat -> {
-                String senderNickName = chat.getSender().getNickname();
-                String nickName =
-                    senderNickName.equals(member.getNickname()) ? senderNickName + " (나)"
-                        : senderNickName;
-                return ChatConverter.toResponseDto(nickName, chat.getContent(),
-                    chat.getCreatedAt());
-            })
-            .collect(Collectors.toList());
+        List<ChatResponseDto> chatResponseDtoList = toChatResponseDtoList(filteredChatList,
+            member);
 
         return chatResponseDtoList;
+    }
+
+    private List<Chat> getFilteredChatList(ChatRoom chatRoom, Member member) {
+        List<Chat> findChatList = chatRepository.findAllByChatRoom(chatRoom);
+        LocalDateTime memberLastDeleteAt = getMemberLastDeleteAt(chatRoom, member);
+        return findChatList.stream()
+            .filter(chat -> memberLastDeleteAt == null || chat.getCreatedAt().isAfter(memberLastDeleteAt))
+            .collect(Collectors.toList());
+    }
+
+    private LocalDateTime getMemberLastDeleteAt(ChatRoom chatRoom, Member member) {
+        return chatRoom.getMemberA().getNickname().equals(member.getNickname())
+            ? chatRoom.getMemberALastDeleteAt()
+            : chatRoom.getMemberBLastDeleteAt();
+    }
+
+    private List<ChatResponseDto> toChatResponseDtoList(List<Chat> chatList, Member member) {
+        return chatList.stream()
+            .map(chat -> {
+                String senderNickName = chat.getSender().getNickname();
+                String nickName = senderNickName.equals(member.getNickname())
+                    ? senderNickName + " (나)"
+                    : senderNickName;
+                return ChatConverter.toResponseDto(nickName, chat.getContent(), chat.getCreatedAt());
+            })
+            .collect(Collectors.toList());
     }
 }
