@@ -60,7 +60,7 @@ public class ChatRoomQueryService {
     }
 
     private LocalDateTime getLastDeleteAtByMember(ChatRoom chatRoom, Member member) {
-        return chatRoom.getMemberA().getName().equals(member.getName()) ?
+        return chatRoom.getMemberA().getNickname().equals(member.getNickname()) ?
             chatRoom.getMemberALastDeleteAt() : chatRoom.getMemberBLastDeleteAt();
     }
 
