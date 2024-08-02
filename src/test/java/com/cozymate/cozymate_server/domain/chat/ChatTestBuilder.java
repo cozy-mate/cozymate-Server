@@ -18,6 +18,7 @@ public class ChatTestBuilder {
         return Member.builder()
             .id(SENDER_ID)
             .name("멤버1")
+            .nickname("닉네임1")
             .build();
     }
 
@@ -25,6 +26,7 @@ public class ChatTestBuilder {
         return Member.builder()
             .id(RECIPIENT_ID)
             .name("멤버2")
+            .nickname("닉네임2")
             .build();
     }
 
