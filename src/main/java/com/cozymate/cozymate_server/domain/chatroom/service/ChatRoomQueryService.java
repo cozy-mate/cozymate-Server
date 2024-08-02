@@ -28,18 +28,14 @@ public class ChatRoomQueryService {
     private final MemberRepository memberRepository;
 
     public List<ChatRoomResponseDto> getChatRoomList(Long memberId) {
-        // 1. member 찾고 member가 속한 쪽지방 전부 조회
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         List<ChatRoom> findChatRoomList = chatRoomRepository.findAllByMember(member);
 
-        // 1.1 쪽지방이 없는 경우 빈 리스트 반환
         if (findChatRoomList.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // 2. 쪽지방 중에 member가 delete하지 않은 쪽지방 or
-        // 논리적 삭제를 했지만, 해당 쪽지방의 마지막 쪽지가 논리적 삭제 시간보다 최근인 경우를 필터링
         List<ChatRoom> chatRoomList = findChatRoomList.stream()
             .filter(chatRoom -> {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
@@ -48,7 +44,6 @@ public class ChatRoomQueryService {
             })
             .collect(Collectors.toList());
 
-        // 3. 필터링 된 쪽지방의 상대방 유저 이름과 마지막 쪽지 내용을 담은 dto로 변환하여 List에 담음
         List<ChatRoomResponseDto> chatRoomResponseDtoList = chatRoomList.stream()
             .map(chatRoom -> {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
