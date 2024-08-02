@@ -31,8 +31,9 @@ public class JwtUtil {
     private String SECRET_KEY;
 
     @Getter
-    @Value("${jwt.access-token.expire-length}")
-    private Long ACCESS_EXPIRATION;
+//    @Value("${jwt.access-token.expire-length}")
+//  주의!!! 테스트용!! access 토큰 6개월!!!
+    private static final Long ACCESS_EXPIRATION = 15778476000L;
     @Getter
     @Value("${jwt.refresh-token.expire-length}")
     private Long REFRESH_EXPIRATION;
