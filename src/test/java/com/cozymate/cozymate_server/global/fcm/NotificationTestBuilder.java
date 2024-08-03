@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.notificationlog.firebase;
+package com.cozymate.cozymate_server.global.fcm;
 
 import com.cozymate.cozymate_server.domain.chat.ChatTestBuilder;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -21,21 +21,21 @@ public class NotificationTestBuilder {
     }
 
     public static OneTargetVO testOneTargetVOWithRoomNameBuild() {
-        return new OneTargetVO(sender.getId(), NotificationType.ROOM_ENTRY, ROOM_NAME);
+        return new OneTargetVO(sender.getId(), NotificationType.ROOM_JOINED, ROOM_NAME);
     }
 
     public static OneTargetReverseVO testOneTargetReverseVOBuild() {
         return new OneTargetReverseVO(sender.getId(), recipient.getId(),
-            NotificationType.ARRIVE_CHAT);
+            NotificationType.CHAT_RECEIVED);
     }
 
     public static TwoTargetVO testTwoTargetVoBuild() {
-        return new TwoTargetVO(sender.getId(), NotificationType.ROOM_MATE_TO, recipient.getId(),
-            NotificationType.ROOM_MATE_FROM);
+        return new TwoTargetVO(sender.getId(), NotificationType.ROOM_MATE_REQUEST_TO, recipient.getId(),
+            NotificationType.ROOM_MATE_REQUEST_FROM);
     }
 
     public static GroupTargetVO testGroupTargetVOBuild() {
         return new GroupTargetVO(List.of(sender.getId(), recipient.getId()),
-            NotificationType.ROOM_OPEN);
+            NotificationType.ROOM_CREATED);
     }
 }

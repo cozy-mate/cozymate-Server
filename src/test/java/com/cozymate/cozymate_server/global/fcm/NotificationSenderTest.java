@@ -1,10 +1,8 @@
-package com.cozymate.cozymate_server.domain.notificationlog.firebase;
+package com.cozymate.cozymate_server.global.fcm;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
-import com.cozymate.cozymate_server.global.fcm.NotificationContentVO;
-import com.cozymate.cozymate_server.global.fcm.NotificationSender;
 import com.cozymate.cozymate_server.global.fcm.NotificationTargetVO.GroupTargetVO;
 import com.cozymate.cozymate_server.global.fcm.NotificationTargetVO.OneTargetReverseVO;
 import com.cozymate.cozymate_server.global.fcm.NotificationTargetVO.OneTargetVO;

@@ -11,7 +11,7 @@ import lombok.Getter;
 public enum NotificationType {
 
     // TwoTargetVO
-    ROOM_MATE_FROM(NotificationCategory.ROOM_MATE) {
+    ROOM_MATE_REQUEST_FROM(NotificationCategory.ROOM_MATE) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVo) {
             return notificationContentVo.getMember().getNickname() + "님에게서 룸메이트 신청이 도착했어요!";
@@ -19,7 +19,7 @@ public enum NotificationType {
     },
 
     // TwoTargetVO
-    ROOM_MATE_TO(NotificationCategory.ROOM_MATE) {
+    ROOM_MATE_REQUEST_TO(NotificationCategory.ROOM_MATE) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVo) {
             return notificationContentVo.getMember().getNickname() + "님에게 룸메이트 신청을 보냈어요!";
@@ -27,7 +27,7 @@ public enum NotificationType {
     },
 
     // OneTargetReverseVO
-    ROOM_MATE_ACCEPT(NotificationCategory.ROOM_MATE) {
+    ROOM_MATE_ACCEPTED(NotificationCategory.ROOM_MATE) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVo) {
             return notificationContentVo.getMember().getNickname() + "님이 룸메이트 신청을 수락했어요!";
@@ -35,7 +35,7 @@ public enum NotificationType {
     },
 
     // OneTargetReverseVO
-    ROOM_MATE_REJECT(NotificationCategory.ROOM_MATE) {
+    ROOM_MATE_REJECTED(NotificationCategory.ROOM_MATE) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVO) {
             return notificationContentVO.getMember().getNickname() + "님이 룸메이트 신청을 거절했어요!";
@@ -43,7 +43,7 @@ public enum NotificationType {
     },
 
     // OneTargetVO
-    ROOM_ENTRY(NotificationCategory.ROOM_MATE) {
+    ROOM_JOINED(NotificationCategory.ROOM_MATE) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVO) {
             return notificationContentVO.getRoomName() + " 방에 입장했어요!";
@@ -51,7 +51,7 @@ public enum NotificationType {
     },
 
     // OneTargetReverseVO
-    ROOM_REJECT(NotificationCategory.ROOM_MATE) {
+    ROOM_INVITE_REJECTED(NotificationCategory.ROOM_MATE) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVO) {
             return notificationContentVO.getMember().getNickname() + "님이 방 초대를 거절했어요.";
@@ -59,7 +59,7 @@ public enum NotificationType {
     },
 
     // GroupTargetVO
-    ROOM_OPEN(NotificationCategory.ROOM_MATE) {
+    ROOM_CREATED(NotificationCategory.ROOM_MATE) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVO) {
             return notificationContentVO.getMember().getNickname() + "님, cozymate가 모두 모여, 방이 열렸어요!";
@@ -67,7 +67,7 @@ public enum NotificationType {
     },
 
     // OneTargetReverseVO
-    ARRIVE_CHAT(NotificationCategory.CHAT) {
+    CHAT_RECEIVED(NotificationCategory.CHAT) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVO) {
             return notificationContentVO.getMember().getNickname() + "님에게서 쪽지가 도착했어요!";
@@ -99,7 +99,7 @@ public enum NotificationType {
     },
 
     // OneTargetVO
-    BEST_ROOMMATE(NotificationCategory.COZY_HOME) {
+    BEST_ROOM_MATE(NotificationCategory.COZY_HOME) {
         @Override
         public String generateContent(NotificationContentVO notificationContentVO) {
             LocalDateTime now = LocalDateTime.now();
@@ -109,7 +109,53 @@ public enum NotificationType {
                 month);
         }
     },
-    ;
+
+    ROOM_CLOSED(NotificationCategory.COZY_HOME) {
+        @Override
+        public String generateContent(NotificationContentVO notificationContentVO) {
+            return notificationContentVO.getRoomName() + " 방이 오늘부로 종로됐어요...";
+        }
+    },
+
+    ROOM_LEFT(NotificationCategory.ROOM_MATE) {
+        @Override
+        public String generateContent(NotificationContentVO notificationContentVO) {
+            String nickname = notificationContentVO.getMember().getNickname();
+            String roomName = notificationContentVO.getRoomName();
+            return roomName + " 방에서 " + nickname + "님이 떠났어요..";
+        }
+    },
+
+    COZY_MATE_RENEWAL(NotificationCategory.COZY_HOME) {
+        @Override
+        public String generateContent(NotificationContentVO notificationContentVO) {
+            return notificationContentVO.getMember().getNickname() + "님, cozymate가 새롭게 리뉴얼 됐어요";
+        }
+    },
+
+    BEST_SELECTED(NotificationCategory.COZY_HOME) {
+        @Override
+        public String generateContent(NotificationContentVO notificationContentVO) {
+            LocalDateTime now = LocalDateTime.now();
+            String month = now.format(DateTimeFormatter.ofPattern("M월"));
+            return String.format(
+                notificationContentVO.getMember().getNickname()
+                    + "님, %s의 Best, Worst 코지메이트가 선정됐어요!\n지금 바로 확인해볼까요?",
+                month);
+        }
+    },
+
+    SELECT_COZYMATE(NotificationCategory.COZY_HOME) {
+        @Override
+        public String generateContent(NotificationContentVO notificationContentVO) {
+            LocalDateTime now = LocalDateTime.now();
+            String month = now.format(DateTimeFormatter.ofPattern("M월"));
+            return String.format(
+                notificationContentVO.getMember().getNickname()
+                    + "님, %s의 Best, Worst 코지메이트를 선정해주세요!",
+                month);
+        }
+    };;
 
     private NotificationCategory category;
 
