@@ -1,10 +1,12 @@
 package com.cozymate.cozymate_server.domain.memberstat.dto;
 
+import com.cozymate.cozymate_server.domain.member.Member;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class MemberStatResponseDTO {
@@ -39,5 +41,14 @@ public class MemberStatResponseDTO {
         private String personality;
         private String mbti;
         private Map<String, List<String>> options;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberStatEqualityResponseDTO {
+        private Member member;
+        private Integer equality;
     }
 }

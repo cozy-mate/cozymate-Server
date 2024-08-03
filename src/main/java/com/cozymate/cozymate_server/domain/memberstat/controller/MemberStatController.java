@@ -2,21 +2,29 @@ package com.cozymate.cozymate_server.domain.memberstat.controller;
 
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -40,9 +48,11 @@ public class MemberStatController {
     )
     @PostMapping("/{memberId}")
     public ResponseEntity<ApiResponse<Long>> createMemberStat(
-        @PathVariable("memberId") Long memberId,@Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        @PathVariable("memberId") Long memberId,
+        @Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(memberStatCommandService.createMemberStat(memberId,memberStatCommandRequestDTO)));
+            ApiResponse.onSuccess(
+                memberStatCommandService.createMemberStat(memberId, memberStatCommandRequestDTO)));
     }
 
     /**
@@ -57,9 +67,11 @@ public class MemberStatController {
     )
     @PutMapping("/{memberId}")
     public ResponseEntity<ApiResponse<Long>> modifyMemberStat(
-        @PathVariable("memberId") Long memberId,@Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        @PathVariable("memberId") Long memberId,
+        @Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(memberStatCommandService.modifyMemberStat(memberId,memberStatCommandRequestDTO)));
+            ApiResponse.onSuccess(
+                memberStatCommandService.modifyMemberStat(memberId, memberStatCommandRequestDTO)));
     }
 
     /**
@@ -73,10 +85,26 @@ public class MemberStatController {
     @GetMapping("/{memberId}")
     public ResponseEntity<ApiResponse<MemberStatQueryResponseDTO>> getMemberStat(
         @PathVariable("memberId") Long memberId) {
-        MemberStatQueryResponseDTO memberStatQueryResponseDTO = MemberStatConverter.toDto(memberStatQueryService.getMemberStat(memberId));
+        MemberStatQueryResponseDTO memberStatQueryResponseDTO = MemberStatConverter.toDto(
+            memberStatQueryService.getMemberStat(memberId));
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryResponseDTO
+            ));
+    }
+    @Operation(
+        summary = "[포비] 사용자 상세정보 필터링, 일치율 조회",
+        description = "Path Variable로 memberId를 넣어 사용합니다.\n\n"
+            + "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다."
+    )
+    @GetMapping("/search/{memberId}")
+    public ResponseEntity<ApiResponse<Page<MemberStatEqualityResponseDTO>>> getFilteredMemberList(
+        @PathVariable("memberId") Long memberId, @RequestParam(defaultValue = "0") int page,
+        @RequestParam(required = false) List<String> filterList) {
+        Pageable pageable = PageRequest.of(page, 5);
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                memberStatQueryService.getMemberStatList(memberId, filterList, pageable)
             ));
     }
 
