@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/api/friend")
+@RequestMapping("/friend")
 @RequiredArgsConstructor
 @RestController
 public class FriendController {
@@ -37,7 +37,7 @@ public class FriendController {
      */
     @Operation(
         summary = "[포비] 친구 신청 요청",
-        description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
+        description = "Path Variable로 쪽지를 보내는 멤버의 ID, Body로 쪽지를 받는 멤버의 ID를 보내주세요."
     )
     @PostMapping("/request/{senderId}")
     public ResponseEntity<ApiResponse<Long>> createFriendRequest(
@@ -54,7 +54,7 @@ public class FriendController {
      */
     @Operation(
         summary = "[포비] 친구 신청 수락",
-        description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
+        description = "Path Variable로 쪽지를 받은 멤버의 ID, Body로 쪽지를 보냈던 멤버의 ID를 보내주세요."
     )
     @PutMapping("/accept/{accepterId}")
     public ResponseEntity<ApiResponse<Long>> acceptFriendRequest(
@@ -70,8 +70,8 @@ public class FriendController {
      * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
      */
     @Operation(
-        summary = "[포비] 친구 신청 삭제",
-        description = "Path Variable로 보내는 멤버의 ID, Body로 받는 멤버의 ID를 보내주세요."
+        summary = "[포비] 친구 신청 거절",
+        description = "Path Variable로 쪽지를 받은 멤버의 ID, Body로 쪽지를 보냈던 멤버의 ID를 보내주세요."
     )
     @DeleteMapping("/deny/{accepterId}")
     public ResponseEntity<ApiResponse<Long>> denyFriendRequest(
