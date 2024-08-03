@@ -184,5 +184,37 @@ class ChatQueryServiceTest {
                     .isInstanceOf(GeneralException.class);
             }
         }
+
+        @Nested
+        @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+        class 쪽지방의_멤버가_아닌_경우 {
+
+            @BeforeEach
+            void setUp() {
+                me = ChatTestBuilder.testSenderBuild();
+                chatRoom = mock(ChatRoom.class);
+
+                Member memberA = Member.builder()
+                    .id(3L)
+                    .build();
+
+                Member memberB = Member.builder()
+                    .id(4L)
+                    .build();
+
+                given(chatRoom.getMemberA()).willReturn(memberA);
+                given(chatRoom.getMemberB()).willReturn(memberB);
+
+                given(memberRepository.findById(me.getId())).willReturn(Optional.of(me));
+                given(chatRoomRepository.findById(1L)).willReturn(Optional.of(chatRoom));
+            }
+
+            @Test
+            @DisplayName("예외를 발생시킨다.")
+            void it_returns_chat_room_not_member() {
+                assertThatThrownBy(() -> chatQueryService.getChatList(me.getId(), 1L))
+                    .isInstanceOf(GeneralException.class);
+            }
+        }
     }
 }

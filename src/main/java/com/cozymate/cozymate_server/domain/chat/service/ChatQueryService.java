@@ -33,6 +33,11 @@ public class ChatQueryService {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
 
+        if (!member.getId().equals(chatRoom.getMemberA().getId())
+            && !member.getId().equals(chatRoom.getMemberB().getId())) {
+            throw new GeneralException(ErrorStatus._CHATROOM_FORBIDDEN);
+        }
+
         List<Chat> filteredChatList = getFilteredChatList(chatRoom, member);
 
         List<ChatResponseDto> chatResponseDtoList = toChatResponseDtoList(filteredChatList,
@@ -45,7 +50,8 @@ public class ChatQueryService {
         List<Chat> findChatList = chatRepository.findAllByChatRoom(chatRoom);
         LocalDateTime memberLastDeleteAt = getMemberLastDeleteAt(chatRoom, member);
         return findChatList.stream()
-            .filter(chat -> memberLastDeleteAt == null || chat.getCreatedAt().isAfter(memberLastDeleteAt))
+            .filter(chat -> memberLastDeleteAt == null || chat.getCreatedAt()
+                .isAfter(memberLastDeleteAt))
             .collect(Collectors.toList());
     }
 
@@ -62,7 +68,8 @@ public class ChatQueryService {
                 String nickName = senderNickName.equals(member.getNickname())
                     ? senderNickName + " (나)"
                     : senderNickName;
-                return ChatConverter.toResponseDto(nickName, chat.getContent(), chat.getCreatedAt());
+                return ChatConverter.toResponseDto(nickName, chat.getContent(),
+                    chat.getCreatedAt());
             })
             .collect(Collectors.toList());
     }
