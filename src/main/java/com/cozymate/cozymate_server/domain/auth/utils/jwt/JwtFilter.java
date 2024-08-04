@@ -54,8 +54,8 @@ public class JwtFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
 
         userName = jwtUtil.extractUserName(jwt);
-        log.info(userName);
         UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+
 
         // 임시 Token 검증
         if (jwtUtil.isTemporaryToken(jwt)) {
@@ -64,7 +64,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
             request.setAttribute("client_id", userDetails.getUsername());
-            log.info(userDetails.getUsername()+"임시 토큰 검증 완료");
             filterChain.doFilter(request, response);
         }
 
@@ -80,6 +79,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
             } else {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid access token");
                 return;
