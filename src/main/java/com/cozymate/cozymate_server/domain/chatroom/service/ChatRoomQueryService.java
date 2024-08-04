@@ -49,7 +49,7 @@ public class ChatRoomQueryService {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
                 return toChatRoomResponseDto(chatRoom, member, chat);
             })
-            .collect(Collectors.toList());
+            .toList();
 
         return chatRoomResponseDtoList;
     }
