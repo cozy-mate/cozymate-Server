@@ -1,12 +1,8 @@
 package com.cozymate.cozymate_server.global.config;
 
-import com.cozymate.cozymate_server.domain.auth.repository.TokenRepository;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
-import com.cozymate.cozymate_server.domain.auth.utils.LoginFilter;
 import com.cozymate.cozymate_server.domain.auth.utils.jwt.JwtFilter;
 import com.cozymate.cozymate_server.domain.auth.utils.jwt.JwtUtil;
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -33,11 +29,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @Slf4j
 public class SecurityConfig {
-    private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
-    private final TokenRepository tokenRepository;
 
-    private final MemberRepository memberRepository;
     private final AuthService authService;
 
     @Bean
@@ -96,13 +89,7 @@ public class SecurityConfig {
 
         //JWT 필터 추가
         httpSecurity
-                .addFilterBefore(new JwtFilter(jwtUtil,authService), LoginFilter.class); // loginFilter 이전에 jwtFilter 추가
-
-        //로그인 필터 추가
-        httpSecurity
-                .addFilterAt(
-                        new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenRepository,
-                                memberRepository, new ObjectMapper()),
+                .addFilterBefore(new JwtFilter(jwtUtil, authService),
                         UsernamePasswordAuthenticationFilter.class);
 
         //session 설정 (jwt 사용 -> stateless)
