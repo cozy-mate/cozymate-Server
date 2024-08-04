@@ -64,7 +64,7 @@ public class MemberStatCommandService {
             () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
         );
 
-        updatedMemberStat.update(member,university,memberStatCommandRequestDTO);
+        updatedMemberStat.update(member, university, memberStatCommandRequestDTO);
         return updatedMemberStat.getId();
 
     }

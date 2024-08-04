@@ -39,6 +39,11 @@ public class Todo extends BaseTimeEntity {
 
     private String content;
 
-    private LocalDate deadline;
+    private LocalDate timePoint;
 
+    private boolean completed = false;
+
+    public void updateCompleteState(boolean completed) {
+        this.completed = completed;
+    }
 }

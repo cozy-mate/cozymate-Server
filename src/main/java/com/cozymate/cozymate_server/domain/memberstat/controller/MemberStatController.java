@@ -6,6 +6,8 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,11 +40,19 @@ public class MemberStatController {
             + "에어컨, 히터, 예민도들은 모두 정수로 주시면 됩니다.\n\n"
             + "학번의 경우 09학번-> \"09\"로 주시면 됩니다."
     )
+    @SwaggerApiError({
+        ErrorStatus._MEMBERSTAT_EXISTS,
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._UNIVERSITY_NOT_FOUND,
+        ErrorStatus._MEMBERSTAT_MERIDIAN_NOT_VALID
+    })
     @PostMapping("/{memberId}")
     public ResponseEntity<ApiResponse<Long>> createMemberStat(
-        @PathVariable("memberId") Long memberId,@Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        @PathVariable("memberId") Long memberId,
+        @Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(memberStatCommandService.createMemberStat(memberId,memberStatCommandRequestDTO)));
+            ApiResponse.onSuccess(
+                memberStatCommandService.createMemberStat(memberId, memberStatCommandRequestDTO)));
     }
 
     /**
@@ -55,11 +65,19 @@ public class MemberStatController {
             + "에어컨, 히터, 예민도들은 모두 정수로 주시면 됩니다.\n\n"
             + "학번의 경우 09학번-> \"09\"로 주시면 됩니다."
     )
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._UNIVERSITY_NOT_FOUND,
+        ErrorStatus._MEMBERSTAT_NOT_EXISTS,
+        ErrorStatus._MEMBERSTAT_MERIDIAN_NOT_VALID
+    })
     @PutMapping("/{memberId}")
     public ResponseEntity<ApiResponse<Long>> modifyMemberStat(
-        @PathVariable("memberId") Long memberId,@Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        @PathVariable("memberId") Long memberId,
+        @Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(memberStatCommandService.modifyMemberStat(memberId,memberStatCommandRequestDTO)));
+            ApiResponse.onSuccess(
+                memberStatCommandService.modifyMemberStat(memberId, memberStatCommandRequestDTO)));
     }
 
     /**
@@ -70,10 +88,15 @@ public class MemberStatController {
         description = "Path Variable로 memberId를 넣어 사용합니다.\n\n"
             + "시간 관련 처리를 유의해주세요."
     )
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._MEMBERSTAT_NOT_EXISTS
+    })
     @GetMapping("/{memberId}")
     public ResponseEntity<ApiResponse<MemberStatQueryResponseDTO>> getMemberStat(
         @PathVariable("memberId") Long memberId) {
-        MemberStatQueryResponseDTO memberStatQueryResponseDTO = MemberStatConverter.toDto(memberStatQueryService.getMemberStat(memberId));
+        MemberStatQueryResponseDTO memberStatQueryResponseDTO = MemberStatConverter.toDto(
+            memberStatQueryService.getMemberStat(memberId));
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryResponseDTO
