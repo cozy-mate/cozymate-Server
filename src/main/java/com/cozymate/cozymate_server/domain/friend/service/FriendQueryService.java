@@ -41,12 +41,12 @@ public class FriendQueryService {
                 SimpleFriendResponseDTO
                     .builder()
                     .memberId(friend.getReceiver().getId())
-                    .memberName(friend.getReceiver().getName())
+                    .memberNickName(friend.getReceiver().getNickname())
                     .build() :
                 SimpleFriendResponseDTO
                     .builder()
                     .memberId(friend.getSender().getId())
-                    .memberName(friend.getSender().getName())
+                    .memberNickName(friend.getSender().getNickname())
                     .build()
         ).toList();
 

@@ -13,7 +13,7 @@ public class FriendResponseDTO {
     @Builder
     public static class SimpleFriendResponseDTO {
         private Long memberId;
-        private String memberName;
+        private String memberNickName;
     }
 
 }
