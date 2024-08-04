@@ -12,12 +12,12 @@ import com.cozymate.cozymate_server.domain.auth.utils.jwt.JwtUtil;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import java.util.NoSuchElementException;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -51,15 +51,23 @@ public class AuthService implements UserDetailsService {
         }
     }
 
-    public AuthResponseDTO.SocialLoginDTO socialLogin(String clientId, String token) {
-        if (jwtUtil.isTemporaryToken(token)) {
+    public HttpHeaders addTokenAtHeader(String token) {
+        log.info("발급된 토큰 :" + jwtUtil.extractTokenType(token) + ":" + token);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(JwtUtil.TOKEN_PREFIX, token);
+        return headers;
+    }
+
+    public AuthResponseDTO.SocialLoginDTO socialLogin(String clientId) {
+        Optional<Member> member = memberRepository.findByClientId(clientId);
+        if (member.isPresent()) {
             return AuthResponseDTO.SocialLoginDTO.builder()
-                    .message(TEMPORARY_TOKEN_SUCCESS_MESSAGE)
+                    .message(RE_LOGIN_EXISTING_MEMBER_MESSAGE)
+                    .refreshToken(getRefreshToken(loadUserByUsername(clientId)))
                     .build();
         }
         return AuthResponseDTO.SocialLoginDTO.builder()
-                .message(RE_LOGIN_EXISTING_MEMBER_MESSAGE)
-                .refreshToken(getRefreshToken(loadUserByUsername(clientId)))
+                .message(TEMPORARY_TOKEN_SUCCESS_MESSAGE)
                 .build();
     }
 
@@ -79,10 +87,10 @@ public class AuthService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String userName) {
-        try {
-            Member member = memberRepository.findByClientId(userName).orElseThrow();
-            return new MemberDetails(member);
-        } catch (NoSuchElementException e) {
+        Optional<Member> member = memberRepository.findByClientId(userName);
+        if (member.isPresent()) {
+            return new MemberDetails(member.get());
+        } else {
             return new TemporaryMember(userName);
         }
     }
