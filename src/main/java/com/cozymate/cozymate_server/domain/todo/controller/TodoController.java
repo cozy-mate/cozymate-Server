@@ -67,7 +67,7 @@ public class TodoController {
 
     @PatchMapping("/state")
     @Operation(summary = "[무빗] Todo 완료 여부를 변경", description = "boolean 값을 같이 넘겨받습니다.")
-    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> updateTodoCompleteState(
         @Valid @RequestBody UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto,
         @RequestParam Long memberId) {
