@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.friend.service;
 import com.cozymate.cozymate_server.domain.friend.Friend;
 import com.cozymate.cozymate_server.domain.friend.FriendRepository;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.SimpleFriendResponseDTO;
+import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -26,7 +27,10 @@ public class FriendQueryService {
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
         );
 
-        List<Friend> friendList = friendRepository.findBySenderIdOrReceiverId(memberId, memberId);
+        List<Friend> friendList = friendRepository.findBySenderIdOrReceiverId(memberId, memberId)
+            .stream()
+            .filter(friendRequest -> friendRequest.getStatus().equals(FriendStatus.ACCEPT))
+            .toList();
 
         if (friendList.isEmpty()) {
             return new ArrayList<>();
