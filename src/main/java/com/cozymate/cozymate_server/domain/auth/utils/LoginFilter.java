@@ -37,9 +37,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         String clientId = obtainUsername(request).toLowerCase();
-        String password = obtainPassword(request).toLowerCase();
 
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(clientId, password,
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(clientId,
                 null);
 
         return authenticationManager.authenticate(authToken);

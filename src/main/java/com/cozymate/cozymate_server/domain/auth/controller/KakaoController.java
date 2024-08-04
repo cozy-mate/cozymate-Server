@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.auth.service.KakaoService;
 import com.cozymate.cozymate_server.domain.auth.utils.jwt.JwtUtil;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -58,6 +59,8 @@ public class KakaoController implements SocialLoginController {
         headers.add(HttpHeaders.AUTHORIZATION, JwtUtil.TOKEN_PREFIX + token);
 
         AuthResponseDTO.SocialLoginDTO socialLoginDTO = authService.socialLogin(clientId, token);
+
+        log.info(token);
 
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .body(ApiResponse.onSuccess(socialLoginDTO));
