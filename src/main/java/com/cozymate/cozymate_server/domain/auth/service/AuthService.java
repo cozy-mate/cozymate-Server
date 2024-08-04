@@ -14,6 +14,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import java.util.NoSuchElementException;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
@@ -33,15 +34,21 @@ public class AuthService implements UserDetailsService {
     private final TokenRepository tokenRepository;
 
 
-
-
     // 기존에 있는 회원이면 AccessToken, 임시회원이면 TempToken 발급
     @Transactional
     public String generateToken(String clientId) {
         UserDetails userDetails = loadUserByUsername(clientId);
-        return memberRepository.findByClientId(userDetails.getUsername())
-                .map(member -> jwtUtil.generateAccessToken(userDetails))
-                .orElseGet(() -> jwtUtil.generateTemporaryToken(userDetails));
+        Optional<Member> member = memberRepository.findByClientId(clientId);
+        if (member.isPresent()) {
+            String accessToken = jwtUtil.generateAccessToken(userDetails);
+            String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+            Token newToken = new Token(clientId, refreshToken);
+            tokenRepository.save(newToken);
+
+            return accessToken;
+        } else {
+            return jwtUtil.generateTemporaryToken(userDetails);
+        }
     }
 
     public AuthResponseDTO.SocialLoginDTO socialLogin(String clientId, String token) {
@@ -63,7 +70,7 @@ public class AuthService implements UserDetailsService {
 
     @Transactional
 
-    public void deleteRefreshToken(String userName){
+    public void deleteRefreshToken(String userName) {
         Token token = tokenRepository.findById(userName).orElseThrow();
         // todo : 예외처리
         tokenRepository.delete(token);
