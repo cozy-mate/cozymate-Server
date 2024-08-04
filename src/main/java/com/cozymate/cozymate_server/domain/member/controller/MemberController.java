@@ -3,12 +3,16 @@ package com.cozymate.cozymate_server.domain.member.controller;
 import com.cozymate.cozymate_server.domain.auth.utils.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
+import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO.LoginResponseDTO;
 import com.cozymate.cozymate_server.domain.member.service.MemberService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,16 +42,25 @@ public class MemberController {
             @RequestBody @Valid MemberRequestDTO.JoinRequestDTO joinRequestDTO
     ) {
         // todo : 파라미터 바인딩 검증 로직 추가
-        MemberResponseDTO.LoginResponseDTO loginResponseDTO = memberService.join(clientId, joinRequestDTO);
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(loginResponseDTO));
+
+        MemberDetails memberDetails = memberService.join(clientId, joinRequestDTO);
+        HttpHeaders headers = memberService.getHeader(memberDetails);
+        LoginResponseDTO loginResponseDTO = memberService.getBody(memberDetails);
+
+        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
+                .headers(headers)
+                .body(ApiResponse.onSuccess(loginResponseDTO));
     }
 
     @GetMapping("/login")
     ResponseEntity<ApiResponse<MemberResponseDTO.LoginResponseDTO>> login(
             @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        MemberResponseDTO.LoginResponseDTO loginResponseDTO = memberService.login(memberDetails);
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(loginResponseDTO));
+        HttpHeaders headers = memberService.getHeader(memberDetails);
+        LoginResponseDTO loginResponseDTO = memberService.getBody(memberDetails);
+        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
+                .headers(headers)
+                .body(ApiResponse.onSuccess(loginResponseDTO));
     }
 
     @GetMapping("/member-info")
