@@ -29,16 +29,16 @@ public enum ErrorStatus implements BaseErrorCode {
     _ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOM409", "이미 활성화 또는 대기 중인 방이 존재합니다."),
 
     // University 관련 에러
-    _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST,"UNIVERSITY400","대학을 찾을 수 없습니다."),
+    _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "UNIVERSITY400", "대학을 찾을 수 없습니다."),
 
     // MemberStat 관련 에러
-    _MEMBERSTAT_EXISTS(HttpStatus.BAD_REQUEST,"MEMBERSTAT400","멤버 상세정보가 이미 존재합니다."),
-    _MEMBERSTAT_MERIDIAN_NOT_VALID(HttpStatus.BAD_REQUEST,"MEMBERSTAT401","오전, 오후를 정확하게 입력하세요."),
+    _MEMBERSTAT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT400", "멤버 상세정보가 이미 존재합니다."),
+    _MEMBERSTAT_MERIDIAN_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT401", "오전, 오후를 정확하게 입력하세요."),
     _MEMBERSTAT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT402", "멤버 상세정보가 존재하지 않습니다."),
 
     // ChatRoom 관련 애러
     _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
-    _CHATROOM_FORBIDDEN(HttpStatus.BAD_REQUEST,"CHATROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
+    _CHATROOM_FORBIDDEN(HttpStatus.BAD_REQUEST, "CHATROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
 
     // Mate 관련
     _MATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE400", "해당하는 메이트 정보가 없습니다."),
@@ -47,8 +47,13 @@ public enum ErrorStatus implements BaseErrorCode {
     _TODO_NOT_FOUND(HttpStatus.BAD_REQUEST, "TODO400", "해당하는 Todo 정보가 없습니다."),
     _TODO_NOT_VALID(HttpStatus.BAD_REQUEST, "TODO401", "수정할 수 있는 권한이 없습니다."),
 
-    ;
+    // Friend 관련 에러
+    _FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "FRIEND400", "친구요청을 찾을 수 없습니다."),
+    _FRIEND_REQUEST_SENT(HttpStatus.BAD_REQUEST, "FRIEND401", "보낸 친구요청입니다."),
+    _FRIEND_REQUEST_RECEIVED(HttpStatus.BAD_REQUEST, "FRIEND402", "받은 친구요청입니다."),
+    _FRIEND_REQUEST_ACCEPTED(HttpStatus.BAD_REQUEST, "FRIEND403", "이미 수락한 친구요청입니다."),
 
+    ;
 
 
     private final HttpStatus httpStatus;

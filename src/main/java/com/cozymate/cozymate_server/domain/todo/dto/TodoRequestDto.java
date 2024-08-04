@@ -18,7 +18,7 @@ public class TodoRequestDto {
 
         @NotNull
         @DateTimeFormat(pattern = "yyyy-MM-dd")
-        private LocalDate deadline;
+        private LocalDate timePoint;
     }
 
     @AllArgsConstructor
