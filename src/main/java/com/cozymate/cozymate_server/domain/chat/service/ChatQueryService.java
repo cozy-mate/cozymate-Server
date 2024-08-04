@@ -35,7 +35,7 @@ public class ChatQueryService {
 
         if (!member.getId().equals(chatRoom.getMemberA().getId())
             && !member.getId().equals(chatRoom.getMemberB().getId())) {
-            throw new GeneralException(ErrorStatus._CHATROOM_NOT_MEMBER);
+            throw new GeneralException(ErrorStatus._CHATROOM_MEMBER_MISMATCH);
         }
 
         List<Chat> filteredChatList = getFilteredChatList(chatRoom, member);
@@ -52,7 +52,7 @@ public class ChatQueryService {
         return findChatList.stream()
             .filter(chat -> memberLastDeleteAt == null || chat.getCreatedAt()
                 .isAfter(memberLastDeleteAt))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private LocalDateTime getMemberLastDeleteAt(ChatRoom chatRoom, Member member) {
@@ -71,6 +71,6 @@ public class ChatQueryService {
                 return ChatConverter.toResponseDto(nickName, chat.getContent(),
                     chat.getCreatedAt());
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 }

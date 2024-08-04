@@ -211,7 +211,7 @@ class ChatQueryServiceTest {
 
             @Test
             @DisplayName("예외를 발생시킨다.")
-            void it_returns_chat_room_not_member() {
+            void it_returns_chat_room_member_mismatch() {
                 assertThatThrownBy(() -> chatQueryService.getChatList(me.getId(), 1L))
                     .isInstanceOf(GeneralException.class);
             }
