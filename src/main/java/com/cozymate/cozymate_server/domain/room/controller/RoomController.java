@@ -29,10 +29,11 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess("방 생성 완료"));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{roomId}")
     @Operation(summary = "[바니] 방 삭제 기능", description = "해당 roomId의 방을 삭제합니다.")
-    public ResponseEntity<ApiResponse<String>> deleteRoom(@PathVariable Long id) {
-        roomCommandService.deleteRoom(id);
+    public ResponseEntity<ApiResponse<String>> deleteRoom(@PathVariable Long roomId, Long memberId) {
+        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
+        roomCommandService.deleteRoom(roomId, memberId);
         return ResponseEntity.ok(ApiResponse.onSuccess("방 삭제 완료"));
     }
 

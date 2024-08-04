@@ -68,21 +68,30 @@ public class RoomCommandService {
     }
 
     @Transactional
-    public void deleteRoom(Long id) {
-        Room room = roomRepository.findById(id)
+    public void deleteRoom(Long roomId, Long memberId) {
+        Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
+        mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
+            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        if (!manager.getMember().getId().equals(memberId)) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
+
         // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
-        List<Mate> mates = mateRepository.findByRoomId(id);
+        List<Mate> mates = mateRepository.findByRoomId(roomId);
         for (Mate mate : mates) {
             roleRepository.deleteByMateId(mate.getId());
             todoRepository.deleteByMateId(mate.getId());
         }
-        mateRepository.deleteByRoomId(id);
-        ruleRepository.deleteByRoomId(id);
-        roomLogRepository.deleteByRoomId(id);
+        mateRepository.deleteByRoomId(roomId);
+        ruleRepository.deleteByRoomId(roomId);
+        roomLogRepository.deleteByRoomId(roomId);
 
-        List<Feed> feeds = feedRepository.findByRoomId(id);
+        List<Feed> feeds = feedRepository.findByRoomId(roomId);
         for (Feed feed : feeds) {
             List<Post> posts = postRepository.findByFeedId(feed.getId());
             for (Post post : posts) {
@@ -91,7 +100,7 @@ public class RoomCommandService {
             }
             postRepository.deleteByFeedId(feed.getId());
         }
-        feedRepository.deleteByRoomId(id);
+        feedRepository.deleteByRoomId(roomId);
 
         roomRepository.delete(room);
     }
