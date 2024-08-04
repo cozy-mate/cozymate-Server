@@ -19,7 +19,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.rule.RuleRepository;
-import com.cozymate.cozymate_server.domain.todo.ToDoRepository;
+import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
@@ -38,7 +38,7 @@ public class RoomCommandService {
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
-    private final ToDoRepository todoRepository;
+    private final TodoRepository todoRepository;
     private final RuleRepository ruleRepository;
     private final RoomLogRepository roomLogRepository;
     private final PostRepository postRepository;
