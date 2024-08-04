@@ -1,11 +1,14 @@
 package com.cozymate.cozymate_server.domain.auth.utils.jwt;
 
-import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,15 +20,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-
-    public JwtFilter(JwtUtil jwtUtil, AuthService authService) {
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = authService;
-    }
 
     @Override
     protected void doFilterInternal(
@@ -52,7 +52,9 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
+
         userName = jwtUtil.extractUserName(jwt);
+        log.info(userName);
         UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
 
         // 임시 Token 검증
@@ -61,6 +63,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid temporary token");
                 return;
             }
+            request.setAttribute("client_id", userDetails.getUsername());
+            log.info(userDetails.getUsername()+"임시 토큰 검증 완료");
             filterChain.doFilter(request, response);
         }
 
