@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Entity;
@@ -65,7 +66,7 @@ public class Member extends BaseTimeEntity {
 
     // 기존에 member -> memberstat 상속 관계를
     // member <-> memberstat one to one mapping으로 변경하였습니다.
-    @OneToOne(mappedBy = "member")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "member")
     private MemberStat memberStat;
 
 }
