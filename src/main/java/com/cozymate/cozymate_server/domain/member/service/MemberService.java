@@ -1,7 +1,5 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
-
-
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.utils.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -32,8 +30,9 @@ public class MemberService {
     public MemberResponseDTO.LoginResponseDTO join(String clientId, MemberRequestDTO.JoinRequestDTO joinRequestDTO) {
         Member member = MemberConverter.toMember(clientId, joinRequestDTO);
         MemberDetails memberDetails = new MemberDetails(member);
-
         memberRepository.save(member);
+        log.info(member.getNickname() +" 저장 완료");
+        authService.generateToken(member.getClientId());
 
         return MemberConverter.toLoginResponseDTO(member.getNickname(),
                 authService.getRefreshToken(memberDetails));
