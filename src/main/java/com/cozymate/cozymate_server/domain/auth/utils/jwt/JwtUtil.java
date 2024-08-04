@@ -7,25 +7,25 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
-@NoArgsConstructor
+@Slf4j
 public class JwtUtil {
 
     public final static String TOKEN_PREFIX = "Bearer ";
 
     public final static String TOKEN_TYPE_CLAIM_NAME = "tokenType";
     public static final String HEADER_AUTHORIZATION = "Authorization";
-
 
     @Value("${jwt.custom.secretKey}")
     private String SECRET_KEY;
@@ -91,9 +91,9 @@ public class JwtUtil {
     private String buildToken(TokenType tokenType, UserDetails userDetails, Long expiration) {
         return Jwts
                 .builder()
+                .setSubject(userDetails.getUsername())
                 .claim(TOKEN_TYPE_CLAIM_NAME, tokenType.toString())
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
@@ -128,7 +128,8 @@ public class JwtUtil {
 
     //서명 키 반환, 토큰 생성하고 검증할 때 사용
     private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        String key = Base64.getEncoder().encodeToString(SECRET_KEY.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(key);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
