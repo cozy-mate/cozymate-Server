@@ -51,6 +51,7 @@ public class TodoController {
     @Operation(
         summary = "[무빗] 특정 방의 특정 날짜 기준 룸메별 To-Do 조회",
         description = "본인이 참가한 방에서만 조회가 가능합니다. | timePoint를 지정하지 않으면 오늘 날짜 기준으로 반환합니다.")
+    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
     public ResponseEntity<ApiResponse<TodoListResponseDto>> getTodo(
         @PathVariable Long roomId,
         @RequestParam Long memberId,
@@ -66,11 +67,12 @@ public class TodoController {
 
     @PatchMapping("/state")
     @Operation(summary = "[무빗] Todo 완료 여부를 변경", description = "boolean 값을 같이 넘겨받습니다.")
+    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> updateTodoCompleteState(
         @Valid @RequestBody UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto,
         @RequestParam Long memberId) {
         // TODO: 소셜로그인 후...
-        toDoCommandService.updateTodoCompleteState(updateTodoCompleteStateRequestDto, memberId);
+        todoCommandService.updateTodoCompleteState(updateTodoCompleteStateRequestDto, memberId);
         return ResponseEntity.ok(ApiResponse.onSuccess("완료되었습니다."));
     }
 }
