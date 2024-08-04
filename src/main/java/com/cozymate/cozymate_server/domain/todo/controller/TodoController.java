@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.domain.todo.service.TodoQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,7 @@ public class TodoController {
     public ResponseEntity<ApiResponse<TodoListResponseDto>> getTodo(
         @PathVariable Long roomId,
         @RequestParam Long memberId,
+        @Parameter(example = "2024-08-01")
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate timePoint
     ) {
         if (timePoint == null) {
