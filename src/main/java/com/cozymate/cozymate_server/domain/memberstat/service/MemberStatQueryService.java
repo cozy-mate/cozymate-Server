@@ -5,23 +5,19 @@ import com.cozymate.cozymate_server.domain.member.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.cozymate.cozymate_server.global.utils.TimeUtil;
+import jakarta.persistence.NoResultException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 
 
 @Slf4j
@@ -34,7 +30,7 @@ public class MemberStatQueryService {
     private final MemberStatRepository memberStatRepository;
 
     private static final Integer ADDITIONAL_SCORE = 12;
-    private static final Integer ATTRIBUTE_COUNT = 19;
+    private static final Integer ATTRIBUTE_COUNT = 20;
     private static final Integer MAX_SCORE = ADDITIONAL_SCORE * ATTRIBUTE_COUNT;
 
     public MemberStat getMemberStat(Long memberId) {
@@ -49,9 +45,14 @@ public class MemberStatQueryService {
             );
     }
 
-    public Page<MemberStatEqualityResponseDTO> getMemberStatList(Long memberId,
+    public PageResponseDto<List<MemberStatEqualityResponseDTO>> getMemberStatList(Long memberId,
         List<String> filterList, Pageable pageable) {
-        //일치율의 기준이 되는 MemberStat을 가져옵니다.
+
+        //멤버의 유효성 검사
+        Member member = memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
+        );
+        //일치율의 기준이 되는 MemberStat을 가져오고, 유효성을 검사합니다.
         MemberStat criteriaMemberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
         );
@@ -60,29 +61,42 @@ public class MemberStatQueryService {
         List<MemberStat> filteredResult = memberStatRepository.getFilteredMemberStat(filterList,
             criteriaMemberStat);
 
-        // 일치율을 계산합니다.
-        List<HashMap<Member, Integer>> result = filteredResult
+        if (filteredResult.isEmpty()) {
+            return new PageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
+        }
+
+        // 일치율을 계산하고, 정렬합니다.
+        List<MemberStatEqualityResponseDTO> result = filteredResult
             .stream()
-            .map(val -> convertToScore(criteriaMemberStat, val))
+            .map(memberStat -> toEqualityResponse(criteriaMemberStat, memberStat))
+            .sorted(Comparator.comparingInt(MemberStatEqualityResponseDTO::getEquality).reversed())
             .toList();
-        //계산된 결과를 정렬하고, DTO로 바꿔줍니다.
-        List<MemberStatEqualityResponseDTO> sortedList = result.stream()
-            .flatMap(map -> map.entrySet().stream())
-            .sorted(Map.Entry.<Member, Integer>comparingByValue().reversed())
-            .map(entry -> new MemberStatEqualityResponseDTO(entry.getKey(), entry.getValue()))
-            .collect(Collectors.toList());
-        //List를 Page로 변환하기 위해 아래 코드를 사용합니다.
+
+        // MemberStat 전체 엔티티를 대상으로 하기 때문에, 우선 Page로 구현했습니다.
+        // List를 Page로 변환하기 위해 아래 코드를 사용합니다.
+        // 기존에 만들어진 PageResponseDTO를 활용해보려고 노력했습니다.
+
+        // 전체 페이지 수 계산
+        int totalPages = (int) Math.ceil((double) result.size() / pageable.getPageSize());
+
+        // 요청한 페이지가 범위를 벗어났을 경우 빈 페이지 반환
+        if (pageable.getPageNumber() >= totalPages || pageable.getPageNumber() < 0) {
+            return new PageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
+        }
+
+        // 요청한 페이지의 시작과 끝 인덱스 계산
         int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), sortedList.size());
-        //Page를 리턴합니다.
-        return new PageImpl<>(sortedList.subList(start, end), pageable, sortedList.size());
+        int end = Math.min((start + pageable.getPageSize()), result.size());
+
+        // 해당 페이지의 데이터만 추출하여 Page로 반환
+        return new PageResponseDto<>(pageable.getPageNumber(),
+            pageable.getPageNumber() + 1 < totalPages, result.subList(start, end));
     }
 
-    private HashMap<Member, Integer> convertToScore(MemberStat criteriaMemberStat,
+    private MemberStatEqualityResponseDTO toEqualityResponse(MemberStat criteriaMemberStat,
         MemberStat memberStat) {
 
         int score = 0;
-
         score +=
             criteriaMemberStat.getAcceptance().equals(memberStat.getAcceptance()) ? ADDITIONAL_SCORE
                 : 0;
@@ -109,6 +123,8 @@ public class MemberStatQueryService {
         score +=
             criteriaMemberStat.getStudying().equals(memberStat.getStudying()) ? ADDITIONAL_SCORE
                 : 0;
+        score +=
+            criteriaMemberStat.getIntake().equals(memberStat.getIntake()) ? ADDITIONAL_SCORE : 0;
         score += criteriaMemberStat.getCleaningFrequency().equals(memberStat.getCleaningFrequency())
             ? ADDITIONAL_SCORE : 0;
         score += criteriaMemberStat.getPersonality().equals(memberStat.getPersonality())
@@ -125,12 +141,16 @@ public class MemberStatQueryService {
             memberStat.getCleanSensitivity());
         score += calculateSensitivityScore(criteriaMemberStat.getNoiseSensitivity(),
             memberStat.getNoiseSensitivity());
-
-        Integer percent = (Integer) score / MAX_SCORE;
-        HashMap<Member, Integer> result = new HashMap<>();
-        result.put(memberStat.getMember(), score);
-
-        return result;
+        double percent = (double) score / MAX_SCORE * 100;
+        return MemberStatEqualityResponseDTO.builder()
+            .memberId(memberStat.getMember().getId())
+            .memberAge(TimeUtil.calculateAge(memberStat.getMember().getBirthDay()))
+            .memberName(memberStat.getMember().getName())
+            .memberNickName(memberStat.getMember().getNickname())
+            .memberPersona(memberStat.getMember().getPersona())
+            .numOfRoommate(memberStat.getNumOfRoommate())
+            .equality((int) percent)
+            .build();
     }
 
     private int calculateTimeScore(Integer time1, Integer time2) {
@@ -141,9 +161,9 @@ public class MemberStatQueryService {
             return ADDITIONAL_SCORE / 2;
         } else if (timeDifference <= 2) {
             return ADDITIONAL_SCORE / 4;
-        } else {
-            return 0;
         }
+        return 0;
+
     }
 
     private int calculateSensitivityScore(Integer sensitivity1, Integer sensitivity2) {
@@ -152,9 +172,9 @@ public class MemberStatQueryService {
             return ADDITIONAL_SCORE;
         } else if (sensitivityDifference == 1) {
             return ADDITIONAL_SCORE / 2;
-        } else {
-            return 0;
         }
+        return 0;
     }
+
 
 }

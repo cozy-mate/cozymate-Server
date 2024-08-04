@@ -6,7 +6,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface MemberStatQueryRepository{
+public interface MemberStatQueryRepository {
+
     List<MemberStat> getFilteredMemberStat(List<String> filterList, MemberStat criteriaMemberStat);
 
 }

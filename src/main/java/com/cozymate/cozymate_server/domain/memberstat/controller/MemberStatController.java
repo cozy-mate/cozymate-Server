@@ -6,20 +6,18 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -110,19 +108,53 @@ public class MemberStatController {
                 memberStatQueryResponseDTO
             ));
     }
+
+    /**
+     * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
+     */
     @Operation(
         summary = "[포비] 사용자 상세정보 필터링, 일치율 조회",
         description = "Path Variable로 memberId를 넣어 사용합니다.\n\n"
-            + "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다."
+            + "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
+            + "사용 가능한 필터명(20개):\n"
+            + "- acceptance : 합격여부\n"
+            + "- admissionYear :  학번\n"
+            + "- major : 전공\n"
+            + "- numOfRoommate : 신청실\n"
+            + "- wakeUpTime : 기상시간\n"
+            + "- sleepingTime : 취침시간\n"
+            + "- turnOffTime : 소등시간\n"
+            + "- smoking : 흡연여부\n"
+            + "- sleepingHabit : 잠버릇\n"
+            + "- airConditioningIntensity : 에어컨 강도\n"
+            + "- heatingIntensity : 히터 강도\n"
+            + "- lifePattern : 생활패턴\n"
+            + "- intimacy : 친밀도\n"
+            + "- canShare : 물건공유\n"
+            + "- isPlayGame : 게임여부\n"
+            + "- isPhoneCall : 전화여부\n"
+            + "- studying : 공부여부\n"
+            + "- intake : 섭취여부\n"
+            + "- cleanSensitivity : 청결예민도\n"
+            + "- noiseSensitivity : 소음예민도\n"
+            + "- cleaningFrequency : 청소예민도\n"
+            + "- personality : 성격\n"
+            + "- mbti : mbti"
     )
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._MEMBERSTAT_NOT_EXISTS,
+        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
+    })
     @GetMapping("/search/{memberId}")
-    public ResponseEntity<ApiResponse<Page<MemberStatEqualityResponseDTO>>> getFilteredMemberList(
+    public ResponseEntity<ApiResponse<PageResponseDto<List<MemberStatEqualityResponseDTO>>>> getFilteredMemberList(
         @PathVariable("memberId") Long memberId, @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList) {
         Pageable pageable = PageRequest.of(page, 5);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getMemberStatList(memberId, filterList, pageable)
+                memberStatQueryService.getMemberStatList(
+                    memberId, filterList, pageable)
             ));
     }
 

@@ -10,8 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class MemberStatResponseDTO {
+
     // Read를 Query DTO로 관리하기
-    @Data
+    @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
@@ -35,6 +36,7 @@ public class MemberStatResponseDTO {
         private Boolean isPlayGame;
         private Boolean isPhoneCall;
         private String studying;
+        private String intake;
         private Integer cleanSensitivity;
         private Integer noiseSensitivity;
         private String cleaningFrequency;
@@ -48,7 +50,13 @@ public class MemberStatResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class MemberStatEqualityResponseDTO {
-        private Member member;
+
+        private Long memberId;
+        private String memberName;
+        private String memberNickName;
+        private Integer memberAge;
+        private Integer memberPersona;
+        private Integer numOfRoommate;
         private Integer equality;
     }
 }

@@ -9,13 +9,14 @@ import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 
 public class MemberStatRequestDTO {
 
         // Create, Update를 Command DTO로 관리하기
-        @Data
+        @Getter
         @NoArgsConstructor
         @AllArgsConstructor
         public static class MemberStatCommandRequestDTO {
@@ -75,6 +76,8 @@ public class MemberStatRequestDTO {
                 private Boolean isPhoneCall;
                 @NotBlank
                 private String studying;
+                @NotBlank
+                private String intake;
                 @NotNull
                 @Min(1)
                 @Max(5)
@@ -93,7 +96,7 @@ public class MemberStatRequestDTO {
                 private Map<String, List<String>> options;
         }
 
-        @Data
+        @Getter
         @NoArgsConstructor
         @AllArgsConstructor
         public static class MemberStatSearchRequestDTO {
@@ -153,6 +156,8 @@ public class MemberStatRequestDTO {
                 private Boolean isPhoneCall;
                 @NotBlank
                 private String studying;
+                @NotBlank
+                private String intake;
                 @NotNull
                 @Min(1)
                 @Max(5)
