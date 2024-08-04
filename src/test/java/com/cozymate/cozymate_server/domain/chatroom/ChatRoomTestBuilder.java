@@ -15,4 +15,15 @@ public class ChatRoomTestBuilder {
             .memberB(recipient)
             .build();
     }
+
+    public static ChatRoom testChat2RoomBuild() {
+        Member sender = ChatTestBuilder.testSenderBuild();
+        Member otherMember = ChatTestBuilder.testOtherMemberBuild();
+
+        return ChatRoom.builder()
+            .id(2L)
+            .memberA(sender)
+            .memberB(otherMember)
+            .build();
+    }
 }
