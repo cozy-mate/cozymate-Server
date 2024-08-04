@@ -44,11 +44,13 @@ dependencies {
 
     // oauth2
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
+
 
     //DB의 JSON 타입을 Domain에서 사용하기 위함
     implementation 'io.hypersistence:hypersistence-utils-hibernate-62:3.7.0'
 
-    // security
+    //spring security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     //aws - S3

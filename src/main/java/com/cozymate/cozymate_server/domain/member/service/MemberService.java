@@ -1,7 +1,5 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
-
-
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.utils.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -13,6 +11,7 @@ import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,24 +28,23 @@ public class MemberService {
         return !memberRepository.existsByNickname(nickname);
     }
 
-    public MemberResponseDTO.LoginResponseDTO join(String clientId, MemberRequestDTO.JoinRequestDTO joinRequestDTO) {
+    public MemberDetails join(String clientId, MemberRequestDTO.JoinRequestDTO joinRequestDTO) {
         Member member = MemberConverter.toMember(clientId, joinRequestDTO);
-        MemberDetails memberDetails = new MemberDetails(member);
-
         memberRepository.save(member);
-
-        return MemberConverter.toLoginResponseDTO(member.getNickname(),
-                authService.getRefreshToken(memberDetails));
+        log.info(member.getNickname() + "저장 완료");
+        return new MemberDetails(member);
     }
 
-    public MemberResponseDTO.MemberInfoDTO getMemberInfo(MemberDetails memberDetails) {
-        return MemberConverter.toMemberInfoDTO(memberDetails.getMember());
+    public HttpHeaders getHeader(MemberDetails memberDetails){
+        String token = authService.generateToken(memberDetails.getMember().getClientId());
+        return authService.addTokenAtHeader(token);
     }
 
-    public LoginResponseDTO login(MemberDetails memberDetails) {
+    public MemberResponseDTO.LoginResponseDTO getBody(MemberDetails memberDetails){
         return MemberConverter.toLoginResponseDTO(memberDetails.getMember().getNickname(),
                 authService.getRefreshToken(memberDetails));
     }
-
-
+    public MemberResponseDTO.MemberInfoDTO getMemberInfo(MemberDetails memberDetails) {
+        return MemberConverter.toMemberInfoDTO(memberDetails.getMember());
+    }
 }
