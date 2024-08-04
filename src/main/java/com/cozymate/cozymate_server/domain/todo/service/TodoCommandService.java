@@ -24,7 +24,7 @@ public class TodoCommandService {
 
         todoRepository.save(
             TodoConverter.toEntity(mate.getRoom(), mate, createTodoRequestDto.getContent(),
-                createTodoRequestDto.getDeadline(), null)
+                createTodoRequestDto.getTimePoint(), null)
         );
     }
 
