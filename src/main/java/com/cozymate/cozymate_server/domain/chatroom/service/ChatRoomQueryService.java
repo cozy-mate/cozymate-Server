@@ -42,7 +42,7 @@ public class ChatRoomQueryService {
                 LocalDateTime lastDeleteAt = getLastDeleteAtByMember(chatRoom, member);
                 return lastDeleteAt == null || chat.getCreatedAt().isAfter(lastDeleteAt);
             })
-            .collect(Collectors.toList());
+            .toList();
 
         List<ChatRoomResponseDto> chatRoomResponseDtoList = chatRoomList.stream()
             .map(chatRoom -> {
