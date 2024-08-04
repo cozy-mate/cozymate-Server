@@ -20,4 +20,13 @@ public class TodoRequestDto {
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate timePoint;
     }
+
+    @AllArgsConstructor
+    @Getter
+    public static class UpdateTodoCompleteStateRequestDto {
+
+        private Long todoId;
+        @NotNull
+        private Boolean completed;
+    }
 }

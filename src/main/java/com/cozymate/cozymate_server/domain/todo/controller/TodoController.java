@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.todo.controller;
 
 
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListResponseDto;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.domain.todo.service.TodoQueryService;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,6 +51,7 @@ public class TodoController {
     @Operation(
         summary = "[무빗] 특정 방의 특정 날짜 기준 룸메별 To-Do 조회",
         description = "본인이 참가한 방에서만 조회가 가능합니다. | timePoint를 지정하지 않으면 오늘 날짜 기준으로 반환합니다.")
+    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
     public ResponseEntity<ApiResponse<TodoListResponseDto>> getTodo(
         @PathVariable Long roomId,
         @RequestParam Long memberId,
@@ -60,5 +63,16 @@ public class TodoController {
         }
         return ResponseEntity.ok(
             ApiResponse.onSuccess(todoQueryService.getTodo(roomId, memberId, timePoint)));
+    }
+
+    @PatchMapping("/state")
+    @Operation(summary = "[무빗] Todo 완료 여부를 변경", description = "boolean 값을 같이 넘겨받습니다.")
+    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
+    public ResponseEntity<ApiResponse<String>> updateTodoCompleteState(
+        @Valid @RequestBody UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto,
+        @RequestParam Long memberId) {
+        // TODO: 소셜로그인 후...
+        todoCommandService.updateTodoCompleteState(updateTodoCompleteStateRequestDto, memberId);
+        return ResponseEntity.ok(ApiResponse.onSuccess("완료되었습니다."));
     }
 }

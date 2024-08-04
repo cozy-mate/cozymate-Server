@@ -14,13 +14,14 @@ import java.util.Map;
 public class TodoConverter {
 
     public static Todo toEntity(Room room, Mate mate, String content, LocalDate timePoint,
-        Role role) {
+        Role role, boolean completed) {
         return Todo.builder()
             .room(room)
             .mate(mate)
             .content(content)
             .timePoint(timePoint)
             .role(role) // role은 null이 될 수 있음
+            .completed(completed)
             .build();
     }
 
