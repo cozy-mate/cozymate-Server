@@ -5,6 +5,8 @@ import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto;
 import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;
 import com.cozymate.cozymate_server.domain.chat.service.ChatQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -38,6 +40,10 @@ public class ChatController {
     // TODO: memberId는 추후 시큐리티 인증 객체에서 받아 오는 것으로 변경 예정
     @GetMapping("/chatrooms/{chatRoomId}")
     @Operation(summary = "[베로] 쪽지방의 쪽지 상세 내역 조회", description = "내 memberId, chatRoomId : 조회할 쪽지방 pk값")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND, ErrorStatus._CHATROOM_NOT_FOUND,
+        ErrorStatus._CHATROOM_MEMBER_MISMATCH
+    })
     public ResponseEntity<List<ChatResponseDto>> getChatList(@RequestParam Long memberId,
         @PathVariable Long chatRoomId) {
         return ResponseEntity.ok(chatQueryService.getChatList(memberId, chatRoomId));
