@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // /api/v3/oauth 는 권한 필요 없는 API 이므로 바로 통과
         // 토큰 없거나 경로 해당 안하는것들 테스트 해보려면
         // 다 return 하거나 dofilter 해주거나
-        if (request.getServletPath().contains("/api/v3/oauth")) {
+        if (request.getServletPath().contains("/api/v3/oauth2")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -45,9 +45,10 @@ public class JwtFilter extends OncePerRequestFilter {
         final String jwt;
         final String userName;
 
-        // 헤더에 토큰이 없거나 Bearer 로 시작하지 않으면 통과
+        // 헤더에 토큰이 없거나 Bearer 로 시작하지 않으면 401 응답
         if (authHeader == null || !authHeader.startsWith(JwtUtil.TOKEN_PREFIX)) {
-            filterChain.doFilter(request, response);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                    "JWT token is missing or does not start with Bearer");
             return;
         }
 
@@ -55,7 +56,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         userName = jwtUtil.extractUserName(jwt);
         UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
-
 
         // 임시 Token 검증
         if (jwtUtil.isTemporaryToken(jwt)) {
