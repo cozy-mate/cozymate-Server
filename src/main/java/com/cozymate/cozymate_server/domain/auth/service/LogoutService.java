@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.auth.service;
 
-import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.utils.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
