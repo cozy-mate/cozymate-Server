@@ -45,10 +45,9 @@ public class JwtFilter extends OncePerRequestFilter {
         final String jwt;
         final String userName;
 
-        // 헤더에 토큰이 없거나 Bearer 로 시작하지 않으면 401 응답
+        // 헤더에 토큰이 없거나 Bearer 로 시작하지 않으면 통과
         if (authHeader == null || !authHeader.startsWith(JwtUtil.TOKEN_PREFIX)) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "JWT token is missing or does not start with Bearer");
+            filterChain.doFilter(request, response);
             return;
         }
 
