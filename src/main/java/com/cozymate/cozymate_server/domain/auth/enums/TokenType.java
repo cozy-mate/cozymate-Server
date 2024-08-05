@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.auth;
+package com.cozymate.cozymate_server.domain.auth.enums;
 
 public enum TokenType {
     TEMPORARY,
