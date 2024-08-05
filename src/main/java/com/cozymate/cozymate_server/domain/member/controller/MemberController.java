@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.member.controller;
 
-import com.cozymate.cozymate_server.domain.auth.utils.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO.LoginResponseDTO;
@@ -84,6 +84,12 @@ public class MemberController {
     ) {
         MemberResponseDTO.MemberInfoDTO memberInfoDTO = memberCommandService.getMemberInfo(memberDetails);
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(memberInfoDTO));
+    }
+
+    @Operation(summary = "[말즈] 로그아웃",
+            description = "사용자를 로그아웃 시킵니다. 스웨거에서는 동작하지 않습니다!")
+    @GetMapping("/logout")
+    public void logout() {
     }
 
 
