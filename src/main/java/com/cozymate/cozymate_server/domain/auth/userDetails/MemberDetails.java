@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.auth.utils;
+package com.cozymate.cozymate_server.domain.auth.userDetails;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.util.Collection;
