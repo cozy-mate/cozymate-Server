@@ -19,4 +19,9 @@ public class ClientIdMaker {
         String socialTypePart = Arrays.asList(clientId.split(DELIMITER)).get(SOCIAL_TYPE_INDEX);
         return SocialType.valueOf(socialTypePart);
     }
+
+    public static String getClientIdAtSocialService(String clientId) {
+        return Arrays.asList(clientId.split(DELIMITER)).get(MEMBER_ID_INDEX);
+    }
+
 }
