@@ -1,8 +1,10 @@
 package com.cozymate.cozymate_server.domain.auth.service;
 
 import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO.UrlDTO;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 
 @Service
 public interface SocialLoginService {
@@ -11,8 +13,11 @@ public interface SocialLoginService {
 
     String CONTENT_TYPE_HEADER_VALUE = "application/x-www-form-urlencoded;charset=utf-8";
     UrlDTO getRedirectUrl();
+    String parseAccessToken(ResponseEntity<String> response);
 
-    String getAccessToken(String code);
+    HttpEntity<MultiValueMap<String, String>> makeTokenRequest(String code);
+    HttpEntity<MultiValueMap<String, String>> makeMemberInfoRequest(String accessToken);
 
-    String getClientId(String accessToken);
+    String getClientId(ResponseEntity<String> response);
+
 }

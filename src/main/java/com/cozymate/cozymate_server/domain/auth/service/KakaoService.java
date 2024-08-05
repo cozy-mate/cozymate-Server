@@ -34,11 +34,10 @@ public class KakaoService implements SocialLoginService {
     private static final String QUERY_PARAMETER_VALUE_CODE = "code";
     private static final String BODY_ATTRIBUTE_NAME_CODE = "code";
     private static final String BODY_ATTRIBUTE_VALUE_AUTH = "authorization_code";
-    private static final String HEADER_ATTRIBUTE_NAME_AUTH="Authorization";
-    private static final String HEADER_TOKEN_PREFIX ="Bearer ";
+    private static final String HEADER_ATTRIBUTE_NAME_AUTH = "Authorization";
+    private static final String HEADER_TOKEN_PREFIX = "Bearer ";
     private static final String JSON_ATTRIBUTE_NAME_TOKEN = "access_token";
     private static final String JSON_ATTRIBUTE_NAME_ID = "id";
-
 
 
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
@@ -66,6 +65,7 @@ public class KakaoService implements SocialLoginService {
         return AuthResponseDTO.UrlDTO.builder().redirectUrl(url).build();
     }
 
+    @Override
     public HttpEntity<MultiValueMap<String, String>> makeTokenRequest(String code) {
         // HTTP Header
         HttpHeaders headers = new HttpHeaders();
@@ -82,6 +82,7 @@ public class KakaoService implements SocialLoginService {
         return new HttpEntity<>(body, headers);
     }
 
+    @Override
     public String parseAccessToken(ResponseEntity<String> response) {
         String responseBody = parseResponseBody(response);
         // JSON 응답 파싱
@@ -95,6 +96,7 @@ public class KakaoService implements SocialLoginService {
         }
     }
 
+    @Override
     public HttpEntity<MultiValueMap<String, String>> makeMemberInfoRequest(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_ATTRIBUTE_NAME_AUTH, HEADER_TOKEN_PREFIX + accessToken);
@@ -103,6 +105,7 @@ public class KakaoService implements SocialLoginService {
         return new HttpEntity<>(headers);
     }
 
+    @Override
     public String getClientId(ResponseEntity<String> response) {
         String responseBody = parseResponseBody(response);
         String clientId;
@@ -122,7 +125,7 @@ public class KakaoService implements SocialLoginService {
         try {
             responseBody = response.getBody();
         } catch (Exception e) {
-            throw new GeneralException(ErrorStatus._KAKAO_ACCESS_RESPONSE_RECEIVING_FAIL);
+            throw new GeneralException(ErrorStatus._KAKAO_RESPONSE_PARSING_FAIL);
         }
         return responseBody;
     }
