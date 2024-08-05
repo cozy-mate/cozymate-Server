@@ -27,15 +27,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class KakaoService implements SocialLoginService {
     private static final String BODY_ATTRIBUTE_NAME_GRANT_TYPE = "grant_type";
+    private static final String BODY_ATTRIBUTE_NAME_CLIENT_SECRET = "client_secret";
+    private static final String BODY_ATTRIBUTE_NAME_CODE = "code";
+    private static final String BODY_ATTRIBUTE_VALUE_AUTH = "authorization_code";
+
     private static final String QUERY_PARAMETER_NAME_CLIENT_ID = "client_id";
     private static final String QUERY_PARAMETER_NAME_REDIRECT_URI = "redirect_uri";
     private static final String QUERY_PARAMETER_NAME_RESPONSE_TYPE = "response_type";
-    private static final String BODY_ATTRIBUTE_NAME_CLIENT_SECRET = "client_secret";
     private static final String QUERY_PARAMETER_VALUE_CODE = "code";
-    private static final String BODY_ATTRIBUTE_NAME_CODE = "code";
-    private static final String BODY_ATTRIBUTE_VALUE_AUTH = "authorization_code";
+
     private static final String HEADER_ATTRIBUTE_NAME_AUTH = "Authorization";
     private static final String HEADER_TOKEN_PREFIX = "Bearer ";
+
     private static final String JSON_ATTRIBUTE_NAME_TOKEN = "access_token";
     private static final String JSON_ATTRIBUTE_NAME_ID = "id";
 
