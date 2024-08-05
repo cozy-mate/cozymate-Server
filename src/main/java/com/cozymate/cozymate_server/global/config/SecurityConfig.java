@@ -1,10 +1,12 @@
 package com.cozymate.cozymate_server.global.config;
 
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
-import com.cozymate.cozymate_server.domain.auth.utils.jwt.JwtFilter;
-import com.cozymate.cozymate_server.domain.auth.utils.jwt.JwtUtil;
+import com.cozymate.cozymate_server.domain.auth.service.LogoutService;
+import com.cozymate.cozymate_server.domain.auth.utils.JwtFilter;
+import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collections;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,8 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
 
     private final AuthService authService;
+
+    private final LogoutService logoutService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -97,7 +101,15 @@ public class SecurityConfig {
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // todo : 로그아웃 필터 추가
+        // 로그아웃 필터
+        httpSecurity.logout((logout) -> logout
+                .logoutUrl("/api/v3/logout") // 로그아웃 URL 설정
+                .addLogoutHandler(logoutService) // LogoutHandler 등록
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().flush();
+                })
+        );
 
         return httpSecurity.build();
 
