@@ -1,6 +1,7 @@
-package com.cozymate.cozymate_server.domain.auth.utils.jwt;
+package com.cozymate.cozymate_server.domain.auth.utils;
 
-import com.cozymate.cozymate_server.domain.auth.TokenType;
+import com.cozymate.cozymate_server.domain.auth.enums.TokenType;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
@@ -25,7 +26,7 @@ public class JwtUtil {
     public final static String TOKEN_PREFIX = "Bearer ";
 
     public final static String TOKEN_TYPE_CLAIM_NAME = "tokenType";
-    public static final String HEADER_AUTHORIZATION = "Authorization";
+    public static final String HEADER_ATTRIBUTE_NAME_AUTHORIZATION = "Authorization";
 
     @Value("${jwt.custom.secretKey}")
     private String SECRET_KEY;
