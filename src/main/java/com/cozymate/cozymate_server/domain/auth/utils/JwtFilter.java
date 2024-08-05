@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.auth.utils.jwt;
+package com.cozymate.cozymate_server.domain.auth.utils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,6 +24,11 @@ import java.io.IOException;
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
+    private static final String SOCIAL_LOGIN_PATH_PREFIX = "/api/v3/oauth2";
+    private static final String REQUEST_ATTRIBUTE_NAME_CLIENT_ID = "client_id";
+    private static final String INVALID_TEMPORARY_TOKEN_MESSAGE = "Invalid temporary token";
+    private static final String INVALID_ACCESS_TOKEN_MESSAGE = "Invalid access token";
+
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
@@ -36,12 +41,12 @@ public class JwtFilter extends OncePerRequestFilter {
         // /api/v3/oauth 는 권한 필요 없는 API 이므로 바로 통과
         // 토큰 없거나 경로 해당 안하는것들 테스트 해보려면
         // 다 return 하거나 dofilter 해주거나
-        if (request.getServletPath().contains("/api/v3/oauth2")) {
+        if (request.getServletPath().contains(SOCIAL_LOGIN_PATH_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String authHeader = request.getHeader(JwtUtil.HEADER_AUTHORIZATION);
+        final String authHeader = request.getHeader(JwtUtil.HEADER_ATTRIBUTE_NAME_AUTHORIZATION);
         final String jwt;
         final String userName;
 
@@ -59,10 +64,10 @@ public class JwtFilter extends OncePerRequestFilter {
         // 임시 Token 검증
         if (jwtUtil.isTemporaryToken(jwt)) {
             if (!jwtUtil.isTokenValid(jwt, userDetails.getUsername())) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid temporary token");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, INVALID_TEMPORARY_TOKEN_MESSAGE);
                 return;
             }
-            request.setAttribute("client_id", userDetails.getUsername());
+            request.setAttribute(REQUEST_ATTRIBUTE_NAME_CLIENT_ID, userDetails.getUsername());
             filterChain.doFilter(request, response);
         }
 
@@ -80,7 +85,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
             } else {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid access token");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, INVALID_ACCESS_TOKEN_MESSAGE);
                 return;
             }
         }
