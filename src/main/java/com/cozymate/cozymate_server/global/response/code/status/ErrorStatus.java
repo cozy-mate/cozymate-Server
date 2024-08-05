@@ -16,8 +16,24 @@ public enum ErrorStatus implements BaseErrorCode {
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
     // [도메인] 관련해서 아래에 계속 추가해주시면 됩니다.
-    // Member 관련 에러
+    // 소셜
+    // 카카오
+
+    _KAKAO_ACCESS_RESPONSE_RECEIVING_FAIL(
+            HttpStatus.INTERNAL_SERVER_ERROR, "AUTH500", "카카오에서 response를 받지 못했습니다."),
+
+    _KAKAO_RESPONSE_PARSING_FAIL(
+            HttpStatus.INTERNAL_SERVER_ERROR, "AUTH501", "카카오 response 파싱 실패"),
+    _KAKAO_ACCESS_TOKEN_PARSING_FAIL(
+            HttpStatus.INTERNAL_SERVER_ERROR, "AUTH501", "카카오 accessToken 파싱 실패"),
+
+
+
+    // [Member] 관련 에러
     _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "멤버를 찾을 수 없습니다."),
+
+    // Token
+    _TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN400", "사용자의 리프레시 토큰을 찾을 수 없습니다."),
 
     // S3 관련
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
