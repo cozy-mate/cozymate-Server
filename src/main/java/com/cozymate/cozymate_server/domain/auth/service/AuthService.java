@@ -34,6 +34,7 @@ public class AuthService implements UserDetailsService {
     private final TokenRepository tokenRepository;
 
 
+
     // 기존에 있는 회원이면 AccessToken, 임시회원이면 TempToken 발급
     @Transactional
     public String generateToken(String clientId) {
@@ -58,6 +59,7 @@ public class AuthService implements UserDetailsService {
         return headers;
     }
 
+    @Transactional
     public AuthResponseDTO.SocialLoginDTO socialLogin(String clientId) {
         Optional<Member> member = memberRepository.findByClientId(clientId);
         if (member.isPresent()) {
@@ -71,27 +73,27 @@ public class AuthService implements UserDetailsService {
                 .build();
     }
 
+    @Transactional
     public String getRefreshToken(UserDetails userDetails) {
         Token token = tokenRepository.findById(userDetails.getUsername()).orElseThrow();
         return token.getRefreshToken();
     }
 
     @Transactional
-
-    public void deleteRefreshToken(String userName) {
-        Token token = tokenRepository.findById(userName).orElseThrow();
+    public void deleteRefreshToken(String clientId) {
+        Token token = tokenRepository.findById(clientId).orElseThrow();
         // todo : 예외처리
         tokenRepository.delete(token);
     }
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String userName) {
-        Optional<Member> member = memberRepository.findByClientId(userName);
+    public UserDetails loadUserByUsername(String clientId) {
+        Optional<Member> member = memberRepository.findByClientId(clientId);
         if (member.isPresent()) {
             return new MemberDetails(member.get());
         } else {
-            return new TemporaryMember(userName);
+            return new TemporaryMember(clientId);
         }
     }
 }
