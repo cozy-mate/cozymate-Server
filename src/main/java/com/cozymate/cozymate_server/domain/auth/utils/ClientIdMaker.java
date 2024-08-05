@@ -2,7 +2,6 @@ package com.cozymate.cozymate_server.domain.auth.utils;
 
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import java.util.Arrays;
-import java.util.List;
 
 public class ClientIdMaker {
 
