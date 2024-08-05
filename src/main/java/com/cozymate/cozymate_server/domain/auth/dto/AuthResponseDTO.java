@@ -7,10 +7,6 @@ import lombok.NoArgsConstructor;
 
 public class AuthResponseDTO {
 
-    public static final String TEMPORARY_TOKEN_SUCCESS_MESSAGE = "임시 토큰 발급 완료";
-
-    public static final String RE_LOGIN_EXISTING_MEMBER_MESSAGE = "기존 사용자 재로그인";
-
     @Builder
     @Getter
     @NoArgsConstructor
