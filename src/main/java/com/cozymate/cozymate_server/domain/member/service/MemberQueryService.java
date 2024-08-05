@@ -22,10 +22,6 @@ public class MemberQueryService {
         return !memberRepository.existsByNickname(nickname);
     }
 
-    @Transactional
-    public Member save(Member member) {
-        return memberRepository.save(member);
-    }
 
     @Transactional
     public Member findByClientId(String clientId) {
