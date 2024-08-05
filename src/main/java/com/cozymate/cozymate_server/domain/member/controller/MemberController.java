@@ -4,7 +4,7 @@ import com.cozymate.cozymate_server.domain.auth.utils.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO.LoginResponseDTO;
-import com.cozymate.cozymate_server.domain.member.service.MemberService;
+import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 
@@ -29,14 +29,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequestMapping("/api/v3")
 public class MemberController {
-    private final MemberService memberService;
+    private final MemberCommandService memberCommandService;
 
     //todo : nosql로 금지어 추가
     @GetMapping("/check-nickname")
     @Operation(summary = "[말즈] 닉네임 유효성 검증",
             description = "false : 사용 불가, true : 사용 가능")
     ResponseEntity<ApiResponse<Boolean>> checkNickname(@RequestParam String nickname) {
-        Boolean isValid = memberService.checkNickname(nickname);
+        Boolean isValid = memberCommandService.checkNickname(nickname);
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(isValid));
     }
 
@@ -54,9 +54,9 @@ public class MemberController {
     ) {
         // todo : 파라미터 바인딩 검증 로직 추가
 
-        MemberDetails memberDetails = memberService.join(clientId, joinRequestDTO);
-        HttpHeaders headers = memberService.getHeader(memberDetails);
-        LoginResponseDTO loginResponseDTO = memberService.getBody(memberDetails);
+        MemberDetails memberDetails = memberCommandService.join(clientId, joinRequestDTO);
+        HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
+        LoginResponseDTO loginResponseDTO = memberCommandService.makeBody(memberDetails);
 
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .headers(headers)
@@ -69,8 +69,8 @@ public class MemberController {
     ResponseEntity<ApiResponse<MemberResponseDTO.LoginResponseDTO>> login(
             @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        HttpHeaders headers = memberService.getHeader(memberDetails);
-        LoginResponseDTO loginResponseDTO = memberService.getBody(memberDetails);
+        HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
+        LoginResponseDTO loginResponseDTO = memberCommandService.makeBody(memberDetails);
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .headers(headers)
                 .body(ApiResponse.onSuccess(loginResponseDTO));
@@ -82,11 +82,9 @@ public class MemberController {
     ResponseEntity<ApiResponse<MemberResponseDTO.MemberInfoDTO>> getMemberInfo(
             @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        MemberResponseDTO.MemberInfoDTO memberInfoDTO = memberService.getMemberInfo(memberDetails);
+        MemberResponseDTO.MemberInfoDTO memberInfoDTO = memberCommandService.getMemberInfo(memberDetails);
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(memberInfoDTO));
     }
-
-
 
 
 }
