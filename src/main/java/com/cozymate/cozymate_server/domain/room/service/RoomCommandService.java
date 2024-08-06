@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class RoomCommandService {
 
@@ -47,7 +48,6 @@ public class RoomCommandService {
     private final RoleRepository roleRepository;
     private final FeedRepository feedRepository;
 
-    @Transactional
     public void createRoom(RoomCreateRequest request) {
         if (roomRepository.existsByMemberIdAndStatuses(request.getCreatorId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
@@ -67,7 +67,6 @@ public class RoomCommandService {
 
     }
 
-    @Transactional
     public void deleteRoom(Long roomId, Long memberId) {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));

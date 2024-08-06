@@ -1,18 +1,13 @@
 package com.cozymate.cozymate_server.domain.room;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,5 +42,20 @@ public class Room extends BaseTimeEntity {
     private String bestMateName;
 
     private int numOfArrival = 1;
+
+//    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Mate> mates;
+//
+//    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Rule> rules;
+//
+//    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<RoomLog> roomLogs;
+//
+//    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Todo> todos;
+//
+//    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Feed> feeds;
 
 }

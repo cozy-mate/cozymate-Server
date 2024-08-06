@@ -35,4 +35,8 @@ public class Feed extends BaseTimeEntity {
     @Column(length = 200)
     private String content;
 
+//    @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Post> posts;
+
+
 }
