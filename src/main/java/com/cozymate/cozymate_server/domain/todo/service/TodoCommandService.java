@@ -29,7 +29,7 @@ public class TodoCommandService {
         // 최대 투두 생성 개수 초과 여부 판단
         int todoCount = todoRepository.countAllByRoomIdAndMateIdAndTimePoint(roomId, memberId,
             createTodoRequestDto.getTimePoint());
-        if (todoCount > MAX_TODO_PER_DAY) {
+        if (todoCount >= MAX_TODO_PER_DAY) {
             throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
         }
 

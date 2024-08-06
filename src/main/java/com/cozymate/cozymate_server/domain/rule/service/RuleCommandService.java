@@ -26,7 +26,7 @@ public class RuleCommandService {
 
         // rule 최대개수 초과 여부 판단
         int ruleCount = ruleRepository.countAllByRoomId(roomId);
-        if (ruleCount > MAX_RULE_COUNT) {
+        if (ruleCount >= MAX_RULE_COUNT) {
             throw new GeneralException(ErrorStatus._RULE_OVER_MAX);
         }
 
