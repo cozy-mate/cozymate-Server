@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class RoomCommandService {
@@ -28,7 +29,6 @@ public class RoomCommandService {
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
 
-    @Transactional
     public void createRoom(RoomCreateRequest request) {
         if (roomRepository.existsByMemberIdAndStatuses(request.getCreatorId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
@@ -48,7 +48,6 @@ public class RoomCommandService {
 
     }
 
-    @Transactional
     public void joinRoom(Long roomId, Long memberId) {
         // TODO: 추후 memberId 부분 수정 예정
         Room room = roomRepository.findById(roomId)
