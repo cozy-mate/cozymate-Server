@@ -47,10 +47,12 @@ public enum ErrorStatus implements BaseErrorCode {
     // Rule 관련
     _RULE_NOT_FOUND(HttpStatus.BAD_REQUEST, "RULE400", "해당하는 Rule이 없습니다."),
     _RULE_MATE_MISMATCH(HttpStatus.BAD_REQUEST, "RULE401", "Mate에게 해당 Rule을 삭제할 권한이 없습니다."),
+    _RULE_OVER_MAX(HttpStatus.BAD_REQUEST, "RULE402", "생성할 수 있는 Rule 개수를 초과했습니다."),
 
-    // Todo 관련
+    // 투두 관련
     _TODO_NOT_FOUND(HttpStatus.BAD_REQUEST, "TODO400", "해당하는 Todo 정보가 없습니다."),
     _TODO_NOT_VALID(HttpStatus.BAD_REQUEST, "TODO401", "수정할 수 있는 권한이 없습니다."),
+    _TODO_OVER_MAX(HttpStatus.BAD_REQUEST, "TODO402", "생성할 수 있는 하루 최대 Todo 개수를 초과했습니다."),
 
     // Friend 관련 에러
     _FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "FRIEND400", "친구요청을 찾을 수 없습니다."),

@@ -18,9 +18,17 @@ public class RuleCommandService {
     private final RuleRepository ruleRepository;
     private final MateRepository mateRepository;
 
+    private static final int MAX_RULE_COUNT = 10;
+
     public void createRule(Long roomId, Long memberId, CreateRuleRequestDto requestDto) {
         Mate mate = mateRepository.findByMemberIdAndRoomId(memberId, roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
+
+        // rule 최대개수 초과 여부 판단
+        int ruleCount = ruleRepository.countAllByRoomId(roomId);
+        if (ruleCount > MAX_RULE_COUNT) {
+            throw new GeneralException(ErrorStatus._RULE_OVER_MAX);
+        }
 
         ruleRepository.save(
             RuleConverter.toEntity(requestDto.getContent(), requestDto.getMemo(), mate.getRoom()));

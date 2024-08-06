@@ -15,6 +15,7 @@ public class RuleResponseDto {
     @NoArgsConstructor
     public static class RuleDetailResponseDto {
 
+        private Long id;
         private String content;
         @Nullable
         private String memo;

@@ -20,6 +20,7 @@ public class RuleConverter {
 
     public static RuleDetailResponseDto toRuleDetailResponseDto(Rule rule) {
         return RuleDetailResponseDto.builder()
+            .id(rule.getId())
             .content(rule.getContent())
             .memo(rule.getMemo())
             .build();

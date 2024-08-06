@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TodoCommandService {
 
+    private static final int MAX_TODO_PER_DAY = 20;
+
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
 
@@ -24,9 +26,16 @@ public class TodoCommandService {
         Mate mate = mateRepository.findByMemberIdAndRoomId(memberId, roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
+        // 최대 투두 생성 개수 초과 여부 판단
+        int todoCount = todoRepository.countAllByRoomIdAndMateIdAndTimePoint(roomId, memberId,
+            createTodoRequestDto.getTimePoint());
+        if (todoCount > MAX_TODO_PER_DAY) {
+            throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
+        }
+
         todoRepository.save(
             TodoConverter.toEntity(mate.getRoom(), mate, createTodoRequestDto.getContent(),
-                createTodoRequestDto.getTimePoint(), null, false)
+                createTodoRequestDto.getTimePoint(), null)
         );
     }
 
