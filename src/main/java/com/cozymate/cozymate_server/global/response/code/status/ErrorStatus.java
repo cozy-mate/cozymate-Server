@@ -26,7 +26,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Room
     _ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM400", "존재하지 않는 방입니다."),
-    _ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOM409", "이미 활성화 또는 대기 중인 방이 존재합니다."),
+    _ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOM401", "이미 활성화 또는 대기 중인 방이 존재합니다."),
+    _ROOM_MANAGER_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM402", "방장이 존재하지 않습니다."),
+    _NOT_ROOM_MANAGER(HttpStatus.BAD_REQUEST, "ROOM403", "방장이 아닙니다."),
+    _NOT_ROOM_MATE(HttpStatus.BAD_REQUEST, "ROOM404", "해당 방의 룸메이트가 아닙니다."),
+
 
     // University 관련 에러
     _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "UNIVERSITY400", "대학을 찾을 수 없습니다."),
@@ -38,11 +42,15 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // ChatRoom 관련 애러
     _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
-    _CHATROOM_FORBIDDEN(HttpStatus.BAD_REQUEST, "CHATROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
+    _CHATROOM_FORBIDDEN(HttpStatus.BAD_REQUEST,"CHATROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
+    _CHATROOM_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "CHATROOM402", "해당 쪽지방의 멤버가 아닙니다."),
 
     // Mate 관련
     _MATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE400", "해당하는 메이트 정보가 없습니다."),
     _MATE_OR_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE401", "해당하는 메이트나 방 정보가 없습니다."),
+
+    // Chat 관련 에러
+    _CHAT_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHAT400", "쪽지를 찾을 수 없습니다."),
 
     // Rule 관련
     _RULE_NOT_FOUND(HttpStatus.BAD_REQUEST, "RULE400", "해당하는 Rule이 없습니다."),
