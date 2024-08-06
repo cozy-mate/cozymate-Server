@@ -50,7 +50,6 @@ public class MemberStatCommandService {
     }
 
     public Long modifyMemberStat(
-
         Long memberId, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
 
         Member member = memberRepository.findById(memberId)

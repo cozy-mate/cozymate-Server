@@ -53,6 +53,12 @@ dependencies {
     // TODO: 07.25. [무빗] 위 패키지는 18년이 마지막 업데이트된 레거시, 추후 아래 패키지로 변경 예정
     // implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3Z:3.1.1'
 
+    //queryDsl
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
 }
 
 tasks.named('test') {

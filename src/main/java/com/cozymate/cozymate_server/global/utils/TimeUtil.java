@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.global.utils;
 
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.time.LocalDate;
 
 public class TimeUtil {
 
@@ -26,5 +27,11 @@ public class TimeUtil {
             default:
                 throw new GeneralException(ErrorStatus._MEMBERSTAT_MERIDIAN_NOT_VALID);
         }
+    }
+
+    public static Integer calculateAge(LocalDate birthDate) {
+        int currentYear = LocalDate.now().getYear();
+        int birthYear = birthDate.getYear();
+        return currentYear - birthYear + 1;
     }
 }
