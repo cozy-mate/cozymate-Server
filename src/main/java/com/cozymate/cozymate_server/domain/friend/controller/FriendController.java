@@ -100,8 +100,8 @@ public class FriendController {
      * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
      */
     @Operation(
-        summary = "[포비] 친구 신청 수락",
-        description = "Path Variable로 친구 신청을 받은 멤버의 ID, Body로 친구 신청을 보냈던 멤버의 ID를 보내주세요."
+        summary = "[포비] 친구 좋아요 토글",
+        description = "Path Variable로 좋아요를 보내고자 하는 멤버의 ID, Body로 좋아하고자 하는 멤버의 ID를 보내주세요."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
