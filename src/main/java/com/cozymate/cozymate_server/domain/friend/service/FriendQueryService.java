@@ -40,16 +40,15 @@ public class FriendQueryService {
         return friendList.stream().map(
             friend -> friend.getSender().getId().equals(memberId) ?
                 FriendConverter.toFriendSummaryResponseDTO(
-                    friend.getReceiver().getId(),
-                    friend.getReceiver().getNickname()
+                    friend.getReceiver(),
+                    friend.getLikesReceiver()
                 )
                 :
-                FriendConverter.toFriendSummaryResponseDTO(
-                    friend.getSender().getId(),
-                    friend.getSender().getNickname()
-                )
+                    FriendConverter.toFriendSummaryResponseDTO(
+                        friend.getSender(),
+                        friend.getLikesSender()
+                    )
         ).toList();
-
     }
 
 }

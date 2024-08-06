@@ -40,11 +40,23 @@ public class Friend extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private FriendStatus status = FriendStatus.WAITING;
 
+    private Boolean likesReceiver = Boolean.FALSE;
+
+    private Boolean likesSender = Boolean.FALSE;
+
     public void accept() {
         if (this.getStatus().equals(FriendStatus.ACCEPT)) {
             throw new GeneralException(ErrorStatus._FRIEND_REQUEST_ACCEPTED);
         }
         this.status = FriendStatus.ACCEPT;
+    }
+
+    public void toggleLikesReceiver() {
+        this.likesReceiver = !this.likesReceiver;
+    }
+
+    public void toggleLikesSender() {
+        this.likesSender = !this.likesSender;
     }
 
 }

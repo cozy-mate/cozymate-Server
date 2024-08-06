@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.friend.controller;
 
 import com.cozymate.cozymate_server.domain.friend.dto.FriendRequestDTO;
+import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.FriendLikeResponseDTO;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.FriendSummaryResponseDTO;
 import com.cozymate.cozymate_server.domain.friend.service.FriendCommandService;
 import com.cozymate.cozymate_server.domain.friend.service.FriendQueryService;
@@ -99,9 +100,31 @@ public class FriendController {
      * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
      */
     @Operation(
+        summary = "[포비] 친구 신청 수락",
+        description = "Path Variable로 친구 신청을 받은 멤버의 ID, Body로 친구 신청을 보냈던 멤버의 ID를 보내주세요."
+    )
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._FRIEND_REQUEST_NOT_FOUND,
+        ErrorStatus._FRIEND_REQUEST_RECEIVED,
+        ErrorStatus._FRIEND_REQUEST_WAITING
+    })
+    @PutMapping("/toggle-like/{memberId}")
+    public ResponseEntity<ApiResponse<FriendLikeResponseDTO>> likeFriendRequest(
+        @PathVariable Long memberId,
+        @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                friendCommandService.toggleLikeFriend(memberId, sendFriendRequestDTO)));
+    }
+
+    /**
+     * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
+     */
+    @Operation(
         summary = "[포비] 친구 목록 가져오기",
         description = "Path Variable로 친구 목록을 보고 싶은 멤버의 ID를 보내주세요."
-        + "친구가 없을 경우 빈 배열을 리턴합니다."
+            + "친구가 없을 경우 빈 배열을 리턴합니다."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND

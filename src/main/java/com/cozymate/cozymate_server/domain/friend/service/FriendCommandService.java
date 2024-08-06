@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.friend.Friend;
 import com.cozymate.cozymate_server.domain.friend.FriendRepository;
 import com.cozymate.cozymate_server.domain.friend.converter.FriendConverter;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendRequestDTO;
+import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.FriendLikeResponseDTO;
 import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.MemberRepository;
@@ -86,6 +87,43 @@ public class FriendCommandService {
         friendRepository.delete(friendRequest);
 
         return friendRequest.getId();
+    }
+
+    public FriendLikeResponseDTO toggleLikeFriend(Long memberId,
+        FriendRequestDTO friendRequestDTO) {
+
+        //요청을 보낸 사람의 유효성 검사
+        Member sender = memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        //요청을 받은 사람의 유효성을 검사
+        Member receiver = memberRepository.findById(friendRequestDTO.getRequesterId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        // 친구 요청이 있었는지 양방향 검사
+        Friend friendRequest = friendRepository.findBySenderIdAndReceiverIdOrReceiverIdAndSenderId(
+                sender.getId(),
+                receiver.getId(), sender.getId(), receiver.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._FRIEND_REQUEST_NOT_FOUND));
+
+        // 대기중인 친구 요청일 경우 예외처리
+        if (friendRequest.getStatus().equals(FriendStatus.WAITING)) {
+            throw new GeneralException(ErrorStatus._FRIEND_REQUEST_WAITING);
+        }
+        // Friend Request안의 Sender라면
+        if (friendRequest.getSender().getId().equals(memberId)) {
+            friendRequest.toggleLikesReceiver();
+            return FriendConverter.toFriendLikeResponseDTO(
+                friendRequest.getReceiver(),
+                friendRequest.getLikesReceiver()
+            );
+        }
+        // Friend Request안의 Reciever라면
+        friendRequest.toggleLikesSender();
+        return FriendConverter.toFriendLikeResponseDTO(
+            friendRequest.getSender(),
+            friendRequest.getLikesSender()
+        );
     }
 
 }

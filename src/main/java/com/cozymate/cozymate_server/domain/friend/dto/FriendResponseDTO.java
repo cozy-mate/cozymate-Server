@@ -13,8 +13,23 @@ public class FriendResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class FriendSummaryResponseDTO {
+
         private Long memberId;
         private String nickname;
+        private Boolean like;
+    }
+
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class FriendLikeResponseDTO {
+
+        private Long memberId;
+        private String nickname;
+        private Boolean like;
+
     }
 
 }
