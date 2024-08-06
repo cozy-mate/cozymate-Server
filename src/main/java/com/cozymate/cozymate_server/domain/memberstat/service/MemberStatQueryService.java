@@ -5,11 +5,10 @@ import com.cozymate.cozymate_server.domain.member.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.domain.memberstat.util.MemberUtil;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import com.cozymate.cozymate_server.global.utils.TimeUtil;
-import jakarta.persistence.NoResultException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,9 +28,7 @@ public class MemberStatQueryService {
     private final MemberRepository memberRepository;
     private final MemberStatRepository memberStatRepository;
 
-    private static final Integer ADDITIONAL_SCORE = 12;
-    private static final Integer ATTRIBUTE_COUNT = 20;
-    private static final Integer MAX_SCORE = ADDITIONAL_SCORE * ATTRIBUTE_COUNT;
+
 
     public MemberStat getMemberStat(Long memberId) {
 
@@ -68,7 +65,7 @@ public class MemberStatQueryService {
         // 일치율을 계산하고, 정렬합니다.
         List<MemberStatEqualityResponseDTO> result = filteredResult
             .stream()
-            .map(memberStat -> toEqualityResponse(criteriaMemberStat, memberStat))
+            .map(memberStat -> MemberUtil.toEqualityResponse(criteriaMemberStat, memberStat))
             .sorted(Comparator.comparingInt(MemberStatEqualityResponseDTO::getEquality).reversed())
             .toList();
 
@@ -92,89 +89,5 @@ public class MemberStatQueryService {
         return new PageResponseDto<>(pageable.getPageNumber(),
             pageable.getPageNumber() + 1 < totalPages, result.subList(start, end));
     }
-
-    private MemberStatEqualityResponseDTO toEqualityResponse(MemberStat criteriaMemberStat,
-        MemberStat memberStat) {
-
-        int score = 0;
-        score +=
-            criteriaMemberStat.getAcceptance().equals(memberStat.getAcceptance()) ? ADDITIONAL_SCORE
-                : 0;
-        score += criteriaMemberStat.getAdmissionYear().equals(memberStat.getAdmissionYear())
-            ? ADDITIONAL_SCORE : 0;
-        score += criteriaMemberStat.getMajor().equals(memberStat.getMajor()) ? ADDITIONAL_SCORE : 0;
-        score +=
-            criteriaMemberStat.getSmoking().equals(memberStat.getSmoking()) ? ADDITIONAL_SCORE : 0;
-        score += criteriaMemberStat.getSleepingHabit().equals(memberStat.getSleepingHabit())
-            ? ADDITIONAL_SCORE : 0;
-        score += criteriaMemberStat.getLifePattern().equals(memberStat.getLifePattern())
-            ? ADDITIONAL_SCORE : 0;
-        score +=
-            criteriaMemberStat.getIntimacy().equals(memberStat.getIntimacy()) ? ADDITIONAL_SCORE
-                : 0;
-        score +=
-            criteriaMemberStat.getCanShare().equals(memberStat.getCanShare()) ? ADDITIONAL_SCORE
-                : 0;
-        score +=
-            criteriaMemberStat.getIsPlayGame().equals(memberStat.getIsPlayGame()) ? ADDITIONAL_SCORE
-                : 0;
-        score += criteriaMemberStat.getIsPhoneCall().equals(memberStat.getIsPhoneCall())
-            ? ADDITIONAL_SCORE : 0;
-        score +=
-            criteriaMemberStat.getStudying().equals(memberStat.getStudying()) ? ADDITIONAL_SCORE
-                : 0;
-        score +=
-            criteriaMemberStat.getIntake().equals(memberStat.getIntake()) ? ADDITIONAL_SCORE : 0;
-        score += criteriaMemberStat.getCleaningFrequency().equals(memberStat.getCleaningFrequency())
-            ? ADDITIONAL_SCORE : 0;
-        score += criteriaMemberStat.getPersonality().equals(memberStat.getPersonality())
-            ? ADDITIONAL_SCORE : 0;
-        score += criteriaMemberStat.getMbti().equals(memberStat.getMbti()) ? ADDITIONAL_SCORE : 0;
-
-        score += calculateTimeScore(criteriaMemberStat.getWakeUpTime(), memberStat.getWakeUpTime());
-        score += calculateTimeScore(criteriaMemberStat.getSleepingTime(),
-            memberStat.getSleepingTime());
-        score += calculateTimeScore(criteriaMemberStat.getTurnOffTime(),
-            memberStat.getTurnOffTime());
-
-        score += calculateSensitivityScore(criteriaMemberStat.getCleanSensitivity(),
-            memberStat.getCleanSensitivity());
-        score += calculateSensitivityScore(criteriaMemberStat.getNoiseSensitivity(),
-            memberStat.getNoiseSensitivity());
-        double percent = (double) score / MAX_SCORE * 100;
-        return MemberStatEqualityResponseDTO.builder()
-            .memberId(memberStat.getMember().getId())
-            .memberAge(TimeUtil.calculateAge(memberStat.getMember().getBirthDay()))
-            .memberName(memberStat.getMember().getName())
-            .memberNickName(memberStat.getMember().getNickname())
-            .memberPersona(memberStat.getMember().getPersona())
-            .numOfRoommate(memberStat.getNumOfRoommate())
-            .equality((int) percent)
-            .build();
-    }
-
-    private int calculateTimeScore(Integer time1, Integer time2) {
-        int timeDifference = Math.abs(time1 - time2);
-        if (timeDifference == 0) {
-            return ADDITIONAL_SCORE;
-        } else if (timeDifference <= 1) {
-            return ADDITIONAL_SCORE / 2;
-        } else if (timeDifference <= 2) {
-            return ADDITIONAL_SCORE / 4;
-        }
-        return 0;
-
-    }
-
-    private int calculateSensitivityScore(Integer sensitivity1, Integer sensitivity2) {
-        int sensitivityDifference = Math.abs(sensitivity1 - sensitivity2);
-        if (sensitivityDifference == 0) {
-            return ADDITIONAL_SCORE;
-        } else if (sensitivityDifference == 1) {
-            return ADDITIONAL_SCORE / 2;
-        }
-        return 0;
-    }
-
 
 }
