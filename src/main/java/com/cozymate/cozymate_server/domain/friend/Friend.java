@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,11 +39,12 @@ public class Friend extends BaseTimeEntity {
     private Member receiver;
 
     @Enumerated(EnumType.STRING)
-    private FriendStatus status = FriendStatus.WAITING;
+    @NotNull
+    private FriendStatus status;
 
-    private Boolean likesReceiver = Boolean.FALSE;
+    private boolean likesReceiver = false;
 
-    private Boolean likesSender = Boolean.FALSE;
+    private boolean likesSender = false;
 
     public void accept() {
         if (this.getStatus().equals(FriendStatus.ACCEPT)) {

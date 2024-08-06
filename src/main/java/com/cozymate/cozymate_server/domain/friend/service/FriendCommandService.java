@@ -115,14 +115,14 @@ public class FriendCommandService {
             friendRequest.toggleLikesReceiver();
             return FriendConverter.toFriendLikeResponseDTO(
                 friendRequest.getReceiver(),
-                friendRequest.getLikesReceiver()
+                friendRequest.isLikesReceiver()
             );
         }
         // Friend Request안의 Reciever라면
         friendRequest.toggleLikesSender();
         return FriendConverter.toFriendLikeResponseDTO(
             friendRequest.getSender(),
-            friendRequest.getLikesSender()
+            friendRequest.isLikesSender()
         );
     }
 

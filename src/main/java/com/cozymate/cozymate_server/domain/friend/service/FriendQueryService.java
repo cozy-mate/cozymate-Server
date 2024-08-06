@@ -41,12 +41,12 @@ public class FriendQueryService {
             friend -> friend.getSender().getId().equals(memberId) ?
                 FriendConverter.toFriendSummaryResponseDTO(
                     friend.getReceiver(),
-                    friend.getLikesReceiver()
+                    friend.isLikesSender()
                 )
                 :
                     FriendConverter.toFriendSummaryResponseDTO(
                         friend.getSender(),
-                        friend.getLikesSender()
+                        friend.isLikesSender()
                     )
         ).toList();
     }

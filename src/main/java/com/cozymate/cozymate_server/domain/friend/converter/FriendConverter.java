@@ -14,8 +14,6 @@ public class FriendConverter {
             .sender(sender)
             .receiver(receiver)
             .status(FriendStatus.WAITING)
-            .likesSender(Boolean.FALSE)
-            .likesReceiver(Boolean.FALSE)
             .build();
     }
 
