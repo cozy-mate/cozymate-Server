@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 
 public class FriendResponseDTO {
 
+    //Summary와 Detail로 사용하겠습니다.
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class SimpleFriendResponseDTO {
+    public static class FriendSummaryResponseDTO {
         private Long memberId;
-        private String memberNickName;
+        private String nickname;
     }
 
 }
