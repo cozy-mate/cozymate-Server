@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
@@ -31,6 +32,13 @@ public class RoomController {
         // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
         roomCommandService.createRoom(request);
         return ResponseEntity.ok(ApiResponse.onSuccess("방 생성 완료"));
+    }
+
+    @GetMapping("/{roomId}")
+    @Operation(summary = "[바니] 생성한 방 정보 조회 기능", description = "방 아이디를 입력합니다.")
+    public ResponseEntity<ApiResponse<RoomCreateResponse>> getRoom(@PathVariable Long roomId, @RequestParam Long memberId) {
+        RoomCreateResponse response = roomQueryService.getRoomById(roomId, memberId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
     @GetMapping("/join")
