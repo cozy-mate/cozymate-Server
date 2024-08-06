@@ -22,7 +22,7 @@ public class RoomConverter {
         return new RoomJoinResponse(
             room.getId(),
             room.getName(),
-            manager.getName(),
+            manager.getNickname(),
             room.getMaxMateNum()
         );
     }
