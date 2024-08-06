@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Builder
-public class Todo extends BaseTimeEntity {
+public class ToDo extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,11 +39,6 @@ public class Todo extends BaseTimeEntity {
 
     private String content;
 
-    private LocalDate timePoint;
+    private LocalDate deadline;
 
-    private boolean completed = false;
-
-    public void updateCompleteState(boolean completed) {
-        this.completed = completed;
-    }
 }
