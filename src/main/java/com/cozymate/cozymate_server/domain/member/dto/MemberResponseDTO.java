@@ -22,7 +22,7 @@ public class MemberResponseDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LoginResponseDTO{
+    public static class TokenResponseDTO{
         private String nickname;
         private String refreshToken;
     }

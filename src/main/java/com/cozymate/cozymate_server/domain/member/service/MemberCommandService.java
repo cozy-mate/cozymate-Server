@@ -37,8 +37,8 @@ public class MemberCommandService {
         return authService.addTokenAtHeader(token);
     }
 
-    public MemberResponseDTO.LoginResponseDTO makeBody(MemberDetails memberDetails) {
-        return MemberConverter.toLoginResponseDTO(memberDetails.getMember().getNickname(),
+    public MemberResponseDTO.TokenResponseDTO makeBody(MemberDetails memberDetails) {
+        return MemberConverter.toTokenResponseDTO(memberDetails.getMember().getNickname(),
                 authService.getRefreshToken(memberDetails));
     }
 

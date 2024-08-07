@@ -75,9 +75,7 @@ public class KakaoController implements SocialLoginController {
         // 인가코드를 기반으로 토큰(Access Token) 발급
         String accessToken = kakaoService.parseAccessToken(tokenResponse);
 
-        // 토큰을 통해 사용자 정보 조회후 토큰 발급
-        // 재로그인인 경우 access token, 회원가입인 경우 temporary token
-
+        // 토큰을 통해 사용자 정보 조회
         HttpEntity<MultiValueMap<String, String>> clientInfoRequest = kakaoService.makeMemberInfoRequest(accessToken);
 
         RestTemplate clientInfoRt = new RestTemplate();
