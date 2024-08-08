@@ -63,7 +63,7 @@ public class AuthService implements UserDetailsService {
     public HttpHeaders addTokenAtHeader(String token) {
         log.info("발급된 토큰 :" + jwtUtil.extractTokenType(token) + ":" + token);
         HttpHeaders headers = new HttpHeaders();
-        headers.add(JwtUtil.TOKEN_PREFIX, token);
+        headers.add("Authorization", JwtUtil.TOKEN_PREFIX + token);
         return headers;
     }
 
