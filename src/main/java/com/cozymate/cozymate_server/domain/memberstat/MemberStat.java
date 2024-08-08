@@ -79,6 +79,8 @@ public class MemberStat extends BaseTimeEntity{
 
     private String studying;
 
+    private String intake;
+
     private Integer cleanSensitivity;
 
     private Integer noiseSensitivity;
@@ -113,6 +115,7 @@ public class MemberStat extends BaseTimeEntity{
         this.isPlayGame = memberStatCommandRequestDTO.getIsPlayGame();
         this.isPhoneCall = memberStatCommandRequestDTO.getIsPhoneCall();
         this.studying = memberStatCommandRequestDTO.getStudying();
+        this.intake = memberStatCommandRequestDTO.getIntake();
         this.cleanSensitivity = memberStatCommandRequestDTO.getCleanSensitivity();
         this.noiseSensitivity = memberStatCommandRequestDTO.getNoiseSensitivity();
         this.cleaningFrequency = memberStatCommandRequestDTO.getCleaningFrequency();

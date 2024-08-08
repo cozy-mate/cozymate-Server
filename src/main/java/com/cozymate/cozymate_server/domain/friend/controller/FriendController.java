@@ -78,7 +78,7 @@ public class FriendController {
      */
     @Operation(
         summary = "[포비] 친구 신청 거절",
-        description = "Path Variable로 쪽지를 받은 멤버의 ID, Body로 쪽지를 보냈던 멤버의 ID를 보내주세요."
+        description = "Path Variable로 친구 신청을 받은 멤버의 ID, Body로 친구 신청을 보냈던 멤버의 ID를 보내주세요."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
