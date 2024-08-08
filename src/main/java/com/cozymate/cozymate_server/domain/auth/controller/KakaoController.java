@@ -99,7 +99,10 @@ public class KakaoController implements SocialLoginController {
 
         AuthResponseDTO.TokenResponseDTO socialLoginDTO = authService.socialLogin(clientId);
 
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
+        log.info(socialLoginDTO.getMessage());
+        log.info(headers.getAccessControlAllowOrigin());
+
+        return ResponseEntity.ok()
                 .headers(headers)
                 .body(ApiResponse.onSuccess(socialLoginDTO));
 
