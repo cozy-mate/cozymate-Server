@@ -24,18 +24,24 @@ public class MemberConverter {
 
     public static MemberResponseDTO.MemberInfoDTO toMemberInfoDTO(Member member) {
         return MemberResponseDTO.MemberInfoDTO.builder()
+                .name(member.getName())
                 .nickname(member.getNickname())
                 .gender(member.getGender().toString())
-                .birthDay(member.getBirthDay().toString())
+                .birthday(member.getBirthDay().toString())
                 .persona(member.getPersona())
                 .build();
     }
 
-    public static MemberResponseDTO.TokenResponseDTO toTokenResponseDTO(
-            String nickname, String refreshToken) {
-        return MemberResponseDTO.TokenResponseDTO.builder()
+    public static MemberResponseDTO.MemberInfoDTO toTemporaryInfoDTO(String name, String nickname, String gender,
+                                                                     String birthday,
+                                                                     Integer persona) {
+        return MemberResponseDTO.MemberInfoDTO.builder()
+                .name(name)
                 .nickname(nickname)
-                .refreshToken(refreshToken)
+                .gender(gender)
+                .birthday(birthday)
+                .persona(persona)
                 .build();
     }
+
 }
