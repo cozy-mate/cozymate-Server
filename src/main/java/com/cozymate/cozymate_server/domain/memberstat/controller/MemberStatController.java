@@ -1,5 +1,7 @@
 package com.cozymate.cozymate_server.domain.memberstat.controller;
 
+import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,85 +39,73 @@ public class MemberStatController {
     private final MemberStatCommandService memberStatCommandService;
     private final MemberStatQueryService memberStatQueryService;
 
-    /**
-     * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
-     */
     @Operation(
         summary = "[포비] 사용자 상세정보 등록",
-        description = "Path Variable로 memberId, body로 사용자 상세정보를 넣어 사용합니다.\n\n"
+        description = "사용자의 토큰을 넣어 사용하고, body로 사용자 상세정보를 넣어 사용합니다.\n\n"
             + "시간은 형식에 맞춰 meridian은 오전, 오후, time은 값을 주시면 됩니다.\n\n"
             + "에어컨, 히터, 예민도들은 모두 정수로 주시면 됩니다.\n\n"
             + "학번의 경우 09학번-> \"09\"로 주시면 됩니다."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_EXISTS,
-        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._UNIVERSITY_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_MERIDIAN_NOT_VALID
     })
-    @PostMapping("/{memberId}")
+    @PostMapping("/")
     public ResponseEntity<ApiResponse<Long>> createMemberStat(
-        @PathVariable("memberId") Long memberId,
+        @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatCommandService.createMemberStat(memberId, memberStatCommandRequestDTO)));
+                memberStatCommandService.createMemberStat(memberDetails.getMember(),
+                    memberStatCommandRequestDTO)));
     }
 
-    /**
-     * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
-     */
     @Operation(
         summary = "[포비] 사용자 상세정보 수정",
-        description = "Path Variable로 memberId, body로 사용자 상세정보를 넣어 사용합니다.\n\n"
+        description = "사용자의 토큰을 넣어 사용하고, body로 사용자 상세정보를 넣어 사용합니다.\n\n"
             + "시간은 형식에 맞춰 meridian은 오전, 오후, time은 값을 주시면 됩니다.\n\n"
             + "에어컨, 히터, 예민도들은 모두 정수로 주시면 됩니다.\n\n"
             + "학번의 경우 09학번-> \"09\"로 주시면 됩니다."
     )
     @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._UNIVERSITY_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
         ErrorStatus._MEMBERSTAT_MERIDIAN_NOT_VALID
     })
-    @PutMapping("/{memberId}")
+    @PutMapping("/")
     public ResponseEntity<ApiResponse<Long>> modifyMemberStat(
-        @PathVariable("memberId") Long memberId,
+        @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatCommandService.modifyMemberStat(memberId, memberStatCommandRequestDTO)));
+                memberStatCommandService.modifyMemberStat(memberDetails.getMember(),
+                    memberStatCommandRequestDTO)));
     }
 
-    /**
-     * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
-     */
     @Operation(
         summary = "[포비] 사용자 상세정보 조회",
-        description = "Path Variable로 memberId를 넣어 사용합니다.\n\n"
+        description = "사용자의 토큰을 넣어 사용합니다.\n\n"
             + "시간 관련 처리를 유의해주세요."
     )
     @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_NOT_EXISTS
     })
-    @GetMapping("/{memberId}")
+    @GetMapping("/")
     public ResponseEntity<ApiResponse<MemberStatQueryResponseDTO>> getMemberStat(
-        @PathVariable("memberId") Long memberId) {
+        @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
         MemberStatQueryResponseDTO memberStatQueryResponseDTO = MemberStatConverter.toDto(
-            memberStatQueryService.getMemberStat(memberId));
+            memberStatQueryService.getMemberStat(memberDetails.getMember()));
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryResponseDTO
             ));
     }
 
-    /**
-     * TODO: member는 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정, path 변경 예정 사항("/memberId" -> "/")
-     */
     @Operation(
         summary = "[포비] 사용자 상세정보 필터링, 일치율 조회",
-        description = "Path Variable로 memberId를 넣어 사용합니다.\n\n"
+        description = "사용자의 토큰을 넣어 사용합니다."
             + "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
             + "사용 가능한 필터명(20개):\n"
             + "- acceptance : 합격여부\n"
@@ -142,19 +133,19 @@ public class MemberStatController {
             + "- mbti : mbti"
     )
     @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
         ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
     })
-    @GetMapping("/search/{memberId}")
+    @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponseDto<List<MemberStatEqualityResponseDTO>>>> getFilteredMemberList(
-        @PathVariable("memberId") Long memberId, @RequestParam(defaultValue = "0") int page,
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList) {
         Pageable pageable = PageRequest.of(page, 5);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberStatList(
-                    memberId, filterList, pageable)
+                    memberDetails.getMember(), filterList, pageable)
             ));
     }
 

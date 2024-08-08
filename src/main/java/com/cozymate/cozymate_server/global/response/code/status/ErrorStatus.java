@@ -78,6 +78,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _FRIEND_REQUEST_RECEIVED(HttpStatus.BAD_REQUEST, "FRIEND402", "받은 친구요청입니다."),
     _FRIEND_REQUEST_ACCEPTED(HttpStatus.BAD_REQUEST, "FRIEND403", "이미 수락한 친구요청입니다."),
     _FRIEND_REQUEST_WAITING(HttpStatus.BAD_REQUEST, "FRIEND404", "대기 중인 친구요청입니다."),
+    _FRIEND_REQUEST_EQUAL(HttpStatus.BAD_REQUEST, "FRIEND405", "같은 사람에게 친구요청을 보낼 수 없습니다.")
     ;
 
 

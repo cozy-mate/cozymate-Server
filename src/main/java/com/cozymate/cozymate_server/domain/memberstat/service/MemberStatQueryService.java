@@ -25,34 +25,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MemberStatQueryService {
 
-    private final MemberRepository memberRepository;
     private final MemberStatRepository memberStatRepository;
 
 
-
-    public MemberStat getMemberStat(Long memberId) {
-
-        memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
-        );
-
-        return memberStatRepository.findByMemberId(memberId)
+    public MemberStat getMemberStat(Member member) {
+        return memberStatRepository.findByMemberId(member.getId())
             .orElseThrow(
                 () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
             );
     }
 
-    public PageResponseDto<List<MemberStatEqualityResponseDTO>> getMemberStatList(Long memberId,
+    public PageResponseDto<List<MemberStatEqualityResponseDTO>> getMemberStatList(Member member,
         List<String> filterList, Pageable pageable) {
 
-        //멤버의 유효성 검사
-        Member member = memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
-        );
         //일치율의 기준이 되는 MemberStat을 가져오고, 유효성을 검사합니다.
-        MemberStat criteriaMemberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
-        );
+        MemberStat criteriaMemberStat = memberStatRepository.findByMemberId(member.getId())
+            .orElseThrow(
+                () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+            );
 
         //필터링된 리스트들을 가져옵니다. 필터가 없을 경우, 모두 가져옵니다.
         List<MemberStat> filteredResult = memberStatRepository.getFilteredMemberStat(filterList,
