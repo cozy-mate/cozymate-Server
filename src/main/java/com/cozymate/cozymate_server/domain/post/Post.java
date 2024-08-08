@@ -35,4 +35,5 @@ public class Post extends BaseTimeEntity {
     private String title;
 
     private String content;
+
 }
