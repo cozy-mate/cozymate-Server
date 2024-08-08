@@ -100,14 +100,17 @@ public class KakaoController implements SocialLoginController {
 
         AuthResponseDTO.TokenResponseDTO socialLoginDTO = authService.socialLogin(clientId);
 
+
+        log.info("소셜로그인 응답: {}",socialLoginDTO.getMessage());
+        log.info("소셜로그인 사용자: {}",socialLoginDTO.getMemberInfoDTO().getNickname());
+
         String userAgent = request.getHeader("User-Agent");
         String origin = request.getHeader("Origin");
         String ip = request.getRemoteAddr();
         log.info("Client User-Agent: {}", userAgent);
         log.info("Client Origin: {}", origin);
         log.info("Client IP: {}", ip);
-        log.info(socialLoginDTO.getMessage());
-        log.info(socialLoginDTO.getMemberInfoDTO().getNickname());
+
 
         return ResponseEntity.ok()
                 .headers(headers)
