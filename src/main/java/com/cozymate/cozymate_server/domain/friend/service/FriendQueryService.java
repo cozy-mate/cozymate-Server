@@ -5,7 +5,7 @@ import com.cozymate.cozymate_server.domain.friend.FriendRepository;
 import com.cozymate.cozymate_server.domain.friend.converter.FriendConverter;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.FriendSummaryResponseDTO;
 import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
-import com.cozymate.cozymate_server.domain.member.MemberRepository;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
@@ -40,16 +40,15 @@ public class FriendQueryService {
         return friendList.stream().map(
             friend -> friend.getSender().getId().equals(memberId) ?
                 FriendConverter.toFriendSummaryResponseDTO(
-                    friend.getReceiver().getId(),
-                    friend.getReceiver().getNickname()
+                    friend.getReceiver(),
+                    friend.isLikesSender()
                 )
                 :
-                FriendConverter.toFriendSummaryResponseDTO(
-                    friend.getSender().getId(),
-                    friend.getSender().getNickname()
-                )
+                    FriendConverter.toFriendSummaryResponseDTO(
+                        friend.getSender(),
+                        friend.isLikesSender()
+                    )
         ).toList();
-
     }
 
 }

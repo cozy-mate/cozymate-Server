@@ -1,18 +1,13 @@
 package com.cozymate.cozymate_server.domain.room;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,5 +42,15 @@ public class Room extends BaseTimeEntity {
     private String bestMateName;
 
     private int numOfArrival = 1;
+
+    public void arrive() {
+        numOfArrival++;
+    }
+
+    public void isRoomFull() {
+        if (numOfArrival == maxMateNum) {
+            this.status = RoomStatus.ENABLE;
+        }
+    }
 
 }

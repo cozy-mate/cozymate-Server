@@ -50,6 +50,6 @@ public class Mate extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Mate bestMate = null;
 
-    
+
 
 }
