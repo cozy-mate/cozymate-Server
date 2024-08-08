@@ -36,9 +36,4 @@ public class Post extends BaseTimeEntity {
 
     private String content;
 
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<PostComment> comments;
-//
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<PostImage> images;
 }
