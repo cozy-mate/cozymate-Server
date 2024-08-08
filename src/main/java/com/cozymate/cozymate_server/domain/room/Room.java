@@ -43,4 +43,14 @@ public class Room extends BaseTimeEntity {
 
     private int numOfArrival = 1;
 
+    public void arrive() {
+        numOfArrival++;
+    }
+
+    public void isRoomFull() {
+        if (numOfArrival == maxMateNum) {
+            this.status = RoomStatus.ENABLE;
+        }
+    }
+
 }
