@@ -31,11 +31,4 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDTO.TokenResponseDTO toTokenResponseDTO(
-            String nickname, String refreshToken) {
-        return MemberResponseDTO.TokenResponseDTO.builder()
-                .nickname(nickname)
-                .refreshToken(refreshToken)
-                .build();
-    }
 }

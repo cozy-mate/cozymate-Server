@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.member.controller;
 
+import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
-import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,19 +53,18 @@ public class MemberController {
                     + "         *     \"gender\": \"MALE\",\n"
                     + "         *     \"birthday\": \"1990-01-01\"\n"
                     + "         *     \"persona\" : 1")
-    ResponseEntity<ApiResponse<MemberResponseDTO.TokenResponseDTO>> signUp(
+    ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> signUp(
             @RequestAttribute("client_id") String clientId,
             @RequestBody @Valid MemberRequestDTO.JoinRequestDTO joinRequestDTO,
             BindingResult bindingResult
     ) {
-        log.info("반갑다 신입");
         log.info("enter MemberController : [post] /member/sign-up");
         if (bindingResult.hasErrors()) {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
         }
         MemberDetails memberDetails = memberCommandService.join(clientId, joinRequestDTO);
         HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
-        MemberResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeBody(memberDetails);
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeTokenBody(memberDetails);
 
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .headers(headers)
@@ -76,12 +74,12 @@ public class MemberController {
     @GetMapping("/reissue")
     @Operation(summary = "[말즈] 토큰 재발행",
             description = "request Header : Bearer refreshToken")
-    ResponseEntity<ApiResponse<TokenResponseDTO>> reissue(
+    ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> reissue(
             @RequestHeader(value = "Refresh") String refreshToken
     ) {
         MemberDetails memberDetails = memberCommandService.extractMemberByRefreshToken(refreshToken);
         HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
-        MemberResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeBody(memberDetails);
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeTokenBody(memberDetails);
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .headers(headers)
                 .body(ApiResponse.onSuccess(tokenResponseDTO));

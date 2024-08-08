@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.repository.TokenRepository;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.auth.userDetails.TemporaryMember;
+import com.cozymate.cozymate_server.domain.auth.utils.AuthConverter;
 import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
 
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -28,7 +29,7 @@ public class AuthService implements UserDetailsService {
 
     public static final String TEMPORARY_TOKEN_SUCCESS_MESSAGE = "임시 토큰 발급 완료";
 
-    public static final String RE_LOGIN_EXISTING_MEMBER_MESSAGE = "기존 사용자 재로그인";
+    public static final String MEMBER_TOKEN_MESSAGE = "기존 사용자 토큰 발급 성공";
 
     private final JwtUtil jwtUtil;
     private final MemberQueryService memberQueryService;
@@ -51,6 +52,7 @@ public class AuthService implements UserDetailsService {
         return jwtUtil.generateTemporaryToken(userDetails);
     }
 
+
     public MemberDetails extractMemberInRefreshToken(String refreshToken) {
         String clientId = jwtUtil.extractUserName(refreshToken);
         return new MemberDetails(memberQueryService.findByClientId(clientId));
@@ -63,18 +65,21 @@ public class AuthService implements UserDetailsService {
         return headers;
     }
 
-    public AuthResponseDTO.SocialLoginDTO socialLogin(String clientId) {
+    public AuthResponseDTO.TokenResponseDTO socialLogin(String clientId) {
         // 이미 회원인 경우
         if (memberQueryService.isPresent(clientId)) {
-            return AuthResponseDTO.SocialLoginDTO.builder()
-                    .message(RE_LOGIN_EXISTING_MEMBER_MESSAGE)
-                    .refreshToken(getRefreshToken(loadUserByUsername(clientId)))
-                    .build();
+            MemberDetails memberDetails = loadMember(clientId);
+            return generateMemberResponse(memberDetails);
         }
         // 새로 가입한 경우
-        return AuthResponseDTO.SocialLoginDTO.builder()
-                .message(TEMPORARY_TOKEN_SUCCESS_MESSAGE)
-                .build();
+        return AuthConverter.toTokenResponseDTO("임시 사용자", TEMPORARY_TOKEN_SUCCESS_MESSAGE,
+                clientId);
+    }
+
+    public AuthResponseDTO.TokenResponseDTO generateMemberResponse(MemberDetails memberDetails) {
+        // 이미 회원인 경우
+        return AuthConverter.toTokenResponseDTO(memberDetails.getMember().getNickname(), MEMBER_TOKEN_MESSAGE,
+                memberDetails.getUsername());
     }
 
     public String getRefreshToken(UserDetails userDetails) {
@@ -90,11 +95,16 @@ public class AuthService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String clientId) {
         if (memberQueryService.isPresent(clientId)) {
-            return new MemberDetails(memberQueryService.findByClientId(clientId));
+            return loadMember(clientId);
         } else {
             return new TemporaryMember(clientId);
         }
     }
+
+    private MemberDetails loadMember(String clientId) {
+        return new MemberDetails(memberQueryService.findByClientId(clientId));
+    }
+
 
     @Transactional
     Token findToken(String clientId) {

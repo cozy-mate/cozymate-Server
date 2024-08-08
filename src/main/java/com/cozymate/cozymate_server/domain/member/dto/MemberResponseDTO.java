@@ -18,13 +18,4 @@ public class MemberResponseDTO {
         private Integer persona;
     }
 
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TokenResponseDTO{
-        private String nickname;
-        private String refreshToken;
-    }
-
 }
