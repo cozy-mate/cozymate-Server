@@ -22,11 +22,11 @@ import com.cozymate.cozymate_server.domain.rule.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +48,7 @@ public class RoomCommandService {
     private final RoleRepository roleRepository;
     private final FeedRepository feedRepository;
 
+    @Transactional
     public void createRoom(RoomCreateRequest request) {
         if (roomRepository.existsByMemberIdAndStatuses(request.getCreatorId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
@@ -64,6 +65,33 @@ public class RoomCommandService {
 
         Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
+
+    }
+
+    public void joinRoom(Long roomId, Long memberId) {
+        // TODO: 추후 memberId 부분 수정 예정
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
+            throw new GeneralException(ErrorStatus._ALREADY_JOINED_ROOM);
+        }
+
+        if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
+            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
+        }
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        if (mateRepository.countByRoomId(roomId) >= room.getMaxMateNum()) {
+            throw new GeneralException(ErrorStatus._ROOM_FULL);
+        }
+
+        Mate mate = MateConverter.toEntity(room, member, false);
+        mateRepository.save(mate);
+        room.arrive();
+        room.isRoomFull();
+        roomRepository.save(room);
 
     }
 
