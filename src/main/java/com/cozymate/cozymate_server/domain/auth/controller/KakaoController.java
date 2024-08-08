@@ -112,7 +112,6 @@ public class KakaoController implements SocialLoginController {
         log.info("Client IP: {}", ip);
 
 
-
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(ApiResponse.onSuccess(socialLoginDTO));
