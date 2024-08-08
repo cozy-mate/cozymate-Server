@@ -12,9 +12,10 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MemberInfoDTO {
+        private String name;
         private String nickname;
         private String gender;
-        private String birthDay;
+        private String birthday;
         private Integer persona;
     }
 

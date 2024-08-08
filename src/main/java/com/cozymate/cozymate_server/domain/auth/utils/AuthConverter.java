@@ -1,14 +1,16 @@
 package com.cozymate.cozymate_server.domain.auth.utils;
 
 import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
+import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 
 public class AuthConverter {
-    public static AuthResponseDTO.TokenResponseDTO toTokenResponseDTO(String nickname, String message,
+    public static AuthResponseDTO.TokenResponseDTO toTokenResponseDTO(MemberResponseDTO.MemberInfoDTO memberInfoDTO,
+                                                                      String message,
                                                                       String refreshToken) {
         return AuthResponseDTO.TokenResponseDTO.builder()
-                .nickname(nickname)
                 .message(message)
                 .refreshToken(refreshToken)
+                .memberInfoDTO(memberInfoDTO)
                 .build();
     }
 

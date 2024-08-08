@@ -9,6 +9,8 @@ import com.cozymate.cozymate_server.domain.auth.utils.AuthConverter;
 import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
 
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
+import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 import com.cozymate.cozymate_server.domain.member.service.MemberQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -72,13 +74,20 @@ public class AuthService implements UserDetailsService {
             return generateMemberResponse(memberDetails);
         }
         // 새로 가입한 경우
-        return AuthConverter.toTokenResponseDTO("임시 사용자", TEMPORARY_TOKEN_SUCCESS_MESSAGE,
+        MemberResponseDTO.MemberInfoDTO temporaryMemberInfo = generateTemporaryMember();
+        return AuthConverter.toTokenResponseDTO(temporaryMemberInfo, TEMPORARY_TOKEN_SUCCESS_MESSAGE,
                 clientId);
     }
 
+    private MemberResponseDTO.MemberInfoDTO generateTemporaryMember(){
+        return MemberConverter.toTemporaryInfoDTO("","","","",0);
+    }
+
     public AuthResponseDTO.TokenResponseDTO generateMemberResponse(MemberDetails memberDetails) {
+        MemberResponseDTO.MemberInfoDTO memberInfoDTO = MemberConverter.toMemberInfoDTO(memberDetails.getMember());
         // 이미 회원인 경우
-        return AuthConverter.toTokenResponseDTO(memberDetails.getMember().getNickname(), MEMBER_TOKEN_MESSAGE,
+        return AuthConverter.toTokenResponseDTO(memberInfoDTO
+                , MEMBER_TOKEN_MESSAGE,
                 memberDetails.getUsername());
     }
 
