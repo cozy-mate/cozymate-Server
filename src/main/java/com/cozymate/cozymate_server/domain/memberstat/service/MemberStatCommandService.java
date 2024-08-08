@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.memberstat.service;
 
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.member.MemberRepository;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
@@ -50,7 +50,6 @@ public class MemberStatCommandService {
     }
 
     public Long modifyMemberStat(
-
         Long memberId, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
 
         Member member = memberRepository.findById(memberId)
