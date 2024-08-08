@@ -58,6 +58,7 @@ public class SecurityConfig {
                                 CorsConfiguration configuration = new CorsConfiguration();
                                 configuration.setAllowedOrigins(
                                         Arrays.asList("https://cozymate.store:3000",
+                                                "https://cozymate.store",
                                                 "http://localhost:3000",
                                                 "http://localhost:8080"));
                                 configuration.setAllowedMethods(Collections.singletonList("*"));
