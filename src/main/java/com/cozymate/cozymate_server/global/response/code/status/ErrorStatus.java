@@ -79,6 +79,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _FRIEND_REQUEST_RECEIVED(HttpStatus.BAD_REQUEST, "FRIEND402", "받은 친구요청입니다."),
     _FRIEND_REQUEST_ACCEPTED(HttpStatus.BAD_REQUEST, "FRIEND403", "이미 수락한 친구요청입니다."),
     _FRIEND_REQUEST_WAITING(HttpStatus.BAD_REQUEST, "FRIEND404", "대기 중인 친구요청입니다."),
+
+    // Role 관련
+    _ROLE_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROLE400", "역할을 찾을 수 없습니다."),
     ;
 
 
