@@ -18,7 +18,7 @@ import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLogRepository;
-import com.cozymate.cozymate_server.domain.rule.RuleRepository;
+import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;

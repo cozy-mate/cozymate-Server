@@ -31,10 +31,12 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // [Member] 관련 에러
     _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "멤버를 찾을 수 없습니다."),
+    _MEMBER_BINDING_FAIL(HttpStatus.BAD_REQUEST, "MEMBER401", "회원가입 요청 바인딩 실패"),
 
     // Token
     _TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN400", "사용자의 리프레시 토큰을 찾을 수 없습니다."),
-
+    _TOKEN_INVALID(HttpStatus.BAD_REQUEST, "TOKEN401", "토큰이 유효하지 않습니다."),
+    _TEMPORARY_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN402", "임시토큰으로 접근 할 수 없습니다."),
     // S3 관련
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
     _FILE_DELETE_ERROR(HttpStatus.BAD_REQUEST, "FILE_002", "파일 삭제에 실패했습니다."),
@@ -65,13 +67,20 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Mate 관련
     _MATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE400", "해당하는 메이트 정보가 없습니다."),
+    _MATE_OR_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE401", "해당하는 메이트나 방 정보가 없습니다."),
 
     // Chat 관련 에러
     _CHAT_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHAT400", "쪽지를 찾을 수 없습니다."),
 
-    // Todo 관련
+    // Rule 관련
+    _RULE_NOT_FOUND(HttpStatus.BAD_REQUEST, "RULE400", "해당하는 Rule이 없습니다."),
+    _RULE_MATE_MISMATCH(HttpStatus.BAD_REQUEST, "RULE401", "Mate에게 해당 Rule을 삭제할 권한이 없습니다."),
+    _RULE_OVER_MAX(HttpStatus.BAD_REQUEST, "RULE402", "생성할 수 있는 Rule 개수를 초과했습니다."),
+
+    // 투두 관련
     _TODO_NOT_FOUND(HttpStatus.BAD_REQUEST, "TODO400", "해당하는 Todo 정보가 없습니다."),
     _TODO_NOT_VALID(HttpStatus.BAD_REQUEST, "TODO401", "수정할 수 있는 권한이 없습니다."),
+    _TODO_OVER_MAX(HttpStatus.BAD_REQUEST, "TODO402", "생성할 수 있는 하루 최대 Todo 개수를 초과했습니다."),
 
     // Friend 관련 에러
     _FRIEND_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "FRIEND400", "친구요청을 찾을 수 없습니다."),
