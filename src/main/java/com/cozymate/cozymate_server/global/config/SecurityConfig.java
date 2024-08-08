@@ -60,7 +60,24 @@ public class SecurityConfig {
                                         Arrays.asList("https://cozymate.store:3000",
                                                 "https://cozymate.store",
                                                 "http://localhost:3000",
-                                                "http://localhost:8080"));
+                                                "http://localhost:8080",
+                                                "http://localhost:4441",
+                                                "http://localhost:5037",
+                                                "http://localhost:6463",
+                                                "http://localhost:8380",
+                                                "http://localhost:10530",
+                                                "http://localhost:10531",
+                                                "http://localhost:14098",
+                                                "http://localhost:15397",
+                                                "http://localhost:15398",
+                                                "http://localhost:16105",
+                                                "http://localhost:16106",
+                                                "http://localhost:17173",
+                                                "http://localhost:19891",
+                                                "http://localhost:27060",
+                                                "http://localhost:29891",
+                                                "http://localhost:31026"
+                                        ));
                                 configuration.setAllowedMethods(Collections.singletonList("*"));
                                 configuration.setAllowCredentials(true);
                                 configuration.setAllowedHeaders(Collections.singletonList("*"));
