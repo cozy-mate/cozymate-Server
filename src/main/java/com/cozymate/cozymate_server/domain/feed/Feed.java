@@ -35,4 +35,5 @@ public class Feed extends BaseTimeEntity {
     @Column(length = 200)
     private String content;
 
+
 }

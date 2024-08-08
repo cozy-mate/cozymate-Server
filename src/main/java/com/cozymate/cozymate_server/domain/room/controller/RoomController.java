@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
+
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +41,14 @@ public class RoomController {
     public ResponseEntity<ApiResponse<RoomCreateResponse>> getRoom(@PathVariable Long roomId, @RequestParam Long memberId) {
         RoomCreateResponse response = roomQueryService.getRoomById(roomId, memberId);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+    @DeleteMapping("/{roomId}")
+    @Operation(summary = "[바니] 방 삭제 기능", description = "해당 roomId의 방을 삭제합니다.")
+    public ResponseEntity<ApiResponse<String>> deleteRoom(@PathVariable Long roomId, Long memberId) {
+        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
+        roomCommandService.deleteRoom(roomId, memberId);
+        return ResponseEntity.ok(ApiResponse.onSuccess("방 삭제 완료"));
     }
 
     @GetMapping("/join")
