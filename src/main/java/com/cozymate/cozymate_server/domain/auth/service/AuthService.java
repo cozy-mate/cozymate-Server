@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.auth.userDetails.TemporaryMember;
 import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
 
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.service.MemberQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -48,6 +49,11 @@ public class AuthService implements UserDetailsService {
         }
         // 새로 가입한 경우
         return jwtUtil.generateTemporaryToken(userDetails);
+    }
+
+    public MemberDetails extractMemberInRefreshToken(String refreshToken) {
+        String clientId = jwtUtil.extractUserName(refreshToken);
+        return new MemberDetails(memberQueryService.findByClientId(clientId));
     }
 
     public HttpHeaders addTokenAtHeader(String token) {

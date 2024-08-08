@@ -36,6 +36,11 @@ public class MemberCommandService {
         String token = authService.generateToken(memberDetails.getMember().getClientId());
         return authService.addTokenAtHeader(token);
     }
+    public MemberDetails extractMemberByRefreshToken(String refreshToken){
+        return authService.extractMemberInRefreshToken(refreshToken);
+
+    }
+
 
     public MemberResponseDTO.TokenResponseDTO makeBody(MemberDetails memberDetails) {
         return MemberConverter.toTokenResponseDTO(memberDetails.getMember().getNickname(),

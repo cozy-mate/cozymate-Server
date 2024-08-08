@@ -75,6 +75,13 @@ public class JwtUtil {
         return buildToken(TokenType.REFRESH, userDetails, REFRESH_EXPIRATION);
     }
 
+    public void validateToken(String token) {
+        Jwts.parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token);
+    }
+
     public Boolean isTemporaryToken(String token) {
         String tokenTypeName =
                 Jwts.parserBuilder()
@@ -133,6 +140,5 @@ public class JwtUtil {
         byte[] keyBytes = Decoders.BASE64.decode(key);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
 
 }

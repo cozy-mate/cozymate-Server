@@ -41,8 +41,8 @@ public class KakaoController implements SocialLoginController {
     @Override
     @Operation(summary = "[말즈] 소셜로그인 url 요청 api",
             description = "get 요청 보내면 response body로 url 응답")
-    @GetMapping(value = "/url")
-    public ResponseEntity<ApiResponse<UrlDTO>> getUrl() {
+    @GetMapping(value = "/sign-in")
+    public ResponseEntity<ApiResponse<UrlDTO>> signIn() {
         UrlDTO url = kakaoService.getRedirectUrl();
 
         log.info(url.getRedirectUrl());
