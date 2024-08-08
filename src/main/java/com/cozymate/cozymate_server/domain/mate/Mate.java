@@ -50,12 +50,6 @@ public class Mate extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Mate bestMate = null;
 
-//    @OneToMany(mappedBy = "mate", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Role> roles;
-//
-//    @OneToMany(mappedBy = "mate", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Todo> todos;
-
 
 
 }
