@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +57,7 @@ public class KakaoController implements SocialLoginController {
             description = "Header : accessToken or 임시 토큰, Body: requestToken or null")
     @GetMapping("/code")
     public ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> callBack(
-            @RequestParam(required = false) String code) {
+            @RequestParam(required = false) String code, HttpServletRequest request) {
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = kakaoService.makeTokenRequest(code);
 
@@ -99,8 +100,18 @@ public class KakaoController implements SocialLoginController {
 
         AuthResponseDTO.TokenResponseDTO socialLoginDTO = authService.socialLogin(clientId);
 
-        log.info(socialLoginDTO.getMessage());
-        log.info(headers.getAccessControlAllowOrigin());
+
+        log.info("소셜로그인 응답: {}",socialLoginDTO.getMessage());
+        log.info("소셜로그인 사용자: {}",socialLoginDTO.getMemberInfoDTO().getNickname());
+
+        String userAgent = request.getHeader("User-Agent");
+        String origin = request.getHeader("Origin");
+        String ip = request.getRemoteAddr();
+        log.info("Client User-Agent: {}", userAgent);
+        log.info("Client Origin: {}", origin);
+        log.info("Client IP: {}", ip);
+
+
 
         return ResponseEntity.ok()
                 .headers(headers)
