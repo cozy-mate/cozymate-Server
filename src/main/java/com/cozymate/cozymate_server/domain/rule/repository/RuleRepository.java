@@ -8,4 +8,6 @@ public interface RuleRepository extends JpaRepository<Rule, Long> {
     List<Rule> findAllByRoomId(Long roomId);
 
     Integer countAllByRoomId(Long roomId);
+
+    void deleteByRoomId(Long roomId);
 }
