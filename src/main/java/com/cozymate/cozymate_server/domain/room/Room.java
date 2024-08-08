@@ -13,14 +13,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
-@Setter
 public class Room extends BaseTimeEntity {
 
     @Id
@@ -45,5 +43,14 @@ public class Room extends BaseTimeEntity {
 
     private int numOfArrival = 1;
 
+    public void arrive() {
+        numOfArrival++;
+    }
+
+    public void isRoomFull() {
+        if (numOfArrival == maxMateNum) {
+            this.status = RoomStatus.ENABLE;
+        }
+    }
 
 }

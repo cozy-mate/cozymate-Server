@@ -19,12 +19,12 @@ public class RoomConverter {
     }
 
     public static RoomJoinResponse toRoomJoinResponse(Room room, Member manager){
-        return new RoomJoinResponse(
-            room.getId(),
-            room.getName(),
-            manager.getNickname(),
-            room.getMaxMateNum()
-        );
+        return RoomJoinResponse.builder()
+            .roomId(room.getId())
+            .name(room.getName())
+            .managerName(manager.getNickname())
+            .maxMateNum(room.getMaxMateNum())
+            .build();
     }
 
 }

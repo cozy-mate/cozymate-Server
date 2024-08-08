@@ -12,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,7 +41,6 @@ public class Mate extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private EntryStatus entryStatus = EntryStatus.PENDING;
 
-    @NotNull
     private boolean isRoomManager = false;
 
     private int numOfBest = 0;

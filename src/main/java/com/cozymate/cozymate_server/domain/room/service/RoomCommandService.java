@@ -89,10 +89,8 @@ public class RoomCommandService {
 
         Mate mate = MateConverter.toEntity(room, member, false);
         mateRepository.save(mate);
-        room.setNumOfArrival(room.getNumOfArrival()+1);
-        if (room.getNumOfArrival()==room.getMaxMateNum()) {
-            room.setStatus(RoomStatus.ENABLE);
-        }
+        room.arrive();
+        room.isRoomFull();
         roomRepository.save(room);
 
     }
