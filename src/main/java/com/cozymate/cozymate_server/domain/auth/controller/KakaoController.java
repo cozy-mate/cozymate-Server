@@ -59,7 +59,7 @@ public class KakaoController implements SocialLoginController {
             description = "Header : accessToken or 임시 토큰, Body: requestToken or null")
     @GetMapping("/code")
     public ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> callBack(
-            @RequestParam(required = false) String code, HttpServletRequest request) {
+            @RequestParam(required = false) String code) {
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = kakaoService.makeTokenRequest(code);
 
@@ -102,16 +102,8 @@ public class KakaoController implements SocialLoginController {
 
         AuthResponseDTO.TokenResponseDTO socialLoginDTO = authService.socialLogin(clientId);
 
-
-        log.info("소셜로그인 응답: {}",socialLoginDTO.getMessage());
         log.info("소셜로그인 사용자: {}",socialLoginDTO.getMemberInfoDTO().getNickname());
 
-        String userAgent = request.getHeader("User-Agent");
-        String origin = request.getHeader("Origin");
-        String ip = request.getRemoteAddr();
-        log.info("Client User-Agent: {}", userAgent);
-        log.info("Client Origin: {}", origin);
-        log.info("Client IP: {}", ip);
 
 
         return ResponseEntity.ok()
