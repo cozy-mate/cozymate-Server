@@ -1,10 +1,10 @@
 package com.cozymate.cozymate_server.domain.auth.utils;
 
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
+
 import java.util.Arrays;
 
 public class ClientIdMaker {
-
     public static final int MEMBER_ID_INDEX = 0;
     public static final int SOCIAL_TYPE_INDEX = 1;
     public static final String DELIMITER = ":";

@@ -21,7 +21,6 @@ public class LogoutService implements LogoutHandler {
 
     private final JwtUtil jwtUtil;
     private final AuthService authService;
-
     @Override
     public void logout(
             HttpServletRequest request,

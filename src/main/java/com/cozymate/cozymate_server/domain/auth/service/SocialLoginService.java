@@ -8,9 +8,7 @@ import org.springframework.util.MultiValueMap;
 
 @Service
 public interface SocialLoginService {
-
     String CONTENT_TYPE_HEADER_NAME = "Content-type";
-
     String CONTENT_TYPE_HEADER_VALUE = "application/x-www-form-urlencoded;charset=utf-8";
     UrlDTO getRedirectUrl();
     String parseAccessToken(ResponseEntity<String> response);
