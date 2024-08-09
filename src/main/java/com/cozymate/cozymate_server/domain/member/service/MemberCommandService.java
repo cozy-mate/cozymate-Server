@@ -7,8 +7,8 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
-
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -34,12 +34,10 @@ public class MemberCommandService {
     }
 
     public HttpHeaders makeHeader(MemberDetails memberDetails) {
-        String token = authService.generateToken(memberDetails.getMember().getClientId());
-        return authService.addTokenAtHeader(token);
+        return authService.generateTokenHeader(memberDetails.getUsername());
     }
-    public MemberDetails extractMemberByRefreshToken(String refreshToken){
-        return authService.extractMemberInRefreshToken(refreshToken);
-
+    public MemberDetails extractMemberDetailsByRefreshToken(String refreshToken){
+        return authService.extractMemberDetailsInRefreshToken(refreshToken);
     }
 
     public AuthResponseDTO.TokenResponseDTO makeTokenBody(MemberDetails memberDetails) {

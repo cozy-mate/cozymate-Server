@@ -63,6 +63,7 @@ public class MemberController {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
         }
         MemberDetails memberDetails = memberCommandService.join(clientId, joinRequestDTO);
+
         HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
         AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeTokenBody(memberDetails);
 
@@ -77,9 +78,11 @@ public class MemberController {
     ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> reissue(
             @RequestHeader(value = "Refresh") String refreshToken
     ) {
-        MemberDetails memberDetails = memberCommandService.extractMemberByRefreshToken(refreshToken);
+        MemberDetails memberDetails = memberCommandService.extractMemberDetailsByRefreshToken(refreshToken);
+
         HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
         AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeTokenBody(memberDetails);
+
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .headers(headers)
                 .body(ApiResponse.onSuccess(tokenResponseDTO));

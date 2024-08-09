@@ -40,32 +40,15 @@ public class AuthService implements UserDetailsService {
     private final TokenRepository tokenRepository;
 
 
-    // 기존에 있는 회원이면 AccessToken, 임시회원이면 TempToken 발급
-    @Transactional
-    public String generateToken(String clientId) {
-        UserDetails userDetails = loadUserByUsername(clientId);
-        // 이미 회원인 경우
-        if (memberQueryService.isPresent(clientId)) {
-            String accessToken = jwtUtil.generateAccessToken(userDetails);
-            String refreshToken = jwtUtil.generateRefreshToken(userDetails);
-            Token newToken = new Token(clientId, refreshToken);
-            tokenRepository.save(newToken);
-            return accessToken;
-        }
-        // 새로 가입한 경우
-        return jwtUtil.generateTemporaryToken(userDetails);
+    // accessToken, refreshToken 둘다 생성
+    public HttpHeaders generateTokenHeader(String clientId) {
+        String token = generateToken(clientId);
+        return addTokenAtHeader(token);
     }
 
-    public MemberDetails extractMemberInRefreshToken(String refreshToken) {
+    public MemberDetails extractMemberDetailsInRefreshToken(String refreshToken) {
         String clientId = jwtUtil.extractUserName(refreshToken);
         return new MemberDetails(memberQueryService.findByClientId(clientId));
-    }
-
-    public HttpHeaders addTokenAtHeader(String token) {
-        log.info("발급된 토큰 :" + jwtUtil.extractTokenType(token) + ":" + token);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(TOKEN_HEADER_NAME, JwtUtil.TOKEN_PREFIX + token);
-        return headers;
     }
 
     public AuthResponseDTO.TokenResponseDTO socialLogin(String clientId) {
@@ -79,27 +62,41 @@ public class AuthService implements UserDetailsService {
         return AuthConverter.toTokenResponseDTO(temporaryMemberInfo, TEMPORARY_TOKEN_SUCCESS_MESSAGE,
                 clientId);
     }
+    public AuthResponseDTO.TokenResponseDTO generateMemberResponse(MemberDetails memberDetails) {
+        MemberResponseDTO.MemberInfoDTO memberInfoDTO = MemberConverter.toMemberInfoDTO(memberDetails.getMember());
+        return AuthConverter.toTokenResponseDTO(
+                memberInfoDTO, MEMBER_TOKEN_MESSAGE, getRefreshToken(memberDetails));
+    }
+
+    private HttpHeaders addTokenAtHeader(String token) {
+        log.info("발급된 토큰 :" + jwtUtil.extractTokenType(token) + ":" + token);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(TOKEN_HEADER_NAME, JwtUtil.TOKEN_PREFIX + token);
+        return headers;
+    }
+
+    // 기존에 있는 회원이면 AccessToken, 임시회원이면 TempToken 발급
+    private String generateToken(String clientId) {
+        UserDetails userDetails = loadUserByUsername(clientId);
+        // 이미 회원인 경우
+        if (memberQueryService.isPresent(clientId)) {
+            return generateTokenPair(userDetails);
+        }
+        // 새로 가입한 경우
+        return jwtUtil.generateTemporaryToken(userDetails);
+    }
 
     private MemberResponseDTO.MemberInfoDTO generateTemporaryMember() {
         return MemberConverter.toTemporaryInfoDTO("", "", "", "", 0);
     }
 
-    public AuthResponseDTO.TokenResponseDTO generateMemberResponse(MemberDetails memberDetails) {
-        MemberResponseDTO.MemberInfoDTO memberInfoDTO = MemberConverter.toMemberInfoDTO(memberDetails.getMember());
-        // 이미 회원인 경우
-        return AuthConverter.toTokenResponseDTO(memberInfoDTO
-                , MEMBER_TOKEN_MESSAGE,
-                memberDetails.getUsername());
-    }
-
-    public String getRefreshToken(UserDetails userDetails) {
+    private String getRefreshToken(UserDetails userDetails) {
         Token token = findToken(userDetails.getUsername());
         return token.getRefreshToken();
     }
 
-    public void deleteRefreshToken(String clientId) {
-        Token token = findToken(clientId);
-        tokenRepository.delete(token);
+    private MemberDetails loadMember(String clientId) {
+        return new MemberDetails(memberQueryService.findByClientId(clientId));
     }
 
     @Override
@@ -110,11 +107,21 @@ public class AuthService implements UserDetailsService {
             return new TemporaryMember(clientId);
         }
     }
-
-    private MemberDetails loadMember(String clientId) {
-        return new MemberDetails(memberQueryService.findByClientId(clientId));
+    @Transactional
+    String generateTokenPair(UserDetails userDetails) {
+        String accessToken = jwtUtil.generateAccessToken(userDetails);
+        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+        Token newToken = new Token(userDetails.getUsername(), refreshToken);
+        tokenRepository.save(newToken);
+        return accessToken;
     }
 
+
+    @Transactional
+    void deleteRefreshToken(String clientId) {
+        Token token = findToken(clientId);
+        tokenRepository.delete(token);
+    }
 
     @Transactional
     Token findToken(String clientId) {

@@ -17,10 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
@@ -42,7 +46,9 @@ public class KakaoService implements SocialLoginService {
 
     private static final String JSON_ATTRIBUTE_NAME_TOKEN = "access_token";
     private static final String JSON_ATTRIBUTE_NAME_ID = "id";
-
+    private static final String HTTP_ERROR_MESSAGE_FORMAT = "HTTP Error: %s, Status Code: %s, Response Body: %s";
+    @Value("${spring.security.oauth2.client.provider.kakao.user-info-uri}")
+    private String USER_INFO_URI;
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String KAKAO_CLIENT_ID;
 
@@ -51,9 +57,10 @@ public class KakaoService implements SocialLoginService {
     @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
     private String KAKAO_REDIRECT_URI;
 
+    @Value("${spring.security.oauth2.client.provider.kakao.token-uri}")
+    private String TOKEN_URI;
     @Value("${spring.security.oauth2.client.provider.kakao.authorization-uri}")
     private String AUTHORIZATION_URI;
-
 
     @Override
     public UrlDTO getRedirectUrl() {
@@ -69,7 +76,21 @@ public class KakaoService implements SocialLoginService {
     }
 
     @Override
-    public HttpEntity<MultiValueMap<String, String>> makeTokenRequest(String code) {
+    public String getTokenByCode(String code) {
+        HttpEntity<MultiValueMap<String, String>> tokenRequest = makeTokenRequest(code);
+        ResponseEntity<String> tokenResponse = getTokenResponse(tokenRequest);
+
+        return parseAccessToken(tokenResponse);
+    }
+
+    @Override
+    public String getClientIdByToken(String token) {
+        HttpEntity<MultiValueMap<String, String>> clientInfoRequest = makeMemberInfoRequest(token);
+        ResponseEntity<String> clientInfoResponse = getClientInfoResponse(clientInfoRequest);
+        return parseClientId(clientInfoResponse);
+    }
+
+    private HttpEntity<MultiValueMap<String, String>> makeTokenRequest(String code) {
         // HTTP Header
         HttpHeaders headers = new HttpHeaders();
         headers.add(CONTENT_TYPE_HEADER_NAME, CONTENT_TYPE_HEADER_VALUE);
@@ -85,8 +106,32 @@ public class KakaoService implements SocialLoginService {
         return new HttpEntity<>(body, headers);
     }
 
-    @Override
-    public String parseAccessToken(ResponseEntity<String> response) {
+    private ResponseEntity<String> getTokenResponse(HttpEntity<MultiValueMap<String, String>> tokenRequest) {
+        RestTemplate tokenRt = new RestTemplate();
+        try {
+            return tokenRt.exchange(TOKEN_URI, HttpMethod.POST,
+                    tokenRequest, String.class);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            String errorMessage = String.format(HTTP_ERROR_MESSAGE_FORMAT,
+                    e.getMessage(), e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
+    private ResponseEntity<String> getClientInfoResponse(HttpEntity<MultiValueMap<String, String>> clientInfoRequest) {
+        RestTemplate clientInfoRt = new RestTemplate();
+        try {
+            return clientInfoRt.exchange(USER_INFO_URI, HttpMethod.POST,
+                    clientInfoRequest,
+                    String.class);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            String errorMessage = String.format(HTTP_ERROR_MESSAGE_FORMAT,
+                    e.getMessage(), e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
+    private String parseAccessToken(ResponseEntity<String> response) {
         String responseBody = parseResponseBody(response);
         // JSON 응답 파싱
         try {
@@ -99,8 +144,7 @@ public class KakaoService implements SocialLoginService {
         }
     }
 
-    @Override
-    public HttpEntity<MultiValueMap<String, String>> makeMemberInfoRequest(String accessToken) {
+    private HttpEntity<MultiValueMap<String, String>> makeMemberInfoRequest(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_ATTRIBUTE_NAME_AUTH, HEADER_TOKEN_PREFIX + accessToken);
         headers.add(CONTENT_TYPE_HEADER_NAME, CONTENT_TYPE_HEADER_VALUE);
@@ -108,8 +152,7 @@ public class KakaoService implements SocialLoginService {
         return new HttpEntity<>(headers);
     }
 
-    @Override
-    public String getClientId(ResponseEntity<String> response) {
+    private String parseClientId(ResponseEntity<String> response) {
         String responseBody = parseResponseBody(response);
         String clientId;
         try {
