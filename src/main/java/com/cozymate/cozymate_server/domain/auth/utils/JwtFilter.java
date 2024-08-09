@@ -26,7 +26,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
-
     // JWT 검증을 제외할 URL 목록
     private static final List<String> EXCLUDE_URLS = Arrays.asList(
             "/oauth2/kakao/sign-in",

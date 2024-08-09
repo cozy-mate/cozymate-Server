@@ -45,10 +45,10 @@ public class MemberCommandService {
     }
 
     public MemberResponseDTO.MemberInfoDTO getMemberInfo(MemberDetails memberDetails) {
-        return MemberConverter.toMemberInfoDTO(memberDetails.getMember());
+        return MemberConverter.toMemberInfoDTO(memberDetails.member());
     }
 
     public void withdraw(MemberDetails memberDetails){
-        memberRepository.delete(memberDetails.getMember());
+        memberRepository.delete(memberDetails.member());
     }
 }

@@ -10,8 +10,7 @@ public class ClientIdMaker {
     public static final String DELIMITER = ":";
 
     public static String makeClientId(String memberId, SocialType socialType) {
-        String userName = memberId + DELIMITER + socialType.toString();
-        return userName;
+        return memberId + DELIMITER + socialType.toString();
     }
 
     public static SocialType getSocialTypeInClientId(String clientId) {

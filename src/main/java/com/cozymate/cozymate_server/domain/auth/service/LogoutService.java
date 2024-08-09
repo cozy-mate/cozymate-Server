@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class LogoutService implements LogoutHandler {
-
     private static final Integer TOKEN_BEGIN_INDEX = 7;
     private final JwtUtil jwtUtil;
     private final AuthService authService;

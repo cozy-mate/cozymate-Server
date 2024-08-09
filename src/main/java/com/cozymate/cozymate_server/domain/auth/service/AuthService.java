@@ -63,7 +63,7 @@ public class AuthService implements UserDetailsService {
                 clientId);
     }
     public AuthResponseDTO.TokenResponseDTO generateMemberResponse(MemberDetails memberDetails) {
-        MemberResponseDTO.MemberInfoDTO memberInfoDTO = MemberConverter.toMemberInfoDTO(memberDetails.getMember());
+        MemberResponseDTO.MemberInfoDTO memberInfoDTO = MemberConverter.toMemberInfoDTO(memberDetails.member());
         return AuthConverter.toTokenResponseDTO(
                 memberInfoDTO, MEMBER_TOKEN_MESSAGE, getRefreshToken(memberDetails));
     }

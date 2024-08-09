@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 @RequiredArgsConstructor
 @NoArgsConstructor
 public class TemporaryMember implements UserDetails {
-
     @NonNull
     String clientId;
 

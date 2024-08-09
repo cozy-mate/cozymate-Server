@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 public class KakaoController implements SocialLoginController {
-
-
     private final KakaoService kakaoService;
     private final AuthService authService;
 
@@ -34,7 +32,7 @@ public class KakaoController implements SocialLoginController {
     public ResponseEntity<ApiResponse<UrlDTO>> signIn() {
         UrlDTO url = kakaoService.getRedirectUrl();
 
-        log.info(url.getRedirectUrl());
+        log.info("redirect url: {}",url.getRedirectUrl());
 
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .body(ApiResponse.onSuccess(url));

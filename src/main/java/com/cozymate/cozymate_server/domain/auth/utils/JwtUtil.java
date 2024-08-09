@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class JwtUtil {
-
     public final static String TOKEN_PREFIX = "Bearer ";
 
     public final static String TOKEN_TYPE_CLAIM_NAME = "tokenType";
