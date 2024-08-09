@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
+import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -36,13 +37,20 @@ public class MemberCommandService {
         String token = authService.generateToken(memberDetails.getMember().getClientId());
         return authService.addTokenAtHeader(token);
     }
+    public MemberDetails extractMemberByRefreshToken(String refreshToken){
+        return authService.extractMemberInRefreshToken(refreshToken);
 
-    public MemberResponseDTO.TokenResponseDTO makeBody(MemberDetails memberDetails) {
-        return MemberConverter.toTokenResponseDTO(memberDetails.getMember().getNickname(),
-                authService.getRefreshToken(memberDetails));
+    }
+
+    public AuthResponseDTO.TokenResponseDTO makeTokenBody(MemberDetails memberDetails) {
+        return authService.generateMemberResponse(memberDetails);
     }
 
     public MemberResponseDTO.MemberInfoDTO getMemberInfo(MemberDetails memberDetails) {
         return MemberConverter.toMemberInfoDTO(memberDetails.getMember());
+    }
+
+    public void withdraw(MemberDetails memberDetails){
+        memberRepository.delete(memberDetails.getMember());
     }
 }
