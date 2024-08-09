@@ -57,6 +57,9 @@ public class KakaoService implements SocialLoginService {
     @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
     private String KAKAO_REDIRECT_URI;
 
+    // 테스트 용
+//    private static final String KAKAO_REDIRECT_URI = "http://localhost:8080/oauth2/kakao/code";
+
     @Value("${spring.security.oauth2.client.provider.kakao.token-uri}")
     private String TOKEN_URI;
     @Value("${spring.security.oauth2.client.provider.kakao.authorization-uri}")
