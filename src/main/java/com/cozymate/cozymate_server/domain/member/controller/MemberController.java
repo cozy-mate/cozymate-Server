@@ -8,8 +8,8 @@ import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
-
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +63,7 @@ public class MemberController {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
         }
         MemberDetails memberDetails = memberCommandService.join(clientId, joinRequestDTO);
+
         HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
         AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeTokenBody(memberDetails);
 
@@ -77,9 +78,11 @@ public class MemberController {
     ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> reissue(
             @RequestHeader(value = "Refresh") String refreshToken
     ) {
-        MemberDetails memberDetails = memberCommandService.extractMemberByRefreshToken(refreshToken);
+        MemberDetails memberDetails = memberCommandService.extractMemberDetailsByRefreshToken(refreshToken);
+
         HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
         AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeTokenBody(memberDetails);
+
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .headers(headers)
                 .body(ApiResponse.onSuccess(tokenResponseDTO));
@@ -104,7 +107,7 @@ public class MemberController {
     @Operation(summary = "[말즈] 회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
     @DeleteMapping("/withdraw")
     public ResponseEntity<ApiResponse<String>> withdraw(@AuthenticationPrincipal MemberDetails memberDetails) {
-        // todo : 회원 탈퇴 api 구현
+        memberCommandService.withdraw(memberDetails);
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
                 .body(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }

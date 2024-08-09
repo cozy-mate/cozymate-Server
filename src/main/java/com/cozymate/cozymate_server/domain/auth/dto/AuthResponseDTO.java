@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.auth.dto;
 
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

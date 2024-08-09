@@ -4,7 +4,6 @@ import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,10 +17,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class LogoutService implements LogoutHandler {
-
+    private static final Integer TOKEN_BEGIN_INDEX = 7;
     private final JwtUtil jwtUtil;
     private final AuthService authService;
-
     @Override
     public void logout(
             HttpServletRequest request,
@@ -33,9 +31,9 @@ public class LogoutService implements LogoutHandler {
         if (authHeader == null ||!authHeader.startsWith(JwtUtil.TOKEN_PREFIX)) {
             return;
         }
-        jwt = authHeader.substring(7);
+        jwt = authHeader.substring(TOKEN_BEGIN_INDEX);
         String username = jwtUtil.extractUserName(jwt);
-        log.info("username: {}", username);
+        log.info("logout: {}", username);
         authService.deleteRefreshToken(username);
         SecurityContextHolder.clearContext();
     }

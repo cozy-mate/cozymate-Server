@@ -12,9 +12,9 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class JwtUtil {
-
     public final static String TOKEN_PREFIX = "Bearer ";
 
     public final static String TOKEN_TYPE_CLAIM_NAME = "tokenType";
@@ -107,7 +106,6 @@ public class JwtUtil {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
 
     //토큰이 유효한지 확인
     public boolean isTokenValid(String token, String userName) {

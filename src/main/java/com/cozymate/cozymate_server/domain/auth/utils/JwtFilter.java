@@ -2,13 +2,14 @@ package com.cozymate.cozymate_server.domain.auth.utils;
 
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.util.Arrays;
 import java.util.List;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,13 +21,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
-
     // JWT 검증을 제외할 URL 목록
     private static final List<String> EXCLUDE_URLS = Arrays.asList(
             "/oauth2/kakao/sign-in",
@@ -41,6 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/v3/member/check-nickname"
     );
 
+    private static final Integer TOKEN_BEGIN_INDEX = 7;
     private static final String REQUEST_ATTRIBUTE_NAME_CLIENT_ID = "client_id";
 
     private final JwtUtil jwtUtil; // JWT 토큰 발급 검증 클래스
@@ -67,7 +67,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             // Authorization 헤더에서 JWT를 추출
-            String jwt = authHeader.substring(7);
+            String jwt = authHeader.substring(TOKEN_BEGIN_INDEX);
             // JWT를 검증
             jwtUtil.validateToken(jwt);
 
