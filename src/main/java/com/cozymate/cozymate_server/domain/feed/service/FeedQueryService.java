@@ -26,13 +26,14 @@ public class FeedQueryService {
 
     private final FeedRepository feedRepository;
     private final MateRepository mateRepository;
-    public FeedResponseDTO getFeedInfo(Member member, Long roomId){
 
-        if(!mateRepository.existsByMemberIdAndRoomId(member.getId(),roomId)){
+    public FeedResponseDTO getFeedInfo(Member member, Long roomId) {
+
+        if (!mateRepository.existsByMemberIdAndRoomId(member.getId(), roomId)) {
             throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
 
-        if(!feedRepository.existsByRoomId(roomId)){
+        if (!feedRepository.existsByRoomId(roomId)) {
             throw new GeneralException(ErrorStatus._FEED_NOT_EXISTS);
         }
 

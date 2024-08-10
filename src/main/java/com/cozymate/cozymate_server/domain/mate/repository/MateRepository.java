@@ -14,5 +14,5 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Optional<Mate> findByMemberIdAndRoomId(Long MemberId, Long RoomId);
 
-    boolean existsByMemberIdAndRoomId(Long memberId, Long RoomId);
+    boolean existsByMemberIdAndRoomId(Long MemberId, Long RoomId);
 }

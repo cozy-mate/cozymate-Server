@@ -7,7 +7,6 @@ import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
-import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -28,7 +27,6 @@ public class FeedCommandService {
 
     // 피드로 들어올 수 있는 화면이,
     // 방이 활성화 되어야지만 들어오게 설계되어,
-    // 이미 활성화 된 방이라고 가정,
     // 엄격하게 예외처리하지 않았습니다.
 
     public Long createFeedInfo(Member member, FeedRequestDTO feedRequestDTO) {
@@ -36,10 +34,6 @@ public class FeedCommandService {
         Room room = roomRepository.findById(feedRequestDTO.getRoomId()).orElseThrow(
             () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND)
         );
-
-        if (room.getStatus().equals(RoomStatus.WAITING)) {
-            throw new GeneralException(ErrorStatus._ROOM_WAITING);
-        }
 
         if (!mateRepository.existsByMemberIdAndRoomId(member.getId(), feedRequestDTO.getRoomId())) {
             throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
@@ -59,18 +53,10 @@ public class FeedCommandService {
 
     public Long updateFeedInfo(Member member, FeedRequestDTO feedRequestDTO) {
 
-        Room room = roomRepository.findById(feedRequestDTO.getRoomId()).orElseThrow(
-            () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND)
-        );
-
-        if (room.getStatus().equals(RoomStatus.WAITING)) {
-            throw new GeneralException(ErrorStatus._ROOM_WAITING);
-        }
-
         if (!mateRepository.existsByMemberIdAndRoomId(member.getId(), feedRequestDTO.getRoomId())) {
             throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
         }
-        if(!feedRepository.existsByRoomId(feedRequestDTO.getRoomId())) {
+        if (!feedRepository.existsByRoomId(feedRequestDTO.getRoomId())) {
             throw new GeneralException(ErrorStatus._FEED_NOT_EXISTS);
         }
 
