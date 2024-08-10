@@ -6,8 +6,6 @@ import com.cozymate.cozymate_server.domain.feed.dto.FeedResponseDTO;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
