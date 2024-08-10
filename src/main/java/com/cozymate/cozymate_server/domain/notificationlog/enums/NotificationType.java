@@ -74,7 +74,7 @@ public enum NotificationType {
         public String generateContent(NotificationContentDto notificationContentDto) {
             return notificationContentDto.getMember().getNickname() + "님, 오늘 "
                 + notificationContentDto.getRoleContent()
-                + "잊지 않으셨죠?";
+                + " 잊지 않으셨죠?";
         }
     },
 
