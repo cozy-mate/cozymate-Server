@@ -17,11 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-/**
- * 비동기로 구현했기 때문에 비동기 메서드가 호출되면 메인 스레드가 아닌 새로운 스레드에서 실행되므로
- * 만약 비동기 메서드를 호출한 쪽의 트랜잭션이 커밋되거나 롤백이 될 수있다.
- */
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,14 +33,12 @@ public class NotificationService {
         if (target.getTodoContents() != null) {
             sendNotificationToMember(member, target.getNotificationType(),
                 target.getTodoContents());
-        }
-        if (target.getRoleContent() != null) {
+        } else if (target.getRoleContent() != null) {
             sendNotificationToMember(member, target.getNotificationType(),
                 target.getRoleContent());
+        } else {
+            sendNotificationToMember(member, target.getNotificationType());
         }
-        sendNotificationToMember(member, target.getNotificationType());
-
-
     }
 
     @Async
@@ -146,7 +139,6 @@ public class NotificationService {
 
     private Message createMessage(Member member, NotificationType notificationType) {
         String token = member.getToken();
-
         String content = getContent(member, notificationType);
 
         Notification notification = Notification.builder()
@@ -164,7 +156,6 @@ public class NotificationService {
     private Message createMessage(Member contentMember, Member recipientMember,
         NotificationType notificationType) {
         String token = recipientMember.getToken();
-
         String content = getContent(contentMember, notificationType);
 
         Notification notification = Notification.builder()
@@ -182,7 +173,6 @@ public class NotificationService {
     private Message createMessage(Member member, NotificationType notificationType,
         List<String> todoContents) {
         String token = member.getToken();
-
         String content = getContent(member, notificationType, todoContents);
 
         Notification notification = Notification.builder()
@@ -200,7 +190,6 @@ public class NotificationService {
     private Message createMessage(Member member, NotificationType notificationType,
         String roleContent) {
         String token = member.getToken();
-
         String content = getContent(member, notificationType, roleContent);
 
         Notification notification = Notification.builder()
@@ -215,11 +204,9 @@ public class NotificationService {
             .build();
     }
 
-
     private String getContent(Member member, NotificationType notificationType) {
         return notificationType.generateContent(NotificationContentDto.create(member));
     }
-
 
     private String getContent(Member member, NotificationType notificationType,
         String roleContent) {
