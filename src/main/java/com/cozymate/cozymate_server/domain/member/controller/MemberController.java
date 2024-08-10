@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -42,6 +41,7 @@ public class MemberController {
             description = "false : 사용 불가, true : 사용 가능")
     ResponseEntity<ApiResponse<Boolean>> checkNickname(@RequestParam String nickname) {
         Boolean isValid = memberCommandService.checkNickname(nickname);
+
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(isValid));
     }
 
@@ -64,12 +64,9 @@ public class MemberController {
         }
         MemberDetails memberDetails = memberCommandService.join(clientId, joinRequestDTO);
 
-        HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
-        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeTokenBody(memberDetails);
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.generateTokenDTO(memberDetails);
 
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .headers(headers)
-                .body(ApiResponse.onSuccess(tokenResponseDTO));
+        return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
     }
 
     @GetMapping("/reissue")
@@ -80,12 +77,9 @@ public class MemberController {
     ) {
         MemberDetails memberDetails = memberCommandService.extractMemberDetailsByRefreshToken(refreshToken);
 
-        HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
-        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeTokenBody(memberDetails);
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.generateTokenDTO(memberDetails);
 
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .headers(headers)
-                .body(ApiResponse.onSuccess(tokenResponseDTO));
+        return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
     }
 
     @GetMapping("/member-info")
@@ -95,7 +89,8 @@ public class MemberController {
             @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         MemberResponseDTO.MemberInfoDTO memberInfoDTO = memberCommandService.getMemberInfo(memberDetails);
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(memberInfoDTO));
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(memberInfoDTO));
     }
 
     @Operation(summary = "[말즈] 로그아웃",
@@ -108,8 +103,8 @@ public class MemberController {
     @DeleteMapping("/withdraw")
     public ResponseEntity<ApiResponse<String>> withdraw(@AuthenticationPrincipal MemberDetails memberDetails) {
         memberCommandService.withdraw(memberDetails);
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .body(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
+
+        return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
 
 
