@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import static com.cozymate.cozymate_server.domain.memberstat.QMemberStat.memberStat;
+import static com.cozymate.cozymate_server.domain.member.QMember.member;
 
 @RequiredArgsConstructor
 @Repository
@@ -27,16 +28,24 @@ public class MemberStatQueryRepositoryImpl implements
     @Override
     public List<MemberStat> getFilteredMemberStat(List<String> filterList, MemberStat criteriaMemberStat) {
         JPAQuery<MemberStat> baseQuery = queryFactory.selectFrom(memberStat);
+
         BooleanBuilder builder = new BooleanBuilder();
 
         //criteriaMemberStat은 제외하기
         builder.and(memberStat.id.ne(criteriaMemberStat.getId()));
+        //성별이 틀리면 제외
+        builder.and(member.gender.eq(criteriaMemberStat.getMember().getGender()));
+        // 대학이 틀리면 제외
+        builder.and(memberStat.university.id.eq(criteriaMemberStat.getUniversity().getId()));
 
         if (filterList != null) {
             filterList.forEach(filter -> applyFilter(builder, filter, criteriaMemberStat));
         }
 
-        return baseQuery.where(builder).fetch();
+        return baseQuery
+            .join(memberStat.member, member)
+            .where(builder)
+            .fetch();
     }
 
     private void applyFilter(BooleanBuilder builder, String filter, MemberStat criteriaMemberStat) {
