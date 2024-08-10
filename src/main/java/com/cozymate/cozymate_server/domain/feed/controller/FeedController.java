@@ -37,8 +37,7 @@ public class FeedController {
     )
     @SwaggerApiError({
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._ROOM_WAITING,
-        ErrorStatus._MATE_NOT_FOUND,
+        ErrorStatus._MATE_OR_ROOM_NOT_FOUND,
         ErrorStatus._FEED_EXISTS
     })
     @PostMapping("")
@@ -55,9 +54,7 @@ public class FeedController {
         description = "사용자의 토큰을 넣어 사용하고, body로 룸 ID와 피드 상세정보를 넣어 사용합니다.\n\n"
     )
     @SwaggerApiError({
-        ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._ROOM_WAITING,
-        ErrorStatus._MATE_NOT_FOUND,
+        ErrorStatus._MATE_OR_ROOM_NOT_FOUND,
         ErrorStatus._FEED_NOT_EXISTS
     })
     @PutMapping("")

@@ -36,7 +36,7 @@ public class FeedCommandService {
         );
 
         if (!mateRepository.existsByMemberIdAndRoomId(member.getId(), feedRequestDTO.getRoomId())) {
-            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
+            throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
 
         // 피드가 이미 존재할 경우
@@ -54,7 +54,7 @@ public class FeedCommandService {
     public Long updateFeedInfo(Member member, FeedRequestDTO feedRequestDTO) {
 
         if (!mateRepository.existsByMemberIdAndRoomId(member.getId(), feedRequestDTO.getRoomId())) {
-            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
+            throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
         if (!feedRepository.existsByRoomId(feedRequestDTO.getRoomId())) {
             throw new GeneralException(ErrorStatus._FEED_NOT_EXISTS);
