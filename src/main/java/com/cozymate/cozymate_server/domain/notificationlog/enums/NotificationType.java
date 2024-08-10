@@ -1,8 +1,9 @@
 package com.cozymate.cozymate_server.domain.notificationlog.enums;
 
-import com.cozymate.cozymate_server.global.fcm.NotificationContentVO;
+import com.cozymate.cozymate_server.global.fcm.NotificationContentDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,158 +11,95 @@ import lombok.Getter;
 @Getter
 public enum NotificationType {
 
-    // TwoTargetVO
-    ROOM_MATE_REQUEST_FROM(NotificationCategory.ROOM_MATE) {
+    // OneTargetReverse
+    COZY_MATE_REQUEST_FROM(NotificationCategory.COZY_MATE) {
         @Override
-        public String generateContent(NotificationContentVO notificationContentVo) {
-            return notificationContentVo.getMember().getNickname() + "님에게서 룸메이트 신청이 도착했어요!";
+        public String generateContent(NotificationContentDto notificationContentDto) {
+            return notificationContentDto.getMember().getNickname() + "님에게서 코지메이트 신청이 도착했어요!";
         }
     },
 
-    // TwoTargetVO
-    ROOM_MATE_REQUEST_TO(NotificationCategory.ROOM_MATE) {
+    // OneTargetReverse
+    COZY_MATE_REQUEST_TO(NotificationCategory.COZY_MATE) {
         @Override
-        public String generateContent(NotificationContentVO notificationContentVo) {
-            return notificationContentVo.getMember().getNickname() + "님에게 룸메이트 신청을 보냈어요!";
+        public String generateContent(NotificationContentDto notificationContentDto) {
+            return notificationContentDto.getMember().getNickname() + "님에게 코지메이트 신청을 보냈어요!";
         }
     },
 
-    // OneTargetReverseVO
-    ROOM_MATE_ACCEPTED(NotificationCategory.ROOM_MATE) {
+    // OneTargetReverse
+    COZY_MATE_REQUEST_ACCEPT(NotificationCategory.COZY_MATE) {
         @Override
-        public String generateContent(NotificationContentVO notificationContentVo) {
-            return notificationContentVo.getMember().getNickname() + "님이 룸메이트 신청을 수락했어요!";
+        public String generateContent(NotificationContentDto notificationContentDto) {
+            return notificationContentDto.getMember().getNickname() + "님이 코지메이트 신청을 수락했어요!";
         }
     },
 
-    // OneTargetReverseVO
-    ROOM_MATE_REJECTED(NotificationCategory.ROOM_MATE) {
+    // GroupTargetDto
+    ROOM_CREATED(NotificationCategory.COZY_HOME) {
         @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getMember().getNickname() + "님이 룸메이트 신청을 거절했어요!";
+        public String generateContent(NotificationContentDto notificationContentDto) {
+            return "방이 열렸어요, 얼른 가서 코지메이트를 만나봐요!";
         }
     },
 
-    // OneTargetVO
-    ROOM_JOINED(NotificationCategory.ROOM_MATE) {
+    // OneTarget -> 투표가 완료되면 알림 -> 해당 투표 요청이 마지막 투표자인지 체크하고 사용
+    BEST_COZY_MATE(NotificationCategory.COZY_HOME) {
         @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getRoomName() + " 방에 입장했어요!";
-        }
-    },
-
-    // OneTargetReverseVO
-    ROOM_INVITE_REJECTED(NotificationCategory.ROOM_MATE) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getMember().getNickname() + "님이 방 초대를 거절했어요.";
-        }
-    },
-
-    // GroupTargetVO
-    ROOM_CREATED(NotificationCategory.ROOM_MATE) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getMember().getNickname() + "님, cozymate가 모두 모여, 방이 열렸어요!";
-        }
-    },
-
-    // OneTargetReverseVO
-    CHAT_RECEIVED(NotificationCategory.CHAT) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getMember().getNickname() + "님에게서 쪽지가 도착했어요!";
-        }
-    },
-
-    // OneTargetVO
-    LAUNDRY_REMINDER(NotificationCategory.COZY_HOME) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getMember().getNickname() + "님, 오늘 빨래 당번 잊지 않으셨죠?";
-        }
-    },
-
-    // OneTargetVO
-    CLEANING_REMINDER(NotificationCategory.COZY_HOME) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getMember().getNickname() + "님, 화장실 청소 까먹으신거 아니죠?";
-        }
-    },
-
-    // OneTargetVO
-    DISH_REMINDER(NotificationCategory.COZY_HOME) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getMember().getNickname() + "님, 오늘은 설거지 하는 날이에요!";
-        }
-    },
-
-    // OneTargetVO
-    BEST_ROOM_MATE(NotificationCategory.COZY_HOME) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
+        public String generateContent(NotificationContentDto notificationContentDto) {
             LocalDateTime now = LocalDateTime.now();
             String month = now.format(DateTimeFormatter.ofPattern("M월"));
             return String.format(
-                notificationContentVO.getMember().getNickname() + "님, %s Best 룸메이트로 선정되셨어요!",
+                notificationContentDto.getMember().getNickname() + "님, %s Best 코지메이트로 선정되셨어요!",
                 month);
         }
     },
 
-    ROOM_CLOSED(NotificationCategory.COZY_HOME) {
+    // OneTarget, 스케줄러
+    SELECT_COZY_MATE(NotificationCategory.COZY_HOME) {
         @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getRoomName() + " 방이 오늘부로 종로됐어요...";
-        }
-    },
-
-    ROOM_LEFT(NotificationCategory.ROOM_MATE) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            String nickname = notificationContentVO.getMember().getNickname();
-            String roomName = notificationContentVO.getRoomName();
-            return roomName + " 방에서 " + nickname + "님이 떠났어요..";
-        }
-    },
-
-    COZY_MATE_RENEWAL(NotificationCategory.COZY_HOME) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            return notificationContentVO.getMember().getNickname() + "님, cozymate가 새롭게 리뉴얼 됐어요";
-        }
-    },
-
-    BEST_SELECTED(NotificationCategory.COZY_HOME) {
-        @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
+        public String generateContent(NotificationContentDto notificationContentDto) {
             LocalDateTime now = LocalDateTime.now();
             String month = now.format(DateTimeFormatter.ofPattern("M월"));
             return String.format(
-                notificationContentVO.getMember().getNickname()
-                    + "님, %s의 Best, Worst 코지메이트가 선정됐어요!\n지금 바로 확인해볼까요?",
+                notificationContentDto.getMember().getNickname()
+                    + "님, %s Best, Worst 코지메이트를 선정해주세요!",
                 month);
         }
     },
 
-    SELECT_COZYMATE(NotificationCategory.COZY_HOME) {
+    // OneTarget, 스케줄러
+    REMINDER_ROLE(NotificationCategory.COZY_ROLE) {
         @Override
-        public String generateContent(NotificationContentVO notificationContentVO) {
-            LocalDateTime now = LocalDateTime.now();
-            String month = now.format(DateTimeFormatter.ofPattern("M월"));
-            return String.format(
-                notificationContentVO.getMember().getNickname()
-                    + "님, %s의 Best, Worst 코지메이트를 선정해주세요!",
-                month);
+        public String generateContent(NotificationContentDto notificationContentDto) {
+            return notificationContentDto.getMember().getNickname() + "님, 오늘 "
+                + notificationContentDto.getRoleContent()
+                + "잊지 않으셨죠?";
         }
-    };;
+    },
+
+    // OneTarget, 스케줄러
+    TODO_LIST(NotificationCategory.COZY_ROLE) {
+        @Override
+        public String generateContent(NotificationContentDto notificationContentDto) {
+            StringBuilder builder = new StringBuilder();
+
+            List<String> todoContents = notificationContentDto.getTodoContents();
+            todoContents.forEach(
+                todoContent -> builder.append("\n• ").append(todoContent)
+            );
+
+            return notificationContentDto.getMember().getNickname() + "님, 오늘 해야할 일이에요!"
+                + builder.toString();
+        }
+    },
+    ;
 
     private NotificationCategory category;
 
-    public abstract String generateContent(NotificationContentVO notificationContentVO);
+    public abstract String generateContent(NotificationContentDto notificationContentDto);
 
     public enum NotificationCategory {
-        COZY_HOME, CHAT, ROOM_MATE
+        COZY_HOME, COZY_MATE, COZY_ROLE
     }
 }

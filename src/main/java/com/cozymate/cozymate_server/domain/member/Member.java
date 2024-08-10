@@ -45,4 +45,6 @@ public class Member extends BaseTimeEntity {
     @OneToOne(mappedBy = "member")
     private MemberStat memberStat;
 
+    private String token;
+
 }
