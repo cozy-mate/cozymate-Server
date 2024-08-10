@@ -5,14 +5,12 @@ import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO.UrlDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.service.KakaoService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
-import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 
 import io.swagger.v3.oas.annotations.Operation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,10 +30,9 @@ public class KakaoController implements SocialLoginController {
     public ResponseEntity<ApiResponse<UrlDTO>> signIn() {
         UrlDTO url = kakaoService.getRedirectUrl();
 
-        log.info("redirect url: {}",url.getRedirectUrl());
+        log.info("redirect url: {}", url.getRedirectUrl());
 
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .body(ApiResponse.onSuccess(url));
+        return ResponseEntity.ok(ApiResponse.onSuccess(url));
     }
 
     @Override
@@ -50,15 +47,11 @@ public class KakaoController implements SocialLoginController {
         // 토큰을 통해 사용자 정보 조회
         String clientId = kakaoService.getClientIdByToken(token);
 
-        HttpHeaders headers = authService.generateTokenHeader(clientId);
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = authService.generateTokenDTO(clientId);
 
-        AuthResponseDTO.TokenResponseDTO socialLoginDTO = authService.socialLogin(clientId); // 바디
+        log.info("소셜로그인 사용자: {}", tokenResponseDTO.getMemberInfoDTO().getNickname());
 
-        log.info("소셜로그인 사용자: {}", socialLoginDTO.getMemberInfoDTO().getNickname());
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(ApiResponse.onSuccess(socialLoginDTO));
+        return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
 
     }
 
