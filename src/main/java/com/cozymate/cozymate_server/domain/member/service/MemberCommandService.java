@@ -11,7 +11,6 @@ import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,22 +32,19 @@ public class MemberCommandService {
         return new MemberDetails(member);
     }
 
-    public HttpHeaders makeHeader(MemberDetails memberDetails) {
-        return authService.generateTokenHeader(memberDetails.getUsername());
-    }
     public MemberDetails extractMemberDetailsByRefreshToken(String refreshToken){
         return authService.extractMemberDetailsInRefreshToken(refreshToken);
     }
 
-    public AuthResponseDTO.TokenResponseDTO makeTokenBody(MemberDetails memberDetails) {
-        return authService.generateMemberResponse(memberDetails);
+    public AuthResponseDTO.TokenResponseDTO generateTokenDTO(MemberDetails memberDetails) {
+        return authService.generateTokenDTO(memberDetails.getUsername());
     }
 
     public MemberResponseDTO.MemberInfoDTO getMemberInfo(MemberDetails memberDetails) {
-        return MemberConverter.toMemberInfoDTO(memberDetails.member());
+        return MemberConverter.toMemberInfoDTO(memberDetails.getMember());
     }
 
     public void withdraw(MemberDetails memberDetails){
-        memberRepository.delete(memberDetails.member());
+        memberRepository.delete(memberDetails.getMember());
     }
 }
