@@ -12,9 +12,9 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class JwtUtil {
-
     public final static String TOKEN_PREFIX = "Bearer ";
 
     public final static String TOKEN_TYPE_CLAIM_NAME = "tokenType";
@@ -49,6 +48,9 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Boolean equalsTokenTypeWith(String token, TokenType tokenType){
+        return extractTokenType(token).equals(tokenType.toString());
+    }
     public String extractTokenType(String token) {
         return extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM_NAME, String.class));
     }
@@ -82,17 +84,6 @@ public class JwtUtil {
                 .parseClaimsJws(token);
     }
 
-    public Boolean isTemporaryToken(String token) {
-        String tokenTypeName =
-                Jwts.parserBuilder()
-                        .setSigningKey(getSignInKey()) // jwtSecret은 토큰 서명에 사용되는 비밀 키
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody()
-                        .get(TOKEN_TYPE_CLAIM_NAME, String.class);
-
-        return (TokenType.valueOf(tokenTypeName).equals(TokenType.TEMPORARY));
-    }
 
 
     // 주어진 클레임, 사용자 정보, 그리고 만료 시간을 바탕으로 JWT 토큰을 생성
@@ -107,7 +98,6 @@ public class JwtUtil {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
 
     //토큰이 유효한지 확인
     public boolean isTokenValid(String token, String userName) {
