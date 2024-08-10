@@ -48,6 +48,9 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Boolean equalsTokenTypeWith(String token, TokenType tokenType){
+        return extractTokenType(token).equals(tokenType.toString());
+    }
     public String extractTokenType(String token) {
         return extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM_NAME, String.class));
     }
@@ -81,17 +84,6 @@ public class JwtUtil {
                 .parseClaimsJws(token);
     }
 
-    public Boolean isTemporaryToken(String token) {
-        String tokenTypeName =
-                Jwts.parserBuilder()
-                        .setSigningKey(getSignInKey()) // jwtSecret은 토큰 서명에 사용되는 비밀 키
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody()
-                        .get(TOKEN_TYPE_CLAIM_NAME, String.class);
-
-        return (TokenType.valueOf(tokenTypeName).equals(TokenType.TEMPORARY));
-    }
 
 
     // 주어진 클레임, 사용자 정보, 그리고 만료 시간을 바탕으로 JWT 토큰을 생성

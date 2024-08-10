@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,7 +72,7 @@ public class MemberController {
     @Operation(summary = "[말즈] 토큰 재발행",
             description = "request Header : Bearer refreshToken")
     ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> reissue(
-            @RequestHeader(value = "Refresh") String refreshToken
+            @RequestAttribute("refresh") String refreshToken
     ) {
         MemberDetails memberDetails = memberCommandService.extractMemberDetailsByRefreshToken(refreshToken);
 
@@ -101,7 +100,8 @@ public class MemberController {
 
     @Operation(summary = "[말즈] 회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
     @DeleteMapping("/withdraw")
-    public ResponseEntity<ApiResponse<String>> withdraw(@AuthenticationPrincipal MemberDetails memberDetails) {
+    public ResponseEntity<ApiResponse<String>> withdraw(
+            @AuthenticationPrincipal MemberDetails memberDetails) {
         memberCommandService.withdraw(memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));

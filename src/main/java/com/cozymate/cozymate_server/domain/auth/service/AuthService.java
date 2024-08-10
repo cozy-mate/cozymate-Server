@@ -49,9 +49,25 @@ public class AuthService implements UserDetailsService {
         String clientId = jwtUtil.extractUserName(refreshToken);
         return new MemberDetails(memberQueryService.findByClientId(clientId));
     }
+    @Override
+    public UserDetails loadUserByUsername(String clientId) {
+        if (memberQueryService.isPresent(clientId)) {
+            return loadMember(clientId);
+        } else {
+            return loadTemporaryMember(clientId);
+        }
+    }
+
+    private MemberDetails loadMember(String clientId) {
+        return new MemberDetails(memberQueryService.findByClientId(clientId));
+    }
+
+    private TemporaryMember loadTemporaryMember(String clientId) {
+        return new TemporaryMember(clientId);
+    }
 
     private AuthResponseDTO.TokenResponseDTO generateTemporaryTokenDTO(String clientId) {
-        TemporaryMember temporaryMember = new TemporaryMember(clientId);
+        TemporaryMember temporaryMember = loadTemporaryMember(clientId);
 
         MemberResponseDTO.MemberInfoDTO temporaryMemberInfo = generateTemporaryMemberInfo();
 
@@ -62,7 +78,7 @@ public class AuthService implements UserDetailsService {
     }
 
     private AuthResponseDTO.TokenResponseDTO generateMemberTokenDTO(String clientId) {
-        MemberDetails memberDetails = loadUserByUsername(clientId);
+        MemberDetails memberDetails = loadMember(clientId);
 
         MemberResponseDTO.MemberInfoDTO memberInfoDTO = MemberConverter.toMemberInfoDTO(memberDetails.getMember());
 
@@ -85,10 +101,6 @@ public class AuthService implements UserDetailsService {
         return token.getRefreshToken();
     }
 
-    @Override
-    public MemberDetails loadUserByUsername(String clientId) {
-        return new MemberDetails(memberQueryService.findByClientId(clientId));
-    }
 
     private String generateTemporaryToken(UserDetails userDetails) {
         return jwtUtil.generateTemporaryToken(userDetails);

@@ -74,7 +74,6 @@ public class KakaoService implements SocialLoginService {
                 .build()
                 .toString();
 
-        log.info(url);
         return AuthResponseDTO.UrlDTO.builder().redirectUrl(url).build();
     }
 
