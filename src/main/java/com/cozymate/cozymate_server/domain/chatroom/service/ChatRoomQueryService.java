@@ -7,7 +7,7 @@ import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositor
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.member.MemberRepository;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
