@@ -1,5 +1,6 @@
-package com.cozymate.cozymate_server.domain.post;
+package com.cozymate.cozymate_server.domain.post.repository;
 
+import com.cozymate.cozymate_server.domain.post.Post;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
