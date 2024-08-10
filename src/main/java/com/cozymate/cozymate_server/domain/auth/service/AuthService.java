@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -32,18 +31,18 @@ public class AuthService implements UserDetailsService {
     public static final String TEMPORARY_TOKEN_SUCCESS_MESSAGE = "임시 토큰 발급 완료";
 
     public static final String MEMBER_TOKEN_MESSAGE = "기존 사용자 토큰 발급 성공";
-
-    public static final String TOKEN_HEADER_NAME = "Authorization";
-
     private final JwtUtil jwtUtil;
     private final MemberQueryService memberQueryService;
     private final TokenRepository tokenRepository;
 
-
-    // accessToken, refreshToken 둘다 생성
-    public HttpHeaders generateTokenHeader(String clientId) {
-        String token = generateToken(clientId);
-        return addTokenAtHeader(token);
+    // 기존에 있는 회원이면 AccessToken, 임시회원이면 TempToken 발급
+    public AuthResponseDTO.TokenResponseDTO generateTokenDTO(String clientId) {
+        // 이미 회원인 경우
+        if (memberQueryService.isPresent(clientId)) {
+            return generateMemberTokenDTO(clientId);
+        }
+        // 새로 가입한 경우
+        return generateTemporaryTokenDTO(clientId);
     }
 
     public MemberDetails extractMemberDetailsInRefreshToken(String refreshToken) {
@@ -51,42 +50,33 @@ public class AuthService implements UserDetailsService {
         return new MemberDetails(memberQueryService.findByClientId(clientId));
     }
 
-    public AuthResponseDTO.TokenResponseDTO socialLogin(String clientId) {
-        // 이미 회원인 경우
-        if (memberQueryService.isPresent(clientId)) {
-            MemberDetails memberDetails = loadMember(clientId);
-            return generateMemberResponse(memberDetails);
-        }
-        // 새로 가입한 경우
-        MemberResponseDTO.MemberInfoDTO temporaryMemberInfo = generateTemporaryMember();
-        return AuthConverter.toTokenResponseDTO(temporaryMemberInfo, TEMPORARY_TOKEN_SUCCESS_MESSAGE,
-                clientId);
+    private AuthResponseDTO.TokenResponseDTO generateTemporaryTokenDTO(String clientId) {
+        TemporaryMember temporaryMember = new TemporaryMember(clientId);
+
+        MemberResponseDTO.MemberInfoDTO temporaryMemberInfo = generateTemporaryMemberInfo();
+
+        String temporaryToken = generateTemporaryToken(temporaryMember);
+
+        return AuthConverter.toTemporaryTokenResponseDTO(temporaryMemberInfo, TEMPORARY_TOKEN_SUCCESS_MESSAGE,
+                temporaryToken);
     }
-    public AuthResponseDTO.TokenResponseDTO generateMemberResponse(MemberDetails memberDetails) {
-        MemberResponseDTO.MemberInfoDTO memberInfoDTO = MemberConverter.toMemberInfoDTO(memberDetails.member());
+
+    private AuthResponseDTO.TokenResponseDTO generateMemberTokenDTO(String clientId) {
+        MemberDetails memberDetails = loadUserByUsername(clientId);
+
+        MemberResponseDTO.MemberInfoDTO memberInfoDTO = MemberConverter.toMemberInfoDTO(memberDetails.getMember());
+
+        String accessToken = generateAccessToken(memberDetails);
+        String refreshToken = generateRefreshToken(memberDetails);
+
+        log.info("access token: {}", accessToken);
+        log.info("refresh token: {}", refreshToken);
+
         return AuthConverter.toTokenResponseDTO(
-                memberInfoDTO, MEMBER_TOKEN_MESSAGE, getRefreshToken(memberDetails));
+                memberInfoDTO, MEMBER_TOKEN_MESSAGE, accessToken, refreshToken);
     }
 
-    private HttpHeaders addTokenAtHeader(String token) {
-        log.info("발급된 토큰 :" + jwtUtil.extractTokenType(token) + ":" + token);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(TOKEN_HEADER_NAME, JwtUtil.TOKEN_PREFIX + token);
-        return headers;
-    }
-
-    // 기존에 있는 회원이면 AccessToken, 임시회원이면 TempToken 발급
-    private String generateToken(String clientId) {
-        UserDetails userDetails = loadUserByUsername(clientId);
-        // 이미 회원인 경우
-        if (memberQueryService.isPresent(clientId)) {
-            return generateTokenPair(userDetails);
-        }
-        // 새로 가입한 경우
-        return jwtUtil.generateTemporaryToken(userDetails);
-    }
-
-    private MemberResponseDTO.MemberInfoDTO generateTemporaryMember() {
+    private MemberResponseDTO.MemberInfoDTO generateTemporaryMemberInfo() {
         return MemberConverter.toTemporaryInfoDTO("", "", "", "", 0);
     }
 
@@ -95,25 +85,25 @@ public class AuthService implements UserDetailsService {
         return token.getRefreshToken();
     }
 
-    private MemberDetails loadMember(String clientId) {
+    @Override
+    public MemberDetails loadUserByUsername(String clientId) {
         return new MemberDetails(memberQueryService.findByClientId(clientId));
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String clientId) {
-        if (memberQueryService.isPresent(clientId)) {
-            return loadMember(clientId);
-        } else {
-            return new TemporaryMember(clientId);
-        }
+    private String generateTemporaryToken(UserDetails userDetails) {
+        return jwtUtil.generateTemporaryToken(userDetails);
     }
+
+    private String generateAccessToken(UserDetails userDetails) {
+        return jwtUtil.generateAccessToken(userDetails);
+    }
+
     @Transactional
-    String generateTokenPair(UserDetails userDetails) {
-        String accessToken = jwtUtil.generateAccessToken(userDetails);
+    String generateRefreshToken(UserDetails userDetails) {
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
         Token newToken = new Token(userDetails.getUsername(), refreshToken);
         tokenRepository.save(newToken);
-        return accessToken;
+        return refreshToken;
     }
 
 
