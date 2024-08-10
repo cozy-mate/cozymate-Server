@@ -23,6 +23,7 @@ public class AuthResponseDTO {
     @NoArgsConstructor
     public static class TokenResponseDTO {
         String message;
+        String accessToken;
         String refreshToken;
         MemberResponseDTO.MemberInfoDTO memberInfoDTO;
     }
