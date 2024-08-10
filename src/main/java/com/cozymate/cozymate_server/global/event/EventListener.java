@@ -5,7 +5,6 @@ import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.GroupTarget
 import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetDto;
 import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetReverseDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
