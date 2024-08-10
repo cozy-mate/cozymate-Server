@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
 @RequiredArgsConstructor
-@NoArgsConstructor
 public class TemporaryMember implements UserDetails {
     @NonNull
     String clientId;
