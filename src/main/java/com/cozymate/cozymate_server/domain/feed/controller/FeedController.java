@@ -41,7 +41,7 @@ public class FeedController {
         ErrorStatus._FEED_EXISTS
     })
     @PostMapping("")
-    public ResponseEntity<ApiResponse<Long>> createMemberStat(
+    public ResponseEntity<ApiResponse<Long>> createFeedInfo(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid @RequestBody FeedRequestDTO feedRequestDTO) {
         return ResponseEntity.ok(
@@ -58,7 +58,7 @@ public class FeedController {
         ErrorStatus._FEED_NOT_EXISTS
     })
     @PutMapping("")
-    public ResponseEntity<ApiResponse<Long>> updateMemberStat(
+    public ResponseEntity<ApiResponse<Long>> updateFeedInfo(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid @RequestBody FeedRequestDTO feedRequestDTO) {
         return ResponseEntity.ok(
@@ -75,7 +75,7 @@ public class FeedController {
         ErrorStatus._FEED_NOT_EXISTS,
     })
     @GetMapping("/{roomId}")
-    public ResponseEntity<ApiResponse<FeedResponseDTO>> getMemberStat(
+    public ResponseEntity<ApiResponse<FeedResponseDTO>> getFeedInfo(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId) {
         return ResponseEntity.ok(
