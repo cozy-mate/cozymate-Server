@@ -1,5 +1,7 @@
 package com.cozymate.cozymate_server.domain.auth.dto;
 
+import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,19 +19,13 @@ public class AuthResponseDTO {
 
     @Builder
     @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RefreshTokenDTO {
-        String refreshToken;
-    }
-
-    @Builder
-    @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class SocialLoginDTO {
+    public static class TokenResponseDTO {
         String message;
+        String accessToken;
         String refreshToken;
+        MemberResponseDTO.MemberInfoDTO memberInfoDTO;
     }
 
 }

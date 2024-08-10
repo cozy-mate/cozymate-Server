@@ -1,11 +1,14 @@
 package com.cozymate.cozymate_server.domain.auth.utils;
 
+import com.cozymate.cozymate_server.domain.auth.enums.TokenType;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import lombok.NonNull;
+import java.util.List;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,80 +20,119 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
+    // JWT 검증을 제외할 URL 목록
+    private static final List<String> EXCLUDE_URLS = List.of(
+            "/oauth2/kakao/sign-in",
+            "/oauth2/naver/sign-in",
+            "/oauth2/apple/sign-in"
+    );
 
-    private static final String SOCIAL_LOGIN_PATH_PREFIX = "/api/v3/oauth2";
+    // 임시 토큰으로만 접근 가능한 URL 목록
+    private static final List<String> TEMPORARY_URLS = List.of(
+            "/api/v3/member/sign-up",
+            "/api/v3/member/check-nickname"
+    );
+
+    private static final List<String> REFRESH_URLS = List.of("/api/v3/member/reissue");
+    private static final Integer TOKEN_BEGIN_INDEX = 7;
     private static final String REQUEST_ATTRIBUTE_NAME_CLIENT_ID = "client_id";
-    private static final String INVALID_TEMPORARY_TOKEN_MESSAGE = "Invalid temporary token";
-    private static final String INVALID_ACCESS_TOKEN_MESSAGE = "Invalid access token";
 
-    private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
+    private static final String REQUEST_ATTRIBUTE_NAME_REFRESH = "refresh";
+
+    private final JwtUtil jwtUtil; // JWT 토큰 발급 검증 클래스
+    private final UserDetailsService userDetailsService; // 사용자 상세 정보를 로드하는 서비스
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
-        // /api/v3/oauth 는 권한 필요 없는 API 이므로 바로 통과
-        // 토큰 없거나 경로 해당 안하는것들 테스트 해보려면
-        // 다 return 하거나 dofilter 해주거나
-        if (request.getServletPath().contains(SOCIAL_LOGIN_PATH_PREFIX)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        final String authHeader = request.getHeader(JwtUtil.HEADER_ATTRIBUTE_NAME_AUTHORIZATION);
-        final String jwt;
-        final String userName;
-
-        // 헤더에 토큰이 없거나 Bearer 로 시작하지 않으면 통과
-        if (authHeader == null || !authHeader.startsWith(JwtUtil.TOKEN_PREFIX)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        jwt = authHeader.substring(7);
-
-        userName = jwtUtil.extractUserName(jwt);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
-
-        // 임시 Token 검증
-        if (jwtUtil.isTemporaryToken(jwt)) {
-            if (!jwtUtil.isTokenValid(jwt, userDetails.getUsername())) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, INVALID_TEMPORARY_TOKEN_MESSAGE);
+        try {
+            // 요청 URL이 제외할 URL 목록에 있는지 확인
+            if (shouldExclude(request)) {
+                filterChain.doFilter(request, response); // 다음 필터로 진행
                 return;
             }
-            request.setAttribute(REQUEST_ATTRIBUTE_NAME_CLIENT_ID, userDetails.getUsername());
-            filterChain.doFilter(request, response);
-        }
 
-        // Access Token 검증
-        if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtUtil.isTokenValid(jwt, userDetails.getUsername())) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-
-            } else {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, INVALID_ACCESS_TOKEN_MESSAGE);
+            // 요청 헤더에서 Authorization 정보를 가져옴
+            String authHeader = request.getHeader(JwtUtil.HEADER_ATTRIBUTE_NAME_AUTHORIZATION);
+            if (authHeader == null || !authHeader.startsWith(JwtUtil.TOKEN_PREFIX)) {
+                filterChain.doFilter(request, response); // Authorization 헤더가 없거나 잘못된 경우, 다음 필터로 진행
                 return;
             }
+
+            // Authorization 헤더에서 JWT를 추출
+            String jwt = authHeader.substring(TOKEN_BEGIN_INDEX);
+            // JWT를 검증
+            jwtUtil.validateToken(jwt);
+
+            // JWT에서 사용자 이름을 추출하고, 사용자 세부 정보를 로드
+            String userName = jwtUtil.extractUserName(jwt);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+
+            log.info("토큰 타입 : {}", jwtUtil.extractTokenType(jwt));
+
+            // 임시 토큰일 경우, 접근을 제한할 URL 목록에 대한 접근 여부 확인
+            if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.TEMPORARY)) {
+                if (isNotAllowTemporary(request)) {
+                    // 임시토큰 접근 거부 예외
+                    throw new RuntimeException(ErrorStatus._TEMPORARY_TOKEN_ACCESS_DENIED_.getMessage());
+                }
+                request.setAttribute(REQUEST_ATTRIBUTE_NAME_CLIENT_ID, userDetails.getUsername());
+            }
+
+            // 리프레시 토큰일 경우, 접근을 제한할 URL 목록에 대한 접근 여부 확인
+            if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.REFRESH)) {
+                if (isNotAllowRefresh(request)) {
+                    // refresh 토큰 접근 거부 예외
+                    throw new RuntimeException(ErrorStatus._REFRESH_TOKEN_ACCESS_DENIED_.getMessage());
+                }
+                request.setAttribute(REQUEST_ATTRIBUTE_NAME_REFRESH, jwt);
+            }
+
+            // 사용자 정보와 권한을 설정하고 SecurityContext에 인증 정보를 저장
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // 다음 필터로 진행
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            log.error("필터에서 예외 발생 = {}", e.toString());
+            log.error(request.getRequestURI());
+            SecurityContextHolder.clearContext();
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().print("잘못된 토큰");
+
+            log.error(Integer.toString(response.getStatus()));
         }
+    }
 
-        filterChain.doFilter(request, response);
+    // 요청 URL이 제외할 URL 목록에 있는지 확인
+    private boolean shouldExclude(HttpServletRequest request) {
+        return EXCLUDE_URLS.stream().anyMatch(url -> request.getRequestURI().equals(url));
+    }
 
+    // 임시 토큰으로 접근 가능한 URL 목록에 해당하는지 확인
+    private boolean isNotAllowTemporary(HttpServletRequest request) {
+        return TEMPORARY_URLS.stream().noneMatch(url -> request.getRequestURI().equals(url));
+    }
+
+    private boolean isNotAllowRefresh(HttpServletRequest request) {
+        return REFRESH_URLS.stream().noneMatch(url -> request.getRequestURI().equals(url));
     }
 }

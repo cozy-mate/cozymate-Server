@@ -5,26 +5,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 public class MemberResponseDTO {
     @Getter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MemberInfoDTO {
+        private String name;
         private String nickname;
         private String gender;
-        private String birthDay;
+        private String birthday;
         private Integer persona;
-    }
-
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TokenResponseDTO{
-        private String nickname;
-        private String refreshToken;
     }
 
 }

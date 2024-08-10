@@ -1,20 +1,23 @@
 package com.cozymate.cozymate_server.domain.member.controller;
 
+import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
+import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v3")
+@RequestMapping("/api/v3/member")
 public class MemberController {
     private final MemberCommandService memberCommandService;
 
@@ -37,10 +40,11 @@ public class MemberController {
             description = "false : 사용 불가, true : 사용 가능")
     ResponseEntity<ApiResponse<Boolean>> checkNickname(@RequestParam String nickname) {
         Boolean isValid = memberCommandService.checkNickname(nickname);
+
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(isValid));
     }
 
-    @PostMapping("/join")
+    @PostMapping("/sign-up")
     @Operation(summary = "[말즈] 회원가입",
             description = "request Header : Bearer 임시토큰"
                     + "request Body : \"name\": \"John Doe\",\n"
@@ -48,32 +52,33 @@ public class MemberController {
                     + "         *     \"gender\": \"MALE\",\n"
                     + "         *     \"birthday\": \"1990-01-01\"\n"
                     + "         *     \"persona\" : 1")
-    ResponseEntity<ApiResponse<MemberResponseDTO.TokenResponseDTO>> join(
+    ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> signUp(
             @RequestAttribute("client_id") String clientId,
-            @RequestBody @Valid MemberRequestDTO.JoinRequestDTO joinRequestDTO
+            @RequestBody @Valid MemberRequestDTO.JoinRequestDTO joinRequestDTO,
+            BindingResult bindingResult
     ) {
-        // todo : 파라미터 바인딩 검증 로직 추가
-
+        log.info("enter MemberController : [post] /member/sign-up");
+        if (bindingResult.hasErrors()) {
+            throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
+        }
         MemberDetails memberDetails = memberCommandService.join(clientId, joinRequestDTO);
-        HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
-        MemberResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeBody(memberDetails);
 
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .headers(headers)
-                .body(ApiResponse.onSuccess(tokenResponseDTO));
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.generateTokenDTO(memberDetails);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
     }
 
     @GetMapping("/reissue")
     @Operation(summary = "[말즈] 토큰 재발행",
-            description = "request Header : Bearer access토큰")
-    ResponseEntity<ApiResponse<MemberResponseDTO.TokenResponseDTO>> reissue(
-            @AuthenticationPrincipal MemberDetails memberDetails
+            description = "request Header : Bearer refreshToken")
+    ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> reissue(
+            @RequestAttribute("refresh") String refreshToken
     ) {
-        HttpHeaders headers = memberCommandService.makeHeader(memberDetails);
-        MemberResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.makeBody(memberDetails);
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .headers(headers)
-                .body(ApiResponse.onSuccess(tokenResponseDTO));
+        MemberDetails memberDetails = memberCommandService.extractMemberDetailsByRefreshToken(refreshToken);
+
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.generateTokenDTO(memberDetails);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
     }
 
     @GetMapping("/member-info")
@@ -83,21 +88,23 @@ public class MemberController {
             @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         MemberResponseDTO.MemberInfoDTO memberInfoDTO = memberCommandService.getMemberInfo(memberDetails);
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(memberInfoDTO));
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(memberInfoDTO));
     }
 
     @Operation(summary = "[말즈] 로그아웃",
             description = "사용자를 로그아웃 시킵니다. 스웨거에서는 동작하지 않습니다!")
-    @GetMapping("/logout")
-    public void logout() {
+    @GetMapping("/sign-out")
+    public void signOut() {
     }
 
-    @Operation(summary = "회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
-    @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<String>> deleteMember(@AuthenticationPrincipal MemberDetails memberDetails) {
-        // todo : 회원 탈퇴 api 구현
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .body(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
+    @Operation(summary = "[말즈] 회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<ApiResponse<String>> withdraw(
+            @AuthenticationPrincipal MemberDetails memberDetails) {
+        memberCommandService.withdraw(memberDetails);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
 
 
