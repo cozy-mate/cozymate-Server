@@ -1,6 +1,8 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
 
+import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
+import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
@@ -9,6 +11,7 @@ import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,10 +64,40 @@ public class RoomController {
     @PostMapping("/{roomId}/join")
     @Operation(summary = "[바니] 방 참여 확인 버튼", description = "방에 참여됩니다.")
     public ResponseEntity<ApiResponse<String>> joinRoom(@PathVariable Long roomId, Long memberId) {
-        // TODO: 추후 memberId 수정 예정
+        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
         roomCommandService.joinRoom(roomId, memberId);
         return ResponseEntity.ok(ApiResponse.onSuccess("방 참여 완료"));
     }
 
+    @GetMapping("/{memberId}/available-friends")
+    @Operation(summary = "[바니] 방에 초대할 코지메이트 목록 조회", description = "로그인한 멤버의 코지메이트 목록을 불러옵니다.")
+    public ResponseEntity<ApiResponse<List<CozymateResponse>>> getCozymateList(@PathVariable Long memberId) {
+        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(memberId)));
+    }
+
+    @PostMapping("/{roomId}}/invite")
+    @Operation(summary = "[바니] 선택한 코지메이트 방에 초대요청 보내기", description = "해당하는 roomId에 선택한 코지메이트를 초대합니다.")
+    public ResponseEntity<ApiResponse<String>> inviteCozymate(@PathVariable Long roomId, @RequestBody List<Long> memberIdList) {
+        // TODO: 시큐리티 이용해 사용자 인증 받아야 함. (방장인지)
+        roomCommandService.sendInvitation(roomId, memberIdList);
+        return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
+    }
+
+    @GetMapping ("/{memberId}/request-invites")
+    @Operation(summary = "[바니] 방 초대 요청 조회", description = "해당 사용자가 수신한 초대 요청을 조회합니다.")
+    public ResponseEntity<ApiResponse<InviteRequest>> getRequestInvites(@PathVariable Long memberId) {
+        InviteRequest inviteRequest = roomQueryService.getInvitations(memberId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(inviteRequest));
+    }
+
+
+    @PostMapping("/{roomId}/invite-request")
+    @Operation(summary = "[바니] 방 초대 요청/수락", description = "해당 roomId에서 온 초대요청을 수락 또는 거절합니다.")
+    public ResponseEntity<ApiResponse<String>> getInviteRequest(
+        @PathVariable Long roomId, @RequestParam Long memberId, @RequestParam boolean accept) {
+        roomCommandService.respondToInviteRequest(roomId, memberId, accept);
+        return ResponseEntity.ok(ApiResponse.onSuccess("초대 요청에 대한 처리 완료"));
+    }
 
 }

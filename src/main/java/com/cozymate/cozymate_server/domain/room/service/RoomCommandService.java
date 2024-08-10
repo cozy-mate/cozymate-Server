@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.FeedRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.converter.MateConverter;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
@@ -48,7 +49,6 @@ public class RoomCommandService {
     private final RoleRepository roleRepository;
     private final FeedRepository feedRepository;
 
-    @Transactional
     public void createRoom(RoomCreateRequest request) {
         if (roomRepository.existsByMemberIdAndStatuses(request.getCreatorId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
@@ -69,7 +69,7 @@ public class RoomCommandService {
     }
 
     public void joinRoom(Long roomId, Long memberId) {
-        // TODO: 추후 memberId 부분 수정 예정
+        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
         if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
@@ -96,6 +96,7 @@ public class RoomCommandService {
     }
 
     public void deleteRoom(Long roomId, Long memberId) {
+        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -132,6 +133,60 @@ public class RoomCommandService {
         roomRepository.delete(room);
     }
 
+    public void sendInvitation(Long roomId, List<Long> memberIdList) {
+        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        // PENDING 상태를 포함해서 room에 연관된 mate수가 maxMateNum을 넘지 않도록 하기 위한 검증 (currentNumOfMate 사용)
+        Long currentNumOfMates = mateRepository.countByRoomId(roomId);
+
+        if (currentNumOfMates + memberIdList.size() > room.getMaxMateNum()-room.getNumOfArrival()) {
+            throw new GeneralException(ErrorStatus._ROOM_FULL);
+        }
+
+
+        for (Long memberId : memberIdList) {
+            if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
+                throw new GeneralException(ErrorStatus._ALREADY_JOINED_ROOM);
+            }
+
+            if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
+                throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
+            }
+
+            Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+            Mate mate = MateConverter.toInvitation(room, member, false);
+            mateRepository.save(mate);
+        }
+
+
+        // TODO: 초대 팝업에 senderId 표시해야 한다.
+
+    }
+
+    public void respondToInviteRequest(Long roomId, Long memberId, boolean accept) {
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        Mate mate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
+
+        if (accept) {
+            // 초대 요청을 수락하여 JOINED 상태로 변경
+            mate.setEntryStatus(EntryStatus.JOINED);
+            mateRepository.save(mate);
+            room.arrive();
+            room.isRoomFull();
+        } else {
+            // 초대 요청을 거절하여 PENDING 상태를 삭제
+            mateRepository.delete(mate);
+        }
+        roomRepository.save(room);
+    }
+
     // 초대코드 생성 부분
 
     private String generateUniqueUppercaseKey() {
@@ -155,5 +210,7 @@ public class RoomCommandService {
         }
         return key.toString();
     }
+
+
 
 }
