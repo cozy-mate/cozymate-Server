@@ -111,7 +111,7 @@ public class PostController {
         description = "사용자의 토큰을 넣어 사용하고, Path Variable로 roomId, postId를 받습니다."
     )
     @SwaggerApiError({})
-    @GetMapping("/{roomId}/{postId}")
+    @GetMapping("/{roomId}")
     public ResponseEntity<ApiResponse<List<PostSummaryDTO>>> getPosts(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
