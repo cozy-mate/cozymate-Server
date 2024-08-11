@@ -95,6 +95,8 @@ public enum ErrorStatus implements BaseErrorCode {
     // Feed 관련 에러
     _FEED_EXISTS(HttpStatus.BAD_REQUEST, "FEED400", "피드 정보가 이미 존재합니다."),
     _FEED_NOT_EXISTS(HttpStatus.BAD_REQUEST, "FEED401", "피드 정보가 존재하지 않습니다."),
+
+    _POST_NOT_EXISTS(HttpStatus.BAD_REQUEST, "POST400", "게시물이 존재하지 않습니다."),
     ;
 
 

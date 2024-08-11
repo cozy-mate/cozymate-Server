@@ -1,21 +1,23 @@
 package com.cozymate.cozymate_server.domain.post.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
+import com.cozymate.cozymate_server.domain.mate.Mate;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class PostRequestDTO {
+@Builder
+public class PostSummaryDTO {
 
-    @NotBlank
+    private Long id;
     private String title;
-    @NotBlank
     private String content;
+    private Mate writer;
     private List<String> imageList;
+    private Integer commentCount;
 
 }

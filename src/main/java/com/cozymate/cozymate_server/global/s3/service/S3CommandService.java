@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.MultiObjectDeleteException;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.cozymate.cozymate_server.domain.postimage.PostImage;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import com.cozymate.cozymate_server.global.s3.dto.S3RequestDto;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -72,6 +74,21 @@ public class S3CommandService {
     public void deleteFilesByName(S3RequestDto requestDto) {
         List<DeleteObjectsRequest.KeyVersion> keys = requestDto.getFileNames().stream()
             .map(KeyVersion::new)
+            .toList();
+
+        DeleteObjectsRequest request = new DeleteObjectsRequest(bucket).withKeys(keys);
+
+        try {
+            amazonS3Client.deleteObjects(request);
+        } catch (MultiObjectDeleteException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제에 실패했습니다.");
+        }
+    }
+
+    public void deleteByPostImages(List<PostImage> postImage) {
+
+        List<DeleteObjectsRequest.KeyVersion> keys = postImage.stream()
+            .map(image -> new KeyVersion(image.getContent()))
             .toList();
 
         DeleteObjectsRequest request = new DeleteObjectsRequest(bucket).withKeys(keys);

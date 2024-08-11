@@ -2,6 +2,8 @@ package com.cozymate.cozymate_server.domain.post;
 
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.post.dto.PostCreateDTO;
+import com.cozymate.cozymate_server.domain.post.dto.PostUpdateDTO;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,5 +37,10 @@ public class Post extends BaseTimeEntity {
     private String title;
 
     private String content;
+
+    public void update(PostUpdateDTO postUpdateDTO) {
+        this.title = postUpdateDTO.getTitle();
+        this.content = postUpdateDTO.getContent();
+    }
 
 }
