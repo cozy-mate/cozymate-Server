@@ -40,12 +40,12 @@ public class PostQueryService {
     public PostDetailViewDTO getPost(Member member, Long roomId, Long postId) {
 
         Post post = postRepository.findById(postId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._POST_NOT_EXISTS)
+            () -> new GeneralException(ErrorStatus._POST_NOT_FOUND)
         );
 
-        Mate writer = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
-
+        if(!mateRepository.existsByMemberIdAndRoomId(member.getId(), roomId)){
+            throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
+        }
         List<PostImage> imageList = postImageRepository.findByPostId(postId);
 
         List<PostComment> postComments = postCommentRepository.findByPostId(postId);
@@ -54,7 +54,6 @@ public class PostQueryService {
 
         return PostConverter.toDto(
             post,
-            writer,
             imageList.isEmpty()
                 ? new ArrayList<>() : imageList,
             postComments.isEmpty()
@@ -64,7 +63,7 @@ public class PostQueryService {
 
     public List<PostSummaryDTO> getPosts(Member member, Long roomId, Pageable pageable) {
 
-        if(mateRepository.existsByMemberIdAndRoomId(member.getId(),roomId)){
+        if(!mateRepository.existsByMemberIdAndRoomId(member.getId(),roomId)){
             throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
 

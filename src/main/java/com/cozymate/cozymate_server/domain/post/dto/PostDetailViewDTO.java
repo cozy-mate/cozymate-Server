@@ -20,7 +20,8 @@ public class PostDetailViewDTO {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Mate writer;
+    private String nickname;
+    private int persona;
     private List<String> postImageList;
     private List<PostCommentViewDTO> commentList;
 }

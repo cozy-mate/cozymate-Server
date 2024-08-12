@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 public class PostCommentViewDTO {
 
     private Long id;
-    private Mate commenter;
+    private String nickname;
+    private int persona;
     private String content;
 
 }

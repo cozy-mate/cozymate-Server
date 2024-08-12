@@ -23,13 +23,14 @@ public class PostConverter {
             .build();
     }
 
-    public static PostDetailViewDTO toDto(Post post, Mate writer, List<PostImage> postImage,
+    public static PostDetailViewDTO toDto(Post post, List<PostImage> postImage,
         List<PostComment> postComment) {
         return PostDetailViewDTO.builder()
             .id(post.getId())
             .title(post.getTitle())
             .content(post.getContent())
-            .writer(writer)
+            .nickname(post.getWriter().getMember().getNickname())
+            .persona(post.getWriter().getMember().getPersona())
             .createdAt(post.getCreatedAt())
             .updatedAt(post.getUpdatedAt())
             .postImageList(
@@ -45,7 +46,8 @@ public class PostConverter {
             .id(post.getId())
             .title(post.getTitle())
             .content(post.getContent())
-            .writer(post.getWriter())
+            .nickname(post.getWriter().getMember().getNickname())
+            .persona(post.getWriter().getMember().getPersona())
             .imageList(
                 postImages.stream().map(PostImage::getContent).map(ImageUtil::generateUrl).toList())
             .commentCount(commentCount)

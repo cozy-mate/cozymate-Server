@@ -38,7 +38,6 @@ public class PostController {
 
     private final PostCommandService postCommandService;
     private final PostQueryService postQueryService;
-    private final MemberStatQueryService memberStatQueryService;
 
     @Operation(
         summary = "[포비] 피드 게시물 등록하기",
@@ -64,7 +63,7 @@ public class PostController {
     @SwaggerApiError({
         ErrorStatus._FEED_NOT_EXISTS,
         ErrorStatus._MATE_OR_ROOM_NOT_FOUND,
-        ErrorStatus._POST_NOT_EXISTS
+        ErrorStatus._POST_NOT_FOUND
     })
     @PutMapping("")
     public ResponseEntity<ApiResponse<Long>> updatePost(
@@ -79,7 +78,10 @@ public class PostController {
         summary = "[포비] 피드 게시물 가져오기",
         description = "사용자의 토큰을 넣어 사용하고, Path Variable로 roomId, postId를 받습니다."
     )
-    @SwaggerApiError({})
+    @SwaggerApiError({
+        ErrorStatus._POST_NOT_FOUND,
+        ErrorStatus._MATE_OR_ROOM_NOT_FOUND
+    })
     @GetMapping("/{roomId}/{postId}")
     public ResponseEntity<ApiResponse<PostDetailViewDTO>> getPost(
         @AuthenticationPrincipal MemberDetails memberDetails,
@@ -94,7 +96,10 @@ public class PostController {
         summary = "[포비] 피드 게시물 삭제하기",
         description = "사용자의 토큰을 넣어 사용하고, Path Variable로 roomId, postId를 받습니다."
     )
-    @SwaggerApiError({})
+    @SwaggerApiError({
+        ErrorStatus._POST_NOT_FOUND,
+        ErrorStatus._MATE_OR_ROOM_NOT_FOUND
+    })
     @DeleteMapping("/{roomId}/{postId}")
     public ResponseEntity<ApiResponse<Boolean>> deletePost(
         @AuthenticationPrincipal MemberDetails memberDetails,
@@ -110,7 +115,9 @@ public class PostController {
         summary = "[포비] 피드 게시물 페이징 조회",
         description = "사용자의 토큰을 넣어 사용하고, Path Variable로 roomId, postId를 받습니다."
     )
-    @SwaggerApiError({})
+    @SwaggerApiError({
+        ErrorStatus._MATE_OR_ROOM_NOT_FOUND
+    })
     @GetMapping("/{roomId}")
     public ResponseEntity<ApiResponse<List<PostSummaryDTO>>> getPosts(
         @AuthenticationPrincipal MemberDetails memberDetails,

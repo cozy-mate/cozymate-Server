@@ -63,12 +63,12 @@ public class PostCommandService {
             throw new GeneralException(ErrorStatus._FEED_NOT_EXISTS);
         }
 
-        if (mateRepository.existsByMemberIdAndRoomId(member.getId(), postUpdateDTO.getRoomId())) {
+        if (!mateRepository.existsByMemberIdAndRoomId(member.getId(), postUpdateDTO.getRoomId())) {
             throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
 
         Post post = postRepository.findById(postUpdateDTO.getPostId()).orElseThrow(
-            () -> new GeneralException(ErrorStatus._POST_NOT_EXISTS)
+            () -> new GeneralException(ErrorStatus._POST_NOT_FOUND)
         );
 
         post.update(postUpdateDTO);
@@ -82,10 +82,10 @@ public class PostCommandService {
     public void deletePost(Member member,Long roomId, Long postId) {
 
         Post post = postRepository.findById(postId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._POST_NOT_EXISTS)
+            () -> new GeneralException(ErrorStatus._POST_NOT_FOUND)
         );
 
-        if(mateRepository.existsByMemberIdAndRoomId(member.getId(),roomId)){
+        if(!mateRepository.existsByMemberIdAndRoomId(member.getId(),roomId)){
             throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
 

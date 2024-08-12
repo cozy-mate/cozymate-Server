@@ -16,7 +16,8 @@ public class PostSummaryDTO {
     private Long id;
     private String title;
     private String content;
-    private Mate writer;
+    private String nickname;
+    private int persona;
     private List<String> imageList;
     private Integer commentCount;
 
