@@ -11,6 +11,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -147,8 +148,13 @@ public class NotificationService {
             .setImage(null)
             .build();
 
+        HashMap<String, String> messageMap = new HashMap<>();
+        messageMap.put("title", NOTIFICATION_TITLE);
+        messageMap.put("body", content);
+
         return Message.builder()
             .setNotification(notification)
+            .putAllData(messageMap)
             .setToken(token)
             .build();
     }
@@ -164,8 +170,13 @@ public class NotificationService {
             .setImage(null)
             .build();
 
+        HashMap<String, String> messageMap = new HashMap<>();
+        messageMap.put("title", NOTIFICATION_TITLE);
+        messageMap.put("body", content);
+
         return Message.builder()
             .setNotification(notification)
+            .putAllData(messageMap)
             .setToken(token)
             .build();
     }
@@ -181,8 +192,13 @@ public class NotificationService {
             .setImage(null)
             .build();
 
+        HashMap<String, String> messageMap = new HashMap<>();
+        messageMap.put("title", NOTIFICATION_TITLE);
+        messageMap.put("body", content);
+
         return Message.builder()
             .setNotification(notification)
+            .putAllData(messageMap)
             .setToken(token)
             .build();
     }
@@ -198,8 +214,13 @@ public class NotificationService {
             .setImage(null)
             .build();
 
+        HashMap<String, String> messageMap = new HashMap<>();
+        messageMap.put("title", NOTIFICATION_TITLE);
+        messageMap.put("body", content);
+
         return Message.builder()
             .setNotification(notification)
+            .putAllData(messageMap)
             .setToken(token)
             .build();
     }
