@@ -142,18 +142,11 @@ public class NotificationService {
         String token = member.getToken();
         String content = getContent(member, notificationType);
 
-        Notification notification = Notification.builder()
-            .setTitle(NOTIFICATION_TITLE)
-            .setBody(content)
-            .setImage(null)
-            .build();
-
         HashMap<String, String> messageMap = new HashMap<>();
         messageMap.put("title", NOTIFICATION_TITLE);
         messageMap.put("body", content);
 
         return Message.builder()
-            .setNotification(notification)
             .putAllData(messageMap)
             .setToken(token)
             .build();
@@ -164,18 +157,11 @@ public class NotificationService {
         String token = recipientMember.getToken();
         String content = getContent(contentMember, notificationType);
 
-        Notification notification = Notification.builder()
-            .setTitle(NOTIFICATION_TITLE)
-            .setBody(content)
-            .setImage(null)
-            .build();
-
         HashMap<String, String> messageMap = new HashMap<>();
         messageMap.put("title", NOTIFICATION_TITLE);
         messageMap.put("body", content);
 
         return Message.builder()
-            .setNotification(notification)
             .putAllData(messageMap)
             .setToken(token)
             .build();
@@ -186,18 +172,11 @@ public class NotificationService {
         String token = member.getToken();
         String content = getContent(member, notificationType, todoContents);
 
-        Notification notification = Notification.builder()
-            .setTitle(NOTIFICATION_TITLE)
-            .setBody(content)
-            .setImage(null)
-            .build();
-
         HashMap<String, String> messageMap = new HashMap<>();
         messageMap.put("title", NOTIFICATION_TITLE);
         messageMap.put("body", content);
 
         return Message.builder()
-            .setNotification(notification)
             .putAllData(messageMap)
             .setToken(token)
             .build();
@@ -208,18 +187,11 @@ public class NotificationService {
         String token = member.getToken();
         String content = getContent(member, notificationType, roleContent);
 
-        Notification notification = Notification.builder()
-            .setTitle(NOTIFICATION_TITLE)
-            .setBody(content)
-            .setImage(null)
-            .build();
-
         HashMap<String, String> messageMap = new HashMap<>();
         messageMap.put("title", NOTIFICATION_TITLE);
         messageMap.put("body", content);
 
         return Message.builder()
-            .setNotification(notification)
             .putAllData(messageMap)
             .setToken(token)
             .build();
