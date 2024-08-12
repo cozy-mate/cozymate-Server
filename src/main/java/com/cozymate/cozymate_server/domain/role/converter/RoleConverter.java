@@ -2,12 +2,16 @@ package com.cozymate.cozymate_server.domain.role.converter;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
+import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleDetailResponseDto;
+import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleListDetailResponseDto;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RoleConverter {
-    public static Role toEntity(Mate mate, String content, int repeatDays){
+
+    public static Role toEntity(Mate mate, String content, int repeatDays) {
         return Role.builder()
             .mate(mate)
             .content(content)
@@ -33,6 +37,26 @@ public class RoleConverter {
             }
         }
         return dayList;
+    }
+
+    public static RoleDetailResponseDto toRoleDetailResponseDto(Role role) {
+        return RoleDetailResponseDto.builder()
+            .content(role.getContent())
+            .repeatDayList(
+                convertBitmaskToDayList(role.getRepeatDays()).stream()
+                    .map(DayListBitmask::name)
+                    .toList()
+            )
+            .build();
+    }
+
+    public static RoleListDetailResponseDto toRoleListDetailResponseDto(
+        List<RoleDetailResponseDto> myRoleList,
+        Map<String, List<RoleDetailResponseDto>> otherRoleList) {
+        return RoleListDetailResponseDto.builder()
+            .myRoleList(myRoleList)
+            .otherRoleList(otherRoleList)
+            .build();
     }
 
 

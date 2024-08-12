@@ -13,6 +13,14 @@ public class RuleResponseDto {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
+    public static class RuleRoleListDetailResponseDto {
+
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class RuleDetailResponseDto {
 
         private Long id;

@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.role.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.role.converter.RoleConverter;
 import com.cozymate.cozymate_server.domain.role.dto.RoleRequestDto.CreateRoleRequestDto;
@@ -23,9 +24,9 @@ public class RoleCommandService {
 
 
     @Transactional
-    public void createRole(CreateRoleRequestDto requestDto, Long roomId, Long memberId) {
+    public void createRole(CreateRoleRequestDto requestDto, Long roomId, Member member) {
         // 해당 API를 호출한 사람
-        Mate mate = mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
         List<DayListBitmask> repeatDayList = requestDto.getRepeatDayList().stream()
@@ -41,8 +42,8 @@ public class RoleCommandService {
         });
     }
 
-    public void deleteRole(Long roleId, Long roomId, Long memberId) {
-        Mate mate = mateRepository.findByMemberIdAndRoomId(roomId, memberId)
+    public void deleteRole(Long roleId, Long roomId, Member member) {
+        Mate mate = mateRepository.findByMemberIdAndRoomId(roomId, member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
         Role roleToDelete = roleRepository.findById(roleId)

@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.rule.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.rule.Rule;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.RuleDetailResponseDto;
@@ -21,8 +22,8 @@ public class RuleQueryService {
     private final RuleRepository ruleRepository;
     private final MateRepository mateRepository;
 
-    public List<RuleDetailResponseDto> getRule(Long roomId, Long memberId) {
-        Mate mate = mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+    public List<RuleDetailResponseDto> getRule(Long roomId, Member member) {
+        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
         List<Rule> ruleList = ruleRepository.findAllByRoomId(mate.getRoom().getId());

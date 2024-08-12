@@ -11,5 +11,4 @@ public class PageResponseDto<T> {
     private boolean hasNext;
     private T result;
 
-
 }
