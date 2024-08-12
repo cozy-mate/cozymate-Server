@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
 import com.cozymate.cozymate_server.domain.feed.Feed;
-import com.cozymate.cozymate_server.domain.feed.FeedRepository;
+import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
 import com.cozymate.cozymate_server.domain.friend.FriendRepository;
 import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
 import com.cozymate.cozymate_server.domain.mate.Mate;
@@ -118,16 +118,19 @@ public class RoomCommandService {
         ruleRepository.deleteByRoomId(roomId);
         roomLogRepository.deleteByRoomId(roomId);
 
-        List<Feed> feeds = feedRepository.findByRoomId(roomId);
-        for (Feed feed : feeds) {
+        // TODO : 이 부분을 수정했습니다. 바니 확인 부탁드려요
+        // 피드를 생성하지 않고 방이 삭제될 경우도 고려함
+        if(feedRepository.existsByRoomId(roomId)){
+            Feed feed = feedRepository.findByRoomId(roomId);
             List<Post> posts = postRepository.findByFeedId(feed.getId());
             for (Post post : posts) {
                 postCommentRepository.deleteByPostId(post.getId());
                 postImageRepository.deleteByPostId(post.getId());
             }
             postRepository.deleteByFeedId(feed.getId());
+            feedRepository.deleteByRoomId(roomId);
         }
-        feedRepository.deleteByRoomId(roomId);
+
 
         roomRepository.delete(room);
     }
@@ -240,7 +243,5 @@ public class RoomCommandService {
         }
         return key.toString();
     }
-
-
 
 }

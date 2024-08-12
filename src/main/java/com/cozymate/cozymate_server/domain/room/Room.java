@@ -1,13 +1,16 @@
 package com.cozymate.cozymate_server.domain.room;
 
+import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -46,6 +49,9 @@ public class Room extends BaseTimeEntity {
 
     private int numOfArrival = 1;
 
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
+    private Feed feed;
+
     public void arrive() {
         numOfArrival++;
     }
@@ -58,4 +64,3 @@ public class Room extends BaseTimeEntity {
     }
 
 }
-
