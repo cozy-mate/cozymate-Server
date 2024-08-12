@@ -5,21 +5,14 @@ import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO.UrlDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.service.KakaoService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
-import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 
 import io.swagger.v3.oas.annotations.Operation;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 
 
 @RequestMapping("/oauth2/kakao")
@@ -27,14 +20,6 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 @RestController
 public class KakaoController implements SocialLoginController {
-
-    private static final String HTTP_ERROR_MESSAGE_FORMAT = "HTTP Error: %s, Status Code: %s, Response Body: %s";
-    @Value("${spring.security.oauth2.client.provider.kakao.user-info-uri}")
-    private String USER_INFO_URI;
-
-    @Value("${spring.security.oauth2.client.provider.kakao.token-uri}")
-    private String TOKEN_URI;
-
     private final KakaoService kakaoService;
     private final AuthService authService;
 
@@ -45,10 +30,9 @@ public class KakaoController implements SocialLoginController {
     public ResponseEntity<ApiResponse<UrlDTO>> signIn() {
         UrlDTO url = kakaoService.getRedirectUrl();
 
-        log.info(url.getRedirectUrl());
+        log.info("redirect url: {}", url.getRedirectUrl());
 
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .body(ApiResponse.onSuccess(url));
+        return ResponseEntity.ok(ApiResponse.onSuccess(url));
     }
 
     @Override
@@ -57,51 +41,17 @@ public class KakaoController implements SocialLoginController {
     @GetMapping("/code")
     public ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> callBack(
             @RequestParam(required = false) String code) {
-
-        HttpEntity<MultiValueMap<String, String>> tokenRequest = kakaoService.makeTokenRequest(code);
-
-        RestTemplate tokenRt = new RestTemplate();
-
-        ResponseEntity<String> tokenResponse;
-        try {
-            tokenResponse = tokenRt.exchange(TOKEN_URI, HttpMethod.POST,
-                    tokenRequest, String.class);
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            String errorMessage = String.format(HTTP_ERROR_MESSAGE_FORMAT,
-                    e.getMessage(), e.getStatusCode(), e.getResponseBodyAsString());
-            throw new RuntimeException(errorMessage);
-        }
-
         // 인가코드를 기반으로 토큰(Access Token) 발급
-        String accessToken = kakaoService.parseAccessToken(tokenResponse);
+        String token = kakaoService.getTokenByCode(code);
 
         // 토큰을 통해 사용자 정보 조회
-        HttpEntity<MultiValueMap<String, String>> clientInfoRequest = kakaoService.makeMemberInfoRequest(accessToken);
+        String clientId = kakaoService.getClientIdByToken(token);
 
-        RestTemplate clientInfoRt = new RestTemplate();
-        ResponseEntity<String> clientInfoResponse;
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = authService.generateTokenDTO(clientId);
 
-        try {
-            clientInfoResponse = clientInfoRt.exchange(USER_INFO_URI, HttpMethod.POST,
-                    clientInfoRequest,
-                    String.class);
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            String errorMessage = String.format(HTTP_ERROR_MESSAGE_FORMAT,
-                    e.getMessage(), e.getStatusCode(), e.getResponseBodyAsString());
-            throw new RuntimeException(errorMessage);
-        }
+        log.info("소셜로그인 사용자: {}", tokenResponseDTO.getMemberInfoDTO().getNickname());
 
-        String clientId = kakaoService.getClientId(clientInfoResponse);
-
-        String token = authService.generateToken(clientId);
-
-        HttpHeaders headers = authService.addTokenAtHeader(token);
-
-        AuthResponseDTO.TokenResponseDTO socialLoginDTO = authService.socialLogin(clientId);
-
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
-                .headers(headers)
-                .body(ApiResponse.onSuccess(socialLoginDTO));
+        return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
 
     }
 

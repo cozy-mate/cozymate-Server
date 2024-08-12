@@ -23,19 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberStatCommandService {
 
     private final MemberStatRepository memberStatRepository;
-    private final MemberRepository memberRepository;
     private final UniversityRepository universityRepository;
 
     public Long createMemberStat(
-        Long memberId, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        Member member, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
 
         // 멤버 상세정보가 이미 존재하는 경우
-        if (memberStatRepository.findByMemberId(memberId).isPresent()) {
+        if (memberStatRepository.findByMemberId(member.getId()).isPresent()) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_EXISTS);
         }
 
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         University university = universityRepository.findById(
                 memberStatCommandRequestDTO.getUniversityId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
@@ -50,18 +47,16 @@ public class MemberStatCommandService {
     }
 
     public Long modifyMemberStat(
-        Long memberId, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
-
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        Member member, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
 
         University university = universityRepository.findById(
                 memberStatCommandRequestDTO.getUniversityId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
-        MemberStat updatedMemberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
-        );
+        MemberStat updatedMemberStat = memberStatRepository.findByMemberId(member.getId())
+            .orElseThrow(
+                () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+            );
 
         updatedMemberStat.update(member, university, memberStatCommandRequestDTO);
         return updatedMemberStat.getId();

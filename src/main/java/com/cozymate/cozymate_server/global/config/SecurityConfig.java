@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import java.util.Collections;
 
 import lombok.RequiredArgsConstructor;
@@ -55,8 +56,9 @@ public class SecurityConfig {
                             @Override
                             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                                 CorsConfiguration configuration = new CorsConfiguration();
-
-                                configuration.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
+                                configuration.setAllowedOrigins(
+                                        Arrays.asList("https://cozymate.store:3000",
+                                                "https://cozymate.store"));
                                 configuration.setAllowedMethods(Collections.singletonList("*"));
                                 configuration.setAllowCredentials(true);
                                 configuration.setAllowedHeaders(Collections.singletonList("*"));
