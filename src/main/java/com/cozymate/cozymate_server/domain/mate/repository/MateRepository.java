@@ -12,8 +12,9 @@ import org.springframework.data.repository.query.Param;
 public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findByRoomId(Long roomId);
     void deleteByRoomId(Long roomId);
-    Optional<Mate> findByRoomIdAndIsRoomManager(Long roomId, boolean IsRoomManager);
+    Optional<Mate> findByRoomIdAndIsRoomManager(Long roomId, boolean isRoomManager);
     Optional<Mate> findByRoomIdAndMemberId(Long roomId, Long memberId);
+
     Long countByRoomId(Long roomId);
 
     @Query("SELECT COUNT(m) > 0 FROM Mate m WHERE m.member.id = :memberId AND (m.room.status = :status1 OR m.room.status = :status2)")
@@ -22,4 +23,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     Optional<Mate> findByMemberIdAndRoomId(Long MemberId, Long RoomId);
 
     Optional<Mate> findByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
+
+    boolean existsByMemberIdAndEntryStatusAndRoomStatusIn(Long memberId, EntryStatus entryStatus, List<RoomStatus> roomStatuses);
 }

@@ -12,4 +12,5 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("SELECT COUNT(m) > 0 FROM Mate m WHERE m.member.id = :memberId AND (m.room.status = :status1 OR m.room.status = :status2)")
     boolean existsByMemberIdAndStatuses(@Param("memberId") Long memberId, @Param("status1") RoomStatus status1, @Param("status2") RoomStatus status2);
     Optional<Room> findByInviteCode(String inviteCode);
+
 }

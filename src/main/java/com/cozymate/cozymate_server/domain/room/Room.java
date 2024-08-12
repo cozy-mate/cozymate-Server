@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,6 +32,8 @@ public class Room extends BaseTimeEntity {
 
     private int maxMateNum = 1;
 
+    private LocalDate enabledAt;
+
     // 캐릭터 이름이 삭제된다는 기획상의 수정으로 프론트에서 정수로 받고,
     // s3에서 /persona/1 과 같은 식으로 가져오는게 좋아보입니다.
     private Integer profileImage;
@@ -50,7 +53,9 @@ public class Room extends BaseTimeEntity {
     public void isRoomFull() {
         if (numOfArrival == maxMateNum) {
             this.status = RoomStatus.ENABLE;
+            this.enabledAt = LocalDate.now();
         }
     }
 
 }
+

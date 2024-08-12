@@ -2,6 +2,8 @@ package com.cozymate.cozymate_server.domain.room.service;
 
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.FeedRepository;
+import com.cozymate.cozymate_server.domain.friend.FriendRepository;
+import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.converter.MateConverter;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
@@ -26,6 +28,7 @@ import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -48,9 +51,13 @@ public class RoomCommandService {
     private final PostImageRepository postImageRepository;
     private final RoleRepository roleRepository;
     private final FeedRepository feedRepository;
+    private final FriendRepository friendRepository;
 
-    public void createRoom(RoomCreateRequest request) {
-        if (roomRepository.existsByMemberIdAndStatuses(request.getCreatorId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
+    public void createRoom(RoomCreateRequest request, Member member) {
+        Member creator = memberRepository.findById(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
@@ -58,22 +65,15 @@ public class RoomCommandService {
         Room room = RoomConverter.toEntity(request, inviteCode);
         roomRepository.save(room);
 
-        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
-        // 현재는 테스트 위해 임시로 memberId 사용
-        Member creator = memberRepository.findById(request.getCreatorId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
-
     }
 
     public void joinRoom(Long roomId, Long memberId) {
-        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
         if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
-            throw new GeneralException(ErrorStatus._ALREADY_JOINED_ROOM);
+            throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
         }
 
         if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
@@ -96,7 +96,6 @@ public class RoomCommandService {
     }
 
     public void deleteRoom(Long roomId, Long memberId) {
-        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -133,62 +132,93 @@ public class RoomCommandService {
         roomRepository.delete(room);
     }
 
-    public void sendInvitation(Long roomId, List<Long> memberIdList) {
-        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
+    public void sendInvitation(Long roomId, List<Long> inviteeIdList, Long inviterId) {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        // 초대한 사용자가 방장인지 검증
+        mateRepository.findByRoomIdAndMemberId(roomId, inviterId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
+            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        if (!inviter.getMember().getId().equals(inviterId)) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
 
         // PENDING 상태를 포함해서 room에 연관된 mate수가 maxMateNum을 넘지 않도록 하기 위한 검증 (currentNumOfMate 사용)
         Long currentNumOfMates = mateRepository.countByRoomId(roomId);
 
-        if (currentNumOfMates + memberIdList.size() > room.getMaxMateNum()-room.getNumOfArrival()) {
+        if (currentNumOfMates + inviteeIdList.size() > room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
+        for (Long inviteeId : inviteeIdList) {
+            Member member = memberRepository.findById(inviteeId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        for (Long memberId : memberIdList) {
-            if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
-                throw new GeneralException(ErrorStatus._ALREADY_JOINED_ROOM);
+            Optional<Mate> invitee = mateRepository.findByRoomIdAndMemberId(roomId, inviteeId);
+            if (invitee.isPresent()) {
+                if (invitee.get().getEntryStatus() == EntryStatus.PENDING) {
+                    throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
+                } else {
+                    throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+                }
             }
 
-            if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
+            if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
                 throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
             }
 
-            Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
+            // 친구가 아닌 경우 예외 발생
+            boolean isFriend = friendRepository.findBySenderIdAndReceiverIdAndStatus(
+                inviteeId, inviterId, FriendStatus.ACCEPT).isPresent()
+                || friendRepository.findBySenderIdAndReceiverIdAndStatus(
+                inviterId, inviteeId, FriendStatus.ACCEPT).isPresent();
+            if (!isFriend) {
+                throw new GeneralException(ErrorStatus._NOT_FRIEND);
+            }
             Mate mate = MateConverter.toInvitation(room, member, false);
             mateRepository.save(mate);
         }
 
-
-        // TODO: 초대 팝업에 senderId 표시해야 한다.
-
     }
 
-    public void respondToInviteRequest(Long roomId, Long memberId, boolean accept) {
+    public void respondToInviteRequest(Long roomId, Long inviteeId, boolean accept) {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate mate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+        if (room.getNumOfArrival()+1 > room.getMaxMateNum()) {
+            throw new GeneralException(ErrorStatus._ROOM_FULL);
+        }
+
+        Mate invitee = mateRepository.findByRoomIdAndMemberId(roomId, inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
+
+        if (invitee.getEntryStatus()==EntryStatus.JOINED) {
+            throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+        }
+
+        // 만약 WAITING 또는 ENABLE 상태의 방에 이미 참여했다면 예외 발생
+        if (mateRepository.existsByMemberIdAndEntryStatusAndRoomStatusIn(
+            inviteeId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING))) {
+            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
+        }
 
         if (accept) {
             // 초대 요청을 수락하여 JOINED 상태로 변경
-            mate.setEntryStatus(EntryStatus.JOINED);
-            mateRepository.save(mate);
+            invitee.setEntryStatus(EntryStatus.JOINED);
+            mateRepository.save(invitee);
             room.arrive();
             room.isRoomFull();
         } else {
             // 초대 요청을 거절하여 PENDING 상태를 삭제
-            mateRepository.delete(mate);
+            mateRepository.delete(invitee);
         }
         roomRepository.save(room);
     }
 
     // 초대코드 생성 부분
-
     private String generateUniqueUppercaseKey() {
         String randomKey;
         do {
