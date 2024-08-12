@@ -27,12 +27,13 @@ public class MemberCommandService {
 
     public MemberDetails join(String clientId, MemberRequestDTO.JoinRequestDTO joinRequestDTO) {
         Member member = MemberConverter.toMember(clientId, joinRequestDTO);
+
         member = memberRepository.save(member);
-        log.info(member.getNickname() + "저장 완료");
+
         return new MemberDetails(member);
     }
 
-    public MemberDetails extractMemberDetailsByRefreshToken(String refreshToken){
+    public MemberDetails extractMemberDetailsByRefreshToken(String refreshToken) {
         return authService.extractMemberDetailsInRefreshToken(refreshToken);
     }
 
@@ -44,7 +45,7 @@ public class MemberCommandService {
         return MemberConverter.toMemberInfoDTO(memberDetails.getMember());
     }
 
-    public void withdraw(MemberDetails memberDetails){
+    public void withdraw(MemberDetails memberDetails) {
         memberRepository.delete(memberDetails.getMember());
     }
 }

@@ -16,9 +16,10 @@ public class AuthConverter {
                 .build();
     }
 
-    public static AuthResponseDTO.TokenResponseDTO toTemporaryTokenResponseDTO(MemberResponseDTO.MemberInfoDTO memberInfoDTO,
-                                                                      String message,
-                                                                      String acessToken) {
+    public static AuthResponseDTO.TokenResponseDTO toTemporaryTokenResponseDTO(
+            MemberResponseDTO.MemberInfoDTO memberInfoDTO,
+            String message,
+            String acessToken) {
         return AuthResponseDTO.TokenResponseDTO.builder()
                 .message(message)
                 .accessToken(acessToken)
