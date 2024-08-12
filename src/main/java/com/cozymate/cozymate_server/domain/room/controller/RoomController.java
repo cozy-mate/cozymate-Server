@@ -94,6 +94,7 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(inviteRequest));
     }
 
+
     @PostMapping("/{roomId}/invite-request")
     @Operation(summary = "[바니] 방 초대 요청/수락", description = "해당 roomId에서 온 초대요청을 수락 또는 거절합니다.")
     public ResponseEntity<ApiResponse<String>> getInviteRequest(
