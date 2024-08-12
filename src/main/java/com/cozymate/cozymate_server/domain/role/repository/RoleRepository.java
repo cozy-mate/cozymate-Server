@@ -6,9 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
-    List<Role> findAllByRoomId(Long roomId);
-
-    Integer countAllByRoomId(Long roomId);
+    List<Role> findAllByMateRoomId(Long roomId);
 
     void deleteByMateId(Long mateId);
 

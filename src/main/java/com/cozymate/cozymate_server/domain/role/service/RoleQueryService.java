@@ -30,7 +30,7 @@ public class RoleQueryService {
         Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
-        List<Role> roleList = roleRepository.findAllByRoomId(mate.getRoom().getId());
+        List<Role> roleList = roleRepository.findAllByMateRoomId(mate.getRoom().getId());
         List<RoleDetailResponseDto> myRoleListResponseDto = new ArrayList<>();
         Map<String, List<RoleDetailResponseDto>> mateRoleListResponseDto = new HashMap<>();
 
