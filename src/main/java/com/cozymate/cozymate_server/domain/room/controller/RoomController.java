@@ -37,7 +37,6 @@ public class RoomController {
     @Operation(summary = "[바니] 방생성 기능", description = "방이름, 프로필이미지, 인원수를 입력합니다.")
     public ResponseEntity<ApiResponse<String>> createRoom(@Valid @RequestBody RoomCreateRequest request,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        // TODO: 시큐리티 이용해 사용자 인증 받아야 함.
         roomCommandService.createRoom(request, memberDetails.getMember());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 생성 완료"));
     }

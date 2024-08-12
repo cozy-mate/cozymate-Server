@@ -118,7 +118,6 @@ public class RoomCommandService {
         ruleRepository.deleteByRoomId(roomId);
         roomLogRepository.deleteByRoomId(roomId);
 
-        // TODO : 이 부분을 수정했습니다. 바니 확인 부탁드려요
         // 피드를 생성하지 않고 방이 삭제될 경우도 고려함
         if(feedRepository.existsByRoomId(roomId)){
             Feed feed = feedRepository.findByRoomId(roomId);
