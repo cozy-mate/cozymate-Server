@@ -79,7 +79,7 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(memberDetails.getMember().getId())));
     }
 
-    @PostMapping("/{roomId}}/invite")
+    @PostMapping("/{roomId}/invite")
     @Operation(summary = "[바니] 선택한 코지메이트 방에 초대요청 보내기", description = "해당하는 roomId에 선택한 코지메이트를 초대합니다.")
     public ResponseEntity<ApiResponse<String>> inviteCozymate(@PathVariable Long roomId,
         @RequestBody List<Long> inviteeIdList, @AuthenticationPrincipal MemberDetails inviterDetails) {
@@ -93,7 +93,6 @@ public class RoomController {
         InviteRequest inviteRequest = roomQueryService.getInvitation(inviteeDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(inviteRequest));
     }
-
 
     @PostMapping("/{roomId}/invite-request")
     @Operation(summary = "[바니] 방 초대 요청/수락", description = "해당 roomId에서 온 초대요청을 수락 또는 거절합니다.")
