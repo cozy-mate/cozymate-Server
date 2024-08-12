@@ -93,7 +93,7 @@ public class RoomQueryService {
             .toList();
     }
 
-    public InviteRequest getInvitations(Long memberId) {
+    public InviteRequest getInvitation(Long memberId) {
         Mate mate = mateRepository.findByMemberIdAndEntryStatus(memberId, EntryStatus.PENDING)
             .orElseThrow(()-> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
         Room room = roomRepository.findById(mate.getRoom().getId())
