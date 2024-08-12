@@ -87,7 +87,7 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
     }
 
-    @GetMapping ("/{memberId}/request-invites")
+    @GetMapping ("/request-invites")
     @Operation(summary = "[바니] 방 초대 요청 조회", description = "해당 사용자가 수신한 초대 요청을 조회합니다.")
     public ResponseEntity<ApiResponse<InviteRequest>> getRequestInvites(@AuthenticationPrincipal MemberDetails inviteeDetails) {
         InviteRequest inviteRequest = roomQueryService.getInvitations(inviteeDetails.getMember().getId());
