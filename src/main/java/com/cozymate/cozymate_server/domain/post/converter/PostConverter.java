@@ -10,7 +10,6 @@ import com.cozymate.cozymate_server.domain.postcomment.PostComment;
 import com.cozymate.cozymate_server.domain.postcomment.converter.PostCommentConverter;
 import com.cozymate.cozymate_server.domain.postimage.PostImage;
 import com.cozymate.cozymate_server.global.utils.ImageUtil;
-import java.util.ArrayList;
 import java.util.List;
 
 public class PostConverter {
