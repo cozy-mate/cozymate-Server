@@ -87,9 +87,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config",
                                 "/swagger-resources/**").permitAll()
-                        .requestMatchers("/", "/oauth2/kakao/**").permitAll()
-                        .requestMatchers("/", "/api/v3/check-nickname", "/api/v3/login", "/api/v3/join").permitAll()
-                        .requestMatchers("/reissue").permitAll()
+                        .requestMatchers("/", "/members/sign-in").permitAll()
                         .anyRequest()
                         .authenticated());
 
@@ -105,7 +103,7 @@ public class SecurityConfig {
 
         // 로그아웃 필터
         httpSecurity.logout((logout) -> logout
-                .logoutUrl("/api/v3/logout") // 로그아웃 URL 설정
+                .logoutUrl("/members/logout")// 로그아웃 URL 설정
                 .addLogoutHandler(logoutService) // LogoutHandler 등록
                 .logoutSuccessHandler((request, response, authentication) -> {
                     response.setStatus(HttpServletResponse.SC_OK);

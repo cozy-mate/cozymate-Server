@@ -27,18 +27,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtFilter extends OncePerRequestFilter {
     // JWT 검증을 제외할 URL 목록
     private static final List<String> EXCLUDE_URLS = List.of(
-            "/oauth2/kakao/sign-in",
-            "/oauth2/naver/sign-in",
-            "/oauth2/apple/sign-in"
+            "/members/sign-in"
     );
 
     // 임시 토큰으로만 접근 가능한 URL 목록
     private static final List<String> TEMPORARY_URLS = List.of(
-            "/api/v3/member/sign-up",
-            "/api/v3/member/check-nickname"
+            "/members/sign-up",
+            "/members/check-nickname"
     );
 
-    private static final List<String> REFRESH_URLS = List.of("/api/v3/member/reissue");
+    private static final List<String> REFRESH_URLS = List.of("/auth/reissue");
     private static final String REQUEST_ATTRIBUTE_NAME_CLIENT_ID = "client_id";
 
     private static final String REQUEST_ATTRIBUTE_NAME_REFRESH = "refresh";
@@ -68,16 +66,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
             // Authorization 헤더에서 JWT를 추출
             String jwt = authHeader.substring(JwtUtil.TOKEN_PREFIX.length());
-            log.info("{}",JwtUtil.TOKEN_PREFIX.length());
+
             // JWT를 검증
             jwtUtil.validateToken(jwt);
 
             // JWT에서 사용자 이름을 추출하고, 사용자 세부 정보를 로드
             String userName = jwtUtil.extractUserName(jwt);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
-
-            log.info("사용자 : {}", userName);
-            log.info("토큰 타입 : {}", jwtUtil.extractTokenType(jwt));
 
             // 임시 토큰일 경우, 접근을 제한할 URL 목록에 대한 접근 여부 확인
             if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.TEMPORARY)) {
@@ -112,14 +107,11 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
-            log.error("필터에서 예외 발생 = {}", e.toString());
+            log.error("필터에서 예외 발생 = {}", e.getMessage());
             log.error(request.getRequestURI());
             SecurityContextHolder.clearContext();
 
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().print("잘못된 토큰");
-
-            log.error(Integer.toString(response.getStatus()));
         }
     }
 

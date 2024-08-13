@@ -17,14 +17,23 @@ public class MemberRequestDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JoinRequestDTO {
+    public static class SignInRequestDTO{
+        String clientId;
+        String socialType;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SignUpRequestDTO {
 
         /**
          * {
-         *     "name": "John Doe",
-         *     "nickName": "johnny",
+         *     "name": "김수환",
+         *     "nickname": "말즈",
          *     "gender": "MALE",
-         *     "birthday": "1990-01-01"
+         *     "birthday": "2000-01-20"
          *     "persona" : 1
          * }
          */
@@ -35,7 +44,7 @@ public class MemberRequestDTO {
 
         @NotNull
         @NotEmpty
-        private String nickName;
+        private String nickname;
 
         @NotNull
         private String gender;
