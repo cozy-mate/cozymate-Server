@@ -22,6 +22,8 @@ public class RoleResponseDto {
 
         private List<String> repeatDayList;
 
+        private boolean isAllDays;
+
     }
 
     @Builder

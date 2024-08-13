@@ -11,6 +11,8 @@ import java.util.Map;
 
 public class RoleConverter {
 
+    private static final int ALL_DAYS_BITMASK = 127;
+
     public static Role toEntity(Mate mate, String content, int repeatDays) {
         return Role.builder()
             .mate(mate)
@@ -48,6 +50,7 @@ public class RoleConverter {
                     .map(DayListBitmask::name)
                     .toList()
             )
+            .isAllDays(role.getRepeatDays() == ALL_DAYS_BITMASK)
             .build();
     }
 
