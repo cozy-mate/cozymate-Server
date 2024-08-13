@@ -36,7 +36,7 @@ public class AuthService implements UserDetailsService {
     public AuthResponseDTO.TokenResponseDTO reissue(String refreshToken) {
         String clientId = jwtUtil.extractUserName(refreshToken);
 
-        findRefreshToken(clientId);
+        findTokenByValue(refreshToken);
 
         return generateMemberTokenDTO(loadMember(clientId));
     }
@@ -112,15 +112,23 @@ public class AuthService implements UserDetailsService {
     // refresh token을 db 에서 삭제
     @Transactional
     public void deleteRefreshToken(String clientId) {
-        Token token = findRefreshToken(clientId);
+        Token token = findRefreshTokenByClientId(clientId);
         tokenRepository.delete(token);
     }
 
     // refresh token db 에서 찾아보기
     @Transactional
-    Token findRefreshToken(String clientId) {
+    Token findRefreshTokenByClientId(String clientId) {
         return tokenRepository.findById(clientId).orElseThrow(
                 () -> new GeneralException(ErrorStatus._TOKEN_NOT_FOUND)
         );
     }
+
+    @Transactional
+    Token findTokenByValue(String refreshToken) {
+        return tokenRepository.findByRefreshToken(refreshToken).orElseThrow(
+                () -> new GeneralException(ErrorStatus._TOKEN_NOT_FOUND)
+        );
+    }
+
 }
