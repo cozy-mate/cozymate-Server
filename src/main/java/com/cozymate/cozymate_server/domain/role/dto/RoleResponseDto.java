@@ -16,6 +16,8 @@ public class RoleResponseDto {
     @NoArgsConstructor
     public static class RoleDetailResponseDto {
 
+        private Long id;
+
         private String content;
 
         private List<String> repeatDayList;

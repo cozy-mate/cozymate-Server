@@ -41,6 +41,7 @@ public class RoleConverter {
 
     public static RoleDetailResponseDto toRoleDetailResponseDto(Role role) {
         return RoleDetailResponseDto.builder()
+            .id(role.getId())
             .content(role.getContent())
             .repeatDayList(
                 convertBitmaskToDayList(role.getRepeatDays()).stream()

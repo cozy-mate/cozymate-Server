@@ -42,13 +42,18 @@ public class RoleCommandService {
         });
     }
 
-    public void deleteRole(Long roleId, Long roomId, Member member) {
-        Mate mate = mateRepository.findByMemberIdAndRoomId(roomId, member.getId())
+    public void deleteRole(Long roomId, Long roleId, Member member) {
+        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
         Role roleToDelete = roleRepository.findById(roleId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROLE_NOT_FOUND));
 
+        if (Boolean.FALSE.equals(
+            member.getId().equals(roleToDelete.getMate().getMember().getId())
+        )) {
+            throw new GeneralException(ErrorStatus._ROLE_MATE_MISMATCH);
+        }
         roleRepository.delete(roleToDelete);
     }
 }
