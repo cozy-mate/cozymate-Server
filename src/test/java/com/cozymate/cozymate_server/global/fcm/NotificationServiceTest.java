@@ -50,7 +50,7 @@ public class NotificationServiceTest {
         @BeforeEach
         void setUp() {
             ve = Member.builder()
-                .token("dummy")
+                .fcmToken("dummy")
                 .nickname("베")
                 .socialType(SocialType.APPLE)
                 .role(Role.USER)
@@ -90,7 +90,7 @@ public class NotificationServiceTest {
         @BeforeEach
         void setUp() {
             ve = Member.builder()
-                .token("dummy")
+                .fcmToken("dummy")
                 .nickname("베")
                 .socialType(SocialType.APPLE)
                 .role(Role.USER)
@@ -102,7 +102,7 @@ public class NotificationServiceTest {
                 .build();
 
             ro = Member.builder()
-                .token("dummy")
+                .fcmToken("dummy")
                 .nickname("로")
                 .socialType(SocialType.APPLE)
                 .role(Role.USER)
@@ -149,7 +149,7 @@ public class NotificationServiceTest {
         @BeforeEach
         void setUp() {
             ve = Member.builder()
-                .token("dummy")
+                .fcmToken("dummy")
                 .nickname("베")
                 .socialType(SocialType.APPLE)
                 .role(Role.USER)
@@ -161,7 +161,7 @@ public class NotificationServiceTest {
                 .build();
 
             ro = Member.builder()
-                .token("dummy")
+                .fcmToken("dummy")
                 .nickname("로")
                 .socialType(SocialType.APPLE)
                 .role(Role.USER)

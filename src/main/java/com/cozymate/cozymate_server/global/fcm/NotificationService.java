@@ -139,7 +139,7 @@ public class NotificationService {
     }
 
     private Message createMessage(Member member, NotificationType notificationType) {
-        String token = member.getToken();
+        String token = member.getFcmToken();
         String content = getContent(member, notificationType);
 
         HashMap<String, String> messageMap = new HashMap<>();
@@ -154,7 +154,7 @@ public class NotificationService {
 
     private Message createMessage(Member contentMember, Member recipientMember,
         NotificationType notificationType) {
-        String token = recipientMember.getToken();
+        String token = recipientMember.getFcmToken();
         String content = getContent(contentMember, notificationType);
 
         HashMap<String, String> messageMap = new HashMap<>();
@@ -169,7 +169,7 @@ public class NotificationService {
 
     private Message createMessage(Member member, NotificationType notificationType,
         List<String> todoContents) {
-        String token = member.getToken();
+        String token = member.getFcmToken();
         String content = getContent(member, notificationType, todoContents);
 
         HashMap<String, String> messageMap = new HashMap<>();
@@ -184,7 +184,7 @@ public class NotificationService {
 
     private Message createMessage(Member member, NotificationType notificationType,
         String roleContent) {
-        String token = member.getToken();
+        String token = member.getFcmToken();
         String content = getContent(member, notificationType, roleContent);
 
         HashMap<String, String> messageMap = new HashMap<>();

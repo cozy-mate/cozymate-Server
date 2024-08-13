@@ -69,6 +69,6 @@ public class Member extends BaseTimeEntity {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "member")
     private MemberStat memberStat;
 
-    private String token;
+    private String fcmToken;
 
 }
