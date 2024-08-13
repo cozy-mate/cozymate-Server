@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.member.controller;
 
-import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
@@ -10,6 +9,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 
+import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +30,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/v3/member")
+@RequestMapping("members/")
 public class MemberController {
     private final MemberCommandService memberCommandService;
+
+    @PostMapping("/sign-in")
+    @Operation(summary = "[말즈] 로그인",
+            description = "request Body : \"client_id\": \"123123\",\n"
+                    + "         *     \"social_type\": \"KAKAO\",\n")
+    @SwaggerApiError({
+            ErrorStatus._MEMBER_BINDING_FAIL,
+    })
+    ResponseEntity<ApiResponse<MemberResponseDTO.SignInResponseDTO>> signIn(
+            @RequestBody @Valid MemberRequestDTO.SignInRequestDTO signInRequestDTO,
+            BindingResult bindingResult) {
+
+        log.info("로그인 시도 : {}:{}", signInRequestDTO.getClientId(), signInRequestDTO.getSocialType());
+
+        if (bindingResult.hasErrors()) {
+            throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
+        }
+
+        MemberResponseDTO.SignInResponseDTO loginResponseDTO = memberCommandService.signIn(signInRequestDTO);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(loginResponseDTO));
+    }
 
     //todo : nosql로 금지어 추가
     @GetMapping("/check-nickname")
@@ -52,38 +74,33 @@ public class MemberController {
                     + "         *     \"gender\": \"MALE\",\n"
                     + "         *     \"birthday\": \"1990-01-01\"\n"
                     + "         *     \"persona\" : 1")
-    ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> signUp(
+    @SwaggerApiError({
+            ErrorStatus._MEMBER_BINDING_FAIL
+    })
+    ResponseEntity<ApiResponse<MemberResponseDTO.SignInResponseDTO>> signUp(
             @RequestAttribute("client_id") String clientId,
-            @RequestBody @Valid MemberRequestDTO.JoinRequestDTO joinRequestDTO,
+            @RequestBody @Valid MemberRequestDTO.SignUpRequestDTO signUpRequestDTO,
             BindingResult bindingResult
     ) {
         log.info("enter MemberController : [post] /member/sign-up");
+
         if (bindingResult.hasErrors()) {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
         }
-        MemberDetails memberDetails = memberCommandService.join(clientId, joinRequestDTO);
 
-        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.generateTokenDTO(memberDetails);
+        MemberResponseDTO.SignInResponseDTO signInResponseDTO = memberCommandService.signUp(clientId, signUpRequestDTO);
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
+        return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
     }
 
-    @GetMapping("/reissue")
-    @Operation(summary = "[말즈] 토큰 재발행",
-            description = "request Header : Bearer refreshToken")
-    ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> reissue(
-            @RequestAttribute("refresh") String refreshToken
-    ) {
-        MemberDetails memberDetails = memberCommandService.extractMemberDetailsByRefreshToken(refreshToken);
-
-        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = memberCommandService.generateTokenDTO(memberDetails);
-
-        return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
-    }
 
     @GetMapping("/member-info")
     @Operation(summary = "[말즈] 사용자 정보 조회",
             description = "request Header : Bearer access토큰")
+    @SwaggerApiError({
+            ErrorStatus._MEMBER_BINDING_FAIL,
+            ErrorStatus._MEMBER_NOT_FOUND
+    })
     ResponseEntity<ApiResponse<MemberResponseDTO.MemberInfoDTO>> getMemberInfo(
             @AuthenticationPrincipal MemberDetails memberDetails
     ) {
