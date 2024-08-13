@@ -12,4 +12,8 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     void deleteByMateId(Long mateId);
 
     Integer countAllByRoomIdAndMateIdAndTimePoint(Long roomId, Long mateId, LocalDate timePoint);
+
+    List<Todo> findByTimePoint(LocalDate today);
+
+    List<Todo> findByTimePointAndRoleIsNotNull(LocalDate today);
 }
