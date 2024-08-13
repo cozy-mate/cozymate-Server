@@ -30,8 +30,7 @@ public class AuthController {
     ResponseEntity<ApiResponse<TokenResponseDTO>> reissue(
             @RequestAttribute("refresh") String refreshToken
     ) {
-        MemberDetails memberDetails = authService.extractMemberDetailsInRefreshToken(refreshToken);
-        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = authService.generateMemberTokenDTO(memberDetails);
+        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = authService.reissue(refreshToken);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
     }

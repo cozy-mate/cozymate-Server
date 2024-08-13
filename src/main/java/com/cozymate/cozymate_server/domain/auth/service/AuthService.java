@@ -33,6 +33,14 @@ public class AuthService implements UserDetailsService {
     private final MemberQueryService memberQueryService;
     private final TokenRepository tokenRepository;
 
+    public AuthResponseDTO.TokenResponseDTO reissue(String refreshToken) {
+        String clientId = jwtUtil.extractUserName(refreshToken);
+
+        findRefreshToken(clientId);
+
+        return generateMemberTokenDTO(loadMember(clientId));
+    }
+
     // 회원가입을 하려는 경우
     // 임시 토큰을 만들어서 token response dto 만들어 반환
     // 바디에 임시 토큰값 있음
@@ -53,7 +61,8 @@ public class AuthService implements UserDetailsService {
         String accessToken = jwtUtil.generateAccessToken(memberDetails);
         String refreshToken = jwtUtil.generateRefreshToken(memberDetails);
 
-        saveRefreshToken(refreshToken, memberDetails.getUsername());
+        deleteRefreshToken(memberDetails.getUsername());
+        saveRefreshToken(memberDetails.getUsername(), refreshToken);
 
         log.info("access token: {}", accessToken);
         log.info("refresh token: {}", refreshToken);
@@ -61,6 +70,7 @@ public class AuthService implements UserDetailsService {
         return AuthConverter.toTokenResponseDTO(
                 MEMBER_TOKEN_MESSAGE, accessToken, refreshToken);
     }
+
 
     // refresh token 에서 member details (user details 구현체) 추출
     public MemberDetails extractMemberDetailsInRefreshToken(String refreshToken) {
@@ -94,7 +104,7 @@ public class AuthService implements UserDetailsService {
 
     // refresh token을 db에 저장하는 함수
     @Transactional
-    void saveRefreshToken(String refreshToken, String clientId) {
+    void saveRefreshToken(String clientId, String refreshToken) {
         Token newToken = new Token(clientId, refreshToken);
         tokenRepository.save(newToken);
     }
