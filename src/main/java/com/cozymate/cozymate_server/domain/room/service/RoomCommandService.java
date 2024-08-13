@@ -70,8 +70,12 @@ public class RoomCommandService {
     }
 
     public void joinRoom(Long roomId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
         if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
         }
@@ -79,9 +83,6 @@ public class RoomCommandService {
         if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
-
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         if (mateRepository.countByRoomId(roomId) >= room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
@@ -96,6 +97,9 @@ public class RoomCommandService {
     }
 
     public void deleteRoom(Long roomId, Long memberId) {
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -135,6 +139,9 @@ public class RoomCommandService {
     }
 
     public void sendInvitation(Long roomId, List<Long> inviteeIdList, Long inviterId) {
+        memberRepository.findById(inviterId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -187,6 +194,9 @@ public class RoomCommandService {
     }
 
     public void respondToInviteRequest(Long roomId, Long inviteeId, boolean accept) {
+        memberRepository.findById(inviteeId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
         Room room = roomRepository.findById(roomId)
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 

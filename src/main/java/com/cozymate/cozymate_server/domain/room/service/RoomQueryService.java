@@ -35,6 +35,9 @@ public class RoomQueryService {
     private final FriendRepository friendRepository;
 
     public RoomCreateResponse getRoomById(Long roomId, Long memberId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
+        );
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -50,7 +53,10 @@ public class RoomQueryService {
         return new RoomCreateResponse(room.getName(), room.getInviteCode(), room.getProfileImage());
     }
 
-    public RoomJoinResponse getRoomByInviteCode(String inviteCode) {
+    public RoomJoinResponse getRoomByInviteCode(String inviteCode, Long memberId) {
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
         Room room = roomRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -94,6 +100,9 @@ public class RoomQueryService {
     }
 
     public InviteRequest getInvitation(Long memberId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
+        );
         Mate mate = mateRepository.findByMemberIdAndEntryStatus(memberId, EntryStatus.PENDING)
             .orElseThrow(()-> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
         Room room = roomRepository.findById(mate.getRoom().getId())
