@@ -12,7 +12,7 @@ import lombok.Getter;
 public enum NotificationType {
 
     // OneTargetReverse
-    COZY_MATE_REQUEST_FROM(NotificationCategory.COZY_MATE) {
+    COZY_MATE_REQUEST_FROM(NotificationCategory.COZY_MATE_ARRIVE) {
         @Override
         public String generateContent(NotificationContentDto notificationContentDto) {
             return notificationContentDto.getMember().getNickname() + "님에게서 코지메이트 신청이 도착했어요!";
@@ -20,7 +20,7 @@ public enum NotificationType {
     },
 
     // OneTargetReverse
-    COZY_MATE_REQUEST_TO(NotificationCategory.COZY_MATE) {
+    COZY_MATE_REQUEST_TO(NotificationCategory.COZY_MATE_SEND) {
         @Override
         public String generateContent(NotificationContentDto notificationContentDto) {
             return notificationContentDto.getMember().getNickname() + "님에게 코지메이트 신청을 보냈어요!";
@@ -28,7 +28,7 @@ public enum NotificationType {
     },
 
     // OneTargetReverse
-    COZY_MATE_REQUEST_ACCEPT(NotificationCategory.COZY_MATE) {
+    COZY_MATE_REQUEST_ACCEPT(NotificationCategory.COZY_MATE_ACCEPT) {
         @Override
         public String generateContent(NotificationContentDto notificationContentDto) {
             return notificationContentDto.getMember().getNickname() + "님이 코지메이트 신청을 수락했어요!";
@@ -100,6 +100,6 @@ public enum NotificationType {
     public abstract String generateContent(NotificationContentDto notificationContentDto);
 
     public enum NotificationCategory {
-        COZY_HOME, COZY_MATE, COZY_ROLE
+        COZY_HOME, COZY_MATE_ARRIVE, COZY_MATE_SEND, COZY_MATE_ACCEPT, COZY_ROLE
     }
 }
