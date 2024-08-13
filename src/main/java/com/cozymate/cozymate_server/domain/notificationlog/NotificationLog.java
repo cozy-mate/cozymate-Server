@@ -1,9 +1,11 @@
 package com.cozymate.cozymate_server.domain.notificationlog;
 
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
+import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,7 +31,8 @@ public class NotificationLog extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private NotificationType type;
+    @Enumerated(EnumType.STRING)
+    private NotificationCategory category;
 
-    private String string;
+    private String content;
 }

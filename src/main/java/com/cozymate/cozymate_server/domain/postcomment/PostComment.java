@@ -33,4 +33,8 @@ public class PostComment extends BaseTimeEntity {
     private Mate commenter;
 
     private String content;
+
+    public void update(String content) {
+        this.content = content;
+    }
 }
