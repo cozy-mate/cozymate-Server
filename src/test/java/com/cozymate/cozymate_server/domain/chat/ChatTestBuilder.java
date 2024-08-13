@@ -16,7 +16,7 @@ public class ChatTestBuilder {
     private static final String CONTENT = "안녕하세요";
 
     public static ChatRequestDto testChatRequestDtoBuild() {
-        return new ChatRequestDto(SENDER_ID, CONTENT);
+        return new ChatRequestDto(CONTENT);
     }
 
     public static Member testSenderBuild() {

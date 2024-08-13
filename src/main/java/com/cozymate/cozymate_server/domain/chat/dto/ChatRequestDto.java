@@ -7,8 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ChatRequestDto {
-
-    private Long senderId;
     @NotBlank
     private String content;
 }
