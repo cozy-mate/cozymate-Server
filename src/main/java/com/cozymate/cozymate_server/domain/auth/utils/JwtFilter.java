@@ -39,7 +39,6 @@ public class JwtFilter extends OncePerRequestFilter {
     );
 
     private static final List<String> REFRESH_URLS = List.of("/api/v3/member/reissue");
-    private static final Integer TOKEN_BEGIN_INDEX = 7;
     private static final String REQUEST_ATTRIBUTE_NAME_CLIENT_ID = "client_id";
 
     private static final String REQUEST_ATTRIBUTE_NAME_REFRESH = "refresh";
@@ -68,7 +67,8 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             // Authorization 헤더에서 JWT를 추출
-            String jwt = authHeader.substring(TOKEN_BEGIN_INDEX);
+            String jwt = authHeader.substring(JwtUtil.TOKEN_PREFIX.length());
+            log.info("{}",JwtUtil.TOKEN_PREFIX.length());
             // JWT를 검증
             jwtUtil.validateToken(jwt);
 
@@ -76,6 +76,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String userName = jwtUtil.extractUserName(jwt);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
 
+            log.info("사용자 : {}", userName);
             log.info("토큰 타입 : {}", jwtUtil.extractTokenType(jwt));
 
             // 임시 토큰일 경우, 접근을 제한할 URL 목록에 대한 접근 여부 확인

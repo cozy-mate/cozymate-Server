@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class LogoutService implements LogoutHandler {
-    private static final Integer TOKEN_BEGIN_INDEX = 7;
     private final JwtUtil jwtUtil;
     private final AuthService authService;
     @Override
@@ -26,15 +25,22 @@ public class LogoutService implements LogoutHandler {
             HttpServletResponse response,
             Authentication authentication
     ) {
+        // 헤더에서 토큰 추출
+        // ex. Authorization ~~~
         final String authHeader = request.getHeader(JwtUtil.HEADER_ATTRIBUTE_NAME_AUTHORIZATION);
         final String jwt;
         if (authHeader == null ||!authHeader.startsWith(JwtUtil.TOKEN_PREFIX)) {
             return;
         }
-        jwt = authHeader.substring(TOKEN_BEGIN_INDEX);
+        // 실제 토큰 값만 추출
+        jwt = authHeader.substring(JwtUtil.TOKEN_PREFIX.length());
         String username = jwtUtil.extractUserName(jwt);
         log.info("logout: {}", username);
+
+        // 사용자 refresh token 삭제
         authService.deleteRefreshToken(username);
+
+        // 헤더에 담겨있던 사용자 정보 clear
         SecurityContextHolder.clearContext();
     }
 }

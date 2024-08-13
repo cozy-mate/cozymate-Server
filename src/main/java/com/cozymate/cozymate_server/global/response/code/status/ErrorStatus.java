@@ -20,12 +20,12 @@ public enum ErrorStatus implements BaseErrorCode {
     // 카카오
 
     _KAKAO_ACCESS_RESPONSE_RECEIVING_FAIL(
-            HttpStatus.INTERNAL_SERVER_ERROR, "AUTH500", "카카오에서 response를 받지 못했습니다."),
+        HttpStatus.INTERNAL_SERVER_ERROR, "AUTH500", "카카오에서 response를 받지 못했습니다."),
 
     _KAKAO_RESPONSE_PARSING_FAIL(
-            HttpStatus.INTERNAL_SERVER_ERROR, "AUTH501", "카카오 response 파싱 실패"),
+        HttpStatus.INTERNAL_SERVER_ERROR, "AUTH501", "카카오 response 파싱 실패"),
     _KAKAO_ACCESS_TOKEN_PARSING_FAIL(
-            HttpStatus.INTERNAL_SERVER_ERROR, "AUTH501", "카카오 accessToken 파싱 실패"),
+        HttpStatus.INTERNAL_SERVER_ERROR, "AUTH501", "카카오 accessToken 파싱 실패"),
 
 
     // [Member] 관련 에러
@@ -62,7 +62,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBERSTAT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT400", "멤버 상세정보가 이미 존재합니다."),
     _MEMBERSTAT_MERIDIAN_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT401", "오전, 오후를 정확하게 입력하세요."),
     _MEMBERSTAT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT402", "멤버 상세정보가 존재하지 않습니다."),
-    _MEMBERSTAT_FILTER_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT403", "멤버 상세정보 filterList이 잘못되었습니다."),
+    _MEMBERSTAT_FILTER_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT403",
+        "멤버 상세정보 filterList이 잘못되었습니다."),
 
     // ChatRoom 관련 애러
     _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
@@ -98,8 +99,11 @@ public enum ErrorStatus implements BaseErrorCode {
     // Feed 관련 에러
     _FEED_EXISTS(HttpStatus.BAD_REQUEST, "FEED400", "피드 정보가 이미 존재합니다."),
     _FEED_NOT_EXISTS(HttpStatus.BAD_REQUEST, "FEED401", "피드 정보가 존재하지 않습니다."),
-    ;
 
+    _POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST400", "게시물이 존재하지 않습니다."),
+
+    _POST_COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT400", "댓글이 존재하지 않습니다."),
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;
@@ -109,10 +113,10 @@ public enum ErrorStatus implements BaseErrorCode {
     @Override
     public ErrorReasonDto getReasonHttpStatus() {
         return ErrorReasonDto.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .httpStatus(httpStatus)
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .httpStatus(httpStatus)
+            .build();
     }
 }
