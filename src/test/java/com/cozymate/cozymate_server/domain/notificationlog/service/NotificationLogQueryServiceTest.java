@@ -37,7 +37,6 @@ class NotificationLogQueryServiceTest {
     NotificationLog notificationLogA;
     NotificationLog notificationLogC;
 
-
     @Nested
     @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
     class sendNotification_메서드는 {

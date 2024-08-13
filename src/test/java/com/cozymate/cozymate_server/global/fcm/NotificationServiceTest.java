@@ -193,8 +193,10 @@ public class NotificationServiceTest {
 
             // then
             verify(firebaseMessaging, times(memberList.size())).send(any(Message.class));
-            verify(notificationLogRepository, times(memberList.size())).save(any(NotificationLog.class));
-            Assertions.assertThat(content).isEqualTo(content2).isEqualTo("방이 열렸어요, 얼른 가서 코지메이트를 만나봐요!");
+            verify(notificationLogRepository, times(memberList.size())).save(
+                any(NotificationLog.class));
+            Assertions.assertThat(content).isEqualTo(content2)
+                .isEqualTo("방이 열렸어요, 얼른 가서 코지메이트를 만나봐요!");
         }
     }
 }

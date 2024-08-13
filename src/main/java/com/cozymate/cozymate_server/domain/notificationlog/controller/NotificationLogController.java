@@ -44,6 +44,7 @@ public class NotificationLogController {
      */
 
     private final NotificationService notificationService;
+
     @GetMapping("/test")
     @Operation(summary = "알림 테스트용")
     public String sendNotificationTest(@AuthenticationPrincipal MemberDetails memberDetails) {

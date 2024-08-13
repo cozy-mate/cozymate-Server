@@ -120,7 +120,9 @@ class ChatCommandServiceTest {
             @Test
             @DisplayName("예외를 발생시킨다.")
             void it_returns_not_found_member_exception() {
-                assertThatThrownBy(() -> chatCommandService.createChat(chatRequestDto, sender.getId(), recipient.getId()))
+                assertThatThrownBy(
+                    () -> chatCommandService.createChat(chatRequestDto, sender.getId(),
+                        recipient.getId()))
                     .isInstanceOf(GeneralException.class);
             }
         }
@@ -145,7 +147,9 @@ class ChatCommandServiceTest {
             @Test
             @DisplayName("예외를 발생시킨다.")
             void it_returns_not_found_member_exception() {
-                assertThatThrownBy(() -> chatCommandService.createChat(chatRequestDto, sender.getId(), recipient.getId()))
+                assertThatThrownBy(
+                    () -> chatCommandService.createChat(chatRequestDto, sender.getId(),
+                        recipient.getId()))
                     .isInstanceOf(GeneralException.class);
             }
         }

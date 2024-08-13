@@ -35,9 +35,11 @@ public class ChatController {
         ErrorStatus._MEMBER_NOT_FOUND
     )
     public ResponseEntity<ApiResponse<String>> createChat(
-        @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId, @AuthenticationPrincipal
+        @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId,
+        @AuthenticationPrincipal
         MemberDetails memberDetails) {
-        chatCommandService.createChat(chatRequestDto, memberDetails.getMember().getId(), recipientId);
+        chatCommandService.createChat(chatRequestDto, memberDetails.getMember().getId(),
+            recipientId);
         return ResponseEntity.ok(ApiResponse.onSuccess("쪽지 작성 완료"));
     }
 
@@ -48,8 +50,10 @@ public class ChatController {
         ErrorStatus._CHATROOM_NOT_FOUND,
         ErrorStatus._CHATROOM_MEMBER_MISMATCH
     })
-    public ResponseEntity<List<ChatResponseDto>> getChatList(@AuthenticationPrincipal MemberDetails memberDetails,
+    public ResponseEntity<List<ChatResponseDto>> getChatList(
+        @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long chatRoomId) {
-        return ResponseEntity.ok(chatQueryService.getChatList(memberDetails.getMember().getId(), chatRoomId));
+        return ResponseEntity.ok(
+            chatQueryService.getChatList(memberDetails.getMember().getId(), chatRoomId));
     }
 }
