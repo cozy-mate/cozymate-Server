@@ -51,7 +51,7 @@ public class MemberResponseDTO {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class LoginResponseDTO{
+    public static class SignInResponseDTO{
         AuthResponseDTO.TokenResponseDTO tokenResponseDTO;
         MemberInfoDTO memberInfoDTO;
     }
