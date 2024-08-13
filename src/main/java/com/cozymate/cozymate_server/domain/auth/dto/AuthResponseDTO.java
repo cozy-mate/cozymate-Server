@@ -17,6 +17,21 @@ public class AuthResponseDTO {
         String redirectUrl;
     }
 
+
+    /**
+     * {
+     *   "message": "임시토큰 발급완료" or "기존회원 로그인",
+     *   "accessToken": "accesstokenheader.accesstokenpayload.accesstokensignature",
+     *   "refreshToken": null or "refreshtokenheader.refreshtokenpayload.refreshtokensignatre",
+     *   "memberInfoDTO": {
+     *     "name": "김수환",
+     *     "nickname": "말즈",
+     *     "gender": "MALE",
+     *     "birthday": "2000-01-20",
+     *     "persona": 1
+     *   }
+     * }
+     */
     @Builder
     @Getter
     @AllArgsConstructor

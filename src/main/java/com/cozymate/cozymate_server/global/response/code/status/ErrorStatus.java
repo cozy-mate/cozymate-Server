@@ -97,7 +97,6 @@ public enum ErrorStatus implements BaseErrorCode {
     _FEED_NOT_EXISTS(HttpStatus.BAD_REQUEST, "FEED401", "피드 정보가 존재하지 않습니다."),
     ;
 
-
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;

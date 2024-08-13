@@ -66,6 +66,7 @@ public class KakaoService implements SocialLoginService {
     private String AUTHORIZATION_URI;
 
     @Override
+    // 사용자가 로그인 할 url 만드는 함수
     public UrlDTO getRedirectUrl() {
         String url = UriComponentsBuilder.fromHttpUrl(AUTHORIZATION_URI)
                 .queryParam(QUERY_PARAMETER_NAME_CLIENT_ID, KAKAO_CLIENT_ID)
@@ -78,6 +79,7 @@ public class KakaoService implements SocialLoginService {
     }
 
     @Override
+    // 인가 코드로 카카오 서버에 접근할 access token 받는 함수
     public String getTokenByCode(String code) {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = makeTokenRequest(code);
         ResponseEntity<String> tokenResponse = getTokenResponse(tokenRequest);
@@ -86,12 +88,15 @@ public class KakaoService implements SocialLoginService {
     }
 
     @Override
+    // accessToken 으로 사용자 정보(client id) 받는 함수
     public String getClientIdByToken(String token) {
         HttpEntity<MultiValueMap<String, String>> clientInfoRequest = makeMemberInfoRequest(token);
         ResponseEntity<String> clientInfoResponse = getClientInfoResponse(clientInfoRequest);
         return parseClientId(clientInfoResponse);
     }
 
+    // 인가 코드를 담아서 카카오에 access 토큰을 달라는 요청을 만드는 함수
+    // Http 헤더와, 바디 만들어서 반환
     private HttpEntity<MultiValueMap<String, String>> makeTokenRequest(String code) {
         // HTTP Header
         HttpHeaders headers = new HttpHeaders();
@@ -108,6 +113,7 @@ public class KakaoService implements SocialLoginService {
         return new HttpEntity<>(body, headers);
     }
 
+    // Http 엔티티로 카카오 요청을 보내고 토큰을 받는 함수
     private ResponseEntity<String> getTokenResponse(HttpEntity<MultiValueMap<String, String>> tokenRequest) {
         RestTemplate tokenRt = new RestTemplate();
         try {
@@ -120,19 +126,7 @@ public class KakaoService implements SocialLoginService {
         }
     }
 
-    private ResponseEntity<String> getClientInfoResponse(HttpEntity<MultiValueMap<String, String>> clientInfoRequest) {
-        RestTemplate clientInfoRt = new RestTemplate();
-        try {
-            return clientInfoRt.exchange(USER_INFO_URI, HttpMethod.POST,
-                    clientInfoRequest,
-                    String.class);
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            String errorMessage = String.format(HTTP_ERROR_MESSAGE_FORMAT,
-                    e.getMessage(), e.getStatusCode(), e.getResponseBodyAsString());
-            throw new RuntimeException(errorMessage);
-        }
-    }
-
+    // 응답에서 access token을 추출하는 함수
     private String parseAccessToken(ResponseEntity<String> response) {
         String responseBody = parseResponseBody(response);
         // JSON 응답 파싱
@@ -146,6 +140,8 @@ public class KakaoService implements SocialLoginService {
         }
     }
 
+    // 사용자 정보를 달라는 요청을 만드는 함수
+    // 헤더에 access token을 담는다.
     private HttpEntity<MultiValueMap<String, String>> makeMemberInfoRequest(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_ATTRIBUTE_NAME_AUTH, HEADER_TOKEN_PREFIX + accessToken);
@@ -154,6 +150,21 @@ public class KakaoService implements SocialLoginService {
         return new HttpEntity<>(headers);
     }
 
+    // 사용자 정보를 달라는 요청을 보내고 응답을 받는 함수
+    private ResponseEntity<String> getClientInfoResponse(HttpEntity<MultiValueMap<String, String>> clientInfoRequest) {
+        RestTemplate clientInfoRt = new RestTemplate();
+        try {
+            return clientInfoRt.exchange(USER_INFO_URI, HttpMethod.POST,
+                    clientInfoRequest,
+                    String.class);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            String errorMessage = String.format(HTTP_ERROR_MESSAGE_FORMAT,
+                    e.getMessage(), e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(errorMessage);
+        }
+    }
+
+    // 받은 사용자 정보에서 clientId를 추출하는 함수
     private String parseClientId(ResponseEntity<String> response) {
         String responseBody = parseResponseBody(response);
         String clientId;
@@ -168,6 +179,7 @@ public class KakaoService implements SocialLoginService {
         return ClientIdMaker.makeClientId(clientId, SocialType.KAKAO);
     }
 
+    // 응답을 받아 바디를 파싱하는 함수
     private String parseResponseBody(ResponseEntity<String> response) {
         String responseBody;
         try {
