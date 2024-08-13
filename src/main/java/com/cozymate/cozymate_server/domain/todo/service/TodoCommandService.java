@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.todo.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
@@ -21,13 +22,17 @@ public class TodoCommandService {
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
 
-    public void createTodo(CreateTodoRequestDto createTodoRequestDto, Long roomId, Long memberId) {
+    public void createTodo(
+        Member member,
+        Long roomId,
+        CreateTodoRequestDto createTodoRequestDto
+    ) {
 
-        Mate mate = mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
         // 최대 투두 생성 개수 초과 여부 판단
-        int todoCount = todoRepository.countAllByRoomIdAndMateIdAndTimePoint(roomId, memberId,
+        int todoCount = todoRepository.countAllByRoomIdAndMateIdAndTimePoint(roomId, member.getId(),
             createTodoRequestDto.getTimePoint());
         if (todoCount >= MAX_TODO_PER_DAY) {
             throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
@@ -40,12 +45,13 @@ public class TodoCommandService {
     }
 
     public void updateTodoCompleteState(
-        UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto,
-        Long memberId) {
+        Member member,
+        UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto
+    ) {
 
         Todo todo = todoRepository.findById(updateTodoCompleteStateRequestDto.getTodoId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
-        if (!todo.getMate().getMember().getId().equals(memberId)) {
+        if (Boolean.FALSE.equals(todo.getMate().getMember().getId().equals(member.getId()))) {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
         todo.updateCompleteState(updateTodoCompleteStateRequestDto.getCompleted());

@@ -6,6 +6,8 @@ import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.RuleDetailRe
 import com.cozymate.cozymate_server.domain.rule.service.RuleCommandService;
 import com.cozymate.cozymate_server.domain.rule.service.RuleQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -33,12 +35,13 @@ public class RuleController {
     @Operation(
         summary = "[무빗] 특정 방의 Rule 생성",
         description = "rule 내용은 필수, memo는 선택입니다.")
+    @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._RULE_OVER_MAX})
     public ResponseEntity<ApiResponse<String>> createRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
         @Valid @RequestBody CreateRuleRequestDto createRuleRequestDto
     ) {
-        ruleCommandService.createRule(roomId, memberDetails.getMember(), createRuleRequestDto);
+        ruleCommandService.createRule(memberDetails.getMember(), roomId, createRuleRequestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("규칙 생성에 성공했습니다."));
     }
 
@@ -46,6 +49,8 @@ public class RuleController {
     @Operation(
         summary = "[무빗] 특정 방의 Rule 목록 조회",
         description = "Rule에서 memo는 null 반환이 가능합니다.")
+    @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._RULE_NOT_FOUND,
+        ErrorStatus._RULE_MATE_MISMATCH})
     public ResponseEntity<ApiResponse<List<RuleDetailResponseDto>>> getRuleList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId
@@ -59,12 +64,14 @@ public class RuleController {
     @Operation(
         summary = "[무빗] 특정 방의 특정 Rule 삭제",
         description = "rule의 고유 번호로 삭제가 가능합니다.")
+    @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._RULE_NOT_FOUND,
+        ErrorStatus._RULE_MATE_MISMATCH})
     public ResponseEntity<ApiResponse<String>> deleteRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
         @RequestParam Long ruleId
     ) {
-        ruleCommandService.deleteRule(roomId, memberDetails.getMember(), ruleId);
+        ruleCommandService.deleteRule(memberDetails.getMember(), roomId, ruleId);
         return ResponseEntity.ok(ApiResponse.onSuccess("삭제되었습니다."));
     }
 

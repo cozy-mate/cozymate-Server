@@ -24,10 +24,14 @@ public class RoleCommandService {
 
 
     @Transactional
-    public void createRole(CreateRoleRequestDto requestDto, Long roomId, Member member) {
+    public void createRole(
+        Member member,
+        Long roomId,
+        CreateRoleRequestDto requestDto
+    ) {
         // 해당 API를 호출한 사람
         Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
         List<DayListBitmask> repeatDayList = requestDto.getRepeatDayList().stream()
             .map(DayListBitmask::valueOf).toList();
@@ -44,7 +48,7 @@ public class RoleCommandService {
 
     public void deleteRole(Long roomId, Long roleId, Member member) {
         Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
         Role roleToDelete = roleRepository.findById(roleId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROLE_NOT_FOUND));

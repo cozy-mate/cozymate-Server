@@ -21,7 +21,7 @@ public class RuleCommandService {
 
     private static final int MAX_RULE_COUNT = 10;
 
-    public void createRule(Long roomId, Member member, CreateRuleRequestDto requestDto) {
+    public void createRule(Member member, Long roomId, CreateRuleRequestDto requestDto) {
         Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
@@ -36,7 +36,7 @@ public class RuleCommandService {
 
     }
 
-    public void deleteRule(Long roomId, Member member, Long ruleId) {
+    public void deleteRule(Member member, Long roomId, Long ruleId) {
         Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 

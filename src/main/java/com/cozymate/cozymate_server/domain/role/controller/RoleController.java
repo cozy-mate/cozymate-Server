@@ -32,19 +32,20 @@ public class RoleController {
 
     @PostMapping("/{roomId}")
     @Operation(summary = "[무빗] 특정 방에 role 생성", description = "본인의 룸메라면 Role을 할당할 수 있습니다.")
-    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> createRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
-        @Valid @RequestBody CreateRoleRequestDto createRoleRequestDto,
-        @PathVariable Long roomId
+        @PathVariable Long roomId,
+        @Valid @RequestBody CreateRoleRequestDto createRoleRequestDto
+
     ) {
-        roleCommandService.createRole(createRoleRequestDto, roomId, memberDetails.getMember());
+        roleCommandService.createRole(memberDetails.getMember(), roomId, createRoleRequestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 생성 완료."));
     }
 
     @GetMapping("/{roomId}")
     @Operation(summary = "[무빗] 특정 방에 role 목록 조회", description = "")
-    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
     public ResponseEntity<ApiResponse<RoleListDetailResponseDto>> getRoleList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId
@@ -57,7 +58,8 @@ public class RoleController {
 
     @DeleteMapping("{roomId}")
     @Operation(summary = "[무빗] 특정 role 삭제", description = "본인의 룸메라면 Role을 삭제할 수 있습니다.")
-    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._ROLE_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._ROLE_NOT_FOUND,
+        ErrorStatus._ROLE_MATE_MISMATCH})
     public ResponseEntity<ApiResponse<String>> deleteRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
