@@ -6,8 +6,8 @@ import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogRe
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 import com.cozymate.cozymate_server.domain.notificationlog.service.NotificationLogQueryService;
-import com.cozymate.cozymate_server.global.fcm.NotificationService;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationService;
+import com.cozymate.cozymate_server.domain.fcm.NotificationTargetDto.OneTargetDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.ArrayList;

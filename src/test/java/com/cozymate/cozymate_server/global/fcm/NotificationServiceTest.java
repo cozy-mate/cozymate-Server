@@ -1,5 +1,7 @@
 package com.cozymate.cozymate_server.global.fcm;
 
+import com.cozymate.cozymate_server.domain.fcm.NotificationContentDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
@@ -7,9 +9,9 @@ import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepository;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.GroupTargetDto;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetDto;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetReverseDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationTargetDto.GroupTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationTargetDto.OneTargetReverseDto;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;

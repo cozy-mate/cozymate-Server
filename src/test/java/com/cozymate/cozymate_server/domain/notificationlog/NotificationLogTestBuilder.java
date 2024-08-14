@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.notificationlog;
 import com.cozymate.cozymate_server.domain.chat.ChatTestBuilder;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
-import com.cozymate.cozymate_server.global.fcm.NotificationContentDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationContentDto;
 
 public class NotificationLogTestBuilder {
 

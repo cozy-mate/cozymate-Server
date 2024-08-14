@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.notificationlog.enums;
 
-import com.cozymate.cozymate_server.global.fcm.NotificationContentDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationContentDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;

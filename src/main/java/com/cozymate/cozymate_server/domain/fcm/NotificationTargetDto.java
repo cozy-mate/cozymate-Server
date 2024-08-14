@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.global.fcm;
+package com.cozymate.cozymate_server.domain.fcm;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;

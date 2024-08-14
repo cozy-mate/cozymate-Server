@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.global.event;
 
-import com.cozymate.cozymate_server.global.fcm.NotificationService;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.GroupTargetDto;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetDto;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetReverseDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationService;
+import com.cozymate.cozymate_server.domain.fcm.NotificationTargetDto.GroupTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.NotificationTargetDto.OneTargetReverseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
