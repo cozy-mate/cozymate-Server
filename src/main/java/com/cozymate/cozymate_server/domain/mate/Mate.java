@@ -50,6 +50,9 @@ public class Mate extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Mate bestMate = null;
 
+    public void setEntryStatus(EntryStatus entryStatus) {
+        this.entryStatus = entryStatus;
+    }
 
 
 }

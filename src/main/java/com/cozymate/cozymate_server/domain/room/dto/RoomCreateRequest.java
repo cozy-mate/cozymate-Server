@@ -26,8 +26,5 @@ public class RoomCreateRequest {
     @Min(2)
     @Max(6)
     private Integer maxMateNum;
-//   TODO: 추후 수정 예정, 테스트 위해 임시로 둔 값
-    @NotNull
-    private Long creatorId;
 
 }

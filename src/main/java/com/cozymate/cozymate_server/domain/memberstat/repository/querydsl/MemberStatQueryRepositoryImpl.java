@@ -1,7 +1,9 @@
 package com.cozymate.cozymate_server.domain.memberstat.repository.querydsl;
 
+import static com.cozymate.cozymate_server.domain.member.QMember.member;
+import static com.cozymate.cozymate_server.domain.memberstat.QMemberStat.memberStat;
+
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import com.querydsl.core.BooleanBuilder;
@@ -14,9 +16,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-
-import static com.cozymate.cozymate_server.domain.memberstat.QMemberStat.memberStat;
-import static com.cozymate.cozymate_server.domain.member.QMember.member;
 
 @RequiredArgsConstructor
 @Repository

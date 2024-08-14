@@ -54,9 +54,11 @@ public enum ErrorStatus implements BaseErrorCode {
     _ROOM_MANAGER_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM402", "방장이 존재하지 않습니다."),
     _NOT_ROOM_MANAGER(HttpStatus.BAD_REQUEST, "ROOM403", "방장이 아닙니다."),
     _NOT_ROOM_MATE(HttpStatus.BAD_REQUEST, "ROOM404", "해당 방의 룸메이트가 아닙니다."),
-    _ALREADY_JOINED_ROOM(HttpStatus.BAD_REQUEST, "ROOM405", "이미 참가한 방입니다."),
+    _ROOM_ALREADY_JOINED(HttpStatus.BAD_REQUEST, "ROOM405", "이미 참가한 방입니다."),
     _ROOM_FULL(HttpStatus.BAD_REQUEST, "ROOM406", "방 정원이 꽉 찼습니다."),
-    _ROOM_WAITING(HttpStatus.BAD_REQUEST, "ROOM407", "대기 중인 방입니다."),
+    _ROOM_WAITING(HttpStatus.BAD_REQUEST,"ROOM407","대기 중인 방입니다."),
+    _INVITATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM408", "존재하지 않는 초대요청입니다."),
+    _INVITATION_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM409", "이미 보낸 초대요청입니다."),
 
     // University 관련 에러
     _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "UNIVERSITY400", "대학을 찾을 수 없습니다."),
@@ -98,6 +100,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _FRIEND_REQUEST_ACCEPTED(HttpStatus.BAD_REQUEST, "FRIEND403", "이미 수락한 친구요청입니다."),
     _FRIEND_REQUEST_WAITING(HttpStatus.BAD_REQUEST, "FRIEND404", "대기 중인 친구요청입니다."),
     _FRIEND_REQUEST_EQUAL(HttpStatus.BAD_REQUEST, "FRIEND405", "같은 사람에게 친구요청을 보낼 수 없습니다."),
+    _NOT_FRIEND(HttpStatus.BAD_REQUEST, "FRIEND406", "친구가 아닙니다."),
 
     // Role 관련
     _ROLE_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROLE400", "역할을 찾을 수 없습니다."),
