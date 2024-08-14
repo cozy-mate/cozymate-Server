@@ -32,8 +32,7 @@ public class PostConverter {
             .nickname(post.getWriter().getMember().getNickname())
             .persona(post.getWriter().getMember().getPersona())
             .createdAt(post.getCreatedAt())
-            .updatedAt(post.getUpdatedAt())
-            .postImageList(
+            .imageList(
                 postImage.stream().map(PostImage::getContent).map(ImageUtil::generateUrl).toList())
             .commentList(postComment.stream().map(PostCommentConverter::toDto).toList())
             .build();
@@ -48,6 +47,7 @@ public class PostConverter {
             .content(post.getContent())
             .nickname(post.getWriter().getMember().getNickname())
             .persona(post.getWriter().getMember().getPersona())
+            .createdAt(post.getCreatedAt())
             .imageList(
                 postImages.stream().map(PostImage::getContent).map(ImageUtil::generateUrl).toList())
             .commentCount(commentCount)

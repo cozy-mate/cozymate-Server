@@ -19,9 +19,8 @@ public class PostDetailViewDTO {
     private String title;
     private String content;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private String nickname;
     private int persona;
-    private List<String> postImageList;
+    private List<String> imageList;
     private List<PostCommentViewDTO> commentList;
 }
