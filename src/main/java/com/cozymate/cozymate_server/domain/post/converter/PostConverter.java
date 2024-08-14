@@ -4,7 +4,7 @@ import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.dto.PostCreateDTO;
-import com.cozymate.cozymate_server.domain.post.dto.PostDetailViewDTO;
+import com.cozymate.cozymate_server.domain.post.dto.PostDetailDTO;
 import com.cozymate.cozymate_server.domain.post.dto.PostSummaryDTO;
 import com.cozymate.cozymate_server.domain.postcomment.PostComment;
 import com.cozymate.cozymate_server.domain.postcomment.converter.PostCommentConverter;
@@ -23,9 +23,9 @@ public class PostConverter {
             .build();
     }
 
-    public static PostDetailViewDTO toDto(Post post, List<PostImage> postImage,
+    public static PostDetailDTO toDto(Post post, List<PostImage> postImage,
         List<PostComment> postComment) {
-        return PostDetailViewDTO.builder()
+        return PostDetailDTO.builder()
             .id(post.getId())
             .title(post.getTitle())
             .content(post.getContent())

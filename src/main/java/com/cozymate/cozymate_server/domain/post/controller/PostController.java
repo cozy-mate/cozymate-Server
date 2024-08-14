@@ -1,11 +1,10 @@
 package com.cozymate.cozymate_server.domain.post.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
 import com.cozymate.cozymate_server.domain.post.dto.PostCreateDTO;
 import com.cozymate.cozymate_server.domain.post.dto.PostSummaryDTO;
 import com.cozymate.cozymate_server.domain.post.dto.PostUpdateDTO;
-import com.cozymate.cozymate_server.domain.post.dto.PostDetailViewDTO;
+import com.cozymate.cozymate_server.domain.post.dto.PostDetailDTO;
 import com.cozymate.cozymate_server.domain.post.service.PostCommandService;
 import com.cozymate.cozymate_server.domain.post.service.PostQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -83,7 +82,7 @@ public class PostController {
         ErrorStatus._MATE_OR_ROOM_NOT_FOUND
     })
     @GetMapping("/{roomId}/{postId}")
-    public ResponseEntity<ApiResponse<PostDetailViewDTO>> getPost(
+    public ResponseEntity<ApiResponse<PostDetailDTO>> getPost(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
         @PathVariable Long postId) {
