@@ -61,7 +61,6 @@ public class AuthService implements UserDetailsService {
         String accessToken = jwtUtil.generateAccessToken(memberDetails);
         String refreshToken = jwtUtil.generateRefreshToken(memberDetails);
 
-        deleteRefreshToken(memberDetails.getUsername());
         saveRefreshToken(memberDetails.getUsername(), refreshToken);
 
         log.info("access token: {}", accessToken);
