@@ -56,7 +56,6 @@ public class MemberController {
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
     }
 
-    //todo : nosql로 금지어 추가
     @GetMapping("/check-nickname")
     @Operation(summary = "[말즈] 닉네임 유효성 검증",
             description = "false : 사용 불가, true : 사용 가능")
