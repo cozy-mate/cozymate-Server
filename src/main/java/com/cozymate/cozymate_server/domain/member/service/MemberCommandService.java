@@ -30,11 +30,11 @@ public class MemberCommandService {
      * 닉네임 유효성 검사 메서드
      *
      * @param nickname 유효성을 검사할 닉네임
-     * @return 유효하지 않으면 true, 유효하면 false 반환
+     * @return 유효하면 true, 유효하지 않으면 false 반환
      */
     public Boolean checkNickname(String nickname) {
         //todo: nickname 금지어 로직 추가, redis 같은 거 써야 할듯
-        return !memberQueryService.isValidNickName(nickname);
+        return memberQueryService.isValidNickName(nickname);
     }
 
     /**
