@@ -18,6 +18,7 @@ import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLogRepository;
@@ -52,8 +53,9 @@ public class RoomCommandService {
     private final RoleRepository roleRepository;
     private final FeedRepository feedRepository;
     private final FriendRepository friendRepository;
+    private final RoomQueryService roomQueryService;
 
-    public void createRoom(RoomCreateRequest request, Member member) {
+    public RoomCreateResponse createRoom(RoomCreateRequest request, Member member) {
         Member creator = memberRepository.findById(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -67,6 +69,8 @@ public class RoomCommandService {
 
         Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
+
+        return roomQueryService.getRoomById(room.getId(), member.getId());
     }
 
     public void joinRoom(Long roomId, Long memberId) {

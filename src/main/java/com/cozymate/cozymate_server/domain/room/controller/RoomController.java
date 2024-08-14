@@ -41,10 +41,10 @@ public class RoomController {
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_ALREADY_EXISTS
     })
-    public ResponseEntity<ApiResponse<String>> createRoom(@Valid @RequestBody RoomCreateRequest request,
+    public ResponseEntity<ApiResponse<RoomCreateResponse>> createRoom(@Valid @RequestBody RoomCreateRequest request,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        roomCommandService.createRoom(request, memberDetails.getMember());
-        return ResponseEntity.ok(ApiResponse.onSuccess("방 생성 완료"));
+        RoomCreateResponse response = roomCommandService.createRoom(request, memberDetails.getMember());
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
     @GetMapping("/{roomId}")
@@ -106,14 +106,15 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess("방 참여 완료"));
     }
 
-    @GetMapping("/available-friends")
+    @GetMapping("/{roomId}/available-friends")
     @Operation(summary = "[바니] 방에 초대할 코지메이트 목록 조회", description = "로그인한 멤버의 코지메이트 목록을 불러옵니다.")
     @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND
     })
     public ResponseEntity<ApiResponse<List<CozymateResponse>>> getCozymateList(
-        @AuthenticationPrincipal MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(memberDetails.getMember().getId())));
+        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(roomId, memberDetails.getMember().getId())));
     }
 
     @PostMapping("/{roomId}/invite")
