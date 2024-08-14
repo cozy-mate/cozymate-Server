@@ -50,7 +50,7 @@ public class RoomQueryService {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
-        return new RoomCreateResponse(room.getName(), room.getInviteCode(), room.getProfileImage());
+        return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage());
     }
 
     public RoomJoinResponse getRoomByInviteCode(String inviteCode, Long memberId) {
@@ -69,7 +69,10 @@ public class RoomQueryService {
         return RoomConverter.toRoomJoinResponse(room, manager);
     }
 
-    public List<CozymateResponse> getCozymateList(Long memberId) {
+    public List<CozymateResponse> getCozymateList(Long roomId, Long memberId) {
+        roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
         );

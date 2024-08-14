@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class RoomCreateResponse {
 
+    private Long roomId;
     private String name;
     private String inviteCode;
     private Integer profileImage;
