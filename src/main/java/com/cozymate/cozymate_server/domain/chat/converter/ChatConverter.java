@@ -17,12 +17,12 @@ public class ChatConverter {
             .build();
     }
 
-    public static ChatResponseDto toResponseDto(String nickName, String content, LocalDateTime createdAt) {
+    public static ChatResponseDto toResponseDto(String nickname, String content, LocalDateTime createdAt) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd | HH:mm");
         String formattedDateTime = createdAt.format(formatter);
 
         return ChatResponseDto.builder()
-            .nickName(nickName)
+            .nickname(nickname)
             .content(content)
             .dateTime(formattedDateTime)
             .build();

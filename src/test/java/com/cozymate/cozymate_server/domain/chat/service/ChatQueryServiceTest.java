@@ -90,9 +90,9 @@ class ChatQueryServiceTest {
                     chatRoom.getId());
 
                 assertThat(result.size()).isEqualTo(2);
-                assertThat(result.get(0).getNickName()).isEqualTo(me.getNickname() + " (나)");
+                assertThat(result.get(0).getNickname()).isEqualTo(me.getNickname() + " (나)");
                 assertThat(result.get(0).getContent()).isEqualTo(chat.getContent());
-                assertThat(result.get(1).getNickName()).isEqualTo(you.getNickname());
+                assertThat(result.get(1).getNickname()).isEqualTo(you.getNickname());
                 assertThat(result.get(1).getContent()).isEqualTo(chat2.getContent());
             }
         }
@@ -143,7 +143,7 @@ class ChatQueryServiceTest {
                     formatter);
 
                 assertThat(result.size()).isEqualTo(1);
-                assertThat(result.get(0).getNickName()).isEqualTo(you.getNickname());
+                assertThat(result.get(0).getNickname()).isEqualTo(you.getNickname());
                 assertThat(result.get(0).getContent()).isEqualTo(chat3.getContent());
                 assertThat(parsedDateTime).isAfter(chatRoom.getMemberALastDeleteAt());
             }

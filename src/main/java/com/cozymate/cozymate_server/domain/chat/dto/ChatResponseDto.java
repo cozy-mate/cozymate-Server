@@ -8,7 +8,7 @@ import lombok.Getter;
 @Builder
 public class ChatResponseDto {
 
-    private String nickName;
+    private String nickname;
     private String content;
     private String dateTime;
 }
