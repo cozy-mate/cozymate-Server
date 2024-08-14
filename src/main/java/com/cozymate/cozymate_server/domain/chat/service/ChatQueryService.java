@@ -58,11 +58,11 @@ public class ChatQueryService {
     private List<ChatResponseDto> toChatResponseDtoList(List<Chat> chatList, Member member) {
         return chatList.stream()
             .map(chat -> {
-                String senderNickName = chat.getSender().getNickname();
-                String nickName = senderNickName.equals(member.getNickname())
-                    ? senderNickName + " (나)"
-                    : senderNickName;
-                return ChatConverter.toResponseDto(nickName, chat.getContent(),
+                String senderNickname = chat.getSender().getNickname();
+                String nickname = senderNickname.equals(member.getNickname())
+                    ? senderNickname + " (나)"
+                    : senderNickname;
+                return ChatConverter.toResponseDto(nickname, chat.getContent(),
                     chat.getCreatedAt());
             })
             .toList();

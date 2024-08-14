@@ -6,8 +6,8 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
-import com.cozymate.cozymate_server.global.fcm.NotificationService;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NotificationScheduler {
 
-    private final NotificationService notificationService;
+    private final FcmPushService fcmPushService;
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
 
@@ -42,7 +42,7 @@ public class NotificationScheduler {
             ));
 
         todoMap.forEach((member, todoContents) -> {
-            notificationService.sendNotification(
+            fcmPushService.sendNotification(
                 OneTargetDto.create(member, NotificationType.TODO_LIST, todoContents));
         });
     }
@@ -62,7 +62,7 @@ public class NotificationScheduler {
             ));
 
         todoMap.forEach((member, todo) -> {
-            notificationService.sendNotification(
+            fcmPushService.sendNotification(
                 OneTargetDto.create(member, NotificationType.REMINDER_ROLE,
                     todo.getRole().getContent()));
         });
@@ -77,7 +77,7 @@ public class NotificationScheduler {
             .toList();
 
         memberList.forEach(member -> {
-            notificationService.sendNotification(
+            fcmPushService.sendNotification(
                 OneTargetDto.create(member, NotificationType.SELECT_COZY_MATE));
         });
     }

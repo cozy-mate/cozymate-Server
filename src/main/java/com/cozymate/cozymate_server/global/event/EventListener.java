@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.global.event;
 
-import com.cozymate.cozymate_server.global.fcm.NotificationService;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.GroupTargetDto;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetDto;
-import com.cozymate.cozymate_server.global.fcm.NotificationTargetDto.OneTargetReverseDto;
+import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetReverseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -12,7 +12,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class EventListener {
 
-    private final NotificationService notificationService;
+    private final FcmPushService fcmPushService;
 
     /**
      * 코지메이트 신청 로직에 추가해 줘야함! -> 아래 1, 2번 두개 이벤트 발행해주세요
@@ -24,7 +24,7 @@ public class EventListener {
      */
     @TransactionalEventListener
     public void sendNotification(OneTargetReverseDto oneTargetReverseDto) {
-        notificationService.sendNotification(oneTargetReverseDto);
+        fcmPushService.sendNotification(oneTargetReverseDto);
     }
 
     /**
@@ -33,7 +33,7 @@ public class EventListener {
      */
     @TransactionalEventListener
     public void sendNotification(GroupTargetDto groupTargetDto) {
-        notificationService.sendNotification(groupTargetDto);
+        fcmPushService.sendNotification(groupTargetDto);
     }
 
     /**
@@ -43,6 +43,6 @@ public class EventListener {
      */
     @TransactionalEventListener
     public void sendNotification(OneTargetDto oneTargetDto) {
-        notificationService.sendNotification(oneTargetDto);
+        fcmPushService.sendNotification(oneTargetDto);
     }
 }

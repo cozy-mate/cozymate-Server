@@ -1,11 +1,11 @@
-package com.cozymate.cozymate_server.global.fcm;
+package com.cozymate.cozymate_server.domain.fcm.dto;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import java.util.List;
 import lombok.Getter;
 
-public class NotificationTargetDto {
+public class FcmPushTargetDto {
 
     /**
      * 상대에게만 알림이 가는 경우 or 나에게만 알림이 가는 경우 notificationType : 알림 종류
