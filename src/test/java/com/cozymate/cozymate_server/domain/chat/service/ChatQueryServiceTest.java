@@ -41,8 +41,6 @@ class ChatQueryServiceTest {
     ChatRepository chatRepository;
     @Mock
     ChatRoomRepository chatRoomRepository;
-    @Mock
-    MemberRepository memberRepository;
     @InjectMocks
     ChatQueryService chatQueryService;
     Member me;
@@ -80,7 +78,6 @@ class ChatQueryServiceTest {
                 given(chat2.getContent()).willReturn("Chat2 내용");
                 given(chat2.getSender()).willReturn(you);
 
-                given(memberRepository.findById(me.getId())).willReturn(Optional.of(me));
                 given(chatRoomRepository.findById(chatRoom.getId())).willReturn(
                     Optional.of(chatRoom));
                 given(chatRepository.findAllByChatRoom(chatRoom)).willReturn(List.of(chat, chat2));
@@ -89,7 +86,7 @@ class ChatQueryServiceTest {
             @Test
             @DisplayName("해당 쪽지방의 쪽지 상세 내역을 리스트로 반환한다.")
             void it_returns_chat_list() {
-                List<ChatResponseDto> result = chatQueryService.getChatList(me.getId(),
+                List<ChatResponseDto> result = chatQueryService.getChatList(me,
                     chatRoom.getId());
 
                 assertThat(result.size()).isEqualTo(2);
@@ -129,7 +126,6 @@ class ChatQueryServiceTest {
                 given(chat3.getContent()).willReturn("나간 후 다시 보냅니다");
                 given(chat3.getSender()).willReturn(you);
 
-                given(memberRepository.findById(me.getId())).willReturn(Optional.of(me));
                 given(chatRoomRepository.findById(chatRoom.getId())).willReturn(
                     Optional.of(chatRoom));
                 given(chatRepository.findAllByChatRoom(chatRoom)).willReturn(
@@ -139,7 +135,7 @@ class ChatQueryServiceTest {
             @Test
             @DisplayName("나간 후에 온 쪽지 상세 내역만 리스트로 반환한다.")
             void it_returns_chat_list_after_delete() {
-                List<ChatResponseDto> result = chatQueryService.getChatList(me.getId(),
+                List<ChatResponseDto> result = chatQueryService.getChatList(me,
                     chatRoom.getId());
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd | HH:mm");
@@ -155,36 +151,18 @@ class ChatQueryServiceTest {
 
         @Nested
         @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-        class memberId가_유효하지_않는_경우 {
-
-            @BeforeEach
-            void setUp() {
-                given(memberRepository.findById(1L)).willReturn(Optional.empty());
-            }
-
-            @Test
-            @DisplayName("예외를 발생시킨다.")
-            void it_returns_not_found_member() {
-                assertThatThrownBy(() -> chatQueryService.getChatList(1L, 1L))
-                    .isInstanceOf(GeneralException.class);
-            }
-        }
-
-        @Nested
-        @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
         class chatRoomId가_유효하지_않는_경우 {
 
             @BeforeEach
             void setUp() {
                 me = ChatTestBuilder.testSenderBuild();
-                given(memberRepository.findById(me.getId())).willReturn(Optional.of(me));
                 given(chatRoomRepository.findById(1L)).willReturn(Optional.empty());
             }
 
             @Test
             @DisplayName("예외를 발생시킨다.")
             void it_returns_not_found_chat_room() {
-                assertThatThrownBy(() -> chatQueryService.getChatList(me.getId(), 1L))
+                assertThatThrownBy(() -> chatQueryService.getChatList(me, 1L))
                     .isInstanceOf(GeneralException.class);
             }
         }
@@ -227,14 +205,13 @@ class ChatQueryServiceTest {
                 given(chatRoom.getMemberA()).willReturn(memberA);
                 given(chatRoom.getMemberB()).willReturn(memberB);
 
-                given(memberRepository.findById(me.getId())).willReturn(Optional.of(me));
                 given(chatRoomRepository.findById(1L)).willReturn(Optional.of(chatRoom));
             }
 
             @Test
             @DisplayName("예외를 발생시킨다.")
             void it_returns_chat_room_member_mismatch() {
-                assertThatThrownBy(() -> chatQueryService.getChatList(me.getId(), 1L))
+                assertThatThrownBy(() -> chatQueryService.getChatList(me, 1L))
                     .isInstanceOf(GeneralException.class);
             }
         }

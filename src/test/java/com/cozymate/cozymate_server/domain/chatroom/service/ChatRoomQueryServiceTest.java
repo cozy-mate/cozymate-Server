@@ -77,7 +77,6 @@ class ChatRoomQueryServiceTest {
                 chat3 = ChatTestBuilder.testChat3Build();
                 chat4 = ChatTestBuilder.testChat4Build();
 
-                given(memberRepository.findById(sender.getId())).willReturn(Optional.of(sender));
                 given(chatRoomRepository.findAllByMember(sender)).willReturn(
                     List.of(chatRoom, chatRoom2));
                 given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
@@ -90,7 +89,7 @@ class ChatRoomQueryServiceTest {
             @DisplayName("내가 속한 쪽지방 목록을 전부 반환한다.")
             void it_returns_chat_room_list() {
                 List<ChatRoomResponseDto> result = chatRoomQueryService.getChatRoomList(
-                    sender.getId());
+                    sender);
                 assertThat(result.size()).isEqualTo(2);
 
                 assertThat(result.get(0).getNickName()).isEqualTo(recipient.getNickname());
@@ -130,8 +129,6 @@ class ChatRoomQueryServiceTest {
                     chat3 = ChatTestBuilder.testChat3Build();
                     chat4 = ChatTestBuilder.testChat4Build();
 
-                    given(memberRepository.findById(sender.getId())).willReturn(
-                        Optional.of(sender));
                     given(chatRoomRepository.findAllByMember(sender)).willReturn(
                         List.of(chatRoom, chatRoom2));
                     given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
@@ -144,7 +141,7 @@ class ChatRoomQueryServiceTest {
                 @DisplayName("쪽지방 목록 2개 중 1개를 삭제했기 때문에 반환된 쪽지방 목록 1개를 반환한다.")
                 void it_returns_chat_room_list() {
                     List<ChatRoomResponseDto> result = chatRoomQueryService.getChatRoomList(
-                        sender.getId());
+                        sender);
                     assertThat(result.size()).isEqualTo(1);
                     assertThat(result.get(0).getNickName()).isEqualTo(otherMember.getNickname());
                     assertThat(result.get(0).getLastContent()).isEqualTo(chat4.getContent());
@@ -178,8 +175,6 @@ class ChatRoomQueryServiceTest {
                     chat3 = ChatTestBuilder.testChat3Build();
                     chat4 = ChatTestBuilder.testChat4Build();
 
-                    given(memberRepository.findById(sender.getId())).willReturn(
-                        Optional.of(sender));
                     given(chatRoomRepository.findAllByMember(sender)).willReturn(
                         List.of(chatRoom, chatRoom2));
                     given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
@@ -192,7 +187,7 @@ class ChatRoomQueryServiceTest {
                 @DisplayName("쪽지방 목록 2개 중 1개를 삭제했지만, 삭제한 쪽지방의 상대가 새로운 쪽지를 보냈기 때문에 쪽지방 목록 2개를 반환한다.")
                 void it_returns_chat_room_list() {
                     List<ChatRoomResponseDto> result = chatRoomQueryService.getChatRoomList(
-                        sender.getId());
+                        sender);
 
                     assertThat(result.size()).isEqualTo(2);
                     assertThat(result.get(0).getNickName()).isEqualTo(recipient.getNickname());
@@ -205,30 +200,12 @@ class ChatRoomQueryServiceTest {
 
         @Nested
         @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-        class memberId가_유효하지_않은_경우 {
-
-            @BeforeEach
-            void setUp() {
-                given(memberRepository.findById(1L)).willReturn(Optional.empty());
-            }
-
-            @Test
-            @DisplayName("예외를 발생시킨다.")
-            void it_returns_not_found_member() {
-                assertThatThrownBy(() -> chatRoomQueryService.getChatRoomList(1L))
-                    .isInstanceOf(GeneralException.class);
-            }
-        }
-
-        @Nested
-        @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
         class ChatRoom으로_가장_최근_Chat_조회가_안되는_경우 {
 
             @BeforeEach
             void setUp() {
                 sender = ChatTestBuilder.testSenderBuild();
                 chatRoom = ChatRoomTestBuilder.testChatRoomBuild();
-                given(memberRepository.findById(sender.getId())).willReturn(Optional.of(sender));
                 given(chatRoomRepository.findAllByMember(sender)).willReturn(List.of(chatRoom));
                 given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
                     Optional.empty());
@@ -237,7 +214,7 @@ class ChatRoomQueryServiceTest {
             @Test
             @DisplayName("예외를 발생시킨다.")
             void it_returns_not_found_chat() {
-                assertThatThrownBy(() -> chatRoomQueryService.getChatRoomList(sender.getId()))
+                assertThatThrownBy(() -> chatRoomQueryService.getChatRoomList(sender))
                     .isInstanceOf(GeneralException.class);
             }
         }
@@ -250,15 +227,13 @@ class ChatRoomQueryServiceTest {
             void setUp() {
                 sender = ChatTestBuilder.testSenderBuild();
                 chatRoom = ChatRoomTestBuilder.testChatRoomBuild();
-                given(memberRepository.findById(sender.getId())).willReturn(Optional.of(sender));
                 given(chatRoomRepository.findAllByMember(sender)).willReturn(List.of());
             }
 
             @Test
             @DisplayName("빈 리스트를 반환한다.")
             void it_returns_empty_list() {
-                List<ChatRoomResponseDto> result = chatRoomQueryService.getChatRoomList(
-                    sender.getId());
+                List<ChatRoomResponseDto> result = chatRoomQueryService.getChatRoomList(sender);
                 assertThat(result.size()).isEqualTo(0);
                 assertThat(result).isEmpty();
             }

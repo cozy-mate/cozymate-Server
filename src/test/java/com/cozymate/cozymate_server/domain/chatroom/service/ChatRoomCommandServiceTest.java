@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomTestBuilder;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -39,6 +40,7 @@ public class ChatRoomCommandServiceTest {
     ChatRoom chatRoom;
     Chat chat;
     LocalDateTime methodStartTime;
+    Member member;
 
     @Nested
     @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -61,7 +63,7 @@ public class ChatRoomCommandServiceTest {
             @Test
             @DisplayName("ChatRoom의 deleteAt필드에 삭제 시간을 업데이트하여 논리적으로 삭제한다.")
             void it_returns_update_deleteAt_soft_delete() {
-                chatRoomCommandService.deleteChatRoom(chatRoom.getMemberA().getId(),
+                chatRoomCommandService.deleteChatRoom(chatRoom.getMemberA(),
                     chatRoom.getId());
                 LocalDateTime memberALastDeleteAt = chatRoom.getMemberALastDeleteAt();
                 assertThat(memberALastDeleteAt).isAfter(methodStartTime);
@@ -95,7 +97,7 @@ public class ChatRoomCommandServiceTest {
                 @Test
                 @DisplayName("해당 쪽지방과 쪽지방의 쪽지를 물리적으로 DB에서 삭제한다.")
                 void it_returns_physically_delete() {
-                    chatRoomCommandService.deleteChatRoom(chatRoom.getMemberA().getId(),
+                    chatRoomCommandService.deleteChatRoom(chatRoom.getMemberA(),
                         chatRoom.getId());
                     then(chatRepository).should(timeout(1)).deleteAllByChatRoom(chatRoom);
                     then(chatRoomRepository).should(timeout(1)).delete(chatRoom);
@@ -123,7 +125,7 @@ public class ChatRoomCommandServiceTest {
                 @Test
                 @DisplayName("ChatRoom의 deleteAt필드에 삭제 시간을 업데이트하여 논리적으로 삭제한다.")
                 void it_returns_update_deleteAt_soft_delete() {
-                    chatRoomCommandService.deleteChatRoom(chatRoom.getMemberA().getId(),
+                    chatRoomCommandService.deleteChatRoom(chatRoom.getMemberA(),
                         chatRoom.getId());
                     LocalDateTime memberALastDeleteAt = chatRoom.getMemberALastDeleteAt();
                     assertThat(memberALastDeleteAt).isAfter(methodStartTime);
@@ -137,13 +139,14 @@ public class ChatRoomCommandServiceTest {
 
             @BeforeEach
             void setUp() {
+                member = mock(Member.class);
                 given(chatRoomRepository.findById(1L)).willReturn(Optional.empty());
             }
 
             @Test
             @DisplayName("예외를 발생시킨다.")
             void it_returns_not_found_chat_room_exception() {
-                assertThatThrownBy(() -> chatRoomCommandService.deleteChatRoom(1L, 1L))
+                assertThatThrownBy(() -> chatRoomCommandService.deleteChatRoom(member, 1L))
                     .isInstanceOf(GeneralException.class);
             }
         }
@@ -154,6 +157,7 @@ public class ChatRoomCommandServiceTest {
 
             @BeforeEach
             void setUp() {
+                member = mock(Member.class);
                 chatRoom = ChatRoomTestBuilder.testChatRoomBuild();
                 given(chatRoomRepository.findById(chatRoom.getId())).willReturn(
                     Optional.of(chatRoom));
@@ -163,7 +167,7 @@ public class ChatRoomCommandServiceTest {
             @DisplayName("예외를 발생시킨다.")
             void it_returns_chat_room_forbidden() {
                 assertThatThrownBy(
-                    () -> chatRoomCommandService.deleteChatRoom(3L, chatRoom.getId()))
+                    () -> chatRoomCommandService.deleteChatRoom(member, chatRoom.getId()))
                     .isInstanceOf(GeneralException.class);
             }
         }

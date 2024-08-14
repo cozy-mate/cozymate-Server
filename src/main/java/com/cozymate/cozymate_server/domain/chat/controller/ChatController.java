@@ -32,13 +32,13 @@ public class ChatController {
     @PostMapping("/members/{recipientId}")
     @Operation(summary = "[베로] 쪽지 작성 기능", description = "recipientId: 쪽지를 받을 멤버의 pk값, RequestBody의 content: 쪽지 내용")
     @SwaggerApiError(
-        ErrorStatus._MEMBER_NOT_FOUND
+        ErrorStatus._CHAT_NOT_FOUND_RECIPIENT
     )
     public ResponseEntity<ApiResponse<String>> createChat(
         @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId,
         @AuthenticationPrincipal
         MemberDetails memberDetails) {
-        chatCommandService.createChat(chatRequestDto, memberDetails.getMember().getId(),
+        chatCommandService.createChat(chatRequestDto, memberDetails.getMember(),
             recipientId);
         return ResponseEntity.ok(ApiResponse.onSuccess("쪽지 작성 완료"));
     }
@@ -46,7 +46,6 @@ public class ChatController {
     @GetMapping("/chatrooms/{chatRoomId}")
     @Operation(summary = "[베로] 쪽지방의 쪽지 상세 내역 조회", description = "chatRoomId : 조회할 쪽지방 pk값")
     @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._CHATROOM_NOT_FOUND,
         ErrorStatus._CHATROOM_MEMBER_MISMATCH
     })
@@ -54,6 +53,6 @@ public class ChatController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long chatRoomId) {
         return ResponseEntity.ok(
-            chatQueryService.getChatList(memberDetails.getMember().getId(), chatRoomId));
+            chatQueryService.getChatList(memberDetails.getMember(), chatRoomId));
     }
 }

@@ -34,21 +34,18 @@ public class ChatRoomController {
     })
     public ResponseEntity<ApiResponse<String>> deleteChatRoom(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long chatRoomId) {
-        chatRoomCommandService.deleteChatRoom(memberDetails.getMember().getId(), chatRoomId);
+        chatRoomCommandService.deleteChatRoom(memberDetails.getMember(), chatRoomId);
         return ResponseEntity.ok(ApiResponse.onSuccess("쪽지방 삭제 완료"));
     }
 
-    // TODO: memberId 추후 시큐리티 인증 객체에서 받아오는 것으로 변경 예정
     @GetMapping
     @Operation(summary = "[베로] 쪽지방 목록 조회", description = "")
     @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._CHAT_NOT_FOUND
     })
     public ResponseEntity<ApiResponse<List<ChatRoomResponseDto>>> getChatRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberDetails.getMember()
-                .getId())));
+            ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberDetails.getMember())));
     }
 }

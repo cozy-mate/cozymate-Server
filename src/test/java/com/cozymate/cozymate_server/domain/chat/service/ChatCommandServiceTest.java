@@ -59,8 +59,6 @@ class ChatCommandServiceTest {
                 chatRoom = ChatRoomTestBuilder.testChatRoomBuild();
                 chat = ChatTestBuilder.testChatBuild();
 
-                given(memberRepository.findById(sender.getId())).willReturn(
-                    Optional.of(sender));
                 given(memberRepository.findById(recipient.getId())).willReturn(
                     Optional.of(recipient));
                 given(chatRoomRepository.findByMemberAAndMemberB(sender, recipient)).willReturn(
@@ -72,7 +70,7 @@ class ChatCommandServiceTest {
             @Test
             @DisplayName("쪽지방을 생성하고, 쪽지 작성에 성공한다.")
             void it_returns_new_chatroom_success_create_chat() {
-                chatCommandService.createChat(chatRequestDto, sender.getId(), recipient.getId());
+                chatCommandService.createChat(chatRequestDto, sender, recipient.getId());
             }
         }
 
@@ -88,8 +86,6 @@ class ChatCommandServiceTest {
                 chatRoom = ChatRoomTestBuilder.testChatRoomBuild();
                 chat = ChatTestBuilder.testChatBuild();
 
-                given(memberRepository.findById(sender.getId())).willReturn(
-                    Optional.of(sender));
                 given(memberRepository.findById(recipient.getId())).willReturn(
                     Optional.of(recipient));
                 given(chatRoomRepository.findByMemberAAndMemberB(sender, recipient)).willReturn(
@@ -100,30 +96,7 @@ class ChatCommandServiceTest {
             @Test
             @DisplayName("존재하던 쪽지방을 이용해서, 쪽지 작성에 성공한다.")
             void it_returns_exist_chatroom_success_create_chat() {
-                chatCommandService.createChat(chatRequestDto, sender.getId(), recipient.getId());
-            }
-        }
-
-        @Nested
-        @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-        class 송신자가_존재하지_않는_경우 {
-
-            @BeforeEach
-            void setUp() {
-                chatRequestDto = ChatTestBuilder.testChatRequestDtoBuild();
-                sender = ChatTestBuilder.testSenderBuild();
-                recipient = ChatTestBuilder.testRecipientBuild();
-                given(memberRepository.findById(sender.getId())).willReturn(
-                    Optional.empty());
-            }
-
-            @Test
-            @DisplayName("예외를 발생시킨다.")
-            void it_returns_not_found_member_exception() {
-                assertThatThrownBy(
-                    () -> chatCommandService.createChat(chatRequestDto, sender.getId(),
-                        recipient.getId()))
-                    .isInstanceOf(GeneralException.class);
+                chatCommandService.createChat(chatRequestDto, sender, recipient.getId());
             }
         }
 
@@ -136,9 +109,6 @@ class ChatCommandServiceTest {
                 chatRequestDto = ChatTestBuilder.testChatRequestDtoBuild();
                 sender = ChatTestBuilder.testSenderBuild();
                 recipient = ChatTestBuilder.testRecipientBuild();
-                given(memberRepository.findById(sender.getId())).willReturn(
-                    Optional.of(sender)
-                );
                 given(memberRepository.findById(recipient.getId())).willReturn(
                     Optional.empty()
                 );
@@ -148,7 +118,7 @@ class ChatCommandServiceTest {
             @DisplayName("예외를 발생시킨다.")
             void it_returns_not_found_member_exception() {
                 assertThatThrownBy(
-                    () -> chatCommandService.createChat(chatRequestDto, sender.getId(),
+                    () -> chatCommandService.createChat(chatRequestDto, sender,
                         recipient.getId()))
                     .isInstanceOf(GeneralException.class);
             }

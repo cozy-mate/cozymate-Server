@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.chatroom.service;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
@@ -18,11 +19,11 @@ public class ChatRoomCommandService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
 
-    public void deleteChatRoom(Long myId, Long chatRoomId) {
+    public void deleteChatRoom(Member member, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
 
-        softDeleteChatRoom(chatRoom, myId);
+        softDeleteChatRoom(chatRoom, member.getId());
 
         tryHardDeleteChatRoom(chatRoom);
     }
