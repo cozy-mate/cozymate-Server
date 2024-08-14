@@ -45,6 +45,7 @@ public class NotificationLogController {
 
     private final NotificationService notificationService;
 
+    @Deprecated
     @GetMapping("/test")
     @Operation(summary = "알림 테스트용")
     public String sendNotificationTest(@AuthenticationPrincipal MemberDetails memberDetails) {
@@ -55,6 +56,7 @@ public class NotificationLogController {
         return "알림 전송 완료";
     }
 
+    @Deprecated
     @GetMapping("/test/todo")
     @Operation(summary = "알림 테스트용")
     public String sendTodoNotification(@AuthenticationPrincipal MemberDetails memberDetails) {
