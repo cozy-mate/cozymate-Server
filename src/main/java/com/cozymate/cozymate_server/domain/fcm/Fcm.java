@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
@@ -23,7 +24,7 @@ public class Fcm extends BaseTimeEntity {
     @Column(name = "device_id")
     String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     Member member;
 
     String token;
