@@ -51,9 +51,9 @@ public class MemberController {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
         }
 
-        MemberResponseDTO.SignInResponseDTO loginResponseDTO = memberCommandService.signIn(signInRequestDTO);
+        MemberResponseDTO.SignInResponseDTO signInResponseDTO = memberCommandService.signIn(signInRequestDTO);
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(loginResponseDTO));
+        return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
     }
 
     //todo : nosql로 금지어 추가
