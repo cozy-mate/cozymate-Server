@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
-@DisplayName("NotificationService 클래스의")
+@DisplayName("FcmPushService 클래스의")
 @ExtendWith(MockitoExtension.class)
 public class FcmPushServiceTest {
 
