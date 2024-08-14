@@ -17,7 +17,7 @@ public class MemberQueryService {
     private final MemberRepository memberRepository;
     @Transactional
     public Boolean isValidNickName(String nickname) {
-        // todo : 금지 닉네임 로직 추가
+        // todo: 금지 닉네임 로직 추가
         return !memberRepository.existsByNickname(nickname);
     }
 

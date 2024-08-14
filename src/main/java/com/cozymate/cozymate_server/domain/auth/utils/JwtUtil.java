@@ -42,6 +42,7 @@ public class JwtUtil {
     @Value("${jwt.access-token.expire-length}")
     private Long TEMPORARY_EXPIRATION;
 
+    // todo: 실 서비스 시 secretKey 변경..
 
     //JWT 토큰에서 subject를 추출하여 사용자 id를 반환
     public String extractUserName(String token) {
@@ -99,10 +100,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    //토큰이 유효한지 확인
-    public boolean isTokenValid(String token, String userName) {
-        return (userName.equals(extractUserName(token))) && !isTokenExpired(token);
-    }
 
     //토큰이 만료되었는지 확인
     private boolean isTokenExpired(String token) {
