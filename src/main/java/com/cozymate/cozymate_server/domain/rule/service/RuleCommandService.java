@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.rule.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.rule.Rule;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.CreateRuleRequestDto;
@@ -20,8 +21,8 @@ public class RuleCommandService {
 
     private static final int MAX_RULE_COUNT = 10;
 
-    public void createRule(Long roomId, Long memberId, CreateRuleRequestDto requestDto) {
-        Mate mate = mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+    public void createRule(Member member, Long roomId, CreateRuleRequestDto requestDto) {
+        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
         // rule 최대개수 초과 여부 판단
@@ -35,8 +36,8 @@ public class RuleCommandService {
 
     }
 
-    public void deleteRule(Long roomId, Long memberId, Long ruleId) {
-        Mate mate = mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+    public void deleteRule(Member member, Long roomId, Long ruleId) {
+        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
         Rule rule = ruleRepository.findById(ruleId)

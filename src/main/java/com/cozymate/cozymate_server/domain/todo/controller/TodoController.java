@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.todo.controller;
 
 
+import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListResponseDto;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,14 +37,13 @@ public class TodoController {
 
     @PostMapping("/{roomId}")
     @Operation(summary = "[무빗] 특정 방에 본인의 Todo 생성", description = "Todo는 본인한테만 할당할 수 있습니다.")
-    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._TODO_OVER_MAX})
     public ResponseEntity<ApiResponse<String>> createTodo(
-        @Valid @RequestBody CreateTodoRequestDto createTodoRequestDto,
+        @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
-        @RequestParam Long memberId) {
-        // TODO: 소셜로그인 구현 후 RequestParam의 userId는 JWT를 인증할 때 수정 예정
-
-        todoCommandService.createTodo(createTodoRequestDto, roomId, memberId);
+        @Valid @RequestBody CreateTodoRequestDto createTodoRequestDto
+    ) {
+        todoCommandService.createTodo(memberDetails.getMember(), roomId, createTodoRequestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("Todo를 정상 생성하였습니다."));
 
     }
@@ -53,26 +54,28 @@ public class TodoController {
         description = "본인이 참가한 방에서만 조회가 가능합니다. | timePoint를 지정하지 않으면 오늘 날짜 기준으로 반환합니다.")
     @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
     public ResponseEntity<ApiResponse<TodoListResponseDto>> getTodo(
+        @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
-        @RequestParam Long memberId,
         @Parameter(example = "2024-08-01")
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate timePoint
     ) {
         if (timePoint == null) {
             timePoint = LocalDate.now();
         }
-        return ResponseEntity.ok(
-            ApiResponse.onSuccess(todoQueryService.getTodo(roomId, memberId, timePoint)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            todoQueryService.getTodo(roomId, memberDetails.getMember(), timePoint)
+        ));
     }
 
     @PatchMapping("/state")
     @Operation(summary = "[무빗] Todo 완료 여부를 변경", description = "boolean 값을 같이 넘겨받습니다.")
-    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> updateTodoCompleteState(
-        @Valid @RequestBody UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto,
-        @RequestParam Long memberId) {
-        // TODO: 소셜로그인 후...
-        todoCommandService.updateTodoCompleteState(updateTodoCompleteStateRequestDto, memberId);
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @Valid @RequestBody UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto
+    ) {
+        todoCommandService.updateTodoCompleteState(memberDetails.getMember(),
+            updateTodoCompleteStateRequestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("완료되었습니다."));
     }
 }

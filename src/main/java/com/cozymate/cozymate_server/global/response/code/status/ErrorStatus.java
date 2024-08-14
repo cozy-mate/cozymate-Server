@@ -18,6 +18,16 @@ public enum ErrorStatus implements BaseErrorCode {
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
     // [도메인] 관련해서 아래에 계속 추가해주시면 됩니다.
+    
+    // 소셜
+    // 카카오
+    _KAKAO_ACCESS_RESPONSE_RECEIVING_FAIL(
+        HttpStatus.INTERNAL_SERVER_ERROR, "AUTH500", "카카오에서 response를 받지 못했습니다."),
+
+    _KAKAO_RESPONSE_PARSING_FAIL(
+        HttpStatus.INTERNAL_SERVER_ERROR, "AUTH501", "카카오 response 파싱 실패"),
+    _KAKAO_ACCESS_TOKEN_PARSING_FAIL(
+        HttpStatus.INTERNAL_SERVER_ERROR, "AUTH501", "카카오 accessToken 파싱 실패"),
 
     // [Member] 관련 에러
     _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "멤버를 찾을 수 없습니다."),
@@ -86,12 +96,18 @@ public enum ErrorStatus implements BaseErrorCode {
     _FRIEND_REQUEST_WAITING(HttpStatus.BAD_REQUEST, "FRIEND404", "대기 중인 친구요청입니다."),
     _FRIEND_REQUEST_EQUAL(HttpStatus.BAD_REQUEST, "FRIEND405", "같은 사람에게 친구요청을 보낼 수 없습니다."),
 
+    // Role 관련
+    _ROLE_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROLE400", "역할을 찾을 수 없습니다."),
+    _ROLE_MATE_MISMATCH(HttpStatus.BAD_REQUEST, "ROLE401", "Mate에게 해당 Role을 삭제할 권한이 없습니다."),
+
     // Feed 관련 에러
     _FEED_EXISTS(HttpStatus.BAD_REQUEST, "FEED400", "피드 정보가 이미 존재합니다."),
     _FEED_NOT_EXISTS(HttpStatus.BAD_REQUEST, "FEED401", "피드 정보가 존재하지 않습니다."),
 
+    // Post관련
     _POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "POST400", "게시물이 존재하지 않습니다."),
 
+    // Post Comment 
     _POST_COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT400", "댓글이 존재하지 않습니다."),
     ;
 

@@ -11,7 +11,7 @@ import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
 import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
-import com.cozymate.cozymate_server.domain.role.RoleRepository;
+import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
