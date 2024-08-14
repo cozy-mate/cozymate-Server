@@ -28,6 +28,7 @@ public class MemberCommandService {
 
     /**
      * 닉네임 유효성 검사 메서드
+     *
      * @param nickname 유효성을 검사할 닉네임
      * @return 유효하지 않으면 true, 유효하면 false 반환
      */
@@ -38,6 +39,7 @@ public class MemberCommandService {
 
     /**
      * 사용자 로그인 메서드
+     *
      * @param signInRequestDTO 로그인 요청 정보를 담은 DTO
      * @return 로그인 결과를 담은 DTO
      */
@@ -50,8 +52,9 @@ public class MemberCommandService {
         String clientId = ClientIdMaker.makeClientId(signInRequestDTO.getClientId(), socialType);
 
         // 사용자가 기존 회원인지 확인하고, 로그인 처리
-        if(memberQueryService.isPresent(clientId))
+        if (memberQueryService.isPresent(clientId)) {
             return signInByExistingMember(clientId);
+        }
 
         // 신규회원인 경우 임시토큰 발급.
         return signInByTemporaryMember(clientId);
@@ -60,11 +63,18 @@ public class MemberCommandService {
 
     /**
      * 사용자 회원가입 메서드
+     *
      * @param clientId 사용자 식별자
+     * clientId 로 사용자 중복 검증
      * @param signUpRequestDTO 회원가입 요청 정보를 담은 DTO
      * @return 로그인 결과를 담은 DTO
      */
-    public MemberResponseDTO.SignInResponseDTO signUp(String clientId, MemberRequestDTO.SignUpRequestDTO signUpRequestDTO) {
+    public MemberResponseDTO.SignInResponseDTO signUp(String clientId,
+                                                      MemberRequestDTO.SignUpRequestDTO signUpRequestDTO) {
+
+        if (memberQueryService.isPresent(clientId)) { // 사용자 중복 검증
+            throw new GeneralException(ErrorStatus._MEMBER_EXISTING);
+        }
         // 회원 정보를 Member 엔티티로 변환하고 저장
         Member member = MemberConverter.toMember(clientId, signUpRequestDTO);
         memberRepository.save(member);
@@ -75,6 +85,7 @@ public class MemberCommandService {
 
     /**
      * 사용자 정보 조회 메서드
+     *
      * @param memberDetails 사용자 세부 정보
      * @return 사용자 정보를 담은 DTO
      */
@@ -84,6 +95,7 @@ public class MemberCommandService {
 
     /**
      * 사용자 회원탈퇴 메서드
+     *
      * @param memberDetails 사용자 세부 정보
      */
     public void withdraw(MemberDetails memberDetails) {
@@ -94,6 +106,7 @@ public class MemberCommandService {
 
     /**
      * 기존 회원 로그인 처리 메서드
+     *
      * @param clientId 사용자 식별자
      * @return 로그인 결과를 담은 DTO
      */
@@ -113,6 +126,7 @@ public class MemberCommandService {
 
     /**
      * 임시 회원 로그인 처리 메서드
+     *
      * @param clientId 사용자 식별자
      * @return 로그인 결과를 담은 DTO
      */
