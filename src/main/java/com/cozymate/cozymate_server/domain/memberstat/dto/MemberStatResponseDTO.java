@@ -23,8 +23,11 @@ public class MemberStatResponseDTO {
         private String major;
         private Integer numOfRoommate;
         private String acceptance;
+        private String wakeUpMeridian;
         private Integer wakeUpTime;
+        private String sleepingMeridian;
         private Integer sleepingTime;
+        private String turnOffMeridian;
         private Integer turnOffTime;
         private String smokingState;
         private String sleepingHabit;

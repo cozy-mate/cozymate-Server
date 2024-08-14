@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.M
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
+import java.sql.Time;
 
 public class MemberStatConverter {
 
@@ -54,9 +55,12 @@ public class MemberStatConverter {
             .major(memberStat.getMajor())
             .numOfRoommate(memberStat.getNumOfRoommate())
             .acceptance(memberStat.getAcceptance())
-            .wakeUpTime(memberStat.getWakeUpTime())
-            .sleepingTime(memberStat.getSleepingTime())
-            .turnOffTime(memberStat.getTurnOffTime())
+            .wakeUpMeridian(TimeUtil.convertToMeridian(memberStat.getWakeUpTime()))
+            .wakeUpTime(TimeUtil.convertToTime(memberStat.getWakeUpTime()))
+            .sleepingMeridian(TimeUtil.convertToMeridian(memberStat.getSleepingTime()))
+            .sleepingTime(TimeUtil.convertToTime(memberStat.getSleepingTime()))
+            .turnOffMeridian(TimeUtil.convertToMeridian(memberStat.getTurnOffTime()))
+            .turnOffTime(TimeUtil.convertToTime(memberStat.getTurnOffTime()))
             .smokingState(memberStat.getSmoking())
             .sleepingHabit(memberStat.getSleepingHabit())
             .airConditioningIntensity(memberStat.getAirConditioningIntensity())
