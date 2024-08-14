@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.post.dto;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.postcomment.dto.PostCommentViewDTO;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,15 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Builder
-public class PostDetailViewDTO {
+public class PostDetailDTO {
 
     private Long id;
     private String title;
     private String content;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private String nickname;
     private int persona;
-    private List<String> postImageList;
+    private List<String> imageList;
     private List<PostCommentViewDTO> commentList;
 }
