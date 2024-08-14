@@ -25,12 +25,9 @@ public class ChatCommandService {
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
 
-    public void createChat(ChatRequestDto chatRequestDto, Long recipientId) {
-
-        Member sender = memberRepository.findById(chatRequestDto.getSenderId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+    public void createChat(ChatRequestDto chatRequestDto, Member sender, Long recipientId) {
         Member recipient = memberRepository.findById(recipientId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._CHAT_NOT_FOUND_RECIPIENT));
 
         Optional<ChatRoom> findChatRoom = chatRoomRepository.findByMemberAAndMemberB(sender,
             recipient);

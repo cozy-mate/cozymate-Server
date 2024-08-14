@@ -79,6 +79,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Chat 관련 에러
     _CHAT_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHAT400", "쪽지를 찾을 수 없습니다."),
+    _CHAT_NOT_FOUND_RECIPIENT(HttpStatus.BAD_REQUEST, "CHAT401", "존재하지 않는 수신인입니다."),
 
     // Rule 관련
     _RULE_NOT_FOUND(HttpStatus.BAD_REQUEST, "RULE400", "해당하는 Rule이 없습니다."),
