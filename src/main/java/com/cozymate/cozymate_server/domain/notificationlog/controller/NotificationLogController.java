@@ -6,8 +6,8 @@ import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogRe
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 import com.cozymate.cozymate_server.domain.notificationlog.service.NotificationLogQueryService;
-import com.cozymate.cozymate_server.domain.fcm.NotificationService;
-import com.cozymate.cozymate_server.domain.fcm.NotificationTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.ArrayList;
@@ -43,14 +43,14 @@ public class NotificationLogController {
      * 아래 테스트용 API
      */
 
-    private final NotificationService notificationService;
+    private final FcmPushService fcmPushService;
 
     @Deprecated
     @GetMapping("/test")
     @Operation(summary = "알림 테스트용")
     public String sendNotificationTest(@AuthenticationPrincipal MemberDetails memberDetails) {
         Member member = memberDetails.getMember();
-        notificationService.sendNotification(
+        fcmPushService.sendNotification(
             OneTargetDto.create(member, NotificationType.BEST_COZY_MATE));
         log.info("베스트 코지 메이트 선정 알림 전송 완료");
         return "알림 전송 완료";
@@ -66,7 +66,7 @@ public class NotificationLogController {
         todoList.add("콩 밥주기");
         todoList.add("밥 먹기");
         todoList.add("버스 표 끊기");
-        notificationService.sendNotification(
+        fcmPushService.sendNotification(
             OneTargetDto.create(member, NotificationType.TODO_LIST, todoList));
         log.info("투두 리스트 알림 전송 완료");
         return "알림 전송 완료";

@@ -30,7 +30,6 @@ public class ChatTestBuilder {
             .clientId("1")
             .role(Role.USER)
             .socialType(SocialType.KAKAO)
-            .fcmToken("dummy")
             .build();
     }
 
@@ -45,7 +44,6 @@ public class ChatTestBuilder {
             .clientId("2")
             .role(Role.USER)
             .socialType(SocialType.KAKAO)
-            .fcmToken("dummy")
             .build();
     }
 
@@ -60,7 +58,6 @@ public class ChatTestBuilder {
             .clientId("3")
             .role(Role.USER)
             .socialType(SocialType.KAKAO)
-            .fcmToken("dummy")
             .build();
     }
 

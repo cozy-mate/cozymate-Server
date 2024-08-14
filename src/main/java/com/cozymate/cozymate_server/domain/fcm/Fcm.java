@@ -1,6 +1,8 @@
 package com.cozymate.cozymate_server.domain.fcm;
 
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -15,11 +17,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
-public class Fcm {
+public class Fcm extends BaseTimeEntity {
 
     @Id
-    String deviceId;
-    String token;
+    @Column(name = "device_id")
+    String id;
+
     @ManyToOne
     Member member;
+
+    String token;
+
+    public void updateToken(String token) {
+        this.token = token;
+    }
 }

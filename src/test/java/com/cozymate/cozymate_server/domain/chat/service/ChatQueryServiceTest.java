@@ -186,7 +186,6 @@ class ChatQueryServiceTest {
                     .clientId("6")
                     .role(Role.USER)
                     .socialType(SocialType.KAKAO)
-                    .fcmToken("dummy")
                     .build();
 
                 Member memberB = Member.builder()
@@ -199,7 +198,6 @@ class ChatQueryServiceTest {
                     .clientId("7")
                     .role(Role.USER)
                     .socialType(SocialType.KAKAO)
-                    .fcmToken("dummy")
                     .build();
 
                 given(chatRoom.getMemberA()).willReturn(memberA);
