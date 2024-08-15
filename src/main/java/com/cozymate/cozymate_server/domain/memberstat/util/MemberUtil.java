@@ -74,6 +74,8 @@ public class MemberUtil {
             .build();
     }
 
+
+
     private static int calculateTimeScore(Integer time1, Integer time2) {
         int timeDifference = Math.abs(time1 - time2);
         return switch (timeDifference) {

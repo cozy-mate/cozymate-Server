@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.memberstat.dto;
 
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -61,5 +62,22 @@ public class MemberStatResponseDTO {
         private Integer memberPersona;
         private Integer numOfRoommate;
         private Integer equality;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberStatEqualityDetailResponseDTO {
+
+        private MemberStatEqualityResponseDTO info;
+        private MemberStatQueryResponseDTO detail;
+
+        @JsonIgnore
+        public MemberStatEqualityResponseDTO getMemberStatEqualityResponseDTO() {
+            return this.info;
+        }
+
+
     }
 }
