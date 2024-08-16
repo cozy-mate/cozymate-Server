@@ -10,7 +10,7 @@ public class TodoResponseDto {
 
     @Builder
     @Getter
-    public static class TodoDetailResponseDto {
+    public static class TodoListDetailResponseDto {
 
         private Long id;
         private String content;
@@ -20,11 +20,19 @@ public class TodoResponseDto {
 
     @Builder
     @Getter
+    public static class TodoMateDetailResponseDto {
+
+        private int persona;
+        private List<TodoListDetailResponseDto> mateTodoList;
+    }
+
+    @Builder
+    @Getter
     public static class TodoListResponseDto {
 
         private LocalDate timePoint;
-        private List<TodoDetailResponseDto> myTodoList;
-        private Map<String, List<TodoDetailResponseDto>> mateTodoList;
+        private TodoMateDetailResponseDto myTodoList;
+        private Map<String, TodoMateDetailResponseDto> mateTodoList;
     }
 
 }
