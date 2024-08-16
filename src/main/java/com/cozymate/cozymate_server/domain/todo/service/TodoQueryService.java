@@ -5,8 +5,9 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoDetailResponseDto;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListDetailResponseDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListResponseDto;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoMateDetailResponseDto;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -33,23 +34,30 @@ public class TodoQueryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
         List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(roomId, timePoint);
-        List<TodoDetailResponseDto> myTodoListResponseDto = new ArrayList<>();
-        Map<String, List<TodoDetailResponseDto>> mateTodoListResponseDto = new HashMap<>();
+        TodoMateDetailResponseDto myTodoListResponseDto = TodoConverter.toTodoMateDetailResponseDto(
+            mate.getMember().getPersona(), new ArrayList<>());
+        Map<String, TodoMateDetailResponseDto> mateTodoResponseDto = new HashMap<>();
 
         todoList.forEach(todo -> {
             if (todo.getMate().getId().equals(mate.getId())) {
-                myTodoListResponseDto.add(TodoConverter.toTodoDetailResponseDto(todo));
+                myTodoListResponseDto.getMateTodoList()
+                    .add(TodoConverter.toTodoListDetailResponseDto(todo));
             } else {
                 String mateName = todo.getMate().getMember().getName();
-                TodoDetailResponseDto todoDto = TodoConverter.toTodoDetailResponseDto(todo);
+
+                TodoListDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(todo);
                 // mateTodoListResponseDto에 mateName이 없으면 새로 생성
-                mateTodoListResponseDto.computeIfAbsent(mateName, k -> new ArrayList<>())
-                    .add(todoDto);
+                mateTodoResponseDto.computeIfAbsent(mateName, k ->
+                        TodoConverter.toTodoMateDetailResponseDto(
+                            todo.getMate().getMember().getPersona(),
+                            new ArrayList<>())
+                    )
+                    .getMateTodoList().add(todoDto);
             }
         });
 
         return TodoConverter.toTodoListResponseDto(timePoint, myTodoListResponseDto,
-            mateTodoListResponseDto);
+            mateTodoResponseDto);
 
     }
 
