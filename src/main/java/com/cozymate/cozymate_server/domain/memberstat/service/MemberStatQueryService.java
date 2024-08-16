@@ -3,7 +3,10 @@ package com.cozymate.cozymate_server.domain.memberstat.service;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberUtil;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
@@ -26,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberStatQueryService {
 
     private final MemberStatRepository memberStatRepository;
+    private final MemberRepository memberRepository;
 
 
     public MemberStat getMemberStat(Member member) {
@@ -35,8 +39,20 @@ public class MemberStatQueryService {
             );
     }
 
-    public PageResponseDto<List<MemberStatEqualityResponseDTO>> getMemberStatList(Member member,
-        List<String> filterList, Pageable pageable) {
+    public MemberStat getMemberStatWithId(Long memberId) {
+
+        if(!memberRepository.existsById(memberId)){
+            throw new GeneralException(ErrorStatus._MEMBER_NOT_FOUND);
+        }
+
+        return memberStatRepository.findByMemberId(memberId)
+            .orElseThrow(
+                () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+            );
+    }
+
+    public PageResponseDto<List<?>> getMemberStatList(Member member,
+        List<String> filterList, Pageable pageable, boolean needsDetail) {
 
         //일치율의 기준이 되는 MemberStat을 가져오고, 유효성을 검사합니다.
         MemberStat criteriaMemberStat = memberStatRepository.findByMemberId(member.getId())
@@ -52,18 +68,38 @@ public class MemberStatQueryService {
             return new PageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
         }
 
-        // 일치율을 계산하고, 정렬합니다.
+        if (needsDetail) {
+            List<MemberStatEqualityDetailResponseDTO> result = filteredResult.stream()
+                .map(memberStat -> {
+                    MemberStatEqualityResponseDTO equalityResponse = MemberUtil.toEqualityResponse(
+                        criteriaMemberStat, memberStat);
+                    MemberStatQueryResponseDTO queryResponse = MemberStatConverter.toDto(
+                        memberStat);
+                    return MemberStatEqualityDetailResponseDTO.builder()
+                        .info(equalityResponse)
+                        .detail(queryResponse)
+                        .build();
+                })
+                .sorted((dto1, dto2) -> Integer.compare(
+                    dto2.getMemberStatEqualityResponseDTO().getEquality(),
+                    dto1.getMemberStatEqualityResponseDTO().getEquality()
+                ))
+                .toList();
+            return toPageResponseDto(result, pageable);
+        }
+
         List<MemberStatEqualityResponseDTO> result = filteredResult
             .stream()
             .map(memberStat -> MemberUtil.toEqualityResponse(criteriaMemberStat, memberStat))
             .sorted(Comparator.comparingInt(MemberStatEqualityResponseDTO::getEquality).reversed())
             .toList();
 
-        // MemberStat 전체 엔티티를 대상으로 하기 때문에, 우선 Page로 구현했습니다.
-        // List를 Page로 변환하기 위해 아래 코드를 사용합니다.
-        // 기존에 만들어진 PageResponseDTO를 활용해보려고 노력했습니다.
+        return toPageResponseDto(result, pageable);
 
-        // 전체 페이지 수 계산
+    }
+
+    private PageResponseDto<List<?>> toPageResponseDto(List<?> result, Pageable pageable) {
+
         int totalPages = (int) Math.ceil((double) result.size() / pageable.getPageSize());
 
         // 요청한 페이지가 범위를 벗어났을 경우 빈 페이지 반환
@@ -78,6 +114,8 @@ public class MemberStatQueryService {
         // 해당 페이지의 데이터만 추출하여 Page로 반환
         return new PageResponseDto<>(pageable.getPageNumber(),
             pageable.getPageNumber() + 1 < totalPages, result.subList(start, end));
+
     }
+
 
 }
