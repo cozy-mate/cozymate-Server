@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class PostSummaryDTO {
 
     private Long id;
+    private Long writerId;
     private String title;
     private String content;
     private String nickname;

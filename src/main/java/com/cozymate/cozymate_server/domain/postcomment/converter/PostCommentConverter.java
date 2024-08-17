@@ -11,9 +11,11 @@ public class PostCommentConverter {
     public static PostCommentViewDTO toDto(PostComment postComment){
         return PostCommentViewDTO.builder()
             .id(postComment.getId())
+            .writerId(postComment.getCommenter().getId())
             .nickname(postComment.getCommenter().getMember().getNickname())
             .persona(postComment.getCommenter().getMember().getPersona())
             .content(postComment.getContent())
+            .createdAt(postComment.getCreatedAt())
             .build();
     }
 
