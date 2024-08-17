@@ -31,24 +31,38 @@ public class MemberStatQueryService {
     private final MemberStatRepository memberStatRepository;
     private final MemberRepository memberRepository;
 
+    private MemberStatConverter memberStatConverter;
 
-    public MemberStat getMemberStat(Member member) {
-        return memberStatRepository.findByMemberId(member.getId())
+
+    public MemberStatQueryResponseDTO getMemberStat(Member member) {
+
+        Integer birthYear = member.getBirthDay().getYear();
+
+        MemberStat memberStat = memberStatRepository.findByMemberId(member.getId())
             .orElseThrow(
                 () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
             );
+
+        return MemberStatConverter.toDto(
+            memberStat,birthYear
+        );
     }
 
-    public MemberStat getMemberStatWithId(Long memberId) {
+    public MemberStatQueryResponseDTO getMemberStatWithId(Long memberId) {
 
-        if(!memberRepository.existsById(memberId)){
-            throw new GeneralException(ErrorStatus._MEMBER_NOT_FOUND);
-        }
+        Member member = memberRepository.findById(memberId). orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
+        );
 
-        return memberStatRepository.findByMemberId(memberId)
-            .orElseThrow(
-                () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
-            );
+        MemberStat memberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+        );
+
+        Integer birthYear = member.getBirthDay().getYear();
+
+        return MemberStatConverter.toDto(
+            memberStat,birthYear
+        );
     }
 
     public PageResponseDto<List<?>> getMemberStatList(Member member,
@@ -73,8 +87,8 @@ public class MemberStatQueryService {
                 .map(memberStat -> {
                     MemberStatEqualityResponseDTO equalityResponse = MemberUtil.toEqualityResponse(
                         criteriaMemberStat, memberStat);
-                    MemberStatQueryResponseDTO queryResponse = MemberStatConverter.toDto(
-                        memberStat);
+                    MemberStatQueryResponseDTO queryResponse = memberStatConverter.toDto(
+                        memberStat, memberStat.getMember().getBirthDay().getYear());
                     return MemberStatEqualityDetailResponseDTO.builder()
                         .info(equalityResponse)
                         .detail(queryResponse)

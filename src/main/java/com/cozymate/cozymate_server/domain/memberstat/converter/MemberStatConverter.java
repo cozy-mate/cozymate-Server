@@ -8,6 +8,9 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
 import java.sql.Time;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 public class MemberStatConverter {
 
@@ -48,10 +51,13 @@ public class MemberStatConverter {
         return builder.build();
     }
 
-    public static MemberStatQueryResponseDTO toDto(MemberStat memberStat){
+
+
+    public static MemberStatQueryResponseDTO toDto(MemberStat memberStat, Integer birthYear){
         return MemberStatQueryResponseDTO.builder()
             .universityId(memberStat.getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
+            .birthYear(birthYear)
             .major(memberStat.getMajor())
             .numOfRoommate(memberStat.getNumOfRoommate())
             .acceptance(memberStat.getAcceptance())
