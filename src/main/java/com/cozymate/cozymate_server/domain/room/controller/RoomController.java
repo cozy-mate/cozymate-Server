@@ -49,13 +49,11 @@ public class RoomController {
     }
 
     @GetMapping("/{roomId}")
-    @Operation(summary = "[바니] 생성한 방 정보 조회 기능", description = "방 아이디를 입력합니다.")
+    @Operation(summary = "[바니] 방 정보 조회 기능", description = "방 아이디를 입력합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
-        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MANAGER
+        ErrorStatus._NOT_ROOM_MATE
     })
     public ResponseEntity<ApiResponse<RoomCreateResponse>> getRoom(@PathVariable Long roomId,
         @AuthenticationPrincipal MemberDetails memberDetails) {

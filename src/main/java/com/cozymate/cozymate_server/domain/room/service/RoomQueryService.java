@@ -46,12 +46,6 @@ public class RoomQueryService {
         mateRepository.findByRoomIdAndMemberId(roomId, memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
-            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        if (!manager.getMember().getId().equals(memberId)) {
-            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
-        }
-
         return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage());
     }
 
