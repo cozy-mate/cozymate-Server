@@ -15,10 +15,12 @@ import lombok.NoArgsConstructor;
 public class PostDetailDTO {
 
     private Long id;
+    private Long writerId;
     private String title;
     private String content;
     private LocalDateTime createdAt;
     private String nickname;
+    private int commentCount;
     private int persona;
     private List<String> imageList;
     private List<PostCommentViewDTO> commentList;

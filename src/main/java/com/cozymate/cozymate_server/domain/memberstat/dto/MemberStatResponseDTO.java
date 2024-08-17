@@ -21,6 +21,7 @@ public class MemberStatResponseDTO {
 
         private Long universityId;
         private Integer admissionYear;
+        private Integer birthYear;
         private String major;
         private Integer numOfRoommate;
         private String acceptance;

@@ -23,26 +23,29 @@ public class PostConverter {
             .build();
     }
 
-    public static PostDetailDTO toDto(Post post, List<PostImage> postImage,
-        List<PostComment> postComment) {
+    public static PostDetailDTO toDetailDto(Post post, List<PostImage> postImage,
+        List<PostComment> postComment, Integer commentCount) {
         return PostDetailDTO.builder()
             .id(post.getId())
+            .writerId(post.getWriter().getId())
             .title(post.getTitle())
             .content(post.getContent())
             .nickname(post.getWriter().getMember().getNickname())
             .persona(post.getWriter().getMember().getPersona())
             .createdAt(post.getCreatedAt())
+            .commentCount(commentCount)
             .imageList(
                 postImage.stream().map(PostImage::getContent).map(ImageUtil::generateUrl).toList())
             .commentList(postComment.stream().map(PostCommentConverter::toDto).toList())
             .build();
     }
 
-    public static PostSummaryDTO toDto(Post post,
+    public static PostSummaryDTO toSummaryDto(Post post,
         List<PostImage> postImages,
         Integer commentCount){
         return PostSummaryDTO.builder()
             .id(post.getId())
+            .writerId(post.getWriter().getId())
             .title(post.getTitle())
             .content(post.getContent())
             .nickname(post.getWriter().getMember().getNickname())

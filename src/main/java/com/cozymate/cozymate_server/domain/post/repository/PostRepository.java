@@ -12,5 +12,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     void deleteByFeedId(Long feedId);
 
-    Page<Post> findByFeedId(Long feedId, Pageable pageable);
+    Page<Post> findByFeedIdOrderByCreatedAtDesc(Long feedId, Pageable pageable);
 }

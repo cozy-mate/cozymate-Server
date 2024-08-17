@@ -47,16 +47,17 @@ public class PostQueryService {
         }
         List<PostImage> imageList = postImageRepository.findByPostId(postId);
 
-        List<PostComment> postComments = postCommentRepository.findByPostId(postId);
+        List<PostComment> postComments = postCommentRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         // Local 변수 reassign 하기 싫어서 삼항 연산자 사용
 
-        return PostConverter.toDto(
+        return PostConverter.toDetailDto(
             post,
             imageList.isEmpty()
                 ? new ArrayList<>() : imageList,
             postComments.isEmpty()
-                ? new ArrayList<>() : postComments);
+                ? new ArrayList<>() : postComments,
+            postCommentRepository.countByPostId(post.getId()));
     }
 
 
@@ -67,10 +68,10 @@ public class PostQueryService {
         }
 
         Feed feed = feedRepository.findByRoomId(roomId);
-        Page<Post> postList = postRepository.findByFeedId(feed.getId(),pageable);
+        Page<Post> postList = postRepository.findByFeedIdOrderByCreatedAtDesc(feed.getId(),pageable);
 
         return postList.stream().map(
-            post->PostConverter.toDto(
+            post->PostConverter.toSummaryDto(
                 post,
                 postImageRepository.findByPostId(post.getId()).isEmpty() ?
                     new ArrayList<>() : postImageRepository.findByPostId(post.getId()),
