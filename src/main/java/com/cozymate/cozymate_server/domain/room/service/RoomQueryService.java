@@ -13,6 +13,7 @@ import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
@@ -20,6 +21,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,5 +114,17 @@ public class RoomQueryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         return RoomConverter.toInviteRequest(room, mate);
+    }
+
+    public RoomExistResponse getExistRoom(Long memberId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
+            memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
+        if (mate.isPresent()) {
+            return RoomConverter.toRoomExistResponse(mate.get().getRoom());
+        } else {
+            return RoomConverter.toRoomExistResponse(null);
+        }
     }
 }

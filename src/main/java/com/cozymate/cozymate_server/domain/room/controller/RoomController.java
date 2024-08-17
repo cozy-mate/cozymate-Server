@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
@@ -165,4 +166,13 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess("초대 요청에 대한 처리 완료"));
     }
 
+    @GetMapping("/exist")
+    @Operation(summary = "[바니] 사용자가 참여한 방이 있는지 여부 조회", description = "현재 참여중인 방이 있다면 해당 roomId가, 없다면 roomId값이 0으로 리턴됩니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<RoomExistResponse>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
+        RoomExistResponse response = roomQueryService.getExistRoom(memberDetails.getMember().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
 }
