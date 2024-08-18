@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.roomlog;
 
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,4 +30,7 @@ public class RoomLog extends BaseTimeEntity {
     private Room room;
 
     private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Todo todo;
 }
