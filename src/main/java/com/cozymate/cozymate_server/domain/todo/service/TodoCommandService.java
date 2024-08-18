@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.todo.service;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
@@ -23,6 +24,7 @@ public class TodoCommandService {
 
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
+    private final RoomLogCommandService roomLogCommandService;
 
     public void createTodo(
         Member member,
@@ -48,15 +50,18 @@ public class TodoCommandService {
 
     public void updateTodoCompleteState(
         Member member,
-        UpdateTodoCompleteStateRequestDto updateTodoCompleteStateRequestDto
+        UpdateTodoCompleteStateRequestDto requestDto
     ) {
 
-        Todo todo = todoRepository.findById(updateTodoCompleteStateRequestDto.getTodoId())
+        Todo todo = todoRepository.findById(requestDto.getTodoId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
         if (Boolean.FALSE.equals(todo.getMate().getMember().getId().equals(member.getId()))) {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
-        todo.updateCompleteState(updateTodoCompleteStateRequestDto.getCompleted());
+        todo.updateCompleteState(requestDto.getCompleted());
+        // 투두 완료시 변한 값을 기준으로 로그 추가
+        roomLogCommandService.addRoomLogFromTodo(todo);
+
         todoRepository.save(todo);
     }
 
