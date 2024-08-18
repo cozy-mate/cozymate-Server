@@ -30,11 +30,22 @@ public class RoleResponseDto {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
+    public static class RoleMateDetailResponseDto {
+
+        private int persona;
+
+        private List<RoleDetailResponseDto> mateRoleList;
+    }
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class RoleListDetailResponseDto {
 
-        private List<RoleDetailResponseDto> myRoleList;
+        private RoleMateDetailResponseDto myRoleList;
 
-        private Map<String, List<RoleDetailResponseDto>> otherRoleList;
+        private Map<String, RoleMateDetailResponseDto> otherRoleList;
     }
 
 }

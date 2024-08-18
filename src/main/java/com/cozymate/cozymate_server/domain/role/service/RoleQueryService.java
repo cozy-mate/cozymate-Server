@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.role.converter.RoleConverter;
 import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleDetailResponseDto;
 import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleListDetailResponseDto;
+import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleMateDetailResponseDto;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.RuleDetailResponseDto;
@@ -33,16 +34,24 @@ public class RoleQueryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
         List<Role> roleList = roleRepository.findAllByMateRoomId(mate.getRoom().getId());
-        List<RoleDetailResponseDto> myRoleListResponseDto = new ArrayList<>();
-        Map<String, List<RoleDetailResponseDto>> mateRoleListResponseDto = new HashMap<>();
+        RoleMateDetailResponseDto myRoleListResponseDto = RoleConverter.toRoleMateDetailResponseDto(
+            mate.getMember().getPersona(), new ArrayList<>());
+        Map<String, RoleMateDetailResponseDto> mateRoleListResponseDto = new HashMap<>();
 
         roleList.forEach(role -> {
             if (role.getMate().getId().equals(mate.getId())) {
-                myRoleListResponseDto.add(RoleConverter.toRoleDetailResponseDto(role));
+                myRoleListResponseDto.getMateRoleList()
+                    .add(RoleConverter.toRoleDetailResponseDto(role));
             } else {
                 String mateName = role.getMate().getMember().getName();
                 RoleDetailResponseDto roleDto = RoleConverter.toRoleDetailResponseDto(role);
-                mateRoleListResponseDto.computeIfAbsent(mateName, k -> new ArrayList<>())
+                
+                mateRoleListResponseDto.computeIfAbsent(mateName, k ->
+                        RoleConverter.toRoleMateDetailResponseDto(
+                            role.getMate().getMember().getPersona(),
+                            new ArrayList<>()
+                        ))
+                    .getMateRoleList()
                     .add(roleDto);
             }
         });
