@@ -12,9 +12,11 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TodoCommandService {
 
     private static final int MAX_TODO_PER_DAY = 20;
@@ -56,6 +58,19 @@ public class TodoCommandService {
         }
         todo.updateCompleteState(updateTodoCompleteStateRequestDto.getCompleted());
         todoRepository.save(todo);
+    }
+
+    public void deleteTodo(
+        Member member,
+        Long todoId
+    ) {
+        Todo todo = todoRepository.findById(todoId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
+
+        if (Boolean.FALSE.equals(todo.getMate().getMember().getId().equals(member.getId()))) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
+        }
+        todoRepository.delete(todo);
     }
 
 }
