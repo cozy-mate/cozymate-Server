@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +66,17 @@ public class TodoController {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             todoQueryService.getTodo(roomId, memberDetails.getMember(), timePoint)
         ));
+    }
+
+    @DeleteMapping("")
+    @Operation(summary = "[무빗] 특정 방의 특정 Todo 삭제", description = "Todo의 고유 번호로 삭제가 가능합니다.")
+    @SwaggerApiError({ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
+    public ResponseEntity<ApiResponse<String>> deleteTodo(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @RequestParam Long todoId
+    ) {
+        todoCommandService.deleteTodo(memberDetails.getMember(), todoId);
+        return ResponseEntity.ok(ApiResponse.onSuccess("삭제되었습니다."));
     }
 
     @PatchMapping("/state")
