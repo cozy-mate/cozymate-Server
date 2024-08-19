@@ -16,7 +16,6 @@ public class PostConverter {
 
     public static Post toEntity(PostCreateDTO postCreateDTO, Feed feed, Mate writer) {
         return Post.builder()
-            .title(postCreateDTO.getTitle())
             .content(postCreateDTO.getContent())
             .feed(feed)
             .writer(writer)
@@ -28,7 +27,6 @@ public class PostConverter {
         return PostDetailDTO.builder()
             .id(post.getId())
             .writerId(post.getWriter().getId())
-            .title(post.getTitle())
             .content(post.getContent())
             .nickname(post.getWriter().getMember().getNickname())
             .persona(post.getWriter().getMember().getPersona())
@@ -46,7 +44,6 @@ public class PostConverter {
         return PostSummaryDTO.builder()
             .id(post.getId())
             .writerId(post.getWriter().getId())
-            .title(post.getTitle())
             .content(post.getContent())
             .nickname(post.getWriter().getMember().getNickname())
             .persona(post.getWriter().getMember().getPersona())

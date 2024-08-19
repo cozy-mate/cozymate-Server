@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,5 +12,5 @@ public class RoomCreateResponse {
     private String name;
     private String inviteCode;
     private Integer profileImage;
-
+    List<CozymateResponse> mateList;
 }

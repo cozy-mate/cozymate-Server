@@ -19,8 +19,6 @@ public class PostUpdateDTO {
     private Long postId;
 
     @NotBlank
-    private String title;
-    @NotBlank
     private String content;
 
     private List<String> imageList;

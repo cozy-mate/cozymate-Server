@@ -37,6 +37,7 @@ public class RoomQueryService {
     private final FriendRepository friendRepository;
 
     public RoomCreateResponse getRoomById(Long roomId, Long memberId) {
+
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
         );
@@ -46,7 +47,12 @@ public class RoomQueryService {
         mateRepository.findByRoomIdAndMemberId(roomId, memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage());
+        List<CozymateResponse> mates = mateRepository.findByRoomId(roomId).stream()
+            .filter(mate->mate.getEntryStatus().equals(EntryStatus.JOINED))
+            .map(mate->RoomConverter.toCozymateResponse(mate.getMember()))
+            .toList();
+
+        return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),mates);
     }
 
     public RoomJoinResponse getRoomByInviteCode(String inviteCode, Long memberId) {

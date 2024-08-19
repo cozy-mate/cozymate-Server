@@ -33,12 +33,9 @@ public class Post extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Mate writer;
 
-    private String title;
-
     private String content;
 
     public void update(PostUpdateDTO postUpdateDTO) {
-        this.title = postUpdateDTO.getTitle();
         this.content = postUpdateDTO.getContent();
     }
 
