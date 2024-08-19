@@ -52,7 +52,9 @@ public class RoomQueryService {
             .map(mate->RoomConverter.toCozymateResponse(mate.getMember()))
             .toList();
 
-        return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),mates);
+        return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),
+            mates.isEmpty() ? new ArrayList<>() : mates
+            );
     }
 
     public RoomJoinResponse getRoomByInviteCode(String inviteCode, Long memberId) {
