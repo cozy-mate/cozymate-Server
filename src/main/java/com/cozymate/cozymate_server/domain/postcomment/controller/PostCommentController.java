@@ -92,7 +92,7 @@ public class PostCommentController {
                 true));
     }
     @Operation(
-        summary = "[포비] 게시물 댓글 삭제하기",
+        summary = "[포비] 게시물 댓글 조회하기",
         description = "사용자의 토큰을 넣어 사용하고, PathVariable로 roomId와 postId와 commentId, 필요한 정보를 넣어 사용합니다.\n\n"
     )
     @SwaggerApiError(
