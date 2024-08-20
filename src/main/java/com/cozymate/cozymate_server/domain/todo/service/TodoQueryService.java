@@ -36,7 +36,17 @@ public class TodoQueryService {
         List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(roomId, timePoint);
         TodoMateDetailResponseDto myTodoListResponseDto = TodoConverter.toTodoMateDetailResponseDto(
             mate.getMember().getPersona(), new ArrayList<>());
+
         Map<String, TodoMateDetailResponseDto> mateTodoResponseDto = new HashMap<>();
+        // mateTodoListResponseDto에 본인을 제외한 mate 정보 추가
+        List<Mate> mateList = mateRepository.findByRoomId(roomId);
+        mateList.stream()
+            .filter(filterMate -> Boolean.FALSE.equals(mate.getId().equals(filterMate.getId())))
+            .forEach(filteredMate ->
+                mateTodoResponseDto.put(filteredMate.getMember().getNickname(),
+                    TodoConverter.toTodoMateDetailResponseDto(filteredMate.getMember().getPersona(),
+                        new ArrayList<>()))
+            );
 
         todoList.forEach(todo -> {
             if (todo.getMate().getId().equals(mate.getId())) {
@@ -46,13 +56,7 @@ public class TodoQueryService {
                 String mateName = todo.getMate().getMember().getNickname();
 
                 TodoListDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(todo);
-                // mateTodoListResponseDto에 mateName이 없으면 새로 생성
-                mateTodoResponseDto.computeIfAbsent(mateName, k ->
-                        TodoConverter.toTodoMateDetailResponseDto(
-                            todo.getMate().getMember().getPersona(),
-                            new ArrayList<>())
-                    )
-                    .getMateTodoList().add(todoDto);
+                mateTodoResponseDto.get(mateName).getMateTodoList().add(todoDto);
             }
         });
 

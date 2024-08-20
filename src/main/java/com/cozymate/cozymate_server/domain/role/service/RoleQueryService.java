@@ -37,6 +37,14 @@ public class RoleQueryService {
         RoleMateDetailResponseDto myRoleListResponseDto = RoleConverter.toRoleMateDetailResponseDto(
             mate.getMember().getPersona(), new ArrayList<>());
         Map<String, RoleMateDetailResponseDto> mateRoleListResponseDto = new HashMap<>();
+        List<Mate> mateList = mateRepository.findByRoomId(roomId);
+        mateList.stream()
+            .filter(filterMate -> Boolean.FALSE.equals(mate.getId().equals(filterMate.getId())))
+            .forEach(filteredMate ->
+                mateRoleListResponseDto.put(filteredMate.getMember().getNickname(),
+                    RoleConverter.toRoleMateDetailResponseDto(filteredMate.getMember().getPersona(),
+                        new ArrayList<>()))
+            );
 
         roleList.forEach(role -> {
             if (role.getMate().getId().equals(mate.getId())) {
@@ -45,14 +53,8 @@ public class RoleQueryService {
             } else {
                 String mateName = role.getMate().getMember().getNickname();
                 RoleDetailResponseDto roleDto = RoleConverter.toRoleDetailResponseDto(role);
-                
-                mateRoleListResponseDto.computeIfAbsent(mateName, k ->
-                        RoleConverter.toRoleMateDetailResponseDto(
-                            role.getMate().getMember().getPersona(),
-                            new ArrayList<>()
-                        ))
-                    .getMateRoleList()
-                    .add(roleDto);
+
+                mateRoleListResponseDto.get(mateName).getMateRoleList().add(roleDto);
             }
         });
 
