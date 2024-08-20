@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.roomlog.service;
 
+import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
 import com.cozymate.cozymate_server.domain.roomlog.converter.RoomLogConverter;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
@@ -26,7 +27,9 @@ public class RoomLogCommandService {
         "완료했어요! 얼른 칭찬해주세요!",
         "완료하여, 최고의 cozy mate가 되었어요!"
     );
+    public static final String DEFAULT_CREATION_MESSAGE = "의 역사적인 하루가 시작됐어요!";
 
+    // 투두 추가되었을 때
     public void addRoomLogFromTodo(Todo todo) {
         Optional<RoomLog> existingLog = roomLogRepository.findByTodoId(todo.getId());
         // False일 때 기존 로그 삭제, True일 때 새로운 로그 생성
@@ -48,6 +51,12 @@ public class RoomLogCommandService {
             roomLogRepository.save(RoomLogConverter.toEntity(content, todo.getRoom(), todo));
         }
 
+    }
+
+    // 방 생성이 완료되었을 때 실행
+    public void addRoomLogCreationRoom(Room room) {
+        String content = "{" + room.getName() + "}" + DEFAULT_CREATION_MESSAGE;
+        roomLogRepository.save(RoomLogConverter.toEntity(content, room, null));
     }
 
 }
