@@ -10,6 +10,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
+import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
@@ -47,9 +48,9 @@ public class RoomQueryService {
         mateRepository.findByRoomIdAndMemberId(roomId, memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        List<CozymateResponse> mates = mateRepository.findByRoomId(roomId).stream()
+        List<CozymateInfoResponse> mates = mateRepository.findByRoomId(roomId).stream()
             .filter(mate->mate.getEntryStatus().equals(EntryStatus.JOINED))
-            .map(mate->RoomConverter.toCozymateResponse(mate.getMember()))
+            .map(RoomConverter::toCozyMateInfoResponse)
             .toList();
 
         return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),

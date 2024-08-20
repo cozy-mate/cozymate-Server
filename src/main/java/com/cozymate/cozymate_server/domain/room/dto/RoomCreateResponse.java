@@ -12,5 +12,5 @@ public class RoomCreateResponse {
     private String name;
     private String inviteCode;
     private Integer profileImage;
-    List<CozymateResponse> mateList;
+    List<CozymateInfoResponse> mateList;
 }
