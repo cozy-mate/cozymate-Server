@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.role.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.role.Role;
@@ -37,7 +38,9 @@ public class RoleQueryService {
         RoleMateDetailResponseDto myRoleListResponseDto = RoleConverter.toRoleMateDetailResponseDto(
             mate.getMember().getPersona(), new ArrayList<>());
         Map<String, RoleMateDetailResponseDto> mateRoleListResponseDto = new HashMap<>();
-        List<Mate> mateList = mateRepository.findByRoomId(roomId);
+
+        List<Mate> mateList = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
+            EntryStatus.JOINED);
         mateList.stream()
             .filter(filterMate -> Boolean.FALSE.equals(mate.getId().equals(filterMate.getId())))
             .forEach(filteredMate ->
