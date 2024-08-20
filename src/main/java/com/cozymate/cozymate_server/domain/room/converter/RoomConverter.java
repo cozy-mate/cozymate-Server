@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.room.converter;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
@@ -35,6 +36,14 @@ public class RoomConverter {
         return CozymateResponse.builder()
             .memberId(member.getId())
             .nickname(member.getNickname())
+            .build();
+    }
+
+    public static CozymateInfoResponse toCozyMateInfoResponse(Mate mate) {
+        return CozymateInfoResponse.builder()
+            .memberId(mate.getMember().getId())
+            .mateId(mate.getId())
+            .nickname(mate.getMember().getNickname())
             .build();
     }
 
