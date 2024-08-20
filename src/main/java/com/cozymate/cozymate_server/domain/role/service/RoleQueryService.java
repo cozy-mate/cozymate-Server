@@ -43,7 +43,7 @@ public class RoleQueryService {
                 myRoleListResponseDto.getMateRoleList()
                     .add(RoleConverter.toRoleDetailResponseDto(role));
             } else {
-                String mateName = role.getMate().getMember().getName();
+                String mateName = role.getMate().getMember().getNickname();
                 RoleDetailResponseDto roleDto = RoleConverter.toRoleDetailResponseDto(role);
                 
                 mateRoleListResponseDto.computeIfAbsent(mateName, k ->
