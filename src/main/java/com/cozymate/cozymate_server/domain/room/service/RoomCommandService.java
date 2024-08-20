@@ -22,6 +22,7 @@ import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
+import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -54,18 +55,21 @@ public class RoomCommandService {
     private final FeedRepository feedRepository;
     private final FriendRepository friendRepository;
     private final RoomQueryService roomQueryService;
+    private final RoomLogCommandService roomLogCommandService;
 
     public RoomCreateResponse createRoom(RoomCreateRequest request, Member member) {
         Member creator = memberRepository.findById(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE, RoomStatus.WAITING)) {
+        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
+            RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toEntity(request, inviteCode);
-        roomRepository.save(room);
+        room = roomRepository.save(room);
+        roomLogCommandService.addRoomLogCreationRoom(room);
 
         Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
@@ -84,7 +88,8 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
         }
 
-        if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
+        if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE,
+            RoomStatus.WAITING)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
@@ -111,7 +116,7 @@ public class RoomCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
-            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
         if (!manager.getMember().getId().equals(memberId)) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
@@ -127,7 +132,7 @@ public class RoomCommandService {
         roomLogRepository.deleteByRoomId(roomId);
 
         // 피드를 생성하지 않고 방이 삭제될 경우도 고려함
-        if(feedRepository.existsByRoomId(roomId)){
+        if (feedRepository.existsByRoomId(roomId)) {
             Feed feed = feedRepository.findByRoomId(roomId);
             List<Post> posts = postRepository.findByFeedId(feed.getId());
             for (Post post : posts) {
@@ -137,7 +142,6 @@ public class RoomCommandService {
             postRepository.deleteByFeedId(feed.getId());
             feedRepository.deleteByRoomId(roomId);
         }
-
 
         roomRepository.delete(room);
     }
@@ -154,7 +158,7 @@ public class RoomCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
-            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
         if (!inviter.getMember().getId().equals(inviterId)) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
@@ -179,7 +183,8 @@ public class RoomCommandService {
                 }
             }
 
-            if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE, RoomStatus.WAITING)) {
+            if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE,
+                RoomStatus.WAITING)) {
                 throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
             }
 
@@ -202,16 +207,16 @@ public class RoomCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Room room = roomRepository.findById(roomId)
-            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        if (room.getNumOfArrival()+1 > room.getMaxMateNum()) {
+        if (room.getNumOfArrival() + 1 > room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
         Mate invitee = mateRepository.findByRoomIdAndMemberId(roomId, inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
 
-        if (invitee.getEntryStatus()==EntryStatus.JOINED) {
+        if (invitee.getEntryStatus() == EntryStatus.JOINED) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
         }
 
