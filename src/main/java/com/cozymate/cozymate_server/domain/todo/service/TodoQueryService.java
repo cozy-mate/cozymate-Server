@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.todo.Todo;
@@ -39,7 +40,8 @@ public class TodoQueryService {
 
         Map<String, TodoMateDetailResponseDto> mateTodoResponseDto = new HashMap<>();
         // mateTodoListResponseDto에 본인을 제외한 mate 정보 추가
-        List<Mate> mateList = mateRepository.findByRoomId(roomId);
+        List<Mate> mateList = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
+            EntryStatus.JOINED);
         mateList.stream()
             .filter(filterMate -> Boolean.FALSE.equals(mate.getId().equals(filterMate.getId())))
             .forEach(filteredMate ->

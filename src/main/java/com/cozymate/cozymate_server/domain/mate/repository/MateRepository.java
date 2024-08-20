@@ -29,4 +29,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     boolean existsByMemberIdAndRoomId(Long MemberId, Long RoomId);
 
     Optional<Mate> findByMemberIdAndEntryStatusAndRoomStatusIn(Long memberId, EntryStatus entryStatus, List<RoomStatus> roomStatuses);
+
+    List<Mate> findAllByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
 }
