@@ -43,7 +43,7 @@ public class TodoQueryService {
                 myTodoListResponseDto.getMateTodoList()
                     .add(TodoConverter.toTodoListDetailResponseDto(todo));
             } else {
-                String mateName = todo.getMate().getMember().getName();
+                String mateName = todo.getMate().getMember().getNickname();
 
                 TodoListDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(todo);
                 // mateTodoListResponseDto에 mateName이 없으면 새로 생성
