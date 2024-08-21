@@ -1,14 +1,20 @@
 package com.cozymate.cozymate_server.global.scheduler;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
+import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,6 +32,9 @@ public class NotificationScheduler {
     private final FcmPushService fcmPushService;
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
+
+    private final RoomLogCommandService roomLogCommandService;
+    private final RoomRepository roomRepository;
 
     @Scheduled(cron = "0 0 0 * * *")
     public void sendDailyNotification() {
@@ -66,6 +75,9 @@ public class NotificationScheduler {
                 OneTargetDto.create(member, NotificationType.REMINDER_ROLE,
                     todo.getRole().getContent()));
         });
+
+        // 각 Todo에 대해 로그 추가
+        todoList.forEach(roomLogCommandService::addRoomLogRemindingRole);
     }
 
     @Scheduled(cron = "0 0 12 L * ?")
@@ -80,5 +92,24 @@ public class NotificationScheduler {
             fcmPushService.sendNotification(
                 OneTargetDto.create(member, NotificationType.SELECT_COZY_MATE));
         });
+
+        //  각 Room에 대해 로그 추가
+        LocalDateTime now = LocalDateTime.now();
+        String month = now.format(DateTimeFormatter.ofPattern("M월"));
+        List<Room> roomList = roomRepository.findAll();
+        roomList.forEach(room -> roomLogCommandService.addRoomLogChoiceCozyMate(room, month));
+    }
+
+
+    // 매일 자정 반복 (생일인 사람 확인해서 해당 방에 로그 추가)
+    @Scheduled(cron = "0 0 0 * * *")
+    public void addBirthdayRoomLog() {
+        LocalDate today = LocalDate.now();
+        List<Mate> mateList = mateRepository.findAllByMemberBirthDayAndEntryStatus(today,
+            EntryStatus.JOINED);
+
+        mateList.forEach(mate ->
+            roomLogCommandService.addRoomLogBirthday(mate, today)
+        );
     }
 }
