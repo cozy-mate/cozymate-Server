@@ -5,13 +5,19 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
+import com.cozymate.cozymate_server.domain.role.Role;
+import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
+import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
+import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.Todo;
+import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +41,8 @@ public class NotificationScheduler {
 
     private final RoomLogCommandService roomLogCommandService;
     private final RoomRepository roomRepository;
+    private final RuleRepository ruleRepository;
+    private final RoleRepository roleRepository;
 
     @Scheduled(cron = "0 0 0 * * *")
     public void sendDailyNotification() {
@@ -112,5 +120,20 @@ public class NotificationScheduler {
         mateList.forEach(mate ->
             roomLogCommandService.addRoomLogBirthday(mate, today)
         );
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void addRoleToTodo() {
+        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
+        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
+        List<Role> roleList = roleRepository.findAll();
+        roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
+            .forEach(role ->
+                todoRepository.save(
+                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
+                        role.getContent(),
+                        LocalDate.now(), role)
+                )
+            );
     }
 }
