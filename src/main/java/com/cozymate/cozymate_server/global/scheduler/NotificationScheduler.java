@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class NotificationScheduler {
 
     private final FcmPushService fcmPushService;
@@ -105,8 +105,9 @@ public class NotificationScheduler {
     @Scheduled(cron = "0 0 0 * * *")
     public void addBirthdayRoomLog() {
         LocalDate today = LocalDate.now();
-        List<Mate> mateList = mateRepository.findAllByMemberBirthDayAndEntryStatus(today,
-            EntryStatus.JOINED);
+        List<Mate> mateList = mateRepository.findAllByMemberBirthDayMonthAndDayAndEntryStatus(
+            today.getMonthValue(), today.getDayOfMonth(), EntryStatus.JOINED
+        );
 
         mateList.forEach(mate ->
             roomLogCommandService.addRoomLogBirthday(mate, today)
