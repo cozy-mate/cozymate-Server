@@ -37,7 +37,7 @@ public class RoomLogCommandService {
             roomLogRepository.delete(existingLog.get());
         }
         if (Boolean.TRUE.equals(todo.isCompleted()) && existingLog.isEmpty()) {
-            String who = "{" + todo.getMate().getMember().getName() + "}님이 ";
+            String who = "{" + todo.getMate().getMember().getNickname() + "}님이 ";
             String what = "[" + todo.getContent() + "]을/를 ";
             String finish = DEFAULT_FINAL_MESSAGE;
 
