@@ -9,5 +9,4 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
     List<Role> findAllByMateRoomId(Long roomId);
 
     void deleteByMateId(Long mateId);
-
 }
