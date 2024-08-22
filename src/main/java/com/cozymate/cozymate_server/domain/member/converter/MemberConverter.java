@@ -19,7 +19,8 @@ public class MemberConverter {
                 .role(Role.USER)
                 .name(signUpRequestDTO.getName())
                 .nickname(signUpRequestDTO.getNickname())
-                .gender(Gender.valueOf(signUpRequestDTO.getGender()))
+                .gender(Gender.MALE)
+//                .gender(Gender.valueOf(signUpRequestDTO.getGender()))
                 .birthDay(signUpRequestDTO.getBirthday())
                 .persona(signUpRequestDTO.getPersona())
                 .build();
