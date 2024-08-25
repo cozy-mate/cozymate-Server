@@ -60,11 +60,11 @@ public class MemberStatRequestDTO {
                 @NotBlank
                 private String sleepingHabit;
                 @NotNull
-                @Min(1)
+                @Min(0)
                 @Max(3)
                 private Integer airConditioningIntensity;
                 @NotNull
-                @Min(1)
+                @Min(0)
                 @Max(3)
                 private Integer heatingIntensity;
                 @NotBlank
