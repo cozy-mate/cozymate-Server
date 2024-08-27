@@ -7,7 +7,8 @@ public enum SocialType {
     KAKAO,
     NAVER,
     GOOGLE,
-    APPLE;
+    APPLE,
+    TEST;
 
     // ex. return KAKAO;
     @Override
