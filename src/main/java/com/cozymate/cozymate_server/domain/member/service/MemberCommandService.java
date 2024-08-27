@@ -48,9 +48,9 @@ public class MemberCommandService {
         SocialType socialType = SocialType.getValue(signInRequestDTO.getSocialType())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._INVALID_SOCIAL_TYPE));
 
-        // 클라이언트 ID 생성
         String clientId = ClientIdMaker.makeClientId(signInRequestDTO.getClientId(), socialType);
 
+        log.info(clientId);
         // 사용자가 기존 회원인지 확인하고, 로그인 처리
         if (memberQueryService.isPresent(clientId)) {
             return signInByExistingMember(clientId);
