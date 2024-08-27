@@ -23,4 +23,12 @@ public class FeedConverter {
             .build();
     }
 
+    public static Feed toEntity(Room room) {
+        return Feed.builder()
+            .room(room)
+            .name("")
+            .description("")
+            .build();
+    }
+
 }

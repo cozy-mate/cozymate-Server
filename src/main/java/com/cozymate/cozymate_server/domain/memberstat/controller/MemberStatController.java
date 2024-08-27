@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -104,9 +105,9 @@ public class MemberStatController {
     @Operation(
         summary = "[포비] 사용자 상세정보 조회",
         description = "사용자 토큰을 넣고, memberId를 PathVariable로 사용합니다.\n\n"
-            + "시간 관련 처리를 유의해주세요."
     )
     @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_NOT_EXISTS
     })
     @GetMapping("/{memberId}")
@@ -213,5 +214,24 @@ public class MemberStatController {
             ));
     }
 
+    @Operation(
+        summary = "[포비] 사용자 상세정보 삭제(관리자용)",
+        description = "요청자의 토큰을 넣고, 삭제하고자 하는 사용자의 ID를 넣어 사용합니다.\n\n"
+    )
+    @DeleteMapping("/{memberId}")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._MEMBERSTAT_NOT_EXISTS
+    })
+    public ResponseEntity<ApiResponse<Boolean>> deleteMemberStat(
+        @PathVariable Long memberId
+    ){
+        // TODO : 관리자 권한 분리시 일반 사용자가 삭제하는 것을 제한하기
+        memberStatCommandService.deleteMemberStat(memberId);
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                true
+            ));
+    }
 
 }
