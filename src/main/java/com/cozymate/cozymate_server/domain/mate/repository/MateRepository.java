@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.mate.repository;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import java.time.LocalDate;
@@ -48,4 +49,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findAllByMemberBirthDayMonthAndDayAndEntryStatus(@Param("month") int month, @Param("day") int day, @Param("entryStatus") EntryStatus entryStatus);
 
     List<Mate> findByRoom(Room room);
+
+    Optional<Mate> findByMember(Member member);
 }

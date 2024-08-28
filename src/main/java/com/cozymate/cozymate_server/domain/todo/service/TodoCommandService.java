@@ -73,8 +73,9 @@ public class TodoCommandService {
         todoRepository.save(todo);
 
         // 현재 member의 오늘 날짜의 todo 중에서 false(미완료)인게 존재하는지 확인
-        boolean existsFalseTodo = todoRepository.existsByMemberAndTimePointAndCompleteStateFalse(
-            member, LocalDate.now());
+
+        boolean existsFalseTodo = todoRepository.existsByMateAndTimePointAndCompletedFalse(
+            todo.getMate(), LocalDate.now());
 
         // 미완료인 todo 존재하지 않는다면 -> 방의 다른 룸메이트들에게 나의 모든 투두를 완료했다는 알림을 전송
         if (!existsFalseTodo) {

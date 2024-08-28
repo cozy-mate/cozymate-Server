@@ -60,22 +60,22 @@ public class NotificationLogController {
         return "알림 전송 완료";
     }
 
-    @Deprecated
-    @GetMapping("/test/todo")
-    @Operation(summary = "알림 테스트용")
-    public String sendTodoNotification(@AuthenticationPrincipal MemberDetails memberDetails) {
-        Member member = memberDetails.getMember();
-
-        Optional<Mate> mate = mateRepository.findByMember(member);
-
-        List<String> todoList = new ArrayList<>();
-        todoList.add("설거지하기");
-        todoList.add("콩 밥주기");
-        todoList.add("밥 먹기");
-        todoList.add("버스 표 끊기");
-        fcmPushService.sendNotification(
-            OneTargetDto.create(member, NotificationType.TODO_LIST, todoList));
-        log.info("투두 리스트 알림 전송 완료");
-        return "알림 전송 완료";
-    }
+//    @Deprecated
+//    @GetMapping("/test/todo")
+//    @Operation(summary = "알림 테스트용")
+//    public String sendTodoNotification(@AuthenticationPrincipal MemberDetails memberDetails) {
+////        Member member = memberDetails.getMember();
+////
+////        Optional<Mate> mate = mateRepository.findByMember(member);
+//
+//        List<String> todoList = new ArrayList<>();
+//        todoList.add("설거지하기");
+//        todoList.add("콩 밥주기");
+//        todoList.add("밥 먹기");
+//        todoList.add("버스 표 끊기");
+//        fcmPushService.sendNotification(
+//            OneTargetDto.create(member, NotificationType.TODO_LIST, todoList));
+//        log.info("투두 리스트 알림 전송 완료");
+//        return "알림 전송 완료";
+//    }
 }
