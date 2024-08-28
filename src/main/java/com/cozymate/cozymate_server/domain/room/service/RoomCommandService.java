@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
 import com.cozymate.cozymate_server.domain.feed.Feed;
+import com.cozymate.cozymate_server.domain.feed.converter.FeedConverter;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
 import com.cozymate.cozymate_server.domain.friend.FriendRepository;
 import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
@@ -73,6 +74,9 @@ public class RoomCommandService {
 
         Mate mate = MateConverter.toEntity(room, creator, true);
         mateRepository.save(mate);
+
+        Feed feed = FeedConverter.toEntity(room);
+        feedRepository.save(feed);
 
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }

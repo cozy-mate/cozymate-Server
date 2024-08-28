@@ -31,9 +31,10 @@ public class FeedController {
     private final FeedCommandService feedCommandService;
     private final FeedQueryService feedQueryService;
 
+    @Deprecated
     @Operation(
         summary = "[포비] 피드 정보 등록하기",
-        description = "사용자의 토큰을 넣어 사용하고, body로 룸 ID와 피드 상세정보를 넣어 사용합니다.\n\n"
+        description = "해당 API는 더 이상 사용하지 않습니다"
     )
     @SwaggerApiError({
         ErrorStatus._ROOM_NOT_FOUND,

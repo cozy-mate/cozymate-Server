@@ -62,4 +62,18 @@ public class MemberStatCommandService {
         return updatedMemberStat.getId();
 
     }
+
+    public void deleteMemberStat(Long memberId){
+
+        if(!memberStatRepository.existsById(memberId)){
+            throw new GeneralException(ErrorStatus._MEMBER_NOT_FOUND);
+        }
+
+        MemberStat memberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+        );
+
+        memberStatRepository.delete(memberStat);
+
+    }
 }
