@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.fcm.service;
 
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushContentDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
@@ -60,6 +61,16 @@ public class FcmPushService {
         memberList.forEach(member -> {
             sendNotificationToMember(member,
                 target.getNotificationType());
+        });
+    }
+
+    @Async
+    public void sendNotification(GroupWithOutMeTargetDto target) {
+        List<Member> memberList = target.getMemberList();
+        Member me = target.getMe();
+
+        memberList.forEach(member -> {
+            sendNotificationToMember(me, member, target.getNotificationType());
         });
     }
 

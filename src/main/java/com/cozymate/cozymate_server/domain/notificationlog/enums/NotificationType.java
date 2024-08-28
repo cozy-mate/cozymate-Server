@@ -11,6 +11,15 @@ import lombok.Getter;
 @Getter
 public enum NotificationType {
 
+    // GroupWithOutMeTarget
+    // TODO :
+    COMPLETE_ALL_TODAY_TODO(NotificationCategory.COZY_HOME) {
+        @Override
+        public String generateContent(FcmPushContentDto fcmPushContentDto) {
+            return fcmPushContentDto.getMember().getNickname() + "님이 오늘 해야 할 일을 전부 완료했어요!";
+        }
+    },
+
     // OneTargetReverse
     COZY_MATE_REQUEST_FROM(NotificationCategory.COZY_MATE_ARRIVE) {
         @Override
