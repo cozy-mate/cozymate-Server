@@ -64,9 +64,9 @@ public class NotificationLogController {
 //    @GetMapping("/test/todo")
 //    @Operation(summary = "알림 테스트용")
 //    public String sendTodoNotification(@AuthenticationPrincipal MemberDetails memberDetails) {
-////        Member member = memberDetails.getMember();
-////
-////        Optional<Mate> mate = mateRepository.findByMember(member);
+//        Member member = memberDetails.getMember();
+//
+//        //Optional<Mate> mate = mateRepository.findByMember(member);
 //
 //        List<String> todoList = new ArrayList<>();
 //        todoList.add("설거지하기");
