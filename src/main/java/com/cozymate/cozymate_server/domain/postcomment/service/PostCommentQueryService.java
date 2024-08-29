@@ -37,7 +37,7 @@ public class PostCommentQueryService {
             throw new GeneralException(ErrorStatus._POST_NOT_FOUND);
         }
 
-        List<PostComment> postComments = postCommentRepository.findByPostIdOrderByCreatedAtDesc(
+        List<PostComment> postComments = postCommentRepository.findByPostIdOrderByCreatedAt(
             postId);
 
         return postComments.stream()
