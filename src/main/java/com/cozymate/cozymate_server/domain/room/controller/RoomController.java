@@ -91,7 +91,7 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/join")
-    @Operation(summary = "[바니] 방 참여 확인", description = "방에 참여됩니다.")
+    @Operation(summary = "[바니] 방 입장 기능", description = "해당 roomId에 참여합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
