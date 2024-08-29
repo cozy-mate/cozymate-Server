@@ -17,7 +17,7 @@ public class FcmCommandService {
     private final FcmRepository fcmRepository;
 
     public void createFcm(Member member, FcmRequestDto fcmRequestDto) {
-        fcmRepository.findById(fcmRequestDto.getDeviceId())
+        fcmRepository.findById(member.getClientId())
             .ifPresentOrElse(
                 fcm -> fcm.updateToken(fcmRequestDto.getToken()),
                 () -> {

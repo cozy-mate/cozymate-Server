@@ -8,7 +8,7 @@ public class FcmConverter {
 
     public static Fcm toFcm(Member member, FcmRequestDto fcmRequestDto) {
         return Fcm.builder()
-            .id(fcmRequestDto.getDeviceId())
+            .id(member.getClientId())
             .token(fcmRequestDto.getToken())
             .member(member)
             .build();
