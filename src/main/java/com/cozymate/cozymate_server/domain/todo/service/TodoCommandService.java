@@ -67,34 +67,26 @@ public class TodoCommandService {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
         todo.updateCompleteState(requestDto.getCompleted());
-        // 투두 완료시 변한 값을 기준으로 로그 추가
+
         roomLogCommandService.addRoomLogFromTodo(todo);
 
         todoRepository.save(todo);
 
-        // 현재 member의 오늘 날짜의 todo 중에서 false(미완료)인게 존재하는지 확인
 
         boolean existsFalseTodo = todoRepository.existsByMateAndTimePointAndCompletedFalse(
             todo.getMate(), LocalDate.now());
 
-        // 미완료인 todo 존재하지 않는다면 -> 방의 다른 룸메이트들에게 나의 모든 투두를 완료했다는 알림을 전송
         if (!existsFalseTodo) {
-            // todo가 속해 있는 방에 속한 모든 룸메이트를 조회한다.
             List<Mate> findRoomMates = mateRepository.findByRoom(todo.getRoom());
 
-            // 이벤트 발행 파라미터에 넘겨주기 위해 Mate -> Member, 본인은 제외
-            // 알림을 받을 대상 멤버 리스트
             List<Member> memberList = findRoomMates.stream()
                 .map(Mate::getMember)
                 .filter(findMember -> !findMember.getId().equals(member.getId()))
                 .toList();
 
-            // 이벤트 발행
             eventPublisher.publishEvent(GroupWithOutMeTargetDto.create(member, memberList,
                 NotificationType.COMPLETE_ALL_TODAY_TODO));
         }
-
-        // 전부 true라면 해당 사용자가 속한 room에 본인을 제외한 모든 룸메이트에게 알림 전송 이벤트 발행
     }
 
     public void deleteTodo(

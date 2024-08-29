@@ -167,23 +167,12 @@ public class FcmPushService {
                 String token = fcm.getToken();
                 String content = getContent(member, notificationType);
 
-                // FCM의 Type 두 가지 Notification과 data 알림 중,
-                // Norification data가 '포함' 되어야 background에서 수신 가능
-                // putAllData 메서드는 data 알림으로,
-                // 둘 다 동시에 보내도 상관 없음
-                // 안드에서 그렇게 구현해놨을거니 iOS 위해서 객체 하나만 추가함
-                Notification notification = Notification.builder()
-                    .setTitle(NOTIFICATION_TITLE)
-                    .setBody(content)
-                    .build();
-
                 HashMap<String, String> messageMap = new HashMap<>();
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
 
                 return Message.builder()
                     .putAllData(messageMap)
-                    .setNotification(notification)
                     .setToken(token)
                     .build();
             }).toList();
@@ -203,16 +192,6 @@ public class FcmPushService {
                 HashMap<String, String> messageMap = new HashMap<>();
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
-
-                // FCM의 Type 두 가지 Notification과 data 알림 중,
-                // Norification data가 '포함' 되어야 background에서 수신 가능
-                // putAllData 메서드는 data 알림으로,
-                // 둘 다 동시에 보내도 상관 없음
-                // 안드에서 그렇게 구현해놨을거니 iOS 위해서 객체 하나만 추가함
-                Notification notification = Notification.builder()
-                    .setTitle(NOTIFICATION_TITLE)
-                    .setBody(content)
-                    .build();
 
                 return Message.builder()
                     .putAllData(messageMap)
@@ -236,13 +215,7 @@ public class FcmPushService {
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
 
-                Notification notification = Notification.builder()
-                    .setTitle(NOTIFICATION_TITLE)
-                    .setBody(content)
-                    .build();
-
                 return Message.builder()
-                    .setNotification(notification)
                     .putAllData(messageMap)
                     .setToken(token)
                     .build();
@@ -264,14 +237,8 @@ public class FcmPushService {
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
 
-                Notification notification = Notification.builder()
-                    .setTitle(NOTIFICATION_TITLE)
-                    .setBody(content)
-                    .build();
-
                 return Message.builder()
                     .putAllData(messageMap)
-                    .setNotification(notification)
                     .setToken(token)
                     .build();
             }).toList();
