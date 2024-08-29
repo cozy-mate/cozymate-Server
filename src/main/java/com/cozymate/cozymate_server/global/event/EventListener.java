@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.global.event;
 
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
@@ -44,5 +45,10 @@ public class EventListener {
     @TransactionalEventListener
     public void sendNotification(OneTargetDto oneTargetDto) {
         fcmPushService.sendNotification(oneTargetDto);
+    }
+
+    @TransactionalEventListener
+    public void sendNotification(GroupWithOutMeTargetDto groupWithOutMeTargetDto) {
+        fcmPushService.sendNotification(groupWithOutMeTargetDto);
     }
 }

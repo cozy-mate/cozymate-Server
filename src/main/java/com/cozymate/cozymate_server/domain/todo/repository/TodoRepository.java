@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.todo.repository;
 
+import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,4 +17,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo> findByTimePoint(LocalDate today);
 
     List<Todo> findByTimePointAndRoleIsNotNull(LocalDate today);
+
+    boolean existsByMateAndTimePointAndCompletedFalse(Mate mate, LocalDate timePoint);
+
 }
