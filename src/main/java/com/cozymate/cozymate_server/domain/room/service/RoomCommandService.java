@@ -1,5 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupRoomNameWithOutMeTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.converter.FeedConverter;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
@@ -11,6 +13,7 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
@@ -33,6 +36,7 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -57,6 +61,7 @@ public class RoomCommandService {
     private final FriendRepository friendRepository;
     private final RoomQueryService roomQueryService;
     private final RoomLogCommandService roomLogCommandService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public RoomCreateResponse createRoom(RoomCreateRequest request, Member member) {
         Member creator = memberRepository.findById(member.getId())
@@ -106,6 +111,20 @@ public class RoomCommandService {
         room.arrive();
         room.isRoomFull();
         roomRepository.save(room);
+
+        // Room의 Mate들을 찾아온다
+        List<Mate> findRoomMates = mateRepository.findByRoom(room);
+
+        List<Member> memberList = findRoomMates.stream()
+            .map(Mate::getMember)
+            .filter(findMember -> !findMember.getId().equals(member.getId()))
+            .toList();
+
+        // 알림 내용에는 현재 코드 상 member의 이름이 담겨야하고, 현재 코드 상의 room의 이름도 담긴다
+        // 알림을 받는 대상은 방에 있는 메이트들이다.
+        // 넘겨야 할 파라미터 = member, room, memberList(알림 받을 대상 멤버 리스트), NotificationType
+        eventPublisher.publishEvent(GroupRoomNameWithOutMeTargetDto.create(member, memberList, room,
+            NotificationType.JOIN_ROOM));
 
     }
 
