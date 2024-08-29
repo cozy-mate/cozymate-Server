@@ -64,6 +64,9 @@ public class ChatRoomQueryService {
         return ChatRoomConverter.toResponseDto(
             member.getNickname().equals(chatRoom.getMemberA().getNickname()) ?
                 chatRoom.getMemberB().getNickname() : chatRoom.getMemberA().getNickname(),
-            chat.getContent(), chatRoom.getId());
+            chat.getContent(),
+            chatRoom.getId(),
+            member.getNickname().equals(chatRoom.getMemberA().getNickname()) ?
+                chatRoom.getMemberB().getPersona() : chatRoom.getMemberA().getPersona());
     }
 }
