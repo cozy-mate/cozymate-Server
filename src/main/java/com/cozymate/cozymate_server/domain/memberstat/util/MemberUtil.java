@@ -96,4 +96,9 @@ public class MemberUtil {
         };
     }
 
+    // nickname을 {nickname}으로 변경
+    public static String getNicknameShowFormat(String nickname) {
+        return "{" + nickname + "}";
+    }
+
 }
