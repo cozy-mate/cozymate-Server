@@ -16,7 +16,7 @@ public class RoomCreateRequest {
 
     @NotBlank
     @Size(max=12)
-    @Pattern(regexp = "^[가-힣a-zA-Z0-9]+$", message = "한글, 영어 및 숫자만 입력해주세요. 특수문자는 불가합니다.")
+    @Pattern(regexp = "^(?!\\s)[가-힣a-zA-Z0-9\\s]+(?<!\\s)$", message = "한글, 영어, 숫자 및 공백만 입력해주세요. 단, 공백은 처음이나 끝에 올 수 없습니다.")
     private String name;
     @NotNull
     @Min(0)
