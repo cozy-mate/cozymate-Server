@@ -30,7 +30,10 @@ public class NotificationLogQueryService {
 
         List<NotificationLogResponseDto> notificationLogResponseDtoList = notificationLogs.stream()
             .map(notificationLog -> NotificationLogConverter.toResponseDto(
-                notificationLog.getContent(), notificationLog.getCreatedAt()))
+                notificationLog.getContent(),
+                notificationLog.getCreatedAt(),
+                notificationLog.getCategory().toString()
+            ))
             .toList();
 
         return notificationLogResponseDtoList;
