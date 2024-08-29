@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.fcm.dto;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
+import com.cozymate.cozymate_server.domain.room.Room;
 import java.util.List;
 import lombok.Getter;
 
@@ -134,5 +135,25 @@ public class FcmPushTargetDto {
         }
     }
 
+    @Getter
+    public static class GroupRoomNameWithOutMeTargetDto {
 
+        private final Member me;
+        private final List<Member> memberList;
+        private final Room room;
+        private final NotificationType notificationType;
+
+        private GroupRoomNameWithOutMeTargetDto(Member me, List<Member> memberList, Room room,
+            NotificationType notificationType) {
+            this.me = me;
+            this.memberList = memberList;
+            this.room = room;
+            this.notificationType = notificationType;
+        }
+
+        public static GroupRoomNameWithOutMeTargetDto create(Member me, List<Member> memberList,
+            Room room, NotificationType notificationType) {
+            return new GroupRoomNameWithOutMeTargetDto(me, memberList, room, notificationType);
+        }
+    }
 }

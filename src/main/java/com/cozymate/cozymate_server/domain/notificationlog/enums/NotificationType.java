@@ -111,6 +111,15 @@ public enum NotificationType {
                 + builder.toString();
         }
     },
+
+    JOIN_ROOM(NotificationCategory.COZY_HOME) {
+        @Override
+        public String generateContent(FcmPushContentDto fcmPushContentDto) {
+            return getNicknameShowFormat(fcmPushContentDto.getRoom().getName()) + "에 "
+                + getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
+                +"님이 뛰어들어왔어요!";
+        }
+    }
     ;
 
     private NotificationCategory category;
