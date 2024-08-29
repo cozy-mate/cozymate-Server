@@ -8,7 +8,7 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
 
     Integer countByPostId(Long postId);
 
-    List<PostComment> findByPostIdOrderByCreatedAtDesc(Long postId);
+    List<PostComment> findByPostIdOrderByCreatedAt(Long postId);
 
     void deleteAllByPostId(Long postId);
 }

@@ -47,7 +47,7 @@ public class PostQueryService {
         }
         List<PostImage> imageList = postImageRepository.findByPostId(postId);
 
-        List<PostComment> postComments = postCommentRepository.findByPostIdOrderByCreatedAtDesc(postId);
+        List<PostComment> postComments = postCommentRepository.findByPostIdOrderByCreatedAt(postId);
 
         // Local 변수 reassign 하기 싫어서 삼항 연산자 사용
 
