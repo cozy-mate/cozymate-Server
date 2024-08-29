@@ -1,5 +1,7 @@
 package com.cozymate.cozymate_server.global.scheduler;
 
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -11,12 +13,9 @@ import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
-import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
-import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,7 +40,6 @@ public class NotificationScheduler {
 
     private final RoomLogCommandService roomLogCommandService;
     private final RoomRepository roomRepository;
-    private final RuleRepository ruleRepository;
     private final RoleRepository roleRepository;
 
     @Scheduled(cron = "0 0 0 * * *")
@@ -64,7 +62,7 @@ public class NotificationScheduler {
         });
     }
 
-    @Scheduled(cron = "0 0 21 * * *")
+    @Scheduled(cron = "0 0 22 * * *")
     public void sendReminderRoleNotification() {
         LocalDate today = LocalDate.now();
         List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
@@ -78,13 +76,17 @@ public class NotificationScheduler {
                     ? newTodo : existingTodo
             ));
 
-        todoMap.forEach((member, todo) -> {
+        todoMap.forEach((member, todo) ->
             fcmPushService.sendNotification(
                 OneTargetDto.create(member, NotificationType.REMINDER_ROLE,
-                    todo.getRole().getContent()));
-        });
+                    todo.getRole().getContent())
+            ));
+    }
 
-        // 각 Todo에 대해 로그 추가
+    @Scheduled(cron = "00 00 00 * * *") // 매일 22시에 실행
+    public void addReminderRoleRoomLog() {
+        LocalDate today = LocalDate.now();
+        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
         todoList.forEach(roomLogCommandService::addRoomLogRemindingRole);
     }
 
@@ -101,13 +103,12 @@ public class NotificationScheduler {
                 OneTargetDto.create(member, NotificationType.SELECT_COZY_MATE));
         });
 
-        //  각 Room에 대해 로그 추가
+        //  각 Room에 대해 로그 추가 (이달의 베스트 코지메이트, 워스트 코지메이트 선정 알림)
         LocalDateTime now = LocalDateTime.now();
         String month = now.format(DateTimeFormatter.ofPattern("M월"));
         List<Room> roomList = roomRepository.findAll();
         roomList.forEach(room -> roomLogCommandService.addRoomLogChoiceCozyMate(room, month));
     }
-
 
     // 매일 자정 반복 (생일인 사람 확인해서 해당 방에 로그 추가)
     @Scheduled(cron = "0 0 0 * * *")
@@ -122,6 +123,7 @@ public class NotificationScheduler {
         );
     }
 
+    // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
     @Scheduled(cron = "0 0 0 * * *")
     public void addRoleToTodo() {
         DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();

@@ -1,5 +1,7 @@
 package com.cozymate.cozymate_server.domain.notificationlog.enums;
 
+import static com.cozymate.cozymate_server.domain.memberstat.util.MemberUtil.getNicknameShowFormat;
+
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushContentDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +18,8 @@ public enum NotificationType {
     COMPLETE_ALL_TODAY_TODO(NotificationCategory.COZY_HOME) {
         @Override
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님이 오늘 해야 할 일을 전부 완료했어요!";
+            return getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
+                + "님이 오늘 해야 할 일을 전부 완료했어요!";
         }
     },
 
@@ -24,7 +27,8 @@ public enum NotificationType {
     COZY_MATE_REQUEST_FROM(NotificationCategory.COZY_MATE_ARRIVE) {
         @Override
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님에게서 코지메이트 신청이 도착했어요!";
+            return getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
+                + "님에게서 코지메이트 신청이 도착했어요!";
         }
     },
 
@@ -32,7 +36,8 @@ public enum NotificationType {
     COZY_MATE_REQUEST_TO(NotificationCategory.COZY_MATE_SEND) {
         @Override
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님에게 코지메이트 신청을 보냈어요!";
+            return getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
+                + "님에게 코지메이트 신청을 보냈어요!";
         }
     },
 
@@ -40,7 +45,8 @@ public enum NotificationType {
     COZY_MATE_REQUEST_ACCEPT(NotificationCategory.COZY_MATE_ACCEPT) {
         @Override
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님이 코지메이트 신청을 수락했어요!";
+            return getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
+                + "님이 코지메이트 신청을 수락했어요!";
         }
     },
 
@@ -59,7 +65,8 @@ public enum NotificationType {
             LocalDateTime now = LocalDateTime.now();
             String month = now.format(DateTimeFormatter.ofPattern("M월"));
             return String.format(
-                fcmPushContentDto.getMember().getNickname() + "님, %s Best 코지메이트로 선정되셨어요!",
+                getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
+                    + "님, %s Best 코지메이트로 선정되셨어요!",
                 month);
         }
     },
@@ -71,7 +78,7 @@ public enum NotificationType {
             LocalDateTime now = LocalDateTime.now();
             String month = now.format(DateTimeFormatter.ofPattern("M월"));
             return String.format(
-                fcmPushContentDto.getMember().getNickname()
+                getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
                     + "님, %s Best, Worst 코지메이트를 선정해주세요!",
                 month);
         }
@@ -81,7 +88,8 @@ public enum NotificationType {
     REMINDER_ROLE(NotificationCategory.COZY_ROLE) {
         @Override
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님, 오늘 "
+            return getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
+                + "님, 오늘 "
                 + fcmPushContentDto.getRoleContent()
                 + " 잊지 않으셨죠?";
         }
@@ -98,7 +106,8 @@ public enum NotificationType {
                 todoContent -> builder.append("\n• ").append(todoContent)
             );
 
-            return fcmPushContentDto.getMember().getNickname() + "님, 오늘 해야할 일이에요!"
+            return getNicknameShowFormat(fcmPushContentDto.getMember().getNickname())
+                + "님, 오늘 해야할 일이에요!"
                 + builder.toString();
         }
     },
