@@ -53,7 +53,7 @@ class NotificationLogQueryServiceTest {
                 notificationLogA = spy(notificationLog1);
                 given(notificationLogA.getCreatedAt()).willReturn(
                     LocalDateTime.now().minusDays(1));
-                given(notificationLogRepository.findByMemberAndCategory(memberA,
+                given(notificationLogRepository.findByMemberAndCategoryOrderByIdDesc(memberA,
                     notificationLogA.getCategory())).willReturn(List.of(notificationLogA));
 
             }
@@ -87,7 +87,7 @@ class NotificationLogQueryServiceTest {
                 notificationLogC = spy(notificationLog3);
                 given(notificationLogC.getCreatedAt()).willReturn(
                     LocalDateTime.now().minusMinutes(5));
-                given(notificationLogRepository.findByMember(memberA)).willReturn(
+                given(notificationLogRepository.findByMemberOrderByIdDesc(memberA)).willReturn(
                     List.of(notificationLogA, notificationLogC));
             }
 
@@ -113,7 +113,7 @@ class NotificationLogQueryServiceTest {
             void setUp() {
                 memberA = NotificationLogTestBuilder.testNotificationLogBuild().getMember();
 
-                given(notificationLogRepository.findByMemberAndCategory(any(Member.class), any(
+                given(notificationLogRepository.findByMemberAndCategoryOrderByIdDesc(any(Member.class), any(
                     NotificationCategory.class))).willReturn(new ArrayList<>());
             }
 

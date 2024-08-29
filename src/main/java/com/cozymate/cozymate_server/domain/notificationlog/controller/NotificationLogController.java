@@ -66,7 +66,7 @@ public class NotificationLogController {
 //    public String sendTodoNotification(@AuthenticationPrincipal MemberDetails memberDetails) {
 //        Member member = memberDetails.getMember();
 //
-//        //Optional<Mate> mate = mateRepository.findByMember(member);
+//        //Optional<Mate> mate = mateRepository.findByMemberOrderByIdDesc(member);
 //
 //        List<String> todoList = new ArrayList<>();
 //        todoList.add("설거지하기");
