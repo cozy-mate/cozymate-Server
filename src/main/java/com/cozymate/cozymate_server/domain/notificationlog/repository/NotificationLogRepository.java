@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotificationLogRepository extends JpaRepository<NotificationLog, Long> {
 
-    List<NotificationLog> findByMemberAndCategory(Member member, NotificationCategory notificationCategory);
+    List<NotificationLog> findByMemberAndCategoryOrderByIdDesc(Member member, NotificationCategory notificationCategory);
 
-    List<NotificationLog> findByMember(Member member);
+    List<NotificationLog> findByMemberOrderByIdDesc(Member member);
 }

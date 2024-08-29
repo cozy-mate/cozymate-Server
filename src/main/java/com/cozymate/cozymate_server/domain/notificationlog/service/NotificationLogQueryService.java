@@ -22,10 +22,10 @@ public class NotificationLogQueryService {
         NotificationCategory notificationCategory) {
         List<NotificationLog> notificationLogs;
         if (notificationCategory != null) {
-            notificationLogs = notificationLogRepository.findByMemberAndCategory(
+            notificationLogs = notificationLogRepository.findByMemberAndCategoryOrderByIdDesc(
                 member, notificationCategory);
         } else {
-            notificationLogs = notificationLogRepository.findByMember(member);
+            notificationLogs = notificationLogRepository.findByMemberOrderByIdDesc(member);
         }
 
         List<NotificationLogResponseDto> notificationLogResponseDtoList = notificationLogs.stream()
