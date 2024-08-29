@@ -16,19 +16,16 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class FcmPushService {
 
     private static final String NOTIFICATION_TITLE = "cozymate";
@@ -36,7 +33,7 @@ public class FcmPushService {
     private final NotificationLogRepository notificationLogRepository;
     private final FcmRepository fcmRepository;
 
-    //    @Async
+    @Async
     public void sendNotification(OneTargetDto target) {
         Member member = target.getMember();
 
@@ -51,7 +48,7 @@ public class FcmPushService {
         }
     }
 
-    //    @Async
+    @Async
     public void sendNotification(OneTargetReverseDto target) {
         Member contentMember = target.getContentMember();
         Member recipientMember = target.getRecipientMember();
@@ -59,7 +56,7 @@ public class FcmPushService {
         sendNotificationToMember(contentMember, recipientMember, target.getNotificationType());
     }
 
-    //    @Async
+    @Async
     public void sendNotification(GroupTargetDto target) {
         List<Member> memberList = target.getMemberList();
 
@@ -69,7 +66,7 @@ public class FcmPushService {
         });
     }
 
-    //    @Async
+    @Async
     public void sendNotification(GroupWithOutMeTargetDto target) {
         List<Member> memberList = target.getMemberList();
         Member me = target.getMe();

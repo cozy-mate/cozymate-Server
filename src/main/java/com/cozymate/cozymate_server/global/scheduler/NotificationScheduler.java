@@ -25,10 +25,12 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @Transactional
@@ -42,7 +44,8 @@ public class NotificationScheduler {
     private final RoomRepository roomRepository;
     private final RoleRepository roleRepository;
 
-    @Scheduled(cron = "0 0 0 * * *")
+    // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가) 작업 자정에 먼저하고 나서 시작하도록 30초로 설정
+    @Scheduled(cron = "30 0 0 * * *")
     public void sendDailyNotification() {
         LocalDate today = LocalDate.now();
         List<Todo> todoList = todoRepository.findByTimePoint(today);
@@ -62,10 +65,10 @@ public class NotificationScheduler {
         });
     }
 
-    @Scheduled(cron = "0 0 22 * * *")
+    @Scheduled(cron = "0 0 21 * * *")
     public void sendReminderRoleNotification() {
         LocalDate today = LocalDate.now();
-        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
+        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNullCompletedFalse(today);
 
         Map<Member, Todo> todoMap = todoList.stream()
             .filter(todo -> !todo.isCompleted())
@@ -92,7 +95,7 @@ public class NotificationScheduler {
 
     @Scheduled(cron = "0 0 12 L * ?")
     public void sendMonthlyNotification() {
-        List<Mate> mates = mateRepository.findAll();
+        List<Mate> mates = mateRepository.findFetchAll();
 
         List<Member> memberList = mates.stream()
             .map(Mate::getMember)
