@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ChatRoomResponseDto {
+    private Integer persona;
     private String nickName;
     private String lastContent;
     private Long chatRoomId;
