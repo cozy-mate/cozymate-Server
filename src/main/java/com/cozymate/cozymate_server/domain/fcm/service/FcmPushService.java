@@ -280,6 +280,7 @@ public class FcmPushService {
     /**
      * 방 입장 시 : 방에 속한 메이트 모두에게 [방이름]에 [닉네임]님이 뛰어들어왔어요! 알림 전송
      */
+    @Async
     public void sendNotification(GroupRoomNameWithOutMeTargetDto target) {
         List<Member> memberList = target.getMemberList(); // 알림을 받을 멤버 리스트
         Member me = target.getMe(); // 알림 내용에 들어갈 멤버 (의 이름)
