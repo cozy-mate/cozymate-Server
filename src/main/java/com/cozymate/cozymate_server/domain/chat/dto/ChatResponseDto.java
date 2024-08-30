@@ -19,4 +19,10 @@ public class ChatResponseDto {
         private String content;
         private String dateTime;
     }
+
+    @Getter
+    @Builder
+    public static class ChatSuccessResponseDto {
+        private Long chatRoomId;
+    }
 }
