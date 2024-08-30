@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.chat.service;
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.ChatTestBuilder;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto;
+import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatContentResponseDto;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomTestBuilder;
@@ -86,8 +87,10 @@ class ChatQueryServiceTest {
             @Test
             @DisplayName("해당 쪽지방의 쪽지 상세 내역을 리스트로 반환한다.")
             void it_returns_chat_list() {
-                List<ChatResponseDto> result = chatQueryService.getChatList(me,
+                ChatResponseDto chatResponseDto = chatQueryService.getChatList(me,
                     chatRoom.getId());
+
+                List<ChatContentResponseDto> result = chatResponseDto.chatContents;
 
                 assertThat(result.size()).isEqualTo(2);
                 assertThat(result.get(0).getNickname()).isEqualTo(me.getNickname() + " (나)");
@@ -135,8 +138,10 @@ class ChatQueryServiceTest {
             @Test
             @DisplayName("나간 후에 온 쪽지 상세 내역만 리스트로 반환한다.")
             void it_returns_chat_list_after_delete() {
-                List<ChatResponseDto> result = chatQueryService.getChatList(me,
+                ChatResponseDto chatResponseDto = chatQueryService.getChatList(me,
                     chatRoom.getId());
+
+                List<ChatContentResponseDto> result = chatResponseDto.getChatContents();
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd | HH:mm");
                 LocalDateTime parsedDateTime = LocalDateTime.parse(result.get(0).getDateTime(),
