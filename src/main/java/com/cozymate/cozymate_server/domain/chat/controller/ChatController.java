@@ -49,10 +49,10 @@ public class ChatController {
         ErrorStatus._CHATROOM_NOT_FOUND,
         ErrorStatus._CHATROOM_MEMBER_MISMATCH
     })
-    public ResponseEntity<List<ChatResponseDto>> getChatList(
+    public ResponseEntity<ApiResponse<ChatResponseDto>> getChatList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long chatRoomId) {
         return ResponseEntity.ok(
-            chatQueryService.getChatList(memberDetails.getMember(), chatRoomId));
+            ApiResponse.onSuccess(chatQueryService.getChatList(memberDetails.getMember(), chatRoomId)));
     }
 }

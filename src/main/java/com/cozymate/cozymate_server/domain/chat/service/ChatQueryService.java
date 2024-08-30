@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.chat.service;
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.converter.ChatConverter;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto;
+import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatContentResponseDto;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
@@ -23,7 +24,7 @@ public class ChatQueryService {
     private final ChatRepository chatRepository;
     private final ChatRoomRepository chatRoomRepository;
 
-    public List<ChatResponseDto> getChatList(Member member, Long chatRoomId) {
+    public ChatResponseDto getChatList(Member member, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
 
@@ -34,10 +35,14 @@ public class ChatQueryService {
 
         List<Chat> filteredChatList = getFilteredChatList(chatRoom, member);
 
-        List<ChatResponseDto> chatResponseDtoList = toChatResponseDtoList(filteredChatList,
+        List<ChatContentResponseDto> chatResponseDtoList = toChatResponseDtoList(filteredChatList,
             member);
 
-        return chatResponseDtoList;
+        Long recipientId = member.getId().equals(chatRoom.getMemberA().getId())
+            ? chatRoom.getMemberB().getId() : chatRoom.getMemberA().getId();
+
+
+        return ChatConverter.toChatResponseDto(recipientId, chatResponseDtoList);
     }
 
     private List<Chat> getFilteredChatList(ChatRoom chatRoom, Member member) {
@@ -55,14 +60,14 @@ public class ChatQueryService {
             : chatRoom.getMemberBLastDeleteAt();
     }
 
-    private List<ChatResponseDto> toChatResponseDtoList(List<Chat> chatList, Member member) {
+    private List<ChatContentResponseDto> toChatResponseDtoList(List<Chat> chatList, Member member) {
         return chatList.stream()
             .map(chat -> {
                 String senderNickname = chat.getSender().getNickname();
                 String nickname = senderNickname.equals(member.getNickname())
                     ? senderNickname + " (나)"
                     : senderNickname;
-                return ChatConverter.toResponseDto(nickname, chat.getContent(),
+                return ChatConverter.toChatContentResponseDto(nickname, chat.getContent(),
                     chat.getCreatedAt());
             })
             .toList();
