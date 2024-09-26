@@ -2,7 +2,7 @@ package com.cozymate.cozymate_server.domain.mail.service;
 
 
 import com.cozymate.cozymate_server.domain.mail.dto.MailResponseDTO;
-import com.cozymate.cozymate_server.domain.member.Member;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -22,7 +22,7 @@ public class MailService {
 
     public void sendUniversityAuthenticationCode(String clientId, String mailAddress) {
         SimpleMailMessage message = new SimpleMailMessage();
-        String authCode = UUID.randomUUID().toString().substring(0, 6);
+        String authCode = Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes()).substring(0,6);
         message.setTo(mailAddress);
         message.setSubject("COZYMATE 대학교 메일인증");
         message.setText("COZYMATE 대학교 메일인증 코드입니다 : " + authCode);
