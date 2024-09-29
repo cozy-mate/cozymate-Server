@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendRequestDTO;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.FriendLikeResponseDTO;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.FriendSummaryResponseDTO;
+import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
 import com.cozymate.cozymate_server.domain.friend.service.FriendCommandService;
 import com.cozymate.cozymate_server.domain.friend.service.FriendQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -126,22 +127,22 @@ public class FriendController {
     }
     @Operation(
         summary = "[포비] 친구 여부 가져오기",
-        description = "사용자의 토큰을 넣어 사용하고,"
-            + "친구 상태를 아래와 같은 문자열로 리턴합니다."
-            + "Android는 ENUM, iOS는 타입이나 인터페이스로 정의해 처리하시면 되겠습니다."
-            + "- STRANGER -> 친구 아님"
-            + "- WAITING -> 친구 요청 대기중"
-            + "- ACCEPT -> 친구 요청 대기중"
+        description = "사용자의 토큰을 넣어 사용하고,\n"
+            + "친구 상태를 아래와 같은 문자열로 리턴합니다.\n"
+            + "Android는 ENUM, iOS는 타입이나 인터페이스로 정의해 처리하시면 되겠습니다.\n"
+            + "- STRANGER -> 친구 아님\n"
+            + "- WAITING -> 친구 요청 대기중\n"
+            + "- ACCEPT -> 친구 요청 대기중\n"
     )
     @SwaggerApiError({
         ErrorStatus._FRIEND_REQUEST_EQUAL
     })
     @GetMapping("/{memberId}")
-    public ResponseEntity<ApiResponse<String>> getFriendStatus(
-        @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long friendId) {
+    public ResponseEntity<ApiResponse<FriendStatus>> getFriendStatus(
+        @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long memberId) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                friendQueryService.getFriendStatus(memberDetails.getMember(), friendId)
+                friendQueryService.getFriendStatus(memberDetails.getMember(), memberId)
             ));
     }
 }

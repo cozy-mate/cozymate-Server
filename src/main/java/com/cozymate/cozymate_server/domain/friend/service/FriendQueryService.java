@@ -48,19 +48,18 @@ public class FriendQueryService {
         ).toList();
     }
 
-    public String getFriendStatus(Member member, Long friendId) {
+    public FriendStatus getFriendStatus(Member member, Long friendId) {
+
         // 요청하는 사람과 수락하는 사람이 같은지 검사
-        if(member.getId().equals(friendId)){
-            throw new GeneralException((ErrorStatus._FRIEND_REQUEST_EQUAL));
+        if (member.getId().equals(friendId)) {
+            throw new GeneralException(ErrorStatus._FRIEND_REQUEST_EQUAL);
         }
-        //친구 요청이 존재하는지 검사
-        Optional<Friend> friendRequest = friendRepository.findBySenderIdAndReceiverIdOrReceiverIdAndSenderId(
-            member.getId(), friendId, friendId, member.getId()
-        );
-        if(friendRequest.isPresent()){
-            return friendRequest.get().getStatus().toString();
-        }
-        return FriendStatus.STRANGER.toString();
+
+        return friendRepository.findBySenderIdAndReceiverIdOrReceiverIdAndSenderId(
+                member.getId(), friendId, member.getId(), friendId
+            )
+            .map(Friend::getStatus)
+            .orElse(FriendStatus.STRANGER);
     }
 
 }
