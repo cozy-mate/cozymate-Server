@@ -37,7 +37,6 @@ public class TodoRequestDto {
         private Long todoId;
         @Length(min = 1, max = 30)
         private String content;
-        @NotNull
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate timePoint;
     }
