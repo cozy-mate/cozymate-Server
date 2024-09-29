@@ -106,7 +106,7 @@ public class TodoCommandService {
     ) {
         Todo todo = todoRepository.findById(requestDto.getTodoId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
-        
+
         if(todo.getRole() != null){
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }

@@ -93,7 +93,7 @@ public class TodoController {
     }
 
     @PatchMapping("")
-    @Operation(summary = "[무빗] Todo의 내용을 수정", description = "수정할 Todo Id와 내용을 같이 넘겨받습니다.")
+    @Operation(summary = "[무빗] Todo의 내용을 수정", description = "수정할 Todo Id와 내용을 같이 넘겨받습니다. Todo Id는 필수이며, 내용이나 시간은 선택적으로 변경할 수 있습니다. (Nullable)")
     @SwaggerApiError({ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> updateTodoContent(
         @AuthenticationPrincipal MemberDetails memberDetails,
