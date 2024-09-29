@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +34,7 @@ public class FriendController {
 
     @Operation(
         summary = "[포비] 친구 신청 요청",
-        description = "보내는 사용자의 토큰을 넣어 사용하고, Body로 쪽지를 받는 멤버의 ID를 보내주세요."
+        description = "보내는 사용자의 토큰을 넣어 사용하고, Body로 친구 요청을 받는 멤버의 ID를 보내주세요."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
@@ -115,12 +116,28 @@ public class FriendController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    @GetMapping("/")
+    @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<FriendSummaryResponseDTO>>> getFriendList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 friendQueryService.getFriendList(memberDetails.getMember())
+            ));
+    }
+    @Operation(
+        summary = "[포비] 친구 여부 가져오기",
+        description = "사용자의 토큰을 넣어 사용하고,"
+            + "친구 상태를 리턴합니다."
+    )
+    @SwaggerApiError({
+        ErrorStatus._FRIEND_REQUEST_EQUAL
+    })
+    @GetMapping("/{memberId}")
+    public ResponseEntity<ApiResponse<String>> getFriendStatus(
+        @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long friendId) {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                friendQueryService.getFriendStatus(memberDetails.getMember(), friendId)
             ));
     }
 }
