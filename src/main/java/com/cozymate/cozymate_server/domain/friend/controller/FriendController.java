@@ -127,7 +127,11 @@ public class FriendController {
     @Operation(
         summary = "[포비] 친구 여부 가져오기",
         description = "사용자의 토큰을 넣어 사용하고,"
-            + "친구 상태를 리턴합니다."
+            + "친구 상태를 아래와 같은 문자열로 리턴합니다."
+            + "Android는 ENUM, iOS는 타입이나 인터페이스로 정의해 처리하시면 되겠습니다."
+            + "- STRANGER -> 친구 아님"
+            + "- WAITING -> 친구 요청 대기중"
+            + "- ACCEPT -> 친구 요청 대기중"
     )
     @SwaggerApiError({
         ErrorStatus._FRIEND_REQUEST_EQUAL
