@@ -35,7 +35,7 @@ def analyze_with_bedrock(diff):
     formatted_prompt = f"Human: You're a senior backend engineer. Below there is a code diff please help me do a code review.\n\nFormat:\n- Numbering issues, specify file. Use markdown, headers, code blocks.\n- Suggest improvements/examples.\n- Be constructive.\n\nPR diff:\n\n{diff}\n\nProvide detailed review. Please answer to korean Assistant:"
 
     response = bedrock.converse(
-        modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',  # 또는 다른 적절한 모델
+        modelId='anthropic.claude-3-haiku-20240307-v1:0',  # 또는 다른 적절한 모델
         messages=[
             {
                 'role': 'user',
