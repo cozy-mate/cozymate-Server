@@ -8,25 +8,16 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: AWS Bedrock Code Review Action
+        uses: eple0329/AWSBedrock-CodeReview@v1.1.0
         with:
           aws-access-key-id: ${{ secrets.REVIEW_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.REVIEW_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: 'us-east-1'
+          github-token: ${{ secrets.REVIEW_GITHUB_TOKEN }}
+          model: 'amazon.titan-text-premier-v1:0'
+          max-tokens: 1000
+          language: 'Korean'
 
-      - name: Install dependencies
-        run: |
-          pip install boto3 requests
-
-      - name: Run PR Review
-        env:
-          GITHUB_TOKEN: ${{ secrets.REVIEW_GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REVIEW_AWS_ACCESS_KEY_ID: ${{ secrets.REVIEW_AWS_ACCESS_KEY_ID }}
-          REVIEW_AWS_SECRET_ACCESS_KEY: ${{ secrets.REVIEW_AWS_SECRET_ACCESS_KEY }}
-        run: |
-          python .github/scripts/pr_review.py
