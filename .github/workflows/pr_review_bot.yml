@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: AWS Bedrock Code Review Action
-        uses: eple0329/AWSBedrock-CodeReview@v1.1.1-alpha.1
+        uses: eple0329/AWSBedrock-CodeReview@v1.1.2
         with:
           aws-access-key-id: ${{ secrets.REVIEW_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.REVIEW_AWS_SECRET_ACCESS_KEY }}
