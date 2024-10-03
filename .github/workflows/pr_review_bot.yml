@@ -21,6 +21,6 @@ jobs:
           aws-region: 'us-east-1'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           model: 'amazon.titan-text-premier-v1:0'
-          max-tokens: 1000
+          max-tokens: 3000
           language: 'Korean'
 
