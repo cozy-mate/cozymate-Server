@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,20 @@ public class FriendQueryService {
                         friend.isLikesSender()
                     )
         ).toList();
+    }
+
+    public FriendStatus getFriendStatus(Member member, Long friendId) {
+
+        // 요청하는 사람과 수락하는 사람이 같은지 검사
+        if (member.getId().equals(friendId)) {
+            throw new GeneralException(ErrorStatus._FRIEND_REQUEST_EQUAL);
+        }
+
+        return friendRepository.findBySenderIdAndReceiverIdOrReceiverIdAndSenderId(
+                member.getId(), friendId, member.getId(), friendId
+            )
+            .map(Friend::getStatus)
+            .orElse(FriendStatus.STRANGER);
     }
 
 }
