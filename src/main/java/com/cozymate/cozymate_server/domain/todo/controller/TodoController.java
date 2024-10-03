@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.todo.controller;
 
 
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListResponseDto;
@@ -89,5 +90,17 @@ public class TodoController {
         todoCommandService.updateTodoCompleteState(memberDetails.getMember(),
             updateTodoCompleteStateRequestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("완료되었습니다."));
+    }
+
+    @PatchMapping("")
+    @Operation(summary = "[무빗] Todo의 내용을 수정", description = "수정할 Todo Id와 내용을 같이 넘겨받습니다. Todo Id는 필수이며, 내용이나 시간은 선택적으로 변경할 수 있습니다. (Nullable)")
+    @SwaggerApiError({ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
+    public ResponseEntity<ApiResponse<String>> updateTodoContent(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @Valid @RequestBody TodoRequestDto.UpdateTodoContentRequestDto updateTodoContentRequestDto
+    ) {
+        todoCommandService.updateTodoContent(memberDetails.getMember(),
+            updateTodoContentRequestDto);
+        return ResponseEntity.ok(ApiResponse.onSuccess("수정되었습니다."));
     }
 }
