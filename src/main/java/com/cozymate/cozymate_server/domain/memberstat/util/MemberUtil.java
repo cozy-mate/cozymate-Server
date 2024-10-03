@@ -8,14 +8,14 @@ public class MemberUtil {
 
     private static final Integer ADDITIONAL_SCORE = 12;
     private static final Integer NO_SCORE = 0;
-    private static final Integer ATTRIBUTE_COUNT = 20;
+    private static final Integer ATTRIBUTE_COUNT = 19;
     private static final Integer HALF_DIVISION = 2;
     private static final Integer QUARTER_DIVISION = 4;
     private static final Integer MULTIPLIER_FOR_PERCENTAGE = 100;
     private static final Integer MAX_SCORE = ADDITIONAL_SCORE * ATTRIBUTE_COUNT;
 
-
-    public static MemberStatEqualityResponseDTO toEqualityResponse(MemberStat criteriaMemberStat,
+    // 두 사용자간 일치율을 비교해야 할 때, 사용하는 util
+    public static int calculateScore(MemberStat criteriaMemberStat,
         MemberStat memberStat) {
 
         int score = NO_SCORE;
@@ -45,8 +45,6 @@ public class MemberUtil {
             ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getCleaningFrequency().equals(memberStat.getCleaningFrequency())
             ? ADDITIONAL_SCORE : NO_SCORE;
-        score += criteriaMemberStat.getPersonality().equals(memberStat.getPersonality())
-            ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getMbti().equals(memberStat.getMbti())
             ? ADDITIONAL_SCORE : NO_SCORE;
 
@@ -63,15 +61,7 @@ public class MemberUtil {
 
         double percent = (double) score / MAX_SCORE * MULTIPLIER_FOR_PERCENTAGE;
 
-        return MemberStatEqualityResponseDTO.builder()
-            .memberId(memberStat.getMember().getId())
-            .memberAge(TimeUtil.calculateAge(memberStat.getMember().getBirthDay()))
-            .memberName(memberStat.getMember().getName())
-            .memberNickName(memberStat.getMember().getNickname())
-            .memberPersona(memberStat.getMember().getPersona())
-            .numOfRoommate(memberStat.getNumOfRoommate())
-            .equality((int) percent)
-            .build();
+        return (int) percent;
     }
 
 
