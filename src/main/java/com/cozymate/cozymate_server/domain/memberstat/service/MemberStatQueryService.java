@@ -31,7 +31,6 @@ public class MemberStatQueryService {
     private final MemberStatRepository memberStatRepository;
     private final MemberRepository memberRepository;
 
-    private MemberStatConverter memberStatConverter;
 
 
     public MemberStatQueryResponseDTO getMemberStat(Member member) {
@@ -85,9 +84,9 @@ public class MemberStatQueryService {
         if (needsDetail) {
             List<MemberStatEqualityDetailResponseDTO> result = filteredResult.stream()
                 .map(memberStat -> {
-                    MemberStatEqualityResponseDTO equalityResponse = MemberUtil.toEqualityResponse(
-                        criteriaMemberStat, memberStat);
-                    MemberStatQueryResponseDTO queryResponse = memberStatConverter.toDto(
+                    MemberStatEqualityResponseDTO equalityResponse = MemberStatConverter.toEqualityDto(memberStat, MemberUtil.calculateScore(
+                        criteriaMemberStat, memberStat));
+                    MemberStatQueryResponseDTO queryResponse = MemberStatConverter.toDto(
                         memberStat, memberStat.getMember().getBirthDay().getYear());
                     return MemberStatEqualityDetailResponseDTO.builder()
                         .info(equalityResponse)
@@ -104,7 +103,7 @@ public class MemberStatQueryService {
 
         List<MemberStatEqualityResponseDTO> result = filteredResult
             .stream()
-            .map(memberStat -> MemberUtil.toEqualityResponse(criteriaMemberStat, memberStat))
+            .map(memberStat -> MemberStatConverter.toEqualityDto(memberStat,MemberUtil.calculateScore(criteriaMemberStat, memberStat)))
             .sorted(Comparator.comparingInt(MemberStatEqualityResponseDTO::getEquality).reversed())
             .toList();
 
