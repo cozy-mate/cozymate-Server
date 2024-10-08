@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.auth.utils;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -23,7 +24,7 @@ public class ClientIdMaker {
         return memberId + DELIMITER + socialType.toString();
     }
     private static String generateUUID(){
-        return UUID.randomUUID().toString();
+        return Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes());
     }
     public static SocialType getSocialTypeInClientId(String clientId) {
         String socialTypePart = Arrays.asList(clientId.split(DELIMITER)).get(SOCIAL_TYPE_INDEX);
