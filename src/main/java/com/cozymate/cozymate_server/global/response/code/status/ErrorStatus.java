@@ -106,6 +106,11 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Post Comment 
     _POST_COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT400", "댓글이 존재하지 않습니다."),
+
+    // MemberBlock 관련
+    _ALREADY_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK400", "이미 차단된 사용자입니다."),
+    _CANNOT_BLOCK_OWN(HttpStatus.BAD_REQUEST, "MEMBERBLOCK401", "자신을 차단할 수 없습니다."),
+    _ALREADY_NOT_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK402", "이미 차단되지 않은 사용자입니다."),
     ;
 
     private final HttpStatus httpStatus;
