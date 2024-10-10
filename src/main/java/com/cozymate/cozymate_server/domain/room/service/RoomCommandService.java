@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupRoomNameWithOutMeTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.converter.FeedConverter;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
@@ -21,10 +20,12 @@ import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
+import com.cozymate.cozymate_server.domain.room.dto.PublicRoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
@@ -62,8 +63,9 @@ public class RoomCommandService {
     private final RoomQueryService roomQueryService;
     private final RoomLogCommandService roomLogCommandService;
     private final ApplicationEventPublisher eventPublisher;
+    private final RoomHashtagCommandService roomHashtagCommandService;
 
-    public RoomCreateResponse createRoom(RoomCreateRequest request, Member member) {
+    public RoomCreateResponse createPrivateRoom(RoomCreateRequest request, Member member) {
         Member creator = memberRepository.findById(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -73,7 +75,33 @@ public class RoomCommandService {
         }
 
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toEntity(request, inviteCode);
+        Room room = RoomConverter.toPrivateRoom(request, inviteCode);
+        room = roomRepository.save(room);
+        roomLogCommandService.addRoomLogCreationRoom(room);
+
+        Mate mate = MateConverter.toEntity(room, creator, true);
+        mateRepository.save(mate);
+
+        Feed feed = FeedConverter.toEntity(room);
+        feedRepository.save(feed);
+
+        return roomQueryService.getRoomById(room.getId(), member.getId());
+    }
+
+    public RoomCreateResponse createPublicRoom(PublicRoomCreateRequest request, Member member) {
+        Member creator = memberRepository.findById(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
+            RoomStatus.WAITING)) {
+            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
+        }
+
+        String inviteCode = generateUniqueUppercaseKey();
+        Room room = RoomConverter.toPublicRoom(request, inviteCode);
+
+        // 해시태그 저장 과정
+        roomHashtagCommandService.createRoomHashtag(room, request.getHashtags());
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 

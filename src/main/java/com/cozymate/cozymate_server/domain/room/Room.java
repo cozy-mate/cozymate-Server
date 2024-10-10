@@ -2,6 +2,8 @@ package com.cozymate.cozymate_server.domain.room;
 
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
+import com.cozymate.cozymate_server.domain.room.enums.RoomType;
+import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -10,8 +12,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,6 +48,12 @@ public class Room extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private RoomStatus status = RoomStatus.WAITING;
 
+    @Enumerated(EnumType.STRING)
+    private RoomType roomType;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RoomHashtag> roomHashtags;
+
     // 화면상에서 베스트 룸메이트를 연관 시킬 필요가 없어보여서 이름만 저장하도록 했습니다.
     private String bestMateName;
 
@@ -62,5 +72,6 @@ public class Room extends BaseTimeEntity {
             this.enabledAt = LocalDate.now();
         }
     }
+
 
 }

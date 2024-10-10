@@ -6,22 +6,38 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
+import com.cozymate.cozymate_server.domain.room.dto.PublicRoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
+import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 
 public class RoomConverter {
-    public static Room toEntity(RoomCreateRequest request, String inviteCode){
+    public static Room toPrivateRoom(RoomCreateRequest request, String inviteCode){
+        return Room.builder()
+            .name(request.getName())
+            .profileImage(request.getProfileImage())
+            .maxMateNum(request.getMaxMateNum())
+            .inviteCode(inviteCode)
+            .status(RoomStatus.ENABLE)
+            .roomType(RoomType.PRIVATE)
+            .numOfArrival(1)
+            .build();
+    }
+
+    public static Room toPublicRoom(PublicRoomCreateRequest request, String inviteCode){
         return Room.builder()
             .name(request.getName())
             .profileImage(request.getProfileImage())
             .maxMateNum(request.getMaxMateNum())
             .inviteCode(inviteCode)
             .status(RoomStatus.WAITING)
+            .roomType(RoomType.PUBLIC)
             .numOfArrival(1)
             .build();
     }
+
 
     public static RoomJoinResponse toRoomJoinResponse(Room room, Member manager){
         return RoomJoinResponse.builder()
