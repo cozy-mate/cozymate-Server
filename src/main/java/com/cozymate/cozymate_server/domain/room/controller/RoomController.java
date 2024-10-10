@@ -4,6 +4,7 @@ package com.cozymate.cozymate_server.domain.room.controller;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
+import com.cozymate.cozymate_server.domain.room.dto.PublicRoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomExistResponse;
@@ -36,15 +37,28 @@ public class RoomController {
     private final RoomCommandService roomCommandService;
     private final RoomQueryService roomQueryService;
 
-    @PostMapping("/create")
-    @Operation(summary = "[바니] 방생성 기능", description = "방이름, 프로필이미지, 인원수를 입력합니다.")
+    @PostMapping("/create-private")
+    @Operation(summary = "[바니] 초대코드로 방생성 기능", description = "방이름, 프로필이미지, 인원수를 입력합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_ALREADY_EXISTS
     })
     public ResponseEntity<ApiResponse<RoomCreateResponse>> createRoom(@Valid @RequestBody RoomCreateRequest request,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomCreateResponse response = roomCommandService.createRoom(request, memberDetails.getMember());
+        RoomCreateResponse response = roomCommandService.createPrivateRoom(request, memberDetails.getMember());
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+    @PostMapping("/create-public")
+    @Operation(summary = "[바니]공개 방 생성 기능", description = "방이름, 프로필이미지, 인원수, 해시태그(1-3개)를 입력합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_ALREADY_EXISTS
+    })
+    public ResponseEntity<ApiResponse<RoomCreateResponse>> createPublicRoom(
+        @Valid @RequestBody PublicRoomCreateRequest request,
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        RoomCreateResponse response = roomCommandService.createPublicRoom(request, memberDetails.getMember());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -106,6 +120,7 @@ public class RoomController {
     }
 
     @GetMapping("/{roomId}/available-friends")
+    @Deprecated
     @Operation(summary = "[바니] 방에 초대할 코지메이트 목록 조회", description = "로그인한 멤버의 코지메이트 목록을 불러옵니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
@@ -117,6 +132,7 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/invite")
+    @Deprecated
     @Operation(summary = "[바니] 선택한 코지메이트 방에 초대요청 보내기", description = "해당하는 roomId에 선택한 코지메이트를 초대합니다.")
     @SwaggerApiError({
         ErrorStatus._ROOM_NOT_FOUND,
@@ -137,6 +153,7 @@ public class RoomController {
     }
 
     @GetMapping ("/request-invites")
+    @Deprecated
     @Operation(summary = "[바니] 방 초대 요청 조회", description = "해당 사용자가 수신한 초대 요청을 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
@@ -149,6 +166,7 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/invite-request")
+    @Deprecated
     @Operation(summary = "[바니] 방 초대 요청/수락", description = "해당 roomId에서 온 초대요청을 수락 또는 거절합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
