@@ -65,12 +65,13 @@ public class RoomCommandService {
     private final ApplicationEventPublisher eventPublisher;
     private final RoomHashtagCommandService roomHashtagCommandService;
 
+
     public RoomCreateResponse createPrivateRoom(RoomCreateRequest request, Member member) {
         Member creator = memberRepository.findById(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
-            RoomStatus.WAITING)) {
+            RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
@@ -93,7 +94,7 @@ public class RoomCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
-            RoomStatus.WAITING)) {
+            RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
@@ -121,24 +122,40 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+        Optional<Mate> isExistingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId);
+
+        if (isExistingMate.isPresent()) {
+            Mate exitingMate = isExistingMate.get();
+            if (exitingMate.getEntryStatus() == EntryStatus.JOINED || exitingMate.getEntryStatus() == EntryStatus.PENDING) {
+                throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+            }
         }
 
         if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE,
-            RoomStatus.WAITING)) {
+            RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        if (mateRepository.countByRoomId(roomId) >= room.getMaxMateNum()) {
+        if (mateRepository.countActiveMatesByRoomId(roomId) >= room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
-        Mate mate = MateConverter.toEntity(room, member, false);
-        mateRepository.save(mate);
-        room.arrive();
-        room.isRoomFull();
-        roomRepository.save(room);
+        if (isExistingMate.isPresent()) {
+            // 재입장 처리
+            Mate exitingMate = isExistingMate.get();
+            exitingMate.setEntryStatus(EntryStatus.JOINED);
+            exitingMate.setNotExit();
+            mateRepository.save(exitingMate);
+            room.arrive();
+            room.isRoomFull();
+            roomRepository.save(room);
+        } else {
+            Mate mate = MateConverter.toEntity(room, member, false);
+            mateRepository.save(mate);
+            room.arrive();
+            room.isRoomFull();
+            roomRepository.save(room);
+        }
 
         // Room의 Mate들을 찾아온다
         List<Mate> findRoomMates = mateRepository.findByRoom(room);
@@ -173,6 +190,38 @@ public class RoomCommandService {
         }
 
         // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
+        deleteRoomDatas(roomId);
+        roomRepository.delete(room);
+    }
+
+    public void quitRoom(Long roomId, Long memberId) {
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        Mate quittingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        // 이미 나간 방에 대한 예외 처리
+        if (quittingMate.getEntryStatus() == EntryStatus.EXITED) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MATE);
+        }
+
+        quittingMate.quit();
+        mateRepository.save(quittingMate);
+        room.quit();
+        roomRepository.save(room);
+
+        if (room.getNumOfArrival()==0) {
+            // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
+            deleteRoomDatas(roomId);
+            roomRepository.delete(room);
+        }
+    }
+
+    private void deleteRoomDatas(Long roomId) {
         List<Mate> mates = mateRepository.findByRoomId(roomId);
         for (Mate mate : mates) {
             roleRepository.deleteByMateId(mate.getId());
@@ -182,7 +231,7 @@ public class RoomCommandService {
         ruleRepository.deleteByRoomId(roomId);
         roomLogRepository.deleteByRoomId(roomId);
 
-        // 피드를 생성하지 않고 방이 삭제될 경우도 고려함
+        // 피드 삭제 로직
         if (feedRepository.existsByRoomId(roomId)) {
             Feed feed = feedRepository.findByRoomId(roomId);
             List<Post> posts = postRepository.findByFeedId(feed.getId());
@@ -193,10 +242,9 @@ public class RoomCommandService {
             postRepository.deleteByFeedId(feed.getId());
             feedRepository.deleteByRoomId(roomId);
         }
-
-        roomRepository.delete(room);
     }
 
+    @Deprecated
     public void sendInvitation(Long roomId, List<Long> inviteeIdList, Long inviterId) {
         memberRepository.findById(inviterId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -235,7 +283,7 @@ public class RoomCommandService {
             }
 
             if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE,
-                RoomStatus.WAITING)) {
+                RoomStatus.WAITING, EntryStatus.JOINED)) {
                 throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
             }
 
@@ -253,6 +301,7 @@ public class RoomCommandService {
 
     }
 
+    @Deprecated
     public void respondToInviteRequest(Long roomId, Long inviteeId, boolean accept) {
         memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));

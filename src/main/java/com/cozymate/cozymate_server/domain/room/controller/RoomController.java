@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,7 +54,8 @@ public class RoomController {
     @Operation(summary = "[바니]공개 방 생성 기능", description = "방이름, 프로필이미지, 인원수, 해시태그(1-3개)를 입력합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
-        ErrorStatus._ROOM_ALREADY_EXISTS
+        ErrorStatus._ROOM_ALREADY_EXISTS,
+        ErrorStatus._DUPLICATE_HASHTAGS
     })
     public ResponseEntity<ApiResponse<RoomCreateResponse>> createPublicRoom(
         @Valid @RequestBody PublicRoomCreateRequest request,
@@ -76,7 +78,7 @@ public class RoomController {
     }
 
     @DeleteMapping("/{roomId}")
-    @Operation(summary = "[바니] 방 삭제 기능", description = "해당 roomId의 방을 삭제합니다.")
+    @Operation(summary = "[바니] 방 삭제 기능 (방장 권한)", description = "해당 roomId의 방을 삭제합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
@@ -88,6 +90,19 @@ public class RoomController {
         @AuthenticationPrincipal MemberDetails memberDetails) {
         roomCommandService.deleteRoom(roomId, memberDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 삭제 완료"));
+    }
+
+    @PatchMapping("/{roomId}/quit")
+    @Operation(summary = "[바니] 방 나가기 기능", description = "해당 roomId의 방을 나갑니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MATE
+    })
+    public ResponseEntity<ApiResponse<String>> quitRoom(@PathVariable Long roomId,
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        roomCommandService.quitRoom(roomId, memberDetails.getMember().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess("방 나가기 완료"));
     }
 
     @GetMapping("/join")

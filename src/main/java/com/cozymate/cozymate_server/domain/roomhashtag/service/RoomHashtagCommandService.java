@@ -6,8 +6,12 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
 import com.cozymate.cozymate_server.domain.roomhashtag.converter.RoomHashtagConverter;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,8 @@ public class RoomHashtagCommandService {
     private final RoomHashtagRepository roomHashtagRepository;
 
     public void createRoomHashtag(Room room, List<String> hashtags) {
+        validateHashtags(hashtags);
+
         for (String tag : hashtags) {
             Hashtag hashtag = hashtagRepository.findByHashtag(tag)
                 .orElseGet( ()-> hashtagRepository.save(new Hashtag(tag)));
@@ -30,4 +36,11 @@ public class RoomHashtagCommandService {
 
     }
 
+    // 입력한 해시태그 중복 검사
+    public void validateHashtags(List<String> hashtags) {
+        Set<String> uniqueHashtags = new HashSet<>(hashtags);
+        if (uniqueHashtags.size() != hashtags.size()) {
+            throw new GeneralException(ErrorStatus._DUPLICATE_HASHTAGS);
+        }
+    }
 }
