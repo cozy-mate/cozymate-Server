@@ -21,10 +21,7 @@ public class MemberBlockCommandService {
     private final MemberRepository memberRepository;
 
     public void saveMemberBlock(MemberBlockRequestDto requestDto, Member member) {
-        if (requestDto.getBlockedMemberId().equals(member.getId())) {
-            throw new GeneralException(ErrorStatus._CANNOT_BLOCK_OWN);
-        }
-
+        checkBlockSelf(requestDto.getBlockedMemberId(), member.getId());
         checkDuplicatedBlock(requestDto, member);
 
         Member blockedMember = memberRepository.findById(requestDto.getBlockedMemberId())
@@ -36,11 +33,19 @@ public class MemberBlockCommandService {
     }
 
     public void deleteMemberBlock(Long blockedMemberId, Member member) {
+        checkBlockSelf(blockedMemberId, member.getId());
+
         MemberBlock memberBlock = memberBlockRepository.findByMemberIdAndBlockedMemberId(
                 member.getId(), blockedMemberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ALREADY_NOT_BLOCKED_MEMBER));
 
         memberBlockRepository.delete(memberBlock);
+    }
+
+    private void checkBlockSelf(Long blockedMemberId, Long memberId) {
+        if (blockedMemberId.equals(memberId)) {
+            throw new GeneralException(ErrorStatus._CANNOT_BLOCK_SELF);
+        }
     }
 
     private void checkDuplicatedBlock(MemberBlockRequestDto requestDto, Member member) {

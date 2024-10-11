@@ -38,8 +38,9 @@ public class ChatController {
         @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId,
         @AuthenticationPrincipal
         MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(chatCommandService.createChat(chatRequestDto, memberDetails.getMember(),
-            recipientId)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            chatCommandService.createChat(chatRequestDto, memberDetails.getMember(),
+                recipientId)));
     }
 
     @GetMapping("/chatrooms/{chatRoomId}")
@@ -52,6 +53,7 @@ public class ChatController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long chatRoomId) {
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(chatQueryService.getChatList(memberDetails.getMember(), chatRoomId)));
+            ApiResponse.onSuccess(
+                chatQueryService.getChatList(memberDetails.getMember(), chatRoomId)));
     }
 }
