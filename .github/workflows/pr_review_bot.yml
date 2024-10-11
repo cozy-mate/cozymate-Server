@@ -24,5 +24,6 @@ jobs:
           max-tokens: 3000
           language: 'Korean'
           title: '리뷰해드려요~'
-          home-directory: 'src/main/java/com/cozymate/cozymate_server''
+          home-directory: 'src/main/java/com/cozymate/cozymate_server'
+          prompt: 'Please proceed with the code review for each change in the entered file. Please organize what changes have been made and if there are any additional improvements you want to suggest. Please write the name of the changed file as ## {name} and the review as a broken list. For example, ## {name} - [ ] Review 1 - [ ] Review 2 - [ ] Review 3'
 
