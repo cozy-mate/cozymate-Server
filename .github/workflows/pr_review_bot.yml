@@ -23,4 +23,6 @@ jobs:
           model: 'amazon.titan-text-premier-v1:0'
           max-tokens: 3000
           language: 'Korean'
+          title: '리뷰해드려요~'
+          home-directory: 'src/main/java/com/cozymate/cozymate_server''
 
