@@ -244,6 +244,10 @@ public class RoomCommandService {
         }
     }
 
+    public Boolean checkRoomName(String roomName) {
+        return roomQueryService.isValidRoomName(roomName);
+    }
+
     @Deprecated
     public void sendInvitation(Long roomId, List<Long> inviteeIdList, Long inviterId) {
         memberRepository.findById(inviterId)
@@ -361,5 +365,6 @@ public class RoomCommandService {
         }
         return key.toString();
     }
+
 
 }

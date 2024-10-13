@@ -136,4 +136,8 @@ public class RoomQueryService {
             return RoomConverter.toRoomExistResponse(null);
         }
     }
+
+    public Boolean isValidRoomName(String roomName) {
+        return !roomRepository.existsByName(roomName);
+    }
 }
