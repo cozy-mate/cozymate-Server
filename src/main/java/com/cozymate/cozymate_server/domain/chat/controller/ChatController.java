@@ -31,9 +31,10 @@ public class ChatController {
 
     @PostMapping("/members/{recipientId}")
     @Operation(summary = "[베로] 쪽지 작성 기능", description = "recipientId: 쪽지를 받을 멤버의 pk값, RequestBody의 content: 쪽지 내용")
-    @SwaggerApiError(
-        ErrorStatus._CHAT_NOT_FOUND_RECIPIENT
-    )
+    @SwaggerApiError({
+            ErrorStatus._CHAT_NOT_FOUND_RECIPIENT,
+            ErrorStatus._REQUEST_TO_BLOCKED_MEMBER
+    })
     public ResponseEntity<ApiResponse<ChatSuccessResponseDto>> createChat(
         @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId,
         @AuthenticationPrincipal
@@ -47,7 +48,8 @@ public class ChatController {
     @Operation(summary = "[베로] 쪽지방의 쪽지 상세 내역 조회", description = "chatRoomId : 조회할 쪽지방 pk값")
     @SwaggerApiError({
         ErrorStatus._CHATROOM_NOT_FOUND,
-        ErrorStatus._CHATROOM_MEMBER_MISMATCH
+        ErrorStatus._CHATROOM_MEMBER_MISMATCH,
+        ErrorStatus._REQUEST_TO_BLOCKED_MEMBER
     })
     public ResponseEntity<ApiResponse<ChatResponseDto>> getChatList(
         @AuthenticationPrincipal MemberDetails memberDetails,
