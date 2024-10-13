@@ -194,6 +194,10 @@ public class RoomCommandService {
         roomRepository.delete(room);
     }
 
+    public Boolean checkRoomName(String roomName) {
+        return roomQueryService.isValidRoomName(roomName);
+    }
+
     public void quitRoom(Long roomId, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -242,10 +246,6 @@ public class RoomCommandService {
             postRepository.deleteByFeedId(feed.getId());
             feedRepository.deleteByRoomId(roomId);
         }
-    }
-
-    public Boolean checkRoomName(String roomName) {
-        return roomQueryService.isValidRoomName(roomName);
     }
 
     @Deprecated

@@ -125,6 +125,10 @@ public class RoomQueryService {
         return RoomConverter.toInviteRequest(room, mate);
     }
 
+    public Boolean isValidRoomName(String roomName) {
+        return !roomRepository.existsByName(roomName);
+    }
+
     public RoomExistResponse getExistRoom(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -137,7 +141,4 @@ public class RoomQueryService {
         }
     }
 
-    public Boolean isValidRoomName(String roomName) {
-        return !roomRepository.existsByName(roomName);
-    }
 }

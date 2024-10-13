@@ -135,6 +135,13 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess("방 참여 완료"));
     }
 
+    @GetMapping("/check-roomname")
+    @Operation(summary = "[바니] 방 이름 중복 검증", description = "가능하면 true가, 중복시 false가 리턴됩니다.")
+    ResponseEntity<ApiResponse<Boolean>> checkRoomName(@RequestParam String roomName) {
+        Boolean isValid = roomCommandService.checkRoomName(roomName);
+        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(isValid));
+    }
+
     @GetMapping("/{roomId}/available-friends")
     @Deprecated
     @Operation(summary = "[바니] 방에 초대할 코지메이트 목록 조회", description = "로그인한 멤버의 코지메이트 목록을 불러옵니다.")
@@ -208,11 +215,4 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
-    @GetMapping("/check-roomname")
-    @Operation(summary = "[바니] 방 이름 중복 검증", description = "가능하면 true가, 중복시 false가 리턴됩니다.")
-    ResponseEntity<ApiResponse<Boolean>> checkRoomName(@RequestParam String roomName) {
-        Boolean isValid = roomCommandService.checkRoomName(roomName);
-
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(isValid));
-    }
 }
