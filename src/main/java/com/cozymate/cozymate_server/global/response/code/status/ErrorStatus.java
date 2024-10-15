@@ -53,6 +53,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // University 관련 에러
     _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "UNIVERSITY400", "대학을 찾을 수 없습니다."),
+    _UNIVERSITY_BINDING_FAIL(HttpStatus.BAD_REQUEST, "UNIVERSITY401", "대학교 바인딩 실패"),
 
     // MemberStat 관련 에러
     _MEMBERSTAT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT400", "멤버 상세정보가 이미 존재합니다."),
@@ -106,6 +107,12 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Post Comment 
     _POST_COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT400", "댓글이 존재하지 않습니다."),
+
+    // Mail
+    _MAIL_AUTHENTICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MAIL400","메일인증을 받아주세요."),
+    _MAIL_ADDRESS_DUPLICATED(HttpStatus.BAD_REQUEST,"MAIL401","이미 사용된 메일입니다."),
+    _MAIL_AUTHENTICATION_CODE_INCORRECT(HttpStatus.BAD_REQUEST,"MAIL402","인증 코드가 올바르지 않습니다."),
+    _MAIL_AUTHENTICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,"MAIL403","메일 인증코드가 만료되었습니다. 다시 받아주세요"),
     ;
 
     private final HttpStatus httpStatus;
