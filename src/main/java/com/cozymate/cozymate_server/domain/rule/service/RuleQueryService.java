@@ -22,13 +22,33 @@ public class RuleQueryService {
     private final RuleRepository ruleRepository;
     private final MateRepository mateRepository;
 
-    public List<RuleDetailResponseDto> getRule(Long roomId, Member member) {
-        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
+    /**
+     * 특정 방의 Rule 목록 조회
+     *
+     * @param member 사용자
+     * @param roomId Rule을 조회하려는 방 Id
+     * @return Rule 목록
+     */
+    public List<RuleDetailResponseDto> getRule(Member member, Long roomId) {
+        // Mate 조회
+        Mate mate = findMateByMemberIdAndRoomId(member, roomId);
 
+        // Rule 목록 조회
         List<Rule> ruleList = ruleRepository.findAllByRoomId(mate.getRoom().getId());
+        // Rule 목록을 RuleDetailResponseDto로 변환하여 반환
         return ruleList.stream().map(RuleConverter::toRuleDetailResponseDto).toList();
 
+    }
+
+    /**
+     * Mate 조회
+     * @param member 사용자
+     * @param roomId 방 Id
+     * @return Mate
+     */
+    private Mate findMateByMemberIdAndRoomId(Member member, Long roomId) {
+        return mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
     }
 
 }

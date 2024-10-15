@@ -10,6 +10,14 @@ import lombok.NoArgsConstructor;
 public class RuleResponseDto {
 
     @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CreateRuleResponseDto {
+
+            private Long id;
+    }
+
+    @Builder
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
