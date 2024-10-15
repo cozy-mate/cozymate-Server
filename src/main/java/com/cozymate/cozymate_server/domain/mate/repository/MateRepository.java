@@ -54,4 +54,7 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     @Query("select m from Mate m join fetch m.member")
     List<Mate> findFetchAll();
+
+    List<Mate> findByIdIn(List<Long> memberIdList);
+
 }

@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.role.dto;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
 
@@ -23,6 +23,17 @@ public class RoleRequestDto {
         @Size(min = 1, max = 7)
         private List<String> repeatDayList;
 
+    }
+
+    @Getter
+    public static class UpdateRoleRequestDto {
+
+        @Length(min = 1, max = 20, message = "title은 1자 이상 20자 이하로 입력해주세요.")
+        private String title;
+
+        @Nullable
+        @Size(max = 7, message = "요일은 7개 이하로 입력해주세요.")
+        private List<String> repeatDayList;
     }
 
 }
