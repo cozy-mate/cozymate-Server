@@ -15,8 +15,10 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -30,6 +32,7 @@ public class MailService {
 
     private static final Integer MAIL_AUTHENTICATION_EXPIRED_TIME = 30;
 
+    @Async
     public void sendUniversityAuthenticationCode(MemberDetails memberDetails, String mailAddress) {
         validateMailAddress(mailAddress);
 
@@ -45,6 +48,7 @@ public class MailService {
 
     }
 
+    @Transactional
     public AuthResponseDTO.TokenResponseDTO verifyAuthenticationCode(MemberDetails memberDetails, String requestCode) {
         MailAuthentication mailAuthentication = mailRepository.findById(memberDetails.getMember().getId())
                 .orElseThrow(() -> new GeneralException(
@@ -60,6 +64,8 @@ public class MailService {
         if (!mailAuthentication.getCode().equals(requestCode)) {
             throw new GeneralException(ErrorStatus._MAIL_AUTHENTICATION_CODE_INCORRECT);
         }
+
+        mailAuthentication.verify();
 
         return memberCommandService.verifyMember(memberDetails);
     }
@@ -79,7 +85,7 @@ public class MailService {
                 .memberId(memberId)
                 .mailAddress(mailAddress)
                 .code(authenticationCode)
-                .isVerified(true)
+                .isVerified(false)
                 .build();
     }
 

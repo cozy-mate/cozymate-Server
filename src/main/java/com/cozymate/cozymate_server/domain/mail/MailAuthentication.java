@@ -21,4 +21,8 @@ public class MailAuthentication extends BaseTimeEntity {
     private String mailAddress;
     private String code;
     private Boolean isVerified;
+
+    public void verify(){
+        isVerified = true;
+    }
 }
