@@ -9,17 +9,17 @@ import org.hibernate.validator.constraints.Length;
 
 public class RoleRequestDto {
 
-    @AllArgsConstructor
     @Getter
     public static class CreateRoleRequestDto {
 
-        @NotEmpty
+        @NotEmpty(message = "mateIdList는 비어있을 수 없습니다.")
         private List<Long> mateIdList;
 
+        @NotEmpty(message = "title은 비어있을 수 없습니다.")
         @Length(min = 1, max = 20)
         private String title;
 
-        @NotEmpty
+        @NotEmpty(message = "description은 비어있을 수 없습니다.")
         @Size(min = 1, max = 7)
         private List<String> repeatDayList;
 

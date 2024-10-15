@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.role.dto;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -9,6 +8,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class RoleResponseDto {
+
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CreateRoleResponseDto {
+
+        private Long id;
+    }
 
     @Builder
     @Getter
