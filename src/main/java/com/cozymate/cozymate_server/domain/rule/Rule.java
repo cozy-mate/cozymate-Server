@@ -34,4 +34,13 @@ public class Rule extends BaseTimeEntity {
 
     @Column(length = 40)
     private String memo;
+
+    public void updateEntity(String content, String memo) {
+        if(content != null) {
+            this.content = content;
+        }
+        if(memo != null) {
+            this.memo = memo;
+        }
+    }
 }

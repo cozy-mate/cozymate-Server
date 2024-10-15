@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.rule.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.CreateRuleRequestDto;
+import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.UpdateRuleRequestDto;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.CreateRuleResponseDto;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.RuleDetailResponseDto;
 import com.cozymate.cozymate_server.domain.rule.service.RuleCommandService;
@@ -35,10 +36,9 @@ public class RuleController {
 
     /**
      * 특정 방의 Rule 생성
-     *
-     * @param memberDetails        사용자
-     * @param roomId               Rule을 생성하려는 방 Id
-     * @param createRuleRequestDto 생성할 Rule 데이터
+     * @param memberDetails 사용자
+     * @param roomId        Rule을 생성하려는 방 Id
+     * @param requestDto    생성할 Rule 데이터
      * @return String 성공 메시지 반환
      */
     @PostMapping("/{roomId}")
@@ -49,18 +49,17 @@ public class RuleController {
     public ResponseEntity<ApiResponse<CreateRuleResponseDto>> createRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
-        @Valid @RequestBody CreateRuleRequestDto createRuleRequestDto
+        @RequestBody @Valid CreateRuleRequestDto requestDto
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             ruleCommandService.createRule(
-                memberDetails.getMember(), roomId, createRuleRequestDto
+                memberDetails.getMember(), roomId, requestDto
             )
         ));
     }
 
     /**
      * 특정 방의 Rule 목록 조회
-     *
      * @param memberDetails 사용자
      * @param roomId        Rule 목록을 조회하려는 방
      * @return List<RuleDetailResponseDto> Rule 목록 반환
@@ -81,7 +80,6 @@ public class RuleController {
 
     /**
      * 특정 방의 특정 Rule 삭제
-     *
      * @param memberDetails 사용자
      * @param roomId        삭제하려는 Rule이 속한 방 Id
      * @param ruleId        삭제하려는 Rule Id
@@ -106,7 +104,6 @@ public class RuleController {
 
     /**
      * 특정 Rule 수정
-     *
      * @param memberDetails 사용자
      * @param roomId        수정하고자 하는 rule이 속한 방의 고유 번호
      * @param ruleId        수정하고자 하는 rule의 고유 번호
@@ -117,11 +114,13 @@ public class RuleController {
         summary = "[무빗] 특정 Rule 수정",
         description = "rule의 고유 번호로 수정이 가능합니다.")
     @SwaggerApiError({})
-    public ResponseEntity<ApiResponse<String>> patchRule(
+    public ResponseEntity<ApiResponse<String>> updateRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
-        @PathVariable Long roomId,
-        @PathVariable Long ruleId
+        @PathVariable @Positive Long roomId,
+        @PathVariable @Positive Long ruleId,
+        @RequestBody @Valid UpdateRuleRequestDto requestDto
     ) {
+        ruleCommandService.updateRule(memberDetails.getMember(), roomId, ruleId, requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("수정되었습니다."));
     }
 }

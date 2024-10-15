@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.rule.Rule;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.CreateRuleRequestDto;
+import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.UpdateRuleRequestDto;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.CreateRuleResponseDto;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -27,7 +28,6 @@ public class RuleCommandService {
 
     /**
      * Rule 생성
-     *
      * @param member     생성 권한을 가진 사용자
      * @param roomId     규칙을 생성하려는 방
      * @param requestDto 규칙 내용
@@ -64,12 +64,25 @@ public class RuleCommandService {
         // Mate 조회 - 해당 조회 기능을 위해 roomId가 필요함
         Mate mate = findMateByMemberIdAndRoomId(member, roomId);
 
-        // 해당 Rule을 지우려는 사람이 Rule이 속한 방에 없으면 예외처리
-        if (!rule.getRoom().getId().equals(mate.getRoom().getId())) {
-            throw new GeneralException(ErrorStatus._RULE_MATE_MISMATCH);
-        }
+        // Rule 접근 권한 확인
+        validateRulePermission(mate, rule);
 
         ruleRepository.delete(rule);
+    }
+
+    public void updateRule(Member member, Long roomId, Long ruleId, UpdateRuleRequestDto requestDto) {
+        // Rule 조회
+        Rule rule = ruleRepository.findById(ruleId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._RULE_NOT_FOUND));
+
+        // Mate 조회 - 해당 조회 기능을 위해 roomId가 필요함
+        Mate mate = findMateByMemberIdAndRoomId(member, roomId);
+
+        // Rule 접근 권한 확인
+        validateRulePermission(mate, rule);
+
+        // @Transactional 에 의해 더티 체크
+        rule.updateEntity(requestDto.getContent(), requestDto.getMemo());
     }
 
     /**
@@ -92,5 +105,16 @@ public class RuleCommandService {
     private Mate findMateByMemberIdAndRoomId(Member member, Long roomId) {
         return mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
+    }
+
+    /**
+     * 해당 Rule을 수정하려는 사람이 Rule이 속한 방에 없으면 예외처리
+     * @param mate 룸메이트
+     * @param rule 규칙
+     */
+    private void validateRulePermission(Mate mate, Rule rule) {
+        if (!rule.getRoom().getId().equals(mate.getRoom().getId())) {
+            throw new GeneralException(ErrorStatus._RULE_MATE_MISMATCH);
+        }
     }
 }
