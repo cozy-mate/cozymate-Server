@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.roomhashtag.service;
 
 import com.cozymate.cozymate_server.domain.hashtag.Hashtag;
+import com.cozymate.cozymate_server.domain.hashtag.converter.HashtagConverter;
 import com.cozymate.cozymate_server.domain.hashtag.repository.HashtagRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
@@ -28,7 +29,7 @@ public class RoomHashtagCommandService {
 
         for (String tag : hashtags) {
             Hashtag hashtag = hashtagRepository.findByHashtag(tag)
-                .orElseGet( ()-> hashtagRepository.save(new Hashtag(tag)));
+                .orElseGet( ()-> hashtagRepository.save(HashtagConverter.toHashtag(tag)));
 
             RoomHashtag roomHashtag = RoomHashtagConverter.toRoomHashtag(room, hashtag);
             roomHashtagRepository.save(roomHashtag);
