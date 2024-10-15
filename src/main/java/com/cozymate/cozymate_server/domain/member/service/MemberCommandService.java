@@ -97,8 +97,6 @@ public class MemberCommandService {
         memberDetails.getMember().verify();
         memberRepository.save(memberDetails.getMember());
 
-        log.info(memberRepository.findByClientId(memberDetails.getUsername()).get().getRole().name());
-
         return authService.generateMemberTokenDTO(memberDetails);
     }
 

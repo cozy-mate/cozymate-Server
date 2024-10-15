@@ -36,9 +36,9 @@ public class MailService {
         MailAuthentication mailAuthentication = createAndSendMail(memberDetails.getMember().getId(),
                 mailAddress);
 
-        log.info("code : {}", mailAuthentication.getCode());
-        log.info("member : {}", memberDetails.getMember().getNickname());
-        log.info("email : {}", mailAddress);
+//        log.info("code : {}", mailAuthentication.getCode());
+//        log.info("member : {}", memberDetails.getMember().getNickname());
+//        log.info("email : {}", mailAddress);
 
         mailRepository.save(mailAuthentication);
 
