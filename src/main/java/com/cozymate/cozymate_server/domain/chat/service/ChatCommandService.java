@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.chat.service;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
+import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatSuccessResponseDto;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
@@ -25,7 +26,7 @@ public class ChatCommandService {
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
 
-    public void createChat(ChatRequestDto chatRequestDto, Member sender, Long recipientId) {
+    public ChatSuccessResponseDto createChat(ChatRequestDto chatRequestDto, Member sender, Long recipientId) {
         Member recipient = memberRepository.findById(recipientId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHAT_NOT_FOUND_RECIPIENT));
 
@@ -34,11 +35,14 @@ public class ChatCommandService {
 
         if (findChatRoom.isPresent()) {
             saveChat(findChatRoom.get(), sender, chatRequestDto.getContent());
+
+            return ChatConverter.toChatSuccessResponseDto(findChatRoom.get().getId());
         } else {
             ChatRoom chatRoom = ChatRoomConverter.toEntity(sender, recipient);
             chatRoomRepository.save(chatRoom);
-
             saveChat(chatRoom, sender, chatRequestDto.getContent());
+
+            return ChatConverter.toChatSuccessResponseDto(chatRoom.getId());
         }
     }
 

@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum FriendStatus {
-    WAITING("WAITING"), ACCEPT("ACCEPT");
+    STRANGER("STRANGER"),WAITING("WAITING"), ACCEPT("ACCEPT");
 
     private final String friendStatus;
 

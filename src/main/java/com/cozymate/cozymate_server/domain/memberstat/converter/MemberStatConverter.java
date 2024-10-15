@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuilder;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
@@ -87,5 +88,15 @@ public class MemberStatConverter {
             .build();
     }
 
-
+    public static MemberStatEqualityResponseDTO toEqualityDto(MemberStat memberStat, int equality){
+        return MemberStatEqualityResponseDTO.builder()
+            .memberId(memberStat.getMember().getId())
+            .memberAge(TimeUtil.calculateAge(memberStat.getMember().getBirthDay()))
+            .memberName(memberStat.getMember().getName())
+            .memberNickName(memberStat.getMember().getNickname())
+            .memberPersona(memberStat.getMember().getPersona())
+            .numOfRoommate(memberStat.getNumOfRoommate())
+            .equality(equality)
+            .build();
+    }
 }

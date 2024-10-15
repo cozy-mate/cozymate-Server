@@ -29,4 +29,15 @@ public class TodoRequestDto {
         @NotNull
         private Boolean completed;
     }
+
+    @AllArgsConstructor
+    @Getter
+    public static class UpdateTodoContentRequestDto {
+
+        private Long todoId;
+        @Length(min = 1, max = 30)
+        private String content;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate timePoint;
+    }
 }

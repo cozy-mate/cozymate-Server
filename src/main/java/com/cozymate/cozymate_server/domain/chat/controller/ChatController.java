@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.chat.controller;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto;
+import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatSuccessResponseDto;
 import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;
 import com.cozymate.cozymate_server.domain.chat.service.ChatQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -10,7 +11,6 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,13 +34,13 @@ public class ChatController {
     @SwaggerApiError(
         ErrorStatus._CHAT_NOT_FOUND_RECIPIENT
     )
-    public ResponseEntity<ApiResponse<String>> createChat(
+    public ResponseEntity<ApiResponse<ChatSuccessResponseDto>> createChat(
         @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId,
         @AuthenticationPrincipal
         MemberDetails memberDetails) {
-        chatCommandService.createChat(chatRequestDto, memberDetails.getMember(),
-            recipientId);
-        return ResponseEntity.ok(ApiResponse.onSuccess("쪽지 작성 완료"));
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            chatCommandService.createChat(chatRequestDto, memberDetails.getMember(),
+                recipientId)));
     }
 
     @GetMapping("/chatrooms/{chatRoomId}")
@@ -49,10 +49,11 @@ public class ChatController {
         ErrorStatus._CHATROOM_NOT_FOUND,
         ErrorStatus._CHATROOM_MEMBER_MISMATCH
     })
-    public ResponseEntity<List<ChatResponseDto>> getChatList(
+    public ResponseEntity<ApiResponse<ChatResponseDto>> getChatList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long chatRoomId) {
         return ResponseEntity.ok(
-            chatQueryService.getChatList(memberDetails.getMember(), chatRoomId));
+            ApiResponse.onSuccess(
+                chatQueryService.getChatList(memberDetails.getMember(), chatRoomId)));
     }
 }

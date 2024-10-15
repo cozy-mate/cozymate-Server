@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -8,15 +7,15 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
+import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoContentRequestDto;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
-import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -72,7 +71,6 @@ public class TodoCommandService {
 
         todoRepository.save(todo);
 
-
         boolean existsFalseTodo = todoRepository.existsByMateAndTimePointAndCompletedFalse(
             todo.getMate(), LocalDate.now());
 
@@ -100,6 +98,25 @@ public class TodoCommandService {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
         todoRepository.delete(todo);
+    }
+
+    public void updateTodoContent(
+        Member member,
+        UpdateTodoContentRequestDto requestDto
+    ) {
+        Todo todo = todoRepository.findById(requestDto.getTodoId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
+
+        if(todo.getRole() != null){
+            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
+        }
+
+        if (Boolean.FALSE.equals(todo.getMate().getMember().getId().equals(member.getId()))) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
+        }
+
+        todo.updateContent(requestDto.getContent(), requestDto.getTimePoint());
+        todoRepository.save(todo);
     }
 
 }
