@@ -93,11 +93,22 @@ public class MemberCommandService {
         return MemberConverter.toMemberInfoDTO(memberDetails.getMember());
     }
 
+    public AuthResponseDTO.TokenResponseDTO verifyMember(MemberDetails memberDetails){
+        memberDetails.getMember().verify();
+        memberRepository.save(memberDetails.getMember());
+
+        log.info(memberRepository.findByClientId(memberDetails.getUsername()).get().getRole().name());
+
+        return authService.generateMemberTokenDTO(memberDetails);
+    }
+
     /**
      * 사용자 회원탈퇴 메서드
      *
      * @param memberDetails 사용자 세부 정보
      */
+
+    // todo: 탈퇴로직 고도화
     public void withdraw(MemberDetails memberDetails) {
         // 리프레시 토큰 삭제 및 회원 삭제
         authService.deleteRefreshToken(memberDetails.getUsername());
