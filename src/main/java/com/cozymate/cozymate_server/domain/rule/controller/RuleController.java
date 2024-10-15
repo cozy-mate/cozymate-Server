@@ -19,7 +19,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -119,7 +118,8 @@ public class RuleController {
     @Operation(
         summary = "[무빗] 특정 Rule 수정",
         description = "rule의 고유 번호로 수정이 가능합니다.")
-    @SwaggerApiError({})
+    @SwaggerApiError({ErrorStatus._RULE_NOT_FOUND, ErrorStatus._RULE_MATE_MISMATCH,
+        ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> updateRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
