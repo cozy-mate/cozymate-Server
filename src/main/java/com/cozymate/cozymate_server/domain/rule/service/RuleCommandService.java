@@ -6,7 +6,6 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.rule.Rule;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.CreateRuleRequestDto;
-import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.UpdateRuleRequestDto;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.CreateRuleResponseDto;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -28,10 +27,10 @@ public class RuleCommandService {
 
     /**
      * Rule 생성
+     *
      * @param member     생성 권한을 가진 사용자
      * @param roomId     규칙을 생성하려는 방
-     * @param requestDto 규칙 내용
-     * return 생성된 규칙의 id
+     * @param requestDto 규칙 내용 return 생성된 규칙의 id
      */
     public CreateRuleResponseDto createRule(
         Member member, Long roomId, CreateRuleRequestDto requestDto) {
@@ -52,6 +51,7 @@ public class RuleCommandService {
 
     /**
      * Rule 삭제
+     *
      * @param member 사용자
      * @param roomId 방 Id
      * @param ruleId 삭제할 Rule Id
@@ -70,7 +70,8 @@ public class RuleCommandService {
         ruleRepository.delete(rule);
     }
 
-    public void updateRule(Member member, Long roomId, Long ruleId, UpdateRuleRequestDto requestDto) {
+    public void updateRule(Member member, Long roomId, Long ruleId,
+        CreateRuleRequestDto requestDto) {
         // Rule 조회
         Rule rule = ruleRepository.findById(ruleId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._RULE_NOT_FOUND));
@@ -87,6 +88,7 @@ public class RuleCommandService {
 
     /**
      * Rule 최대 개수 초과 여부 확인
+     *
      * @param roomId 확인하려는 방 Id
      */
     private void checkMaxRuleCount(Long roomId) {
@@ -98,6 +100,7 @@ public class RuleCommandService {
 
     /**
      * Mate 조회
+     *
      * @param member 사용자
      * @param roomId 방 Id
      * @return Mate
@@ -109,6 +112,7 @@ public class RuleCommandService {
 
     /**
      * 해당 Rule을 수정하려는 사람이 Rule이 속한 방에 없으면 예외처리
+     *
      * @param mate 룸메이트
      * @param rule 규칙
      */
