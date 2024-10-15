@@ -16,11 +16,11 @@ public class RoleRequestDto {
         private List<Long> mateIdList;
 
         @NotEmpty(message = "title은 비어있을 수 없습니다.")
-        @Length(min = 1, max = 20)
+        @Length(min = 1, max = 20, message = "title은 1자 이상 20자 이하로 입력해주세요.")
         private String title;
 
         @NotEmpty(message = "description은 비어있을 수 없습니다.")
-        @Size(min = 1, max = 7)
+        @Size(max = 7, message = "요일은 7개 이하로 입력해주세요.")
         private List<String> repeatDayList;
 
     }
