@@ -18,6 +18,7 @@ import com.cozymate.cozymate_server.domain.room.dto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class RoomQueryService {
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
     private final FriendRepository friendRepository;
+    private final RoomHashtagRepository roomHashtagRepository;
 
     public RoomCreateResponse getRoomById(Long roomId, Long memberId) {
 
@@ -53,8 +55,12 @@ public class RoomQueryService {
             .map(RoomConverter::toCozyMateInfoResponse)
             .toList();
 
+        //해시태그 가져오기
+        List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(roomId);
+
         return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),
-            mates.isEmpty() ? new ArrayList<>() : mates
+            mates.isEmpty() ? new ArrayList<>() : mates,
+            room.getRoomType(), hashtags
             );
     }
 
@@ -119,6 +125,10 @@ public class RoomQueryService {
         return RoomConverter.toInviteRequest(room, mate);
     }
 
+    public Boolean isValidRoomName(String roomName) {
+        return !roomRepository.existsByName(roomName);
+    }
+
     public RoomExistResponse getExistRoom(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -130,4 +140,5 @@ public class RoomQueryService {
             return RoomConverter.toRoomExistResponse(null);
         }
     }
+
 }

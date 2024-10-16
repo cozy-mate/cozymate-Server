@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupRoomNameWithOutMeTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.converter.FeedConverter;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
@@ -21,10 +20,12 @@ import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
+import com.cozymate.cozymate_server.domain.room.dto.PublicRoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
@@ -62,18 +63,46 @@ public class RoomCommandService {
     private final RoomQueryService roomQueryService;
     private final RoomLogCommandService roomLogCommandService;
     private final ApplicationEventPublisher eventPublisher;
+    private final RoomHashtagCommandService roomHashtagCommandService;
 
-    public RoomCreateResponse createRoom(RoomCreateRequest request, Member member) {
+
+    public RoomCreateResponse createPrivateRoom(RoomCreateRequest request, Member member) {
         Member creator = memberRepository.findById(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
-            RoomStatus.WAITING)) {
+            RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toEntity(request, inviteCode);
+        Room room = RoomConverter.toPrivateRoom(request, inviteCode);
+        room = roomRepository.save(room);
+        roomLogCommandService.addRoomLogCreationRoom(room);
+
+        Mate mate = MateConverter.toEntity(room, creator, true);
+        mateRepository.save(mate);
+
+        Feed feed = FeedConverter.toEntity(room);
+        feedRepository.save(feed);
+
+        return roomQueryService.getRoomById(room.getId(), member.getId());
+    }
+
+    public RoomCreateResponse createPublicRoom(PublicRoomCreateRequest request, Member member) {
+        Member creator = memberRepository.findById(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
+            RoomStatus.WAITING, EntryStatus.JOINED)) {
+            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
+        }
+
+        String inviteCode = generateUniqueUppercaseKey();
+        Room room = RoomConverter.toPublicRoom(request, inviteCode);
+
+        // 해시태그 저장 과정
+        roomHashtagCommandService.createRoomHashtag(room, request.getHashtags());
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
@@ -93,24 +122,40 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        if (mateRepository.findByRoomIdAndMemberId(roomId, memberId).isPresent()) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+        Optional<Mate> isExistingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId);
+
+        if (isExistingMate.isPresent()) {
+            Mate exitingMate = isExistingMate.get();
+            if (exitingMate.getEntryStatus() == EntryStatus.JOINED || exitingMate.getEntryStatus() == EntryStatus.PENDING) {
+                throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+            }
         }
 
         if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE,
-            RoomStatus.WAITING)) {
+            RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        if (mateRepository.countByRoomId(roomId) >= room.getMaxMateNum()) {
+        if (mateRepository.countActiveMatesByRoomId(roomId) >= room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
-        Mate mate = MateConverter.toEntity(room, member, false);
-        mateRepository.save(mate);
-        room.arrive();
-        room.isRoomFull();
-        roomRepository.save(room);
+        if (isExistingMate.isPresent()) {
+            // 재입장 처리
+            Mate exitingMate = isExistingMate.get();
+            exitingMate.setEntryStatus(EntryStatus.JOINED);
+            exitingMate.setNotExit();
+            mateRepository.save(exitingMate);
+            room.arrive();
+            room.isRoomFull();
+            roomRepository.save(room);
+        } else {
+            Mate mate = MateConverter.toEntity(room, member, false);
+            mateRepository.save(mate);
+            room.arrive();
+            room.isRoomFull();
+            roomRepository.save(room);
+        }
 
         // Room의 Mate들을 찾아온다
         List<Mate> findRoomMates = mateRepository.findByRoom(room);
@@ -145,6 +190,42 @@ public class RoomCommandService {
         }
 
         // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
+        deleteRoomDatas(roomId);
+        roomRepository.delete(room);
+    }
+
+    public Boolean checkRoomName(String roomName) {
+        return roomQueryService.isValidRoomName(roomName);
+    }
+
+    public void quitRoom(Long roomId, Long memberId) {
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        Mate quittingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        // 이미 나간 방에 대한 예외 처리
+        if (quittingMate.getEntryStatus() == EntryStatus.EXITED) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MATE);
+        }
+
+        quittingMate.quit();
+        mateRepository.save(quittingMate);
+        room.quit();
+        roomRepository.save(room);
+
+        if (room.getNumOfArrival()==0) {
+            // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
+            deleteRoomDatas(roomId);
+            roomRepository.delete(room);
+        }
+    }
+
+    private void deleteRoomDatas(Long roomId) {
         List<Mate> mates = mateRepository.findByRoomId(roomId);
         for (Mate mate : mates) {
             roleRepository.deleteByMateId(mate.getId());
@@ -154,7 +235,7 @@ public class RoomCommandService {
         ruleRepository.deleteByRoomId(roomId);
         roomLogRepository.deleteByRoomId(roomId);
 
-        // 피드를 생성하지 않고 방이 삭제될 경우도 고려함
+        // 피드 삭제 로직
         if (feedRepository.existsByRoomId(roomId)) {
             Feed feed = feedRepository.findByRoomId(roomId);
             List<Post> posts = postRepository.findByFeedId(feed.getId());
@@ -165,10 +246,9 @@ public class RoomCommandService {
             postRepository.deleteByFeedId(feed.getId());
             feedRepository.deleteByRoomId(roomId);
         }
-
-        roomRepository.delete(room);
     }
 
+    @Deprecated
     public void sendInvitation(Long roomId, List<Long> inviteeIdList, Long inviterId) {
         memberRepository.findById(inviterId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -207,7 +287,7 @@ public class RoomCommandService {
             }
 
             if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE,
-                RoomStatus.WAITING)) {
+                RoomStatus.WAITING, EntryStatus.JOINED)) {
                 throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
             }
 
@@ -225,6 +305,7 @@ public class RoomCommandService {
 
     }
 
+    @Deprecated
     public void respondToInviteRequest(Long roomId, Long inviteeId, boolean accept) {
         memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -284,5 +365,6 @@ public class RoomCommandService {
         }
         return key.toString();
     }
+
 
 }
