@@ -25,13 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class UniversityController {
     private final UniversityService universityService;
 
+    /**
+     * 저희 서버에서 안돌아가고 aws 람다로 이전될 api 입니다.
+     * 삭제 될 예정..
+     */
     @PostMapping("/create")
     @Operation(summary = "[말즈] 대학교 생성 API",
             description = "request Body :  <br>"
                     + "\t name : 인하대학교 <br>"
                     + "\t mailPattern : inha.edu <br>"
                     + "\t dormitoryNames : [\"웅비재\", \"비룡재\", ...] <br>"
-                    + "\t departments : [\"컴퓨터공학과\", \"문화콘텐츠문화경영학과\", ...] <br>" )
+                    + "\t departments : [\"컴퓨터공학과\", \"문화콘텐츠문화경영학과\", ...] <br>"
+                    + "저희 서버에서 안돌아가고 aws 람다로 이전될 api 입니다.<br>"
+                    + "삭제 될 예정..")
     @SwaggerApiError({
     })
     public ResponseEntity<ApiResponse<UniversityResponse.UniversityDTO>> createUniversity
@@ -41,13 +47,19 @@ public class UniversityController {
         return ResponseEntity.ok(ApiResponse.onSuccess(universityDTO));
     }
 
+    /**
+     * 저희 서버에서 안돌아가고 aws 람다로 이전될 api 입니다.
+     * 삭제 될 예정..
+     */
     @PostMapping("/update")
     @Operation(summary = "[말즈] 대학교 수정 API",
             description = "request body :  <br>"
                     + "\t name : 인하대학교 <br>"
                     + "\t mailPattern : inha.edu <br>"
                     + "\t dormitoryNames : [\"웅비재\", \"비룡재\", ...] <br>"
-                    + "\t departments : [\"컴퓨터공학과\", \"문화콘텐츠문화경영학과\", ...] <br>" )
+                    + "\t departments : [\"컴퓨터공학과\", \"문화콘텐츠문화경영학과\", ...] <br>"
+                    + "저희 서버에서 안돌아가고 aws 람다로 이전될 api 입니다.<br>"
+                    + "삭제 될 예정..")
     @SwaggerApiError({
             ErrorStatus._UNIVERSITY_NOT_FOUND
     })

@@ -37,10 +37,16 @@ public class UniversityService {
         return UniversityConverter.toUniversityDTO(university);
     }
 
-    public UniversityResponse.UniversityDTO getUniversity(String name){
+    public UniversityResponse.UniversityDTO getUniversity(String name) {
         University university = universityRepository.findByName(name)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
         return UniversityConverter.toUniversityDTO(university);
     }
+
+    public University findUniversityById(Long id) {
+        return universityRepository.findById(id)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+    }
+
 }
