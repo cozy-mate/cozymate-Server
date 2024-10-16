@@ -30,11 +30,11 @@ public class MemberRequestDTO {
 
         /**
          * {
-         *     "name": "김수환",
          *     "nickname": "말즈",
          *     "gender": "MALE",
-         *     "birthday": "2000-01-20"
-         *     "persona" : 1
+         *     "birthday": "2000-01-20",
+         *     "persona" : 1,
+         *     "university : 1
          * }
          */
 
@@ -56,6 +56,9 @@ public class MemberRequestDTO {
         @Max(value = 16)
         @Min(value = 1)
         private Integer persona;
+
+        @NotNull
+        private Long universityId;
     }
 
 }

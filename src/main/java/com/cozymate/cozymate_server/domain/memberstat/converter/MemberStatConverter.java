@@ -92,7 +92,6 @@ public class MemberStatConverter {
         return MemberStatEqualityResponseDTO.builder()
             .memberId(memberStat.getMember().getId())
             .memberAge(TimeUtil.calculateAge(memberStat.getMember().getBirthDay()))
-            .memberName(memberStat.getMember().getName())
             .memberNickName(memberStat.getMember().getNickname())
             .memberPersona(memberStat.getMember().getPersona())
             .numOfRoommate(memberStat.getNumOfRoommate())

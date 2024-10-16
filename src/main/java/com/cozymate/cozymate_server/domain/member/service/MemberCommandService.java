@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 
+import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -76,8 +77,7 @@ public class MemberCommandService {
             throw new GeneralException(ErrorStatus._MEMBER_EXISTING);
         }
         // 회원 정보를 Member 엔티티로 변환하고 저장
-        Member member = MemberConverter.toMember(clientId, signUpRequestDTO);
-        memberRepository.save(member);
+
 
         // 기존 회원으로 로그인 처리
         return signInByExistingMember(clientId);
@@ -98,6 +98,7 @@ public class MemberCommandService {
      *
      * @param memberDetails 사용자 세부 정보
      */
+
     public void withdraw(MemberDetails memberDetails) {
         // 리프레시 토큰 삭제 및 회원 삭제
         authService.deleteRefreshToken(memberDetails.getUsername());

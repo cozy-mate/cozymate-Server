@@ -108,9 +108,10 @@ public class MemberController {
         return ResponseEntity.ok(ApiResponse.onSuccess(memberInfoDTO));
     }
 
+
+    @GetMapping("/sign-out")
     @Operation(summary = "[말즈] 로그아웃",
             description = "사용자를 로그아웃 시킵니다. 스웨거에서는 동작하지 않습니다!")
-    @GetMapping("/sign-out")
     public void signOut() {
     }
 
@@ -122,6 +123,7 @@ public class MemberController {
 
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
+
 
 
 }

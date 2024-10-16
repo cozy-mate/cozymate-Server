@@ -5,9 +5,11 @@ import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Entity;
@@ -15,6 +17,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 
@@ -49,9 +53,6 @@ public class Member extends BaseTimeEntity {
 
 
     @NonNull
-    private String name;
-
-    @NonNull
     private String nickname;
 
     @NonNull
@@ -63,6 +64,10 @@ public class Member extends BaseTimeEntity {
 
     @NonNull
     private Integer persona;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id")
+    private University university;
 
     // 기존에 member -> memberstat 상속 관계를
     // member <-> memberstat one to one mapping으로 변경하였습니다.
