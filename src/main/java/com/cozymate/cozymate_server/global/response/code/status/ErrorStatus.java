@@ -111,6 +111,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _ALREADY_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK400", "이미 차단된 사용자입니다."),
     _CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST, "MEMBERBLOCK401", "자신에 대해 차단 관련 요청을 할 수 없습니다."),
     _ALREADY_NOT_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK402", "이미 차단되지 않은 사용자입니다."),
+
+    // MemberStatEquality 관련
+    _MEMBERSTAT_EQUALITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERSTATEQUALITY400", "일치율이 존재하지 않습니다.")
     ;
 
     private final HttpStatus httpStatus;
