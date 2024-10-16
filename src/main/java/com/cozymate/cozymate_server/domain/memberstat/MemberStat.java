@@ -71,11 +71,11 @@ public class MemberStat extends BaseTimeEntity{
 
     private String intimacy;
 
-    private Boolean canShare;
+    private String canShare;
 
-    private Boolean isPlayGame;
+    private String isPlayGame;
 
-    private Boolean isPhoneCall;
+    private String isPhoneCall;
 
     private String studying;
 
@@ -86,6 +86,8 @@ public class MemberStat extends BaseTimeEntity{
     private Integer noiseSensitivity;
 
     private String cleaningFrequency;
+
+    private String drinkingFrequency;
 
     private String personality;
 
@@ -119,7 +121,8 @@ public class MemberStat extends BaseTimeEntity{
         this.cleanSensitivity = memberStatCommandRequestDTO.getCleanSensitivity();
         this.noiseSensitivity = memberStatCommandRequestDTO.getNoiseSensitivity();
         this.cleaningFrequency = memberStatCommandRequestDTO.getCleaningFrequency();
-        this.personality = memberStatCommandRequestDTO.getPersonality();
+        this.drinkingFrequency = memberStatCommandRequestDTO.getDrinkingFrequency();
+        this.personality = String.join(",", memberStatCommandRequestDTO.getPersonality()) + ",";
         this.mbti = memberStatCommandRequestDTO.getMbti();
         this.options = memberStatCommandRequestDTO.getOptions();
     }

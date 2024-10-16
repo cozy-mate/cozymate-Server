@@ -8,15 +8,19 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
-import java.sql.Time;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 public class MemberStatConverter {
 
     public static MemberStat toEntity(
         Long memberStatId, Member member, University university, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+
+        // 입력 시 정렬된 상태를 유지, 검색을 쉽게 하기 위해 넣었음.
+        List<String> personalityList = memberStatCommandRequestDTO.getPersonality().stream().sorted(
+            Comparator.naturalOrder()).toList();
+
         MemberStatBuilder builder = MemberStat.builder()
             .member(member)
             .university(university)
@@ -41,7 +45,8 @@ public class MemberStatConverter {
             .cleanSensitivity(memberStatCommandRequestDTO.getCleanSensitivity())
             .noiseSensitivity(memberStatCommandRequestDTO.getNoiseSensitivity())
             .cleaningFrequency(memberStatCommandRequestDTO.getCleaningFrequency())
-            .personality(memberStatCommandRequestDTO.getPersonality())
+            .drinkingFrequency(memberStatCommandRequestDTO.getDrinkingFrequency())
+            .personality(String.join(",", personalityList + ","))
             .mbti(memberStatCommandRequestDTO.getMbti())
             .options(memberStatCommandRequestDTO.getOptions());
 
@@ -82,7 +87,8 @@ public class MemberStatConverter {
             .cleanSensitivity(memberStat.getCleanSensitivity())
             .noiseSensitivity(memberStat.getNoiseSensitivity())
             .cleaningFrequency(memberStat.getCleaningFrequency())
-            .personality(memberStat.getPersonality())
+            .drinkingFrequency(memberStat.getDrinkingFrequency())
+            .personality(Arrays.asList(memberStat.getPersonality().replaceAll(",$", "").split(",")))
             .mbti(memberStat.getMbti())
             .options(memberStat.getOptions())
             .build();

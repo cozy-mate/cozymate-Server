@@ -1,12 +1,10 @@
 package com.cozymate.cozymate_server.domain.memberstat.dto;
 
-import com.cozymate.cozymate_server.domain.member.Member;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,15 +35,16 @@ public class MemberStatResponseDTO {
         private Integer heatingIntensity;
         private String lifePattern;
         private String intimacy;
-        private Boolean canShare;
-        private Boolean isPlayGame;
-        private Boolean isPhoneCall;
+        private String canShare;
+        private String isPlayGame;
+        private String isPhoneCall;
         private String studying;
         private String intake;
         private Integer cleanSensitivity;
         private Integer noiseSensitivity;
         private String cleaningFrequency;
-        private String personality;
+        private String drinkingFrequency;
+        private List<String> personality;
         private String mbti;
         private Map<String, List<String>> options;
     }

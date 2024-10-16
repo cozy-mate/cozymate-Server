@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -71,9 +70,12 @@ public class MemberStatRequestDTO {
                 private String lifePattern;
                 @NotBlank
                 private String intimacy;
-                private Boolean canShare;
-                private Boolean isPlayGame;
-                private Boolean isPhoneCall;
+                @NotBlank
+                private String canShare;
+                @NotBlank
+                private String isPlayGame;
+                @NotBlank
+                private String isPhoneCall;
                 @NotBlank
                 private String studying;
                 @NotBlank
@@ -89,7 +91,9 @@ public class MemberStatRequestDTO {
                 @NotBlank
                 private String cleaningFrequency;
                 @NotBlank
-                private String personality;
+                private String drinkingFrequency;
+                @NotBlank
+                private List<String> personality;
                 @NotBlank
                 @Size(max=4, min=4)
                 private String mbti;
@@ -151,9 +155,12 @@ public class MemberStatRequestDTO {
                 private String lifePattern;
                 @NotBlank
                 private String intimacy;
-                private Boolean canShare;
-                private Boolean isPlayGame;
-                private Boolean isPhoneCall;
+                @NotBlank
+                private String canShare;
+                @NotBlank
+                private String isPlayGame;
+                @NotBlank
+                private String isPhoneCall;
                 @NotBlank
                 private String studying;
                 @NotBlank
@@ -168,6 +175,8 @@ public class MemberStatRequestDTO {
                 private Integer noiseSensitivity;
                 @NotBlank
                 private String cleaningFrequency;
+                @NotBlank
+                private String drinkingFrequency;
                 @NotBlank
                 private String personality;
                 @NotBlank
