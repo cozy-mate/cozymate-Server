@@ -16,6 +16,7 @@ import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -64,8 +65,7 @@ public class MemberCommandService {
     /**
      * 사용자 회원가입 메서드
      *
-     * @param clientId 사용자 식별자
-     * clientId 로 사용자 중복 검증
+     * @param clientId         사용자 식별자 clientId 로 사용자 중복 검증
      * @param signUpRequestDTO 회원가입 요청 정보를 담은 DTO
      * @return 로그인 결과를 담은 DTO
      */
@@ -93,11 +93,21 @@ public class MemberCommandService {
         return MemberConverter.toMemberInfoDTO(memberDetails.getMember());
     }
 
+    @Transactional
+    public AuthResponseDTO.TokenResponseDTO verifyMember(MemberDetails memberDetails) {
+        memberDetails.getMember().verify();
+        memberRepository.save(memberDetails.getMember());
+
+        return authService.generateMemberTokenDTO(memberDetails);
+    }
+
     /**
      * 사용자 회원탈퇴 메서드
      *
      * @param memberDetails 사용자 세부 정보
      */
+
+    // todo: 탈퇴로직 고도화
     public void withdraw(MemberDetails memberDetails) {
         // 리프레시 토큰 삭제 및 회원 삭제
         authService.deleteRefreshToken(memberDetails.getUsername());

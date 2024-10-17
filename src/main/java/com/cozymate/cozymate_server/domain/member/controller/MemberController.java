@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("members/")
+@RequestMapping("/members")
 public class MemberController {
     private final MemberCommandService memberCommandService;
 

@@ -68,4 +68,8 @@ public class Member extends BaseTimeEntity {
     // member <-> memberstat one to one mapping으로 변경하였습니다.
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "member")
     private MemberStat memberStat;
+
+    public void verify(){
+        role = Role.USER_VERIFIED;
+    }
 }
