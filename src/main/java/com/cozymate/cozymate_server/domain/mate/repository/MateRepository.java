@@ -23,6 +23,9 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Optional<Mate> findByRoomIdAndMemberId(Long roomId, Long memberId);
 
+    @Query("SELECT COUNT(m) FROM Mate m WHERE m.room.id = :roomId AND m.entryStatus != 'EXITED'")
+    long countActiveMatesByRoomId(@Param("roomId") Long roomId);
+
     Long countByRoomId(Long roomId);
 
     @Query("SELECT COUNT(m) > 0 FROM Mate m WHERE m.member.id = :memberId AND (m.room.status = :status1 OR m.room.status = :status2)")
@@ -58,4 +61,9 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     @Query("select m.id from Mate m where m.member.id in :memberIds")
     Set<Long> findMateIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
+
+    List<Mate> findByIdIn(List<Long> memberIdList);
+
+    void deleteByRoomIdAndMemberId(Long roomId, Long memberId);
+
 }

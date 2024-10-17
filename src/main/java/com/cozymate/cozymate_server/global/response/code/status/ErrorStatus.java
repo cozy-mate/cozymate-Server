@@ -51,6 +51,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _INVITATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM408", "존재하지 않는 초대요청입니다."),
     _INVITATION_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM409", "이미 보낸 초대요청입니다."),
 
+    // Hashtag
+    _DUPLICATE_HASHTAGS(HttpStatus.BAD_REQUEST, "HASHTAG400", "중복된 해시태그는 입력할 수 없습니다."),
+
     // University 관련 에러
     _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "UNIVERSITY400", "대학을 찾을 수 없습니다."),
 

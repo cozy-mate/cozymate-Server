@@ -67,6 +67,14 @@ dependencies {
     // Firebase Admin SDK
     implementation 'com.google.firebase:firebase-admin:9.2.0'
 
+    // spring-boot mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.3.4'
+
+
+
 }
 
 tasks.named('test') {
