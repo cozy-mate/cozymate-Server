@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
+@Transactional
 public class MemberStatEqualityBulkRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Transactional
     public void saveAll(List<MemberStatEquality> memberStatEqualityList) {
 
         String sql = "INSERT INTO member_stat_equality(equality, memberaid, memberbid) VALUES (?, ?, ?)";
@@ -27,6 +27,37 @@ public class MemberStatEqualityBulkRepository {
                 ps.setInt(1, memberStatEquality.getEquality());
                 ps.setLong(2,memberStatEquality.getMemberAId());
                 ps.setLong(3,memberStatEquality.getMemberBId());
+            }
+        );
+    }
+
+    public void updateAll(List<MemberStatEquality> memberStatEqualityList) {
+
+        String sql = "UPDATE member_stat_equality SET equality = ? where memberaid = ? and memberbid = ?";
+
+        jdbcTemplate.batchUpdate(
+            sql,
+            memberStatEqualityList,
+            memberStatEqualityList.size(),
+            (PreparedStatement ps, MemberStatEquality memberStatEquality) -> {
+                ps.setInt(1, memberStatEquality.getEquality());
+                ps.setLong(2,memberStatEquality.getMemberAId());
+                ps.setLong(3,memberStatEquality.getMemberBId());
+            }
+        );
+    }
+
+    public void deleteAll(List<MemberStatEquality> memberStatEqualityList) {
+
+        String sql = "DELETE FROM member_stat_equality WHERE memberaid = ? AND memberbid = ?";
+
+        jdbcTemplate.batchUpdate(
+            sql,
+            memberStatEqualityList,
+            memberStatEqualityList.size(),
+            (PreparedStatement ps, MemberStatEquality memberStatEquality) -> {
+                ps.setLong(1, memberStatEquality.getMemberAId());
+                ps.setLong(2, memberStatEquality.getMemberBId());
             }
         );
     }
