@@ -93,9 +93,7 @@ public class MemberStat extends BaseTimeEntity{
 
     private String mbti;
 
-    @Type(JsonType.class)
-    @Column(columnDefinition = "json")
-    private Map<String, List<String>> options;
+    private String selfIntroduction;
 
     public void update(Member member, University university, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         this.member = member;
@@ -108,7 +106,7 @@ public class MemberStat extends BaseTimeEntity{
         this.sleepingTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),memberStatCommandRequestDTO.getSleepingTime());
         this.turnOffTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(),memberStatCommandRequestDTO.getTurnOffTime());
         this.smoking = memberStatCommandRequestDTO.getSmokingState();
-        this.sleepingHabit = memberStatCommandRequestDTO.getSleepingHabit();
+        this.sleepingHabit = String.join(",", memberStatCommandRequestDTO.getSleepingHabit()) + ",";
         this.airConditioningIntensity = memberStatCommandRequestDTO.getAirConditioningIntensity();
         this.heatingIntensity = memberStatCommandRequestDTO.getHeatingIntensity();
         this.lifePattern = memberStatCommandRequestDTO.getLifePattern();
@@ -124,6 +122,6 @@ public class MemberStat extends BaseTimeEntity{
         this.drinkingFrequency = memberStatCommandRequestDTO.getDrinkingFrequency();
         this.personality = String.join(",", memberStatCommandRequestDTO.getPersonality()) + ",";
         this.mbti = memberStatCommandRequestDTO.getMbti();
-        this.options = memberStatCommandRequestDTO.getOptions();
+        this.selfIntroduction = memberStatCommandRequestDTO.getSelfIntroduction();
     }
 }

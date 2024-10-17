@@ -57,7 +57,7 @@ public class MemberStatRequestDTO {
                 @NotBlank
                 private String smokingState;
                 @NotBlank
-                private String sleepingHabit;
+                private List<String> sleepingHabit;
                 @NotNull
                 @Min(0)
                 @Max(3)
@@ -97,7 +97,8 @@ public class MemberStatRequestDTO {
                 @NotBlank
                 @Size(max=4, min=4)
                 private String mbti;
-                private Map<String, List<String>> options;
+                @NotBlank
+                private String selfIntroduction;
         }
 
         @Getter
@@ -142,7 +143,7 @@ public class MemberStatRequestDTO {
                 @NotBlank
                 private String smokingState;
                 @NotBlank
-                private String sleepingHabit;
+                private List<String> sleepingHabit;
                 @NotNull
                 @Min(1)
                 @Max(3)
@@ -182,6 +183,7 @@ public class MemberStatRequestDTO {
                 @NotBlank
                 @Size(max=4, min=4)
                 private String mbti;
-                private Map<String, List<String>> options;
+                @NotBlank
+                private String selfIntroduction;
         }
 }

@@ -18,8 +18,13 @@ public class MemberStatConverter {
         Long memberStatId, Member member, University university, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
 
         // 입력 시 정렬된 상태를 유지, 검색을 쉽게 하기 위해 넣었음.
-        List<String> personalityList = memberStatCommandRequestDTO.getPersonality().stream().sorted(
-            Comparator.naturalOrder()).toList();
+        List<String> personalityList = memberStatCommandRequestDTO.getPersonality().stream()
+            .sorted(Comparator.naturalOrder())
+            .toList();
+
+        List<String> sleepHabitList = memberStatCommandRequestDTO.getSleepingHabit().stream()
+            .sorted(Comparator.naturalOrder())
+            .toList();
 
         MemberStatBuilder builder = MemberStat.builder()
             .member(member)
@@ -32,7 +37,7 @@ public class MemberStatConverter {
             .sleepingTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(), memberStatCommandRequestDTO.getSleepingTime()))
             .turnOffTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(), memberStatCommandRequestDTO.getTurnOffTime()))
             .smoking(memberStatCommandRequestDTO.getSmokingState())
-            .sleepingHabit(memberStatCommandRequestDTO.getSleepingHabit())
+            .sleepingHabit(String.join(",", sleepHabitList + ","))
             .airConditioningIntensity(memberStatCommandRequestDTO.getAirConditioningIntensity())
             .heatingIntensity(memberStatCommandRequestDTO.getHeatingIntensity())
             .lifePattern(memberStatCommandRequestDTO.getLifePattern())
@@ -48,7 +53,7 @@ public class MemberStatConverter {
             .drinkingFrequency(memberStatCommandRequestDTO.getDrinkingFrequency())
             .personality(String.join(",", personalityList + ","))
             .mbti(memberStatCommandRequestDTO.getMbti())
-            .options(memberStatCommandRequestDTO.getOptions());
+            .selfIntroduction(memberStatCommandRequestDTO.getSelfIntroduction());
 
         if (memberStatId != null) {
             builder.id(memberStatId);
@@ -74,7 +79,7 @@ public class MemberStatConverter {
             .turnOffMeridian(TimeUtil.convertToMeridian(memberStat.getTurnOffTime()))
             .turnOffTime(TimeUtil.convertToTime(memberStat.getTurnOffTime()))
             .smokingState(memberStat.getSmoking())
-            .sleepingHabit(memberStat.getSleepingHabit())
+            .sleepingHabit(Arrays.asList(memberStat.getSleepingHabit().replaceAll(",$", "").split(",")))
             .airConditioningIntensity(memberStat.getAirConditioningIntensity())
             .heatingIntensity(memberStat.getHeatingIntensity())
             .lifePattern(memberStat.getLifePattern())
@@ -90,7 +95,7 @@ public class MemberStatConverter {
             .drinkingFrequency(memberStat.getDrinkingFrequency())
             .personality(Arrays.asList(memberStat.getPersonality().replaceAll(",$", "").split(",")))
             .mbti(memberStat.getMbti())
-            .options(memberStat.getOptions())
+            .selfIntroduction(memberStat.getSelfIntroduction())
             .build();
     }
 

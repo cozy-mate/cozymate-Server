@@ -30,7 +30,7 @@ public class MemberStatResponseDTO {
         private String turnOffMeridian;
         private Integer turnOffTime;
         private String smokingState;
-        private String sleepingHabit;
+        private List<String> sleepingHabit;
         private Integer airConditioningIntensity;
         private Integer heatingIntensity;
         private String lifePattern;
@@ -46,7 +46,7 @@ public class MemberStatResponseDTO {
         private String drinkingFrequency;
         private List<String> personality;
         private String mbti;
-        private Map<String, List<String>> options;
+        private String selfIntroduction;
     }
 
     @Getter
