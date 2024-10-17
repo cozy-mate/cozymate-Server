@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositor
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.memberblock.util.MemberBlockUtil;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class ChatRoomQueryService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
+    private final MemberBlockUtil memberBlockUtil;
 
     public List<ChatRoomResponseDto> getChatRoomList(Member member) {
         List<ChatRoom> findChatRoomList = chatRoomRepository.findAllByMember(member);
@@ -46,7 +48,8 @@ public class ChatRoomQueryService {
             })
             .toList();
 
-        return chatRoomResponseDtoList;
+        return memberBlockUtil.filterBlockedMember(chatRoomResponseDtoList, member,
+            ChatRoomResponseDto::getMemberId);
     }
 
     private Chat getLatestChatByChatRoom(ChatRoom chatRoom) {
@@ -67,6 +70,9 @@ public class ChatRoomQueryService {
             chat.getContent(),
             chatRoom.getId(),
             member.getNickname().equals(chatRoom.getMemberA().getNickname()) ?
-                chatRoom.getMemberB().getPersona() : chatRoom.getMemberA().getPersona());
+                chatRoom.getMemberB().getPersona() : chatRoom.getMemberA().getPersona(),
+            member.getNickname().equals(chatRoom.getMemberA().getNickname()) ?
+                chatRoom.getMemberB().getId() : chatRoom.getMemberA().getId()
+        );
     }
 }
