@@ -26,11 +26,6 @@ public class SshTunnelConfig {
     private String user;
     @Value("${cloud.aws.ec2.private_key_path}")
     private String privateKeyPath;
-    @Value("${cloud.aws.ec2.database_endpoint}")
-    private String databaseEndpoint;
-    @Value("${cloud.aws.ec2.database_port}")
-    private int databasePort;
-
 
     private Session session;
 
@@ -41,12 +36,11 @@ public class SshTunnelConfig {
         }
     }
 
-    public Integer buildSshConnection() {
+    public Integer buildSshConnection(String endpoint, int port) {
         Integer forwardPort = null;
 
         try {
-            log.info("Connecting to SSH with {}@{}:{} using privateKey at {}", user, remoteJumpHost,
-                sshPort, privateKeyPath);
+            log.info("SSH  {}@{}:{}  with {}", user, remoteJumpHost, sshPort, privateKeyPath);
             JSch jsch = new JSch();
 
             jsch.addIdentity(privateKeyPath);
@@ -57,9 +51,9 @@ public class SshTunnelConfig {
             session.connect();
             log.info("SSH session connected");
 
-            forwardPort = session.setPortForwardingL(0, databaseEndpoint, databasePort);
+            forwardPort = session.setPortForwardingL(0, endpoint, port);
             log.info("Port forwarding created on local port {} to remote port {}", forwardPort,
-                databasePort);
+                port);
         } catch (JSchException e) {
             log.error(e.getMessage());
             this.destroy();
