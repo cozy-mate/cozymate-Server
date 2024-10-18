@@ -67,6 +67,15 @@ public class MemberStatQueryService {
         );
     }
 
+    public Integer getNumOfRoommateStatus(Long memberId) {
+
+        MemberStat memberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+        );
+
+        return memberStat.getNumOfRoommate();
+    }
+
     public PageResponseDto<List<?>> getMemberStatList(Member member,
         List<String> filterList, Pageable pageable, boolean needsDetail) {
 

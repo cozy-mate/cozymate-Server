@@ -123,6 +123,28 @@ public class MemberStatController {
     }
 
     @Operation(
+        summary = "[포비] 기숙사 인원 미정 여부 조회",
+        description = "사용자 토큰을 넣고 사용합니다. 결과 값으로 정수를 리턴합니다.\n\n"
+            + "- 미정일 경우 : 0 반환\n"
+            + "- 인실이 정해져 있을 경우 : 사용자의 인실 반환\n"
+            + "- 필터링 기능에서 사용하면 됩니다.\n"
+            + "(미정일 때는 다른 인실 상세 필터링 가능, 아닐 경우 자신이 입력한 인실에 대한 결과를 반환)"
+    )
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._MEMBERSTAT_NOT_EXISTS
+    })
+    @GetMapping("/numOfRoommate")
+    public ResponseEntity<ApiResponse<Integer>> getNumOfRoommateStatus(
+         @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                memberStatQueryService.getNumOfRoommateStatus(memberDetails.getMember().getId())
+            ));
+    }
+
+    @Operation(
         summary = "[포비] 사용자 상세정보 완전 일치 필터링 및 일치율 조회",
         description = "사용자의 토큰을 넣어 사용합니다."
             + "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
@@ -284,6 +306,8 @@ public class MemberStatController {
             )
         );
     }
+
+
 
     @Deprecated(since = "2024-10-15, 상세정보 검색 기능 Update")
     @Operation(

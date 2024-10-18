@@ -4,9 +4,9 @@ import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 
 public class MemberStatEqualityUtil {
 
-    private static final Integer ADDITIONAL_SCORE = 12;
+    private static final Integer ADDITIONAL_SCORE = 36;
     private static final Integer NO_SCORE = 0;
-    private static final Integer ATTRIBUTE_COUNT = 19;
+    private static final Integer ATTRIBUTE_COUNT = 18;
     private static final Integer HALF_DIVISION = 2;
     private static final Integer QUARTER_DIVISION = 4;
     private static final Integer MULTIPLIER_FOR_PERCENTAGE = 100;
@@ -14,10 +14,13 @@ public class MemberStatEqualityUtil {
 
     // 두 사용자간 일치율을 비교해야 할 때, 사용하는 util
     // 성격은 일치율에서 제외, 출생년도는 보류(총 22개 항목)
-    // 완전 라이프스타일에 대한 일치율이라면, 다음의 항목을 제외할 필요성이 있는지 논의가 필요할 듯 함
-    // - 기숙사 합격 여부
-    // - 학번
-    // - 학과
+    // 제외 목록
+//    - 출생년도
+//    - 기숙사 합격 여부
+//    - 학번
+//    - 학과
+//    - 성격
+//    - mbti
     public static int calculateEquality(MemberStat criteriaMemberStat,
         MemberStat memberStat) {
 
@@ -41,8 +44,6 @@ public class MemberStatEqualityUtil {
         score += criteriaMemberStat.getIntake().equals(memberStat.getIntake())
             ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getCleaningFrequency().equals(memberStat.getCleaningFrequency())
-            ? ADDITIONAL_SCORE : NO_SCORE;
-        score += criteriaMemberStat.getMbti().equals(memberStat.getMbti())
             ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getAirConditioningIntensity().equals(memberStat.getAirConditioningIntensity())
             ? ADDITIONAL_SCORE : NO_SCORE;
@@ -81,7 +82,6 @@ public class MemberStatEqualityUtil {
             default -> NO_SCORE;
         };
     }
-
 
     private static int calculateSensitivityScore(Integer sensitivity1, Integer sensitivity2) {
         int sensitivityDifference = Math.abs(sensitivity1 - sensitivity2);

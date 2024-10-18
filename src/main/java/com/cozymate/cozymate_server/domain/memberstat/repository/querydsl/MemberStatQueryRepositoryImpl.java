@@ -29,6 +29,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private final JPAQueryFactory queryFactory;
     private static final Integer NUM_OF_ROOMMATE_NOT_DETERMINED = 0;
     private static final String PERSONALITY = "personality";
+    private static final String SLEEPING_HABIT = "sleepingHabit";
+    private static final String NUM_OF_ROOMMATE = "numOfRoommate";
 
     private JPAQuery<Tuple> createBaseQuery(MemberStat criteriaMemberStat) {
         return queryFactory
@@ -39,7 +41,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     }
 
     @Override
-    public Map<Member, MemberStat> getFilteredMemberStat(List<String> filterList, MemberStat criteriaMemberStat) {
+    public Map<Member, MemberStat> getFilteredMemberStat(List<String> filterList,
+        MemberStat criteriaMemberStat) {
         // Tuple로 MemberStat과 Member를 함께 조회
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
             .where(applyFilters(filterList, criteriaMemberStat))
@@ -54,10 +57,11 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     }
 
     @Override
-    public Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap, MemberStat criteriaMemberStat) {
+    public Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
+        MemberStat criteriaMemberStat) {
         // Tuple로 MemberStat과 Member를 함께 조회
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
-            .where(applyFilters(filterMap))
+            .where(applyFilters(filterMap, criteriaMemberStat))
             .fetch();
 
         // 결과를 Map<Member, MemberStat>으로 변환
@@ -83,30 +87,42 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return builder;
     }
 
-    // 단순 필터링 (완전 일치)
+    // 단순 필터링 (criteriaMemberStat과 각 필드의 값이 일치하는지 확인)
     private BooleanBuilder applyFilters(List<String> filterList, MemberStat criteriaMemberStat) {
         BooleanBuilder builder = new BooleanBuilder();
-        if (filterList != null) {
-            filterList.forEach(filter -> applyFilter(builder, filter, criteriaMemberStat));
-        }
-        return builder;
-    }
 
-    // 상세 검색 필터링 (key : value) 필터링
-    private BooleanBuilder applyFilters(HashMap<String, List<?>> filterMap) {
-        BooleanBuilder builder = new BooleanBuilder();
-        if (filterMap != null) {
-            filterMap.forEach((key, value) -> {
-                // value가 빈 배열이 아닐때만 적용
-                if (value != null && !value.isEmpty()) {
-                    applyFilter(builder, key, value);
+        // filterList가 주어진 경우에만 필터링 수행
+        if (filterList != null) {
+            filterList.forEach(filter -> {
+                // 기존의 getPathByKey를 사용하여 동적 필터링을 적용
+                Path<?> path = getPathByKey(filter);
+                Object criteriaValue = getFieldValueByKey(criteriaMemberStat, filter);
+
+                if (path != null && criteriaValue != null) {
+                    applyFilter(builder, filter, criteriaValue, criteriaMemberStat);
                 }
             });
         }
         return builder;
     }
 
-    private void applyFilter(BooleanBuilder builder, String filterKey, Object filterValue) {
+    // 상세 검색 필터링 (key : value) 필터링
+    private BooleanBuilder applyFilters(HashMap<String, List<?>> filterMap,
+        MemberStat criteriaMemberStat) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if (filterMap != null) {
+            filterMap.forEach((key, value) -> {
+                // value가 빈 배열이 아닐때만 적용
+                if (value != null && !value.isEmpty()) {
+                    applyFilter(builder, key, value, criteriaMemberStat);
+                }
+            });
+        }
+        return builder;
+    }
+
+    private void applyFilter(BooleanBuilder builder, String filterKey, Object filterValue,
+        MemberStat criteriaMemberStat) {
 
         if (Objects.isNull(filterValue)) {
             return;
@@ -122,7 +138,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "StringPath" ->
                 handleStringPathFilter(builder, (StringPath) path, filterKey, filterValue);
             case "NumberPath" ->
-                builder.and(handleNumberFilter((NumberPath<Integer>) path, filterValue));
+                handleNumberPathFilter(builder, (NumberPath<Integer>) path, filterKey, filterValue,
+                    criteriaMemberStat);
             case "BooleanPath" -> builder.and(handleBooleanFilter((BooleanPath) path, filterValue));
             case "DatePath" ->
                 builder.and(handleDateFilter((DatePath<LocalDate>) path, filterValue));
@@ -133,24 +150,57 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 
     private void handleStringPathFilter(BooleanBuilder builder, StringPath stringPath,
         String filterKey, Object filterValue) {
-        if (filterKey.equals(PERSONALITY)) {
-            builder.and(handlePersonalityFilter(stringPath, filterValue));
-        }
-        else {
+        // 다중 선택 요소들의 경우
+        if (filterKey.equals(PERSONALITY) || filterKey.equals(SLEEPING_HABIT)) {
+            builder.and(handleMultiStringContentFilter(stringPath, filterValue));
+        } else {
             builder.and(handleStringFilter(stringPath, filterValue));
         }
     }
 
+    private void handleNumberPathFilter(BooleanBuilder builder, NumberPath<Integer> numberPath,
+        String filterKey, Object filterValue, MemberStat criteriaMemberStat) {
+        if (filterKey.equals(NUM_OF_ROOMMATE)) {
+            builder.and(handleNumberOfRoommateFilter(numberPath, filterValue, criteriaMemberStat));
+        } else {
+            builder.and(handleNumberFilter(numberPath, filterValue));
+        }
+    }
+
     // 성격은 다중 선택으로 String의 조합으로 저장됨. 따라서 일반 String 필터링과 분리함.
-    private BooleanExpression handlePersonalityFilter(StringPath path, Object filterValue) {
+    private BooleanExpression handleMultiStringContentFilter(StringPath path, Object filterValue) {
         if (filterValue instanceof String value) {
-            return path.eq(value);  // 단일 문자열 비교
+            return path.eq(value);
         } else if (filterValue instanceof List<?> values) {
             return values.stream()
                 .map(String::valueOf)
                 .map(value -> path.like("%" + value + "%"))
                 .reduce(BooleanExpression::and)
                 .orElse(null);
+        }
+        return null;
+    }
+
+
+    private BooleanExpression handleNumberOfRoommateFilter(NumberPath<Integer> path,
+        Object filterValue, MemberStat criteriaMemberStat) {
+        if (filterValue instanceof Integer value) {
+            // 미정일 경우 모든 조건을 보여줘야 함
+            if (value.equals(0)) {
+                return null;
+            }
+            // 나머지는 자신의 인실에 맞춰서 보여줌
+            return path.eq(value);
+        } else if (filterValue instanceof List<?> values) {
+            if(criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)){
+                // 미정을 선택한 사용자는 자유롭게 필터링 가능
+                return path.in((List<Integer>) values);
+            }
+            // 특정 인실을 선택한 사용자는 필터링 불가능
+
+            throw new GeneralException((ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE));
+
+            // return null;
         }
         return null;
     }
@@ -167,6 +217,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 
     // Integer 형식을 다루는 Boolean Expression
     private BooleanExpression handleNumberFilter(NumberPath<Integer> path, Object filterValue) {
+
         if (filterValue instanceof Integer value) {
             return path.eq(value);
         } else if (filterValue instanceof List<?> values) {
@@ -189,7 +240,10 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private BooleanExpression handleDateFilter(DatePath<LocalDate> path, Object filterValue) {
         if (filterValue instanceof Integer value) {
             return Expressions.numberTemplate(Integer.class, "year({0})", path).eq(value);
-        } else if (filterValue instanceof List<?> values) {
+        }  else if(filterValue instanceof LocalDate value) {
+            return Expressions.numberTemplate(Integer.class, "year({0})", path).eq(value.getYear());
+        }
+        else if (filterValue instanceof List<?> values) {
             List<Integer> value = values.stream()
                 .map(Integer.class::cast)
                 .toList();
@@ -209,6 +263,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "turnOffTime" -> memberStat.turnOffTime;
             case "smoking" -> memberStat.smoking;
             case "sleepingHabit" -> memberStat.sleepingHabit;
+            case "numOfRoommate" -> memberStat.numOfRoommate;
             case "airConditioningIntensity" -> memberStat.airConditioningIntensity;
             case "heatingIntensity" -> memberStat.heatingIntensity;
             case "lifePattern" -> memberStat.lifePattern;
@@ -227,6 +282,38 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "birthYear" -> member.birthDay;
             default ->
                 throw new GeneralException(ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID);
+        };
+    }
+
+    private Object getFieldValueByKey(MemberStat criteriaMemberStat, String key) {
+
+        return switch (key) {
+            case "acceptance" -> criteriaMemberStat.getAcceptance();
+            case "admissionYear" -> criteriaMemberStat.getAdmissionYear();
+            case "major" -> criteriaMemberStat.getMajor();
+            case "wakeUpTime" -> criteriaMemberStat.getWakeUpTime();
+            case "sleepingTime" -> criteriaMemberStat.getSleepingTime();
+            case "turnOffTime" -> criteriaMemberStat.getTurnOffTime();
+            case "smoking" -> criteriaMemberStat.getSmoking();
+            case "sleepingHabit" -> criteriaMemberStat.getSleepingHabit();
+            case "numOfRoommate" -> criteriaMemberStat.getNumOfRoommate();
+            case "airConditioningIntensity" -> criteriaMemberStat.getAirConditioningIntensity();
+            case "heatingIntensity" -> criteriaMemberStat.getHeatingIntensity();
+            case "lifePattern" -> criteriaMemberStat.getLifePattern();
+            case "intimacy" -> criteriaMemberStat.getIntimacy();
+            case "canShare" -> criteriaMemberStat.getCanShare();
+            case "isPlayGame" -> criteriaMemberStat.getIsPlayGame();
+            case "isPhoneCall" -> criteriaMemberStat.getIsPhoneCall();
+            case "studying" -> criteriaMemberStat.getStudying();
+            case "intake" -> criteriaMemberStat.getIntake();
+            case "cleanSensitivity" -> criteriaMemberStat.getCleanSensitivity();
+            case "noiseSensitivity" -> criteriaMemberStat.getNoiseSensitivity();
+            case "cleaningFrequency" -> criteriaMemberStat.getCleaningFrequency();
+            case "personality" -> criteriaMemberStat.getPersonality();
+            case "drinkingFrequency" -> criteriaMemberStat.getDrinkingFrequency();
+            case "mbti" -> criteriaMemberStat.getMbti();
+            case "birthYear" -> criteriaMemberStat.getMember().getBirthDay();
+            default -> null;
         };
     }
 }

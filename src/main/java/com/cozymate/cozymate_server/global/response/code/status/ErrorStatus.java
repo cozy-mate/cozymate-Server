@@ -60,6 +60,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBERSTAT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT402", "멤버 상세정보가 존재하지 않습니다."),
     _MEMBERSTAT_FILTER_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT403",
         "멤버 상세정보 filterList이 잘못되었습니다."),
+    _MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE(HttpStatus.BAD_REQUEST, "MEMBERSTAT404", "인실이 정해진 경우 인실 필터링이 불가합니다."),
 
     // ChatRoom 관련 애러
     _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
