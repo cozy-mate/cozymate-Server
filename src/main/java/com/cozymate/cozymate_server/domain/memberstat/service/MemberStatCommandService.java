@@ -72,9 +72,9 @@ public class MemberStatCommandService {
 
     }
 
-    public void deleteMemberStat(Long memberId){
+    public void deleteMemberStat(Long memberId) {
 
-        if(!memberStatRepository.existsById(memberId)){
+        if (!memberStatRepository.existsById(memberId)) {
             throw new GeneralException(ErrorStatus._MEMBER_NOT_FOUND);
         }
 

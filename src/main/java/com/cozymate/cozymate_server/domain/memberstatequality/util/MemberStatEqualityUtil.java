@@ -45,7 +45,8 @@ public class MemberStatEqualityUtil {
             ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getCleaningFrequency().equals(memberStat.getCleaningFrequency())
             ? ADDITIONAL_SCORE : NO_SCORE;
-        score += criteriaMemberStat.getAirConditioningIntensity().equals(memberStat.getAirConditioningIntensity())
+        score += criteriaMemberStat.getAirConditioningIntensity()
+            .equals(memberStat.getAirConditioningIntensity())
             ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getHeatingIntensity().equals(memberStat.getHeatingIntensity())
             ? ADDITIONAL_SCORE : NO_SCORE;

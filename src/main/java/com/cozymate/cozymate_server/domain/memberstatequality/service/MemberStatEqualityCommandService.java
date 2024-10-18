@@ -73,8 +73,8 @@ public class MemberStatEqualityCommandService {
     }
 
     /**
-     * @action : 없는 일치율 재생성
      * @return : void
+     * @action : 없는 일치율 재생성
      */
     public void generateAllMemberStatEquality(
     ) {
@@ -94,7 +94,8 @@ public class MemberStatEqualityCommandService {
         // 성별과 학교를 기준으로 MemberStat을 그룹화
         Map<String, List<MemberStat>> groupedMemberStats = allMemberStats.stream()
             .collect(Collectors.groupingBy(
-                memberStat -> memberStat.getMember().getGender() + "-" + memberStat.getUniversity().getId()
+                memberStat -> memberStat.getMember().getGender() + "-" + memberStat.getUniversity()
+                    .getId()
             ));
 
         // 일치율 리스트 생성
@@ -109,12 +110,15 @@ public class MemberStatEqualityCommandService {
                     MemberStat memberStatB = memberStats.get(j);
 
                     // Set을 이용해 A -> B와 B -> A의 존재 여부를 빠르게 확인
-                    String keyAtoB = memberStatA.getMember().getId() + "-" + memberStatB.getMember().getId();
-                    String keyBtoA = memberStatB.getMember().getId() + "-" + memberStatA.getMember().getId();
+                    String keyAtoB =
+                        memberStatA.getMember().getId() + "-" + memberStatB.getMember().getId();
+                    String keyBtoA =
+                        memberStatB.getMember().getId() + "-" + memberStatA.getMember().getId();
 
                     // A -> B 일치율이 없을 경우
                     if (!existingEqualities.contains(keyAtoB)) {
-                        Integer equality = MemberStatEqualityUtil.calculateEquality(memberStatA, memberStatB);
+                        Integer equality = MemberStatEqualityUtil.calculateEquality(memberStatA,
+                            memberStatB);
 
                         MemberStatEquality equalityAtoB = MemberStatEquality.builder()
                             .memberAId(memberStatA.getMember().getId())
@@ -129,7 +133,8 @@ public class MemberStatEqualityCommandService {
 
                     // B -> A 일치율이 없을 경우
                     if (!existingEqualities.contains(keyBtoA)) {
-                        Integer equality = MemberStatEqualityUtil.calculateEquality(memberStatA, memberStatB);
+                        Integer equality = MemberStatEqualityUtil.calculateEquality(memberStatA,
+                            memberStatB);
 
                         MemberStatEquality equalityBtoA = MemberStatEquality.builder()
                             .memberAId(memberStatB.getMember().getId())
@@ -150,8 +155,8 @@ public class MemberStatEqualityCommandService {
     }
 
     /**
-     * @action : 모든 기존 일치율을 다시 계산하여 업데이트
      * @return : void
+     * @action : 모든 기존 일치율을 다시 계산하여 업데이트
      */
     public void recalculateAllMemberStatEquality() {
 
@@ -169,7 +174,8 @@ public class MemberStatEqualityCommandService {
             MemberStat memberStatB = memberStatMap.get(equality.getMemberBId());
 
             if (memberStatA != null && memberStatB != null) {
-                Integer newEqualityValue = MemberStatEqualityUtil.calculateEquality(memberStatA, memberStatB);
+                Integer newEqualityValue = MemberStatEqualityUtil.calculateEquality(memberStatA,
+                    memberStatB);
 
                 if (!newEqualityValue.equals(equality.getEquality())) {
                     equality.updateEquality(newEqualityValue);

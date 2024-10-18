@@ -16,6 +16,7 @@ import org.springframework.data.repository.query.Param;
 public interface MemberStatRepository extends
     JpaRepository<MemberStat, Long>,
     MemberStatQueryRepository {
+
     Optional<MemberStat> findByMemberId(Long memberId);
 
     @Query("SELECT ms, ms.member.id FROM MemberStat ms WHERE ms.member.id IN :memberIds")

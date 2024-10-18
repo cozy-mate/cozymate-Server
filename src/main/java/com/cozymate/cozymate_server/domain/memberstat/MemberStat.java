@@ -31,7 +31,7 @@ import org.hibernate.annotations.Type;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
-public class MemberStat extends BaseTimeEntity{
+public class MemberStat extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -95,16 +95,20 @@ public class MemberStat extends BaseTimeEntity{
 
     private String selfIntroduction;
 
-    public void update(Member member, University university, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+    public void update(Member member, University university,
+        MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         this.member = member;
         this.university = university;
         this.acceptance = memberStatCommandRequestDTO.getAcceptance();
         this.admissionYear = Integer.parseInt(memberStatCommandRequestDTO.getAdmissionYear());
         this.major = memberStatCommandRequestDTO.getMajor();
         this.numOfRoommate = memberStatCommandRequestDTO.getNumOfRoommate();
-        this.wakeUpTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),memberStatCommandRequestDTO.getWakeUpTime());
-        this.sleepingTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),memberStatCommandRequestDTO.getSleepingTime());
-        this.turnOffTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(),memberStatCommandRequestDTO.getTurnOffTime());
+        this.wakeUpTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),
+            memberStatCommandRequestDTO.getWakeUpTime());
+        this.sleepingTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),
+            memberStatCommandRequestDTO.getSleepingTime());
+        this.turnOffTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(),
+            memberStatCommandRequestDTO.getTurnOffTime());
         this.smoking = memberStatCommandRequestDTO.getSmokingState();
         this.sleepingHabit = String.join(",", memberStatCommandRequestDTO.getSleepingHabit()) + ",";
         this.airConditioningIntensity = memberStatCommandRequestDTO.getAirConditioningIntensity();

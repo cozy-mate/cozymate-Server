@@ -1,11 +1,7 @@
 package com.cozymate.cozymate_server.domain.memberstatequality.service;
 
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatequality.MemberStatEquality;
 import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberStatEqualityRepository;
-import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
-import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

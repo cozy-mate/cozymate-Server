@@ -10,6 +10,9 @@ import org.springframework.data.domain.Pageable;
 
 public interface MemberStatQueryRepository {
 
-    Map<Member, MemberStat> getFilteredMemberStat(List<String> filterList, MemberStat criteriaMemberStat);
-    Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap, MemberStat criteriaMemberStat);
+    Map<Member, MemberStat> getFilteredMemberStat(List<String> filterList,
+        MemberStat criteriaMemberStat);
+
+    Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
+        MemberStat criteriaMemberStat);
 }

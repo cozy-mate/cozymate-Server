@@ -131,12 +131,11 @@ public class MemberStatController {
             + "(미정일 때는 다른 인실 상세 필터링 가능, 아닐 경우 자신이 입력한 인실에 대한 결과를 반환)"
     )
     @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_NOT_EXISTS
     })
     @GetMapping("/numOfRoommate")
     public ResponseEntity<ApiResponse<Integer>> getNumOfRoommateStatus(
-         @AuthenticationPrincipal MemberDetails memberDetails
+        @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
@@ -171,13 +170,14 @@ public class MemberStatController {
             + "- cleanSensitivity : 청결예민도\n"
             + "- noiseSensitivity : 소음예민도\n"
             + "- cleaningFrequency : 청소 빈도\n"
-            + "- drinkingFrequency : 음주 빈도"
+            + "- drinkingFrequency : 음주 빈도\n"
             + "- personality : 성격\n"
             + "- mbti : mbti"
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
-        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
+        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID,
+        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
     })
     @GetMapping("/filter")
     public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getFilteredMemberList(
@@ -185,7 +185,7 @@ public class MemberStatController {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList,
         @RequestParam(defaultValue = "false", required = false) boolean needsDetail
-        ) {
+    ) {
         Pageable pageable = PageRequest.of(page, 5);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
@@ -222,7 +222,8 @@ public class MemberStatController {
             "- **intimacy** (친밀도) : `[Integer]` 예) `[1, 5]` (1~5 사이의 숫자)\n" +
             "- **canShare** (물건 공유 가능여부) : `[String]` 예) `[\"아무것도 공유하고싶지 않아요\"]`\n" +
             "- **isPlayGame** (게임여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
-            "- **isPhoneCall** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n" +
+            "- **isPhoneCall** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n"
+            +
             "- **studying** (공부여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
             "- **intake** (음식 섭취 여부) : `[String]` 예) `[\"간단한 간식은 괜찮아요\"]`\n" +
             "- **cleanSensitivity** (청결 예민도) : `[Integer]` 예) `[3, 4]` (1~5 사이의 숫자)\n" +
@@ -234,7 +235,8 @@ public class MemberStatController {
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
-        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
+        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID,
+        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
     })
     @PostMapping("/filter/search/count")
     public ResponseEntity<ApiResponse<Integer>> getSizeOfAdvancedFilteredMemberList(
@@ -252,7 +254,7 @@ public class MemberStatController {
     @Operation(
         summary = "[포비] 사용자 상세정보를 키-값으로 필터링하고, 사용자 목록 받아오기(일치율 포함)",
         description = "사용자의 토큰을 넣어 사용합니다. " +
-            "filterMap은 RequestBody에 다음과 같은 형식으로 전달됩니다:\n\n" +
+            "검색하고자 하는 정보를 RequestBody에 다음과 같은 형식으로 전달하면 됩니다:\n\n" +
             "```json\n" +
             "{\n" +
             "  \"birthYear\": [1995, 1996],\n" +
@@ -277,7 +279,8 @@ public class MemberStatController {
             "- **intimacy** (친밀도) : `[Integer]` 예) `[1, 5]` (1~5 사이의 숫자)\n" +
             "- **canShare** (물건 공유 가능여부) : `[String]` 예) `[\"아무것도 공유하고싶지 않아요\"]`\n" +
             "- **isPlayGame** (게임여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
-            "- **isPhoneCall** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n" +
+            "- **isPhoneCall** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n"
+            +
             "- **studying** (공부여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
             "- **intake** (음식 섭취 여부) : `[String]` 예) `[\"간단한 간식은 괜찮아요\"]`\n" +
             "- **cleanSensitivity** (청결 예민도) : `[Integer]` 예) `[3, 4]` (1~5 사이의 숫자)\n" +
@@ -285,11 +288,14 @@ public class MemberStatController {
             "- **cleaningFrequency** (청소 빈도) : `[String]` 예) `[\"주1회\", \"월2회\"]`\n" +
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`" +
             "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
-            "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n"
-        )
+            "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n" +
+            "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다."
+
+    )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
-        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
+        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID,
+        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
     })
     @PostMapping("/filter/search")
     public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getAdvancedFilteredMemberList(
@@ -306,7 +312,6 @@ public class MemberStatController {
             )
         );
     }
-
 
 
     @Deprecated(since = "2024-10-15, 상세정보 검색 기능 Update")
@@ -370,7 +375,7 @@ public class MemberStatController {
     })
     public ResponseEntity<ApiResponse<Boolean>> deleteMemberStat(
         @PathVariable Long memberId
-    ){
+    ) {
         // TODO : 관리자 권한 분리시 일반 사용자가 삭제하는 것을 제한하기
         memberStatCommandService.deleteMemberStat(memberId);
         return ResponseEntity.ok(

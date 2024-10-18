@@ -192,7 +192,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             // 나머지는 자신의 인실에 맞춰서 보여줌
             return path.eq(value);
         } else if (filterValue instanceof List<?> values) {
-            if(criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)){
+            if (criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)) {
                 // 미정을 선택한 사용자는 자유롭게 필터링 가능
                 return path.in((List<Integer>) values);
             }
@@ -240,10 +240,9 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private BooleanExpression handleDateFilter(DatePath<LocalDate> path, Object filterValue) {
         if (filterValue instanceof Integer value) {
             return Expressions.numberTemplate(Integer.class, "year({0})", path).eq(value);
-        }  else if(filterValue instanceof LocalDate value) {
+        } else if (filterValue instanceof LocalDate value) {
             return Expressions.numberTemplate(Integer.class, "year({0})", path).eq(value.getYear());
-        }
-        else if (filterValue instanceof List<?> values) {
+        } else if (filterValue instanceof List<?> values) {
             List<Integer> value = values.stream()
                 .map(Integer.class::cast)
                 .toList();

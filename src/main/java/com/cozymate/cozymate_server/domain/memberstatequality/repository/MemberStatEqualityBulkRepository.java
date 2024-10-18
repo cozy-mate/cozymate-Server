@@ -25,8 +25,8 @@ public class MemberStatEqualityBulkRepository {
             memberStatEqualityList.size(),
             (PreparedStatement ps, MemberStatEquality memberStatEquality) -> {
                 ps.setInt(1, memberStatEquality.getEquality());
-                ps.setLong(2,memberStatEquality.getMemberAId());
-                ps.setLong(3,memberStatEquality.getMemberBId());
+                ps.setLong(2, memberStatEquality.getMemberAId());
+                ps.setLong(3, memberStatEquality.getMemberBId());
             }
         );
     }
@@ -41,8 +41,8 @@ public class MemberStatEqualityBulkRepository {
             memberStatEqualityList.size(),
             (PreparedStatement ps, MemberStatEquality memberStatEquality) -> {
                 ps.setInt(1, memberStatEquality.getEquality());
-                ps.setLong(2,memberStatEquality.getMemberAId());
-                ps.setLong(3,memberStatEquality.getMemberBId());
+                ps.setLong(2, memberStatEquality.getMemberAId());
+                ps.setLong(3, memberStatEquality.getMemberBId());
             }
         );
 
