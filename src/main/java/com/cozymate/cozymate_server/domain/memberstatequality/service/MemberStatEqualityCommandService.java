@@ -1,15 +1,14 @@
 package com.cozymate.cozymate_server.domain.memberstatequality.service;
 
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatequality.MemberStatEquality;
 import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberStatEqualityBulkRepository;
 import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberStatEqualityRepository;
 import com.cozymate.cozymate_server.domain.memberstatequality.util.MemberStatEqualityUtil;
-import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
-import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,6 +39,8 @@ public class MemberStatEqualityCommandService {
             newMemberStat.getUniversity().getId()
         );
 
+        Long newMemberId = newMemberStat.getMember().getId();
+
         List<MemberStatEquality> memberStatEqualityList = memberStatList.stream()
             //자기 자신을 제외
             .filter(memberStat -> !memberStat.getId().equals(newMemberStat.getId()))
@@ -48,15 +49,17 @@ public class MemberStatEqualityCommandService {
                 Integer equality = MemberStatEqualityUtil.calculateEquality(newMemberStat,
                     memberStat);
 
+                Long originalMemberId = memberStat.getMember().getId();
+
                 MemberStatEquality equalityA = MemberStatEquality.builder()
-                    .memberAId(newMemberStat.getMember().getId())
-                    .memberBId(memberStat.getMember().getId())
+                    .memberAId(newMemberId)
+                    .memberBId(originalMemberId)
                     .equality(equality)
                     .build();
 
                 MemberStatEquality equalityB = MemberStatEquality.builder()
-                    .memberAId(memberStat.getMember().getId())
-                    .memberBId(newMemberStat.getMember().getId())
+                    .memberAId(originalMemberId)
+                    .memberBId(newMemberId)
                     .equality(equality)
                     .build();
 
@@ -69,58 +72,115 @@ public class MemberStatEqualityCommandService {
 
     }
 
-    public void generateAllMemberStatEquality() {
+    /**
+     * @action : 없는 일치율 재생성
+     * @return : void
+     */
+    public void generateAllMemberStatEquality(
+    ) {
 
-        long startTime = System.currentTimeMillis();
+        // 12000ms -> 600ms로 개선
+        // 모든 MemberStat을 성별과 학교 기준으로 한 번에 가져옴 (Member도 함께 불러오기)
+        List<MemberStat> allMemberStats = memberStatRepository.findAllWithMember(); // JOIN FETCH 사용
 
-        // 모든 MemberStat을 성별과 학교 기준으로 필터링하여 가져옴
-        List<MemberStat> allMemberStats = memberStatRepository.findAll();
+        // 이미 존재하는 모든 MemberStatEquality를 한 번에 가져와서 Set으로 저장
+        Set<String> existingEqualities = memberStatEqualityRepository.findAll().stream()
+            .flatMap(equality -> Stream.of(
+                equality.getMemberAId() + "-" + equality.getMemberBId(),  // A -> B
+                equality.getMemberBId() + "-" + equality.getMemberAId())  // B -> A
+            )
+            .collect(Collectors.toSet());
 
-        // 각 MemberStat에 대해 성별과 학교가 같은 다른 MemberStat 목록 가져오기
-        List<MemberStatEquality> memberStatEqualityList = allMemberStats.stream()
-            .flatMap(memberStatA -> {
-                // 성별과 학교가 같은 다른 MemberStat들을 가져옴
-                List<MemberStat> filteredMemberStats = memberStatRepository.findByMember_GenderAndUniversity_Id(
-                    memberStatA.getMember().getGender(),
-                    memberStatA.getUniversity().getId()
-                );
+        // 성별과 학교를 기준으로 MemberStat을 그룹화
+        Map<String, List<MemberStat>> groupedMemberStats = allMemberStats.stream()
+            .collect(Collectors.groupingBy(
+                memberStat -> memberStat.getMember().getGender() + "-" + memberStat.getUniversity().getId()
+            ));
 
-                return filteredMemberStats.stream()
-                    .filter(memberStatB -> !memberStatA.getId()
-                        .equals(memberStatB.getId())) // 자신과의 비교 제외
-                    // 중복되는 일치율 제외
-                    .filter(
-                        memberStatB -> !memberStatEqualityRepository.existsByMemberAIdAndMemberBId(
-                            memberStatA.getMember().getId(), memberStatB.getMember().getId()))
-                    .flatMap(memberStatB -> {
-                        Integer equality = MemberStatEqualityUtil.calculateEquality(memberStatA,
-                            memberStatB);
+        // 일치율 리스트 생성
+        List<MemberStatEquality> memberStatEqualityList = new ArrayList<>();
 
-                        MemberStatEquality equalityA = MemberStatEquality.builder()
+        // 그룹별로 처리
+        groupedMemberStats.forEach((key, memberStats) -> {
+            for (int i = 0; i < memberStats.size(); i++) {
+                MemberStat memberStatA = memberStats.get(i);
+
+                for (int j = i + 1; j < memberStats.size(); j++) {
+                    MemberStat memberStatB = memberStats.get(j);
+
+                    // Set을 이용해 A -> B와 B -> A의 존재 여부를 빠르게 확인
+                    String keyAtoB = memberStatA.getMember().getId() + "-" + memberStatB.getMember().getId();
+                    String keyBtoA = memberStatB.getMember().getId() + "-" + memberStatA.getMember().getId();
+
+                    // A -> B 일치율이 없을 경우
+                    if (!existingEqualities.contains(keyAtoB)) {
+                        Integer equality = MemberStatEqualityUtil.calculateEquality(memberStatA, memberStatB);
+
+                        MemberStatEquality equalityAtoB = MemberStatEquality.builder()
                             .memberAId(memberStatA.getMember().getId())
                             .memberBId(memberStatB.getMember().getId())
                             .equality(equality)
                             .build();
+                        memberStatEqualityList.add(equalityAtoB);
 
-                        MemberStatEquality equalityB = MemberStatEquality.builder()
+                        // 새로 추가된 A -> B를 Set에 추가하여 중복 방지
+                        existingEqualities.add(keyAtoB);
+                    }
+
+                    // B -> A 일치율이 없을 경우
+                    if (!existingEqualities.contains(keyBtoA)) {
+                        Integer equality = MemberStatEqualityUtil.calculateEquality(memberStatA, memberStatB);
+
+                        MemberStatEquality equalityBtoA = MemberStatEquality.builder()
                             .memberAId(memberStatB.getMember().getId())
                             .memberBId(memberStatA.getMember().getId())
                             .equality(equality)
                             .build();
+                        memberStatEqualityList.add(equalityBtoA);
 
-                        return Stream.of(equalityA, equalityB);
-                    });
-            })
-            .collect(Collectors.toList());
-
-        // 일치율 계산 시간 출력
-        System.out.println("Calculation time = " + (System.currentTimeMillis() - startTime) + "ms");
+                        // 새로 추가된 B -> A를 Set에 추가하여 중복 방지
+                        existingEqualities.add(keyBtoA);
+                    }
+                }
+            }
+        });
 
         // 새로운 일치율 데이터를 저장
         memberStatEqualityBulkRepository.saveAll(memberStatEqualityList);
+    }
 
-        // 저장 시간 출력
-        System.out.println("Save time = " + (System.currentTimeMillis() - startTime) + "ms");
+    /**
+     * @action : 모든 기존 일치율을 다시 계산하여 업데이트
+     * @return : void
+     */
+    public void recalculateAllMemberStatEquality() {
+
+        // 1. 모든 MemberStat을 미리 한 번에 불러옴 (memberId와 매핑된 Map으로 관리)
+        List<MemberStat> allMemberStats = memberStatRepository.findAllWithMember();
+        Map<Long, MemberStat> memberStatMap = allMemberStats.stream()
+            .collect(Collectors.toMap(ms -> ms.getMember().getId(), ms -> ms));
+
+        List<MemberStatEquality> allEqualities = memberStatEqualityRepository.findAll();
+
+        List<MemberStatEquality> updatedEqualities = new ArrayList<>();
+
+        for (MemberStatEquality equality : allEqualities) {
+            MemberStat memberStatA = memberStatMap.get(equality.getMemberAId());
+            MemberStat memberStatB = memberStatMap.get(equality.getMemberBId());
+
+            if (memberStatA != null && memberStatB != null) {
+                Integer newEqualityValue = MemberStatEqualityUtil.calculateEquality(memberStatA, memberStatB);
+
+                if (!newEqualityValue.equals(equality.getEquality())) {
+                    equality.updateEquality(newEqualityValue);
+                    updatedEqualities.add(equality); // 업데이트할 리스트에 추가
+                }
+            }
+        }
+
+        if (!updatedEqualities.isEmpty()) {
+            memberStatEqualityBulkRepository.updateAll(updatedEqualities); // 배치 저장으로 성능 최적화
+        }
     }
 
 
@@ -128,48 +188,72 @@ public class MemberStatEqualityCommandService {
      * @param changedMemberStat : 변경된 멤버의 상세정보
      * @return : void
      */
-
     public void updateMemberStatEqualities(MemberStat changedMemberStat) {
 
+        Long changedMemberId = changedMemberStat.getMember().getId();
+
         List<MemberStatEquality> relatedEqualities = memberStatEqualityRepository.findAllByMemberAIdOrMemberBId(
-            changedMemberStat.getId(), changedMemberStat.getId());
+            changedMemberId, changedMemberId);
 
-        // 필요 없는 코드 고치기
+        Set<Long> memberIds = relatedEqualities.stream()
+            .flatMap(equality -> Stream.of(equality.getMemberAId(), equality.getMemberBId()))
+            .collect(Collectors.toSet());
+
+        Map<Long, MemberStat> memberStatMap = memberStatRepository.findMemberStatsAndMemberIdsByMemberIds(
+                memberIds)
+            .stream()
+            .collect(Collectors.toMap(
+                tuple -> tuple.get(1, Long.class),
+                tuple -> tuple.get(0, MemberStat.class)
+            ));
+
         List<MemberStatEquality> updatedEqualities = relatedEqualities.stream()
-            .peek(equality -> {
+            .map(
+                equality -> {
+                    boolean isMemberAChanged = equality.getMemberAId().equals(changedMemberId);
 
-                MemberStat memberA = memberStatRepository.findByMemberId(equality.getMemberAId())
-                    .orElseThrow(
-                        () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
-                    );
+                    MemberStat memberStat = isMemberAChanged ?
+                        memberStatMap.get(equality.getMemberBId()) :
+                        memberStatMap.get(equality.getMemberAId());
 
-                MemberStat memberB = memberStatRepository.findByMemberId(equality.getMemberBId())
-                    .orElseThrow(
-                        () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
-                    );
+                    Integer updatedEquality = MemberStatEqualityUtil.calculateEquality(
+                        changedMemberStat, memberStat);
 
-                Integer newEqualityScore = MemberStatEqualityUtil.calculateEquality(memberA,
-                    memberB);
-
-                equality.updateEquality(
-                    newEqualityScore
-                );
-
-            })
+                    return equality.updateEquality(updatedEquality);
+                }
+            )
             .toList();
+
+        memberStatEqualityBulkRepository.updateAll(updatedEqualities);
 
     }
 
     /**
      * @param deletedMemberStat : 삭제할 멤버의 상세정보
      * @return : void
-     */
+     **/
     public void deleteMemberStatEqualities(MemberStat deletedMemberStat) {
 
-        List<MemberStatEquality> relatedEqualities = memberStatEqualityRepository.findAllByMemberAIdOrMemberBId(
-            deletedMemberStat.getId(), deletedMemberStat.getId());
+        Long memberId = deletedMemberStat.getMember().getId();
 
-        memberStatEqualityRepository.deleteAll(relatedEqualities);
+        List<MemberStatEquality> relatedEqualities = memberStatEqualityRepository.findAllByMemberAIdOrMemberBId(
+            memberId, memberId);
+
+        memberStatEqualityBulkRepository.deleteAll(relatedEqualities);
 
     }
+
+    /**
+     * @param memberId : 삭제할 멤버의 Id
+     * @return : void
+     */
+    public void deleteMemberStatEqualitiesWithMemberId(Long memberId) {
+
+        List<MemberStatEquality> relatedEqualities = memberStatEqualityRepository.findAllByMemberAIdOrMemberBId(
+            memberId, memberId);
+
+        memberStatEqualityBulkRepository.deleteAll(relatedEqualities);
+
+    }
+
 }

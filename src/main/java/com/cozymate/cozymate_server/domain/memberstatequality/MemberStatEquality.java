@@ -34,8 +34,9 @@ public class MemberStatEquality {
 
     private Integer equality;
 
-    public void updateEquality(Integer equality) {
+    public MemberStatEquality updateEquality(Integer equality) {
         this.equality = equality;
+        return this;
     }
 
 }

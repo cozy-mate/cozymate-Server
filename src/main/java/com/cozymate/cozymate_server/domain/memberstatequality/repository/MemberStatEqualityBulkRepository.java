@@ -45,6 +45,7 @@ public class MemberStatEqualityBulkRepository {
                 ps.setLong(3,memberStatEquality.getMemberBId());
             }
         );
+
     }
 
     public void deleteAll(List<MemberStatEquality> memberStatEqualityList) {
