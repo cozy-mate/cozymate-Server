@@ -9,7 +9,7 @@ public class MemberStatUtil {
     public static String toSortedString(List<String> list) {
         return list.stream()
             .sorted()
-            .collect(Collectors.joining(",")) + ",";
+            .collect(Collectors.joining(","));
     }
 
     public static List<String> fromStringToList(String str) {

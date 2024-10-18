@@ -57,7 +57,6 @@ public class MemberStatRequestDTO {
         private Integer turnOffTime;
         @NotBlank
         private String smokingState;
-        @NotBlank
         private List<String> sleepingHabit;
         @NotNull
         @Min(0)
@@ -93,7 +92,6 @@ public class MemberStatRequestDTO {
         private String cleaningFrequency;
         @NotBlank
         private String drinkingFrequency;
-        @NotBlank
         private List<String> personality;
         @NotBlank
         @Size(max = 4, min = 4)
@@ -144,7 +142,6 @@ public class MemberStatRequestDTO {
         private Integer turnOffTime;
         @NotBlank
         private String smokingState;
-        @NotBlank
         private List<String> sleepingHabit;
         @NotNull
         @Min(1)
@@ -180,8 +177,7 @@ public class MemberStatRequestDTO {
         private String cleaningFrequency;
         @NotBlank
         private String drinkingFrequency;
-        @NotBlank
-        private String personality;
+        private List<String> personality;
         @NotBlank
         @Size(max = 4, min = 4)
         private String mbti;

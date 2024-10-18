@@ -175,7 +175,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             return values.stream()
                 .map(String::valueOf)
                 .map(value -> path.like("%" + value + "%"))
-                .reduce(BooleanExpression::and)
+                .reduce(BooleanExpression::or)
                 .orElse(null);
         }
         return null;

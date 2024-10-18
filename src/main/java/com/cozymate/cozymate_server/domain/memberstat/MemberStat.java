@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.memberstat;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
@@ -110,7 +111,7 @@ public class MemberStat extends BaseTimeEntity {
         this.turnOffTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(),
             memberStatCommandRequestDTO.getTurnOffTime());
         this.smoking = memberStatCommandRequestDTO.getSmokingState();
-        this.sleepingHabit = String.join(",", memberStatCommandRequestDTO.getSleepingHabit()) + ",";
+        this.sleepingHabit = MemberStatUtil.toSortedString(memberStatCommandRequestDTO.getSleepingHabit());
         this.airConditioningIntensity = memberStatCommandRequestDTO.getAirConditioningIntensity();
         this.heatingIntensity = memberStatCommandRequestDTO.getHeatingIntensity();
         this.lifePattern = memberStatCommandRequestDTO.getLifePattern();
@@ -124,7 +125,7 @@ public class MemberStat extends BaseTimeEntity {
         this.noiseSensitivity = memberStatCommandRequestDTO.getNoiseSensitivity();
         this.cleaningFrequency = memberStatCommandRequestDTO.getCleaningFrequency();
         this.drinkingFrequency = memberStatCommandRequestDTO.getDrinkingFrequency();
-        this.personality = String.join(",", memberStatCommandRequestDTO.getPersonality()) + ",";
+        this.personality = MemberStatUtil.toSortedString(memberStatCommandRequestDTO.getPersonality());
         this.mbti = memberStatCommandRequestDTO.getMbti();
         this.selfIntroduction = memberStatCommandRequestDTO.getSelfIntroduction();
     }
