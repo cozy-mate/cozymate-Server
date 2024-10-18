@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.role;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
-import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,4 +31,13 @@ public class Role extends BaseTimeEntity {
     private String content;
 
     private int repeatDays = 0;
+
+    public void updateEntity(String content, int repeatDays) {
+        if (content != null) {
+            this.content = content;
+        }
+        if (repeatDays != -1) { // -1이면 null로 입력된 것
+            this.repeatDays = repeatDays;
+        }
+    }
 }

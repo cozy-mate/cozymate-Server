@@ -54,5 +54,12 @@ public class Mate extends BaseTimeEntity {
         this.entryStatus = entryStatus;
     }
 
+    public void quit() {
+        this.isExit = true;
+        setEntryStatus(EntryStatus.EXITED);
+    }
 
+    public void setNotExit() {
+        this.isExit = false;
+    }
 }

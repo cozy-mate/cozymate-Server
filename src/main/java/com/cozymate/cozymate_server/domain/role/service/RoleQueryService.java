@@ -30,10 +30,12 @@ public class RoleQueryService {
     private final RoleRepository roleRepository;
     private final MateRepository mateRepository;
 
-    public RoleListDetailResponseDto getRole(Long roomId, Member member) {
+    public RoleListDetailResponseDto getRole(Member member, Long roomId) {
+        // mate 정보 조회
         Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
+        // 해당 방의 role 정보 조회
         List<Role> roleList = roleRepository.findAllByMateRoomId(mate.getRoom().getId());
         RoleMateDetailResponseDto myRoleListResponseDto = RoleConverter.toRoleMateDetailResponseDto(
             mate.getMember().getPersona(), new ArrayList<>());
