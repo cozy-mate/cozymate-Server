@@ -118,9 +118,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _MAIL_AUTHENTICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,"MAIL403","메일 인증코드가 만료되었습니다. 다시 받아주세요"),
   
     // MemberBlock 관련
-    _ALREADY_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK400", "이미 차단된 사용자입니다."),
-    _CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST, "MEMBERBLOCK401", "자신에 대해 차단 관련 요청을 할 수 없습니다."),
-    _ALREADY_NOT_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK402", "이미 차단되지 않은 사용자입니다."),
+    _ALREADY_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK400", "이미 차단한 사용자입니다."),
+    _CANNOT_BLOCK_REQUEST_SELF(HttpStatus.BAD_REQUEST, "MEMBERBLOCK401", "자신에 대해 차단 관련 요청을 할 수 없습니다."),
+    _ALREADY_NOT_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK402", "이미 차단하지 않은 사용자입니다."),
+    _REQUEST_TO_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK403", "차단한 사용자에 대한 요청입니다."),
     ;
 
     private final HttpStatus httpStatus;
