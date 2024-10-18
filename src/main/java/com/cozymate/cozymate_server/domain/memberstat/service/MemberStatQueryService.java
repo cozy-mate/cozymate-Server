@@ -8,13 +8,15 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
-import com.cozymate.cozymate_server.domain.memberstat.util.MemberUtil;
+import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +34,7 @@ public class MemberStatQueryService {
     private final MemberRepository memberRepository;
 
 
+    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
 
     public MemberStatQueryResponseDTO getMemberStat(Member member) {
 
@@ -64,51 +67,151 @@ public class MemberStatQueryService {
         );
     }
 
+    public Integer getNumOfRoommateStatus(Long memberId) {
+
+        MemberStat memberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+        );
+
+        return memberStat.getNumOfRoommate();
+    }
+
     public PageResponseDto<List<?>> getMemberStatList(Member member,
         List<String> filterList, Pageable pageable, boolean needsDetail) {
 
-        //일치율의 기준이 되는 MemberStat을 가져오고, 유효성을 검사합니다.
-        MemberStat criteriaMemberStat = memberStatRepository.findByMemberId(member.getId())
-            .orElseThrow(
-                () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
-            );
+        MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
-        //필터링된 리스트들을 가져옵니다. 필터가 없을 경우, 모두 가져옵니다.
-        List<MemberStat> filteredResult = memberStatRepository.getFilteredMemberStat(filterList,
+        // List<MemberStat> -> Map<Member,MemberStat>으로 변경,
+        // LazyFetch로 인해서 N+1 문제 발생해, 쿼리를 한번에 처리하기로 결정.
+        Map<Member, MemberStat> filteredResult = memberStatRepository.getFilteredMemberStat(filterList,
             criteriaMemberStat);
 
-        if (filteredResult.isEmpty()) {
-            return new PageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
+        if (filteredResult.isEmpty()){
+            return createEmptyPageResponse(pageable);
         }
 
+        //N+1 문제 발생, 해결 위해 MAP을 활용한 방식 적용
+        //Filtering 시 Member와 MemberStat을 join을 하기 때문에, Member를 Select하는 것을 추가한다고
+        // 자원 소모의차이가 크지 않을 것이라고 생각했음.
+
+//        Map<Long,Integer> memberStatEqualities = memberStatEqualityQueryService.getEquality(
+//            criteriaMemberStat.getMember().getId(),
+//            filteredResult.stream().map(memberStat -> memberStat.getMember().getId()).toList()
+//        );
+
+
+        List<Long> memberIds = filteredResult.keySet().stream()
+            .map(Member::getId)
+            .toList();
+
+
+        Map<Long,Integer> memberStatEqualities = memberStatEqualityQueryService.getEquality(member.getId(), memberIds);
+
+        // 이 부분 이후는 DB 안 건들고, Application 내에서 계산.
+        // 쿼리는 필터링은 한번,
+        // 일치율 조회 한번으로 줄이고(N+1 Problem -> 조회 1회), 응답속도를 비약적으로 개선함.
         if (needsDetail) {
-            List<MemberStatEqualityDetailResponseDTO> result = filteredResult.stream()
-                .map(memberStat -> {
-                    MemberStatEqualityResponseDTO equalityResponse = MemberStatConverter.toEqualityDto(memberStat, MemberUtil.calculateScore(
-                        criteriaMemberStat, memberStat));
-                    MemberStatQueryResponseDTO queryResponse = MemberStatConverter.toDto(
-                        memberStat, memberStat.getMember().getBirthDay().getYear());
-                    return MemberStatEqualityDetailResponseDTO.builder()
-                        .info(equalityResponse)
-                        .detail(queryResponse)
-                        .build();
-                })
-                .sorted((dto1, dto2) -> Integer.compare(
-                    dto2.getMemberStatEqualityResponseDTO().getEquality(),
-                    dto1.getMemberStatEqualityResponseDTO().getEquality()
-                ))
-                .toList();
+            List<MemberStatEqualityDetailResponseDTO> result =
+                createDetailedResponse(filteredResult, memberStatEqualities);
             return toPageResponseDto(result, pageable);
         }
 
-        List<MemberStatEqualityResponseDTO> result = filteredResult
-            .stream()
-            .map(memberStat -> MemberStatConverter.toEqualityDto(memberStat,MemberUtil.calculateScore(criteriaMemberStat, memberStat)))
-            .sorted(Comparator.comparingInt(MemberStatEqualityResponseDTO::getEquality).reversed())
-            .toList();
-
+        List<MemberStatEqualityResponseDTO> result =
+            createEqualityResponse(filteredResult, memberStatEqualities);
         return toPageResponseDto(result, pageable);
 
+    }
+
+    public PageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member, HashMap<String, List<?>> filterMap, Pageable pageable, boolean needsDetail) {
+
+        MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
+
+        Map<Member,MemberStat> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(filterMap,
+            criteriaMemberStat);
+
+        if (filteredResult.isEmpty()) {
+            return createEmptyPageResponse(pageable);
+        }
+
+        List<Long> memberIds = filteredResult.keySet().stream()
+            .map(Member::getId)
+            .toList();
+
+        Map<Long,Integer> memberStatEqualities = memberStatEqualityQueryService.getEquality(member.getId(), memberIds);
+
+        if (needsDetail) {
+            List<MemberStatEqualityDetailResponseDTO> result =
+                createDetailedResponse(filteredResult, memberStatEqualities);
+            return toPageResponseDto(result, pageable);
+        }
+
+        List<MemberStatEqualityResponseDTO> result =
+            createEqualityResponse(filteredResult, memberStatEqualities);
+        return toPageResponseDto(result, pageable);
+
+    }
+
+    public Integer getNumOfSearchedAndFilteredMemberStatList(Member member, HashMap<String, List<?>> filterMap) {
+        // 여기서 드는 의문.. 쿼리 개수 vs 쿼리 무게
+        MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
+
+        Map<Member,MemberStat> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(filterMap,
+            criteriaMemberStat);
+
+        return filteredResult.size();
+
+
+    }
+
+    private List<MemberStatEqualityDetailResponseDTO> createDetailedResponse(
+        Map<Member, MemberStat> memberStats, Map<Long, Integer> memberStatEqualities) {
+
+        List<MemberStatEqualityResponseDTO> memberStatEqualityResponseDTOList = createEqualityResponse(memberStats,memberStatEqualities);
+
+        return memberStatEqualityResponseDTOList.stream()
+            .map(equalityResponse -> {
+
+                MemberStat memberStat = memberStats.values().stream()
+                    .filter(stat -> stat.getMember().getId().equals(equalityResponse.getMemberId()))
+                    .findFirst()
+                    .orElse(null);
+
+                MemberStatQueryResponseDTO queryResponse = MemberStatConverter.toDto(
+                    memberStat, memberStat.getMember().getBirthDay().getYear()
+                );
+
+                return MemberStatEqualityDetailResponseDTO.builder()
+                    .info(equalityResponse)
+                    .detail(queryResponse)
+                    .build();
+            })
+            .toList();
+    }
+
+    private List<MemberStatEqualityResponseDTO> createEqualityResponse(
+        Map<Member, MemberStat> memberStats, Map<Long, Integer> memberStatEqualities) {
+
+        return memberStats.entrySet().stream()
+            .map(entry -> {
+                Member member = entry.getKey();
+                MemberStat memberStat = entry.getValue();
+
+                return MemberStatConverter.toEqualityDto(
+                    memberStat,
+                    memberStatEqualities.getOrDefault(member.getId(), 0)
+                );
+            })
+            .sorted(Comparator.comparingInt(MemberStatEqualityResponseDTO::getEquality).reversed())
+            .toList();
+    }
+
+    private MemberStat getCriteriaMemberStat(Member member) {
+        return memberStatRepository.findByMemberId(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
+    }
+
+    private PageResponseDto<List<?>> createEmptyPageResponse(Pageable pageable) {
+        return new PageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
     }
 
     private PageResponseDto<List<?>> toPageResponseDto(List<?> result, Pageable pageable) {
@@ -129,6 +232,4 @@ public class MemberStatQueryService {
             pageable.getPageNumber() + 1 < totalPages, result.subList(start, end));
 
     }
-
-
 }
