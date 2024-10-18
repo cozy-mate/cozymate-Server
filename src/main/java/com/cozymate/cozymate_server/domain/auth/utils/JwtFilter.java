@@ -36,6 +36,11 @@ public class JwtFilter extends OncePerRequestFilter {
             "/members/check-nickname"
     );
 
+    private static final List<String> VERIFIED_URLS = List.of(
+            "/admin/university/get-info"
+            // todo: 공개방 url 추가
+    );
+
     private static final List<String> REFRESH_URLS = List.of("/auth/reissue");
     private static final String REQUEST_ATTRIBUTE_NAME_CLIENT_ID = "client_id";
 
@@ -70,7 +75,7 @@ public class JwtFilter extends OncePerRequestFilter {
             // JWT를 검증
             jwtUtil.validateToken(jwt);
 
-            // JWT에서 사용자 이름을 추출하고, 사용자 세부 정보를 로드
+            // JWT에서 user name 추출하고, 사용자 세부 정보를 로드
             String userName = jwtUtil.extractUserName(jwt);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
 
@@ -90,6 +95,15 @@ public class JwtFilter extends OncePerRequestFilter {
                     throw new RuntimeException(ErrorStatus._REFRESH_TOKEN_ACCESS_DENIED_.getMessage());
                 }
                 request.setAttribute(REQUEST_ATTRIBUTE_NAME_REFRESH, jwt);
+            }
+
+            // 사용자 메일인증 여부에 따른 권한 조회
+            if (userDetails.getAuthorities().stream()
+                    .noneMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER_VERIFIED"))){
+                if(isNotAllowUnverified(request)){
+                    throw new RuntimeException(ErrorStatus._MEMBER_NOT_VERIFIED.getMessage());
+                }
+
             }
 
             // 사용자 정보와 권한을 설정하고 SecurityContext에 인증 정보를 저장
@@ -127,5 +141,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private boolean isNotAllowRefresh(HttpServletRequest request) {
         return REFRESH_URLS.stream().noneMatch(url -> request.getRequestURI().equals(url));
+    }
+
+    private boolean isNotAllowUnverified(HttpServletRequest request){
+        return VERIFIED_URLS.stream().anyMatch(url -> request.getRequestURI().equals(url));
     }
 }

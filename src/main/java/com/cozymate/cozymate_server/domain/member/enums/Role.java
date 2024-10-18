@@ -18,6 +18,14 @@ public enum Role {
 
     NONE(Collections.emptySet()),
     USER(Collections.emptySet()),
+    USER_VERIFIED(
+            Set.of(
+                    USER_PUBLIC_ROOM_JOIN,
+                    USER_PUBLIC_ROOM_CREATE,
+                    USER_PUBLIC_ROOM_UPDATE,
+                    USER_PUBLIC_ROOM_DELETE
+            )
+    ),
     ADMIN(
             Set.of(
                     ADMIN_READ,
