@@ -78,11 +78,10 @@ public class ChatQueryService {
     }
 
     private void checkBlockedMember(Member member, ChatRoom chatRoom) {
-        Member memberA = chatRoom.getMemberA();
-        Member memberB = chatRoom.getMemberB();
+        Member otherMember = member.getId().equals(chatRoom.getMemberA())
+            ? chatRoom.getMemberB() : chatRoom.getMemberA();
 
-        if (member.getId().equals(memberA.getId()) ? memberBlockUtil.existsMemberBlock(member,
-            memberB.getId()) : memberBlockUtil.existsMemberBlock(member, memberA.getId())) {
+        if (memberBlockUtil.existsMemberBlock(member, otherMember.getId())) {
             throw new GeneralException(ErrorStatus._REQUEST_TO_BLOCKED_MEMBER);
         }
     }
