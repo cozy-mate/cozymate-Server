@@ -40,9 +40,9 @@ public class ChatRoomController {
 
     @GetMapping
     @Operation(summary = "[베로] 쪽지방 목록 조회", description = "")
-    @SwaggerApiError({
+    @SwaggerApiError(
         ErrorStatus._CHAT_NOT_FOUND
-    })
+    )
     public ResponseEntity<ApiResponse<List<ChatRoomResponseDto>>> getChatRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(

@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -58,6 +59,8 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     @Query("select m from Mate m join fetch m.member")
     List<Mate> findFetchAll();
 
+    @Query("select m.id from Mate m where m.member.id in :memberIds")
+    Set<Long> findMateIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
 
     List<Mate> findByIdIn(List<Long> memberIdList);
 
