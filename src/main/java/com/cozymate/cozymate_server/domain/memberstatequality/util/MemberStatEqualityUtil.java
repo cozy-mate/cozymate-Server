@@ -1,30 +1,30 @@
-package com.cozymate.cozymate_server.domain.memberstat.util;
+package com.cozymate.cozymate_server.domain.memberstatequality.util;
 
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
-import com.cozymate.cozymate_server.global.utils.TimeUtil;
 
-public class MemberUtil {
+public class MemberStatEqualityUtil {
 
-    private static final Integer ADDITIONAL_SCORE = 12;
+    private static final Integer ADDITIONAL_SCORE = 36;
     private static final Integer NO_SCORE = 0;
-    private static final Integer ATTRIBUTE_COUNT = 19;
+    private static final Integer ATTRIBUTE_COUNT = 18;
     private static final Integer HALF_DIVISION = 2;
     private static final Integer QUARTER_DIVISION = 4;
     private static final Integer MULTIPLIER_FOR_PERCENTAGE = 100;
     private static final Integer MAX_SCORE = ADDITIONAL_SCORE * ATTRIBUTE_COUNT;
 
     // 두 사용자간 일치율을 비교해야 할 때, 사용하는 util
-    public static int calculateScore(MemberStat criteriaMemberStat,
+    // 성격은 일치율에서 제외, 출생년도는 보류(총 22개 항목)
+    // 제외 목록
+//    - 출생년도
+//    - 기숙사 합격 여부
+//    - 학번
+//    - 학과
+//    - 성격
+//    - mbti
+    public static int calculateEquality(MemberStat criteriaMemberStat,
         MemberStat memberStat) {
 
         int score = NO_SCORE;
-        score += criteriaMemberStat.getAcceptance().equals(memberStat.getAcceptance())
-            ? ADDITIONAL_SCORE : NO_SCORE;
-        score += criteriaMemberStat.getAdmissionYear().equals(memberStat.getAdmissionYear())
-            ? ADDITIONAL_SCORE : NO_SCORE;
-        score += criteriaMemberStat.getMajor().equals(memberStat.getMajor())
-            ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getSmoking().equals(memberStat.getSmoking())
             ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getSleepingHabit().equals(memberStat.getSleepingHabit())
@@ -45,15 +45,18 @@ public class MemberUtil {
             ? ADDITIONAL_SCORE : NO_SCORE;
         score += criteriaMemberStat.getCleaningFrequency().equals(memberStat.getCleaningFrequency())
             ? ADDITIONAL_SCORE : NO_SCORE;
-        score += criteriaMemberStat.getMbti().equals(memberStat.getMbti())
+        score += criteriaMemberStat.getAirConditioningIntensity()
+            .equals(memberStat.getAirConditioningIntensity())
             ? ADDITIONAL_SCORE : NO_SCORE;
-
+        score += criteriaMemberStat.getHeatingIntensity().equals(memberStat.getHeatingIntensity())
+            ? ADDITIONAL_SCORE : NO_SCORE;
+        score += criteriaMemberStat.getDrinkingFrequency().equals(memberStat.getDrinkingFrequency())
+            ? ADDITIONAL_SCORE : NO_SCORE;
         score += calculateTimeScore(criteriaMemberStat.getWakeUpTime(), memberStat.getWakeUpTime());
         score += calculateTimeScore(criteriaMemberStat.getSleepingTime(),
             memberStat.getSleepingTime());
         score += calculateTimeScore(criteriaMemberStat.getTurnOffTime(),
             memberStat.getTurnOffTime());
-
         score += calculateSensitivityScore(criteriaMemberStat.getCleanSensitivity(),
             memberStat.getCleanSensitivity());
         score += calculateSensitivityScore(criteriaMemberStat.getNoiseSensitivity(),
@@ -65,9 +68,14 @@ public class MemberUtil {
     }
 
 
-
+    // 24시간 반영해 개선함.
     private static int calculateTimeScore(Integer time1, Integer time2) {
-        int timeDifference = Math.abs(time1 - time2);
+
+        int diff1 = Math.abs(time1 - time2);
+        int diff2 = 24 - diff1;
+
+        int timeDifference = Math.min(diff1, diff2);
+
         return switch (timeDifference) {
             case 0 -> ADDITIONAL_SCORE;
             case 1 -> ADDITIONAL_SCORE / HALF_DIVISION;
@@ -75,7 +83,6 @@ public class MemberUtil {
             default -> NO_SCORE;
         };
     }
-
 
     private static int calculateSensitivityScore(Integer sensitivity1, Integer sensitivity2) {
         int sensitivityDifference = Math.abs(sensitivity1 - sensitivity2);

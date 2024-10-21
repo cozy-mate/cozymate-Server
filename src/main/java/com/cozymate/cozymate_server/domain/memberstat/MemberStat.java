@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.memberstat;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
@@ -31,7 +32,7 @@ import org.hibernate.annotations.Type;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
-public class MemberStat extends BaseTimeEntity{
+public class MemberStat extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,11 +72,11 @@ public class MemberStat extends BaseTimeEntity{
 
     private String intimacy;
 
-    private Boolean canShare;
+    private String canShare;
 
-    private Boolean isPlayGame;
+    private String isPlayGame;
 
-    private Boolean isPhoneCall;
+    private String isPhoneCall;
 
     private String studying;
 
@@ -87,26 +88,30 @@ public class MemberStat extends BaseTimeEntity{
 
     private String cleaningFrequency;
 
+    private String drinkingFrequency;
+
     private String personality;
 
     private String mbti;
 
-    @Type(JsonType.class)
-    @Column(columnDefinition = "json")
-    private Map<String, List<String>> options;
+    private String selfIntroduction;
 
-    public void update(Member member, University university, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+    public void update(Member member, University university,
+        MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         this.member = member;
         this.university = university;
         this.acceptance = memberStatCommandRequestDTO.getAcceptance();
         this.admissionYear = Integer.parseInt(memberStatCommandRequestDTO.getAdmissionYear());
         this.major = memberStatCommandRequestDTO.getMajor();
         this.numOfRoommate = memberStatCommandRequestDTO.getNumOfRoommate();
-        this.wakeUpTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),memberStatCommandRequestDTO.getWakeUpTime());
-        this.sleepingTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),memberStatCommandRequestDTO.getSleepingTime());
-        this.turnOffTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(),memberStatCommandRequestDTO.getTurnOffTime());
+        this.wakeUpTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),
+            memberStatCommandRequestDTO.getWakeUpTime());
+        this.sleepingTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),
+            memberStatCommandRequestDTO.getSleepingTime());
+        this.turnOffTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(),
+            memberStatCommandRequestDTO.getTurnOffTime());
         this.smoking = memberStatCommandRequestDTO.getSmokingState();
-        this.sleepingHabit = memberStatCommandRequestDTO.getSleepingHabit();
+        this.sleepingHabit = MemberStatUtil.toSortedString(memberStatCommandRequestDTO.getSleepingHabit());
         this.airConditioningIntensity = memberStatCommandRequestDTO.getAirConditioningIntensity();
         this.heatingIntensity = memberStatCommandRequestDTO.getHeatingIntensity();
         this.lifePattern = memberStatCommandRequestDTO.getLifePattern();
@@ -119,8 +124,9 @@ public class MemberStat extends BaseTimeEntity{
         this.cleanSensitivity = memberStatCommandRequestDTO.getCleanSensitivity();
         this.noiseSensitivity = memberStatCommandRequestDTO.getNoiseSensitivity();
         this.cleaningFrequency = memberStatCommandRequestDTO.getCleaningFrequency();
-        this.personality = memberStatCommandRequestDTO.getPersonality();
+        this.drinkingFrequency = memberStatCommandRequestDTO.getDrinkingFrequency();
+        this.personality = MemberStatUtil.toSortedString(memberStatCommandRequestDTO.getPersonality());
         this.mbti = memberStatCommandRequestDTO.getMbti();
-        this.options = memberStatCommandRequestDTO.getOptions();
+        this.selfIntroduction = memberStatCommandRequestDTO.getSelfIntroduction();
     }
 }
