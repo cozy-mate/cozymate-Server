@@ -33,4 +33,14 @@ public class University extends BaseTimeEntity {
     @Type(JsonType.class)
     @Column(columnDefinition = "json")
     private List<String> departments;
+
+    @Type(JsonType.class)
+    @Column(columnDefinition = "json")
+    private List<String> dormitoryNames;
+
+    public void update(String mailPattern, List<String> departments, List<String> dormitoryNames) {
+        this.mailPattern = mailPattern;
+        this.departments = departments;
+        this.dormitoryNames = dormitoryNames;
+    }
 }

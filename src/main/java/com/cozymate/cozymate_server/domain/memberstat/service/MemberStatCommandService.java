@@ -7,7 +7,7 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.M
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityCommandService;
 import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.university.UniversityRepository;
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
