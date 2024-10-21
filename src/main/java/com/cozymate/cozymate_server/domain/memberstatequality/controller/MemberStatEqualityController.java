@@ -77,6 +77,7 @@ public class MemberStatEqualityController {
             ));
     }
 
+    @Deprecated(forRemoval = true)
     @Operation(
         summary = "[포비] 일치율 업데이트(관리자용)",
         description = "요청자의 토큰을 넣고, 일치율 정책이 바뀌어 재계산이 필요할 때 사용합니다.\n\n"
@@ -87,6 +88,7 @@ public class MemberStatEqualityController {
         ErrorStatus._MEMBERSTAT_NOT_EXISTS
     })
     public ResponseEntity<ApiResponse<Boolean>> updateMemberStatEqualityWithMemberId(
+
     ) {
         memberStatEqualityCommandService.recalculateAllMemberStatEquality();
         return ResponseEntity.ok(
