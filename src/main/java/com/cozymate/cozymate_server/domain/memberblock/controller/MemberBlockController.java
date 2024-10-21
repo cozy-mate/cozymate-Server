@@ -32,7 +32,7 @@ public class MemberBlockController {
     @PostMapping
     @Operation(summary = "[베로] 멤버 차단", description = "body에 차단할 멤버 id")
     @SwaggerApiError({
-        ErrorStatus._CANNOT_BLOCK_SELF,
+        ErrorStatus._CANNOT_BLOCK_REQUEST_SELF,
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ALREADY_BLOCKED_MEMBER
     })
@@ -54,7 +54,7 @@ public class MemberBlockController {
     @DeleteMapping("/{memberId}")
     @Operation(summary = "[베로] 멤버 차단 해제", description = "path에 차단 해제할 멤버 id")
     @SwaggerApiError({
-        ErrorStatus._CANNOT_BLOCK_SELF,
+        ErrorStatus._CANNOT_BLOCK_REQUEST_SELF,
         ErrorStatus._ALREADY_NOT_BLOCKED_MEMBER
     })
     public ResponseEntity<ApiResponse<String>> deleteMemberBlock(@PathVariable Long memberId,

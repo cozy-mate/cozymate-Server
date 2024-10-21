@@ -10,4 +10,5 @@ public class ChatRoomResponseDto {
     private String nickName;
     private String lastContent;
     private Long chatRoomId;
+    private Long memberId;
 }
