@@ -14,6 +14,13 @@ public class RoomCreateResponse {
     private String inviteCode;
     private Integer profileImage;
     List<CozymateInfoResponse> mateList;
+    private boolean isRoomManager;
+    private Integer maxMateNum;
+    private Integer numOfArrival;
     private RoomType roomType;
     private List<String> hashtags;
+    private Integer equaility;
+    // TODO: 기숙사 정보 추가
+
+
 }

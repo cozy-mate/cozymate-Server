@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
@@ -23,7 +24,9 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class RoomQueryService {
     private final MemberRepository memberRepository;
     private final FriendRepository friendRepository;
     private final RoomHashtagRepository roomHashtagRepository;
+    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
 
     public RoomCreateResponse getRoomById(Long roomId, Long memberId) {
 
@@ -47,7 +51,7 @@ public class RoomQueryService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+        Mate creatingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         List<CozymateInfoResponse> mates = mateRepository.findByRoomId(roomId).stream()
@@ -60,7 +64,13 @@ public class RoomQueryService {
 
         return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),
             mates.isEmpty() ? new ArrayList<>() : mates,
-            room.getRoomType(), hashtags
+            creatingMate.isRoomManager(),
+            room.getMaxMateNum(),
+            room.getNumOfArrival(),
+            room.getRoomType(),
+            hashtags, getCalculateRoomEquality(memberId, roomId)
+            // Todo: 기숙사 정보 추가
+            // Todo: 일치율
             );
     }
 
@@ -139,6 +149,25 @@ public class RoomQueryService {
         } else {
             return RoomConverter.toRoomExistResponse(null);
         }
+    }
+
+    public Integer getCalculateRoomEquality(Long memberId, Long roomId){
+        List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED);
+        List<Long> joinedMateIds = joinedMates.stream()
+            .map(Mate::getId)
+            .filter(id -> !id.equals(memberId))
+            .collect(Collectors.toList());
+
+        Map<Long, Integer> roomEquality = memberStatEqualityQueryService.getEquality(memberId, joinedMateIds);
+        if (roomEquality.isEmpty()){
+            return 0;
+        }
+
+        return (int) roomEquality.values().stream()
+            .mapToInt(Integer::intValue)
+            .average()
+            .orElse(0);
+
     }
 
 }

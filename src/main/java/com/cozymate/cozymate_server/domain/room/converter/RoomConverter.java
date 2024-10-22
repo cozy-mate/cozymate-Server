@@ -60,6 +60,7 @@ public class RoomConverter {
             .memberId(mate.getMember().getId())
             .mateId(mate.getId())
             .nickname(mate.getMember().getNickname())
+            .persona(mate.getMember().getPersona())
             .build();
     }
 

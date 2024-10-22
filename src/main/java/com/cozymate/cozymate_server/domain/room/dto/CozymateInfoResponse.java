@@ -10,6 +10,7 @@ public class CozymateInfoResponse {
     private Long memberId;
     private Long mateId;
     private String nickname;
+    private Integer persona;
 
 
 }
