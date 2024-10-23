@@ -1,11 +1,12 @@
 package com.cozymate.cozymate_server.domain.report;
 
-import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
-import com.cozymate.cozymate_server.domain.mate.Mate;
-import com.cozymate.cozymate_server.domain.post.Post;
-import com.cozymate.cozymate_server.domain.postcomment.PostComment;
+import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.report.enums.ReportReason;
+import com.cozymate.cozymate_server.domain.report.enums.ReportSource;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,16 +30,15 @@ public class Report extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Mate reporter;
+    private Member reporter;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ChatRoom chatRoom = null;
+    private Long reportedMemberId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Post post = null;
+    @Enumerated(EnumType.STRING)
+    private ReportReason reportReason;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private PostComment comment = null;
+    @Enumerated(EnumType.STRING)
+    private ReportSource reportSource;
 
-    private String reason;
+    private String content;
 }
