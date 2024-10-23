@@ -64,7 +64,6 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBERSTAT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT402", "멤버 상세정보가 존재하지 않습니다."),
     _MEMBERSTAT_FILTER_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT403",
         "멤버 상세정보 filterList이 잘못되었습니다."),
-    _MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE(HttpStatus.BAD_REQUEST, "MEMBERSTAT404", "인실이 정해진 경우 인실 필터링이 불가합니다."),
 
     // ChatRoom 관련 애러
     _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
@@ -119,15 +118,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _MAIL_AUTHENTICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,"MAIL403","메일 인증코드가 만료되었습니다. 다시 받아주세요"),
   
     // MemberBlock 관련
-    _ALREADY_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK400", "이미 차단된 사용자입니다."),
-    _CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST, "MEMBERBLOCK401", "자신에 대해 차단 관련 요청을 할 수 없습니다."),
-    _ALREADY_NOT_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK402", "이미 차단되지 않은 사용자입니다."),
-   _REQUEST_TO_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK403", "차단한 사용자에 대한 요청입니다."),
+    _ALREADY_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK400", "이미 차단한 사용자입니다."),
     _CANNOT_BLOCK_REQUEST_SELF(HttpStatus.BAD_REQUEST, "MEMBERBLOCK401", "자신에 대해 차단 관련 요청을 할 수 없습니다."),
-
-
-    // MemberStatEquality 관련
-    _MEMBERSTAT_EQUALITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERSTATEQUALITY400", "일치율이 존재하지 않습니다.")
+    _ALREADY_NOT_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK402", "이미 차단하지 않은 사용자입니다."),
+    _REQUEST_TO_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK403", "차단한 사용자에 대한 요청입니다."),
     ;
 
     private final HttpStatus httpStatus;
