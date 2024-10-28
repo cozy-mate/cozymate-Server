@@ -48,7 +48,7 @@ public class Todo extends BaseTimeEntity {
     }
 
     public void updateContent(String content, LocalDate timePoint) {
-        if(content != null) this.content = content;
-        if(timePoint != null) this.timePoint = timePoint;
+        this.content = content;
+        this.timePoint = timePoint;
     }
 }

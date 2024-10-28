@@ -9,8 +9,8 @@ import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoContentRequestDto;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoIdResponseDto;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -33,44 +33,100 @@ public class TodoCommandService {
     private final RoomLogCommandService roomLogCommandService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public void createTodo(
-        Member member,
-        Long roomId,
+    public TodoIdResponseDto createTodo(Member member, Long roomId,
         CreateTodoRequestDto createTodoRequestDto
     ) {
-
         Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
         // 최대 투두 생성 개수 초과 여부 판단
-        int todoCount = todoRepository.countAllByRoomIdAndMateIdAndTimePoint(roomId, member.getId(),
-            createTodoRequestDto.getTimePoint());
-        if (todoCount >= MAX_TODO_PER_DAY) {
-            throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
-        }
+        checkMaxTodoPerDay(roomId, member.getId(), LocalDate.now());
 
-        todoRepository.save(
+        Todo todo = todoRepository.save(
             TodoConverter.toEntity(mate.getRoom(), mate, createTodoRequestDto.getContent(),
                 createTodoRequestDto.getTimePoint(), null)
         );
+        return TodoIdResponseDto.builder().id(todo.getId()).build();
     }
 
-    public void updateTodoCompleteState(
-        Member member,
-        UpdateTodoCompleteStateRequestDto requestDto
+    public void updateTodoCompleteState(Member member, Long roomId, Long todoId, Boolean completed
     ) {
 
-        Todo todo = todoRepository.findById(requestDto.getTodoId())
+        Todo todo = getTodo(todoId);
+
+        checkTodoRoomId(todo, roomId);
+        checkValidUpdate(todo, member);
+
+        todo.updateCompleteState(completed);
+
+        // 투두 완료시 RoomLog 추가
+        roomLogCommandService.addRoomLogFromTodo(todo);
+        // 모든 투두가 완료되었을 때 알림을 보냄
+        allTodoCompleteNotification(todo, member);
+    }
+
+    public void deleteTodo(Member member, Long roomId, Long todoId
+    ) {
+        Todo todo = getTodo(todoId);
+
+        checkTodoRoomId(todo, roomId);
+        checkValidUpdate(todo, member);
+
+        // 투두 삭제
+        todoRepository.delete(todo);
+    }
+
+    public void updateTodoContent(Member member, Long roomId, Long todoId,
+        UpdateTodoContentRequestDto requestDto
+    ) {
+        Todo todo = getTodo(todoId);
+
+        checkTodoRoomId(todo, roomId);
+        checkValidUpdate(todo, member);
+
+        if (isTodoOfRole(todo)) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
+        }
+
+        todo.updateContent(requestDto.getContent(), requestDto.getTimePoint());
+    }
+
+    private Todo getTodo(Long todoId) {
+        return todoRepository.findById(todoId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
+    }
+
+    private void checkMaxTodoPerDay(Long roomId, Long memberId, LocalDate timePoint) {
+        int todoCount = todoRepository.countAllByRoomIdAndMateIdAndTimePoint(roomId, memberId,
+            timePoint);
+        if (todoCount >= MAX_TODO_PER_DAY) {
+            throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
+        }
+    }
+
+    private void checkTodoRoomId(Todo todo, Long roomId) {
+        if (todo.getRoom().getId().equals(roomId)) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
+        }
+    }
+
+    private void checkValidUpdate(Todo todo, Member member) {
         if (Boolean.FALSE.equals(todo.getMate().getMember().getId().equals(member.getId()))) {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
-        todo.updateCompleteState(requestDto.getCompleted());
+    }
 
-        roomLogCommandService.addRoomLogFromTodo(todo);
+    private boolean isTodoOfRole(Todo todo) {
+        return todo.getRole() != null;
+    }
 
-        todoRepository.save(todo);
-
+    /**
+     * 모든 투두가 완료되었을 때 알림을 보냄
+     *
+     * @param todo   투두
+     * @param member 사용자
+     */
+    private void allTodoCompleteNotification(Todo todo, Member member) {
         boolean existsFalseTodo = todoRepository.existsByMateAndTimePointAndCompletedFalse(
             todo.getMate(), LocalDate.now());
 
@@ -85,38 +141,6 @@ public class TodoCommandService {
             eventPublisher.publishEvent(GroupWithOutMeTargetDto.create(member, memberList,
                 NotificationType.COMPLETE_ALL_TODAY_TODO));
         }
-    }
-
-    public void deleteTodo(
-        Member member,
-        Long todoId
-    ) {
-        Todo todo = todoRepository.findById(todoId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
-
-        if (Boolean.FALSE.equals(todo.getMate().getMember().getId().equals(member.getId()))) {
-            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
-        }
-        todoRepository.delete(todo);
-    }
-
-    public void updateTodoContent(
-        Member member,
-        UpdateTodoContentRequestDto requestDto
-    ) {
-        Todo todo = todoRepository.findById(requestDto.getTodoId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
-
-        if(todo.getRole() != null){
-            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
-        }
-
-        if (Boolean.FALSE.equals(todo.getMate().getMember().getId().equals(member.getId()))) {
-            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
-        }
-
-        todo.updateContent(requestDto.getContent(), requestDto.getTimePoint());
-        todoRepository.save(todo);
     }
 
 }

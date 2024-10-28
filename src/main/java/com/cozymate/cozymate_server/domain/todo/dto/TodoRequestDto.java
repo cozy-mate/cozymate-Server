@@ -24,8 +24,6 @@ public class TodoRequestDto {
     @AllArgsConstructor
     @Getter
     public static class UpdateTodoCompleteStateRequestDto {
-
-        private Long todoId;
         @NotNull
         private Boolean completed;
     }
@@ -33,10 +31,9 @@ public class TodoRequestDto {
     @AllArgsConstructor
     @Getter
     public static class UpdateTodoContentRequestDto {
-
-        private Long todoId;
         @Length(min = 1, max = 30)
         private String content;
+
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate timePoint;
     }
