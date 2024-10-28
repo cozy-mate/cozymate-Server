@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 @PropertySource("classpath:application.yml")
 public class ImageUtil {
 
-    private static String bucket;
+    private static String publicUri;
 
-    @Value("${cloud.aws.s3.bucket}")
-    public void setBucket(String bucket) {
-        ImageUtil.bucket = bucket;
+    @Value("${cloud.aws.cdn.public-uri}")
+    public void setBucket(String publicUri) {
+        ImageUtil.publicUri = publicUri;
     }
     public static String generateUrl(String key) {
 
-        return String.format("https://%s.s3.amazonaws.com/%s", bucket, key);
+        return String.format("%s/%s", publicUri, key);
     }
 }
