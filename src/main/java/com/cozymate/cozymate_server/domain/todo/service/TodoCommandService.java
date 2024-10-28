@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoContentRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoIdResponseDto;
+import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TodoCommandService {
 
     private static final int MAX_TODO_PER_DAY = 20;
+    private static final int SINGLE_NUM = 1;
 
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
@@ -36,15 +38,17 @@ public class TodoCommandService {
     public TodoIdResponseDto createTodo(Member member, Long roomId,
         CreateTodoRequestDto requestDto
     ) {
-        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
+        Mate mate = getMate(member.getId(), roomId);
+
+        TodoType type = classifyTodoType(mate, requestDto.getMateIdList());
 
         // 최대 투두 생성 개수 초과 여부 판단
         checkMaxTodoPerDay(roomId, member.getId(), LocalDate.now());
 
         Todo todo = todoRepository.save(
-            TodoConverter.toEntity(mate.getRoom(), mate, requestDto.getContent(),
-                requestDto.getTimePoint(), null)
+            TodoConverter.toEntity(mate.getRoom(), mate, requestDto.getMateIdList(),
+                requestDto.getContent(),
+                requestDto.getTimePoint(), null, type)
         );
         return TodoIdResponseDto.builder().id(todo.getId()).build();
     }
@@ -89,6 +93,11 @@ public class TodoCommandService {
         }
 
         todo.updateContent(requestDto.getContent(), requestDto.getTimePoint());
+    }
+
+    private Mate getMate(Long memberId, Long roomId) {
+        return mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
     }
 
     private Todo getTodo(Long todoId) {
@@ -141,6 +150,19 @@ public class TodoCommandService {
             eventPublisher.publishEvent(GroupWithOutMeTargetDto.create(member, memberList,
                 NotificationType.COMPLETE_ALL_TODAY_TODO));
         }
+    }
+
+    private TodoType classifyTodoType(Mate mate, List<Long> todoIdList) {
+        // size가 1보다 크면 그룹투두
+        if (todoIdList.size() > SINGLE_NUM) {
+            return TodoType.GROUPTODO;
+        }
+        // size가 1이고 해당 아이디가 본인 아이디와 같으면 내 투두
+        if (todoIdList.size() == SINGLE_NUM && todoIdList.get(0).equals(mate.getId())) {
+            return TodoType.MYTODO;
+        }
+        // size가 1이고 해당 아이디가 본인 아이디와 다르면 남 투두
+        return TodoType.MATETODO;
     }
 
 }

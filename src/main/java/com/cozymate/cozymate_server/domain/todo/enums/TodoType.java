@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.todo;
+package com.cozymate.cozymate_server.domain.todo.enums;
 
 public enum TodoType {
     MYTODO, // 내 투두

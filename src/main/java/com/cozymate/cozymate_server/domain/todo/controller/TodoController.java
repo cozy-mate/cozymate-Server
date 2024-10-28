@@ -41,7 +41,7 @@ public class TodoController {
     private final TodoQueryService todoQueryService;
 
     @PostMapping("/{roomId}/todos")
-    @Operation(summary = "[무빗] 특정 방에 본인의 Todo 생성", description = "Todo는 본인한테만 할당할 수 있습니다.")
+    @Operation(summary = "[무빗] 특정 방에 본인의 Todo 생성", description = "내 투두, 남 투두, 그룹 투두 모두 생성 가능합니다.")
     @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._TODO_OVER_MAX})
     public ResponseEntity<ApiResponse<TodoIdResponseDto>> createTodo(
         @AuthenticationPrincipal MemberDetails memberDetails,
