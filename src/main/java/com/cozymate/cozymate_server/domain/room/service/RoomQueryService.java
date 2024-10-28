@@ -56,7 +56,7 @@ public class RoomQueryService {
 
         List<CozymateInfoResponse> mates = mateRepository.findByRoomId(roomId).stream()
             .filter(mate->mate.getEntryStatus().equals(EntryStatus.JOINED))
-            .map(RoomConverter::toCozyMateInfoResponse)
+            .map(mate -> RoomConverter.toCozymateInfoResponse(mate, memberId, memberStatEqualityQueryService))
             .toList();
 
         //해시태그 가져오기
@@ -162,10 +162,10 @@ public class RoomQueryService {
             return 0;
         }
 
-        return (int) roomEquality.values().stream()
+        return (int) Math.round(roomEquality.values().stream()
             .mapToInt(Integer::intValue)
             .average()
-            .orElse(0);
+            .orElse(0));
 
     }
 

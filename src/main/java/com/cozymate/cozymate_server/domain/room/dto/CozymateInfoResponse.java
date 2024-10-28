@@ -11,6 +11,7 @@ public class CozymateInfoResponse {
     private Long mateId;
     private String nickname;
     private Integer persona;
+    private Integer mateEquality;
 
 
 }
