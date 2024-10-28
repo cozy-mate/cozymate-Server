@@ -20,10 +20,12 @@ import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
-import com.cozymate.cozymate_server.domain.room.dto.PublicRoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PrivateRoomCreateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PublicRoomCreateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.RoomUpdateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
+import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
@@ -66,7 +68,7 @@ public class RoomCommandService {
     private final RoomHashtagCommandService roomHashtagCommandService;
 
 
-    public RoomCreateResponse createPrivateRoom(RoomCreateRequest request, Member member) {
+    public RoomCreateResponse createPrivateRoom(PrivateRoomCreateRequest request, Member member) {
         Member creator = memberRepository.findById(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -246,6 +248,35 @@ public class RoomCommandService {
             postRepository.deleteByFeedId(feed.getId());
             feedRepository.deleteByRoomId(roomId);
         }
+    }
+
+    public RoomCreateResponse updateRoom(Long roomId, Long memberId, RoomUpdateRequest request){
+
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        if (!manager.getMember().getId().equals(memberId)) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
+
+        if (room.getRoomType()== RoomType.PRIVATE){
+            room.updateRoomName(request.getName());
+        } else if (room.getRoomType()==RoomType.PUBLIC) {
+            room.updateRoomName(request.getName());
+            roomHashtagCommandService.deleteRoomHashtags(room);
+            roomHashtagCommandService.updateRoomHashtags(room, request.getHashtags());
+        }
+        roomRepository.save(room);
+
+        return roomQueryService.getRoomById(roomId, memberId);
     }
 
     @Deprecated

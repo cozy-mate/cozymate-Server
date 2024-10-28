@@ -14,9 +14,9 @@ import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomExistResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
@@ -70,7 +70,6 @@ public class RoomQueryService {
             room.getRoomType(),
             hashtags, getCalculateRoomEquality(memberId, roomId)
             // Todo: 기숙사 정보 추가
-            // Todo: 일치율
             );
     }
 

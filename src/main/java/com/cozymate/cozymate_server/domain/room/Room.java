@@ -77,5 +77,8 @@ public class Room extends BaseTimeEntity {
         }
     }
 
+    public void updateRoomName(String newRoomName) {
+        this.name = newRoomName;
+    }
 
 }

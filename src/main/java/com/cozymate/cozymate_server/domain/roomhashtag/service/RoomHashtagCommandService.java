@@ -34,7 +34,6 @@ public class RoomHashtagCommandService {
             RoomHashtag roomHashtag = RoomHashtagConverter.toRoomHashtag(room, hashtag);
             roomHashtagRepository.save(roomHashtag);
         }
-
     }
 
     // 입력한 해시태그 중복 검사
@@ -43,5 +42,15 @@ public class RoomHashtagCommandService {
         if (uniqueHashtags.size() != hashtags.size()) {
             throw new GeneralException(ErrorStatus._DUPLICATE_HASHTAGS);
         }
+    }
+
+    public void deleteRoomHashtags(Room room) {
+        // RoomHashtag 엔티티를 조회하여 삭제하는 로직 구현
+        roomHashtagRepository.deleteAllByRoomId(room.getId());
+    }
+
+    public void updateRoomHashtags(Room room, List<String> hashtags) {
+        // 새로운 해시태그 추가
+        createRoomHashtag(room, hashtags);
     }
 }
