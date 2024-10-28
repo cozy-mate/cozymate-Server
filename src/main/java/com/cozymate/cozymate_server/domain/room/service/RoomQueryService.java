@@ -56,8 +56,11 @@ public class RoomQueryService {
 
         List<CozymateInfoResponse> mates = mateRepository.findByRoomId(roomId).stream()
             .filter(mate->mate.getEntryStatus().equals(EntryStatus.JOINED))
-            .map(mate -> RoomConverter.toCozymateInfoResponse(mate, memberId, memberStatEqualityQueryService))
-            .toList();
+            .map(mate -> {
+                Integer mateEquality = memberStatEqualityQueryService.getEquality(memberId, List.of(mate.getMember().getId()))
+                    .getOrDefault(mate.getMember().getId(), 0);
+                return RoomConverter.toCozymateInfoResponse(mate, mateEquality);
+            }).toList();
 
         //해시태그 가져오기
         List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(roomId);

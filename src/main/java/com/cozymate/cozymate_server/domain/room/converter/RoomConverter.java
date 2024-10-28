@@ -2,7 +2,6 @@ package com.cozymate.cozymate_server.domain.room.converter;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
@@ -13,7 +12,6 @@ import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistRes
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
-import java.util.List;
 
 public class RoomConverter {
 
@@ -58,19 +56,13 @@ public class RoomConverter {
             .build();
     }
 
-    public static CozymateInfoResponse toCozymateInfoResponse(
-        Mate mate, Long memberId, MemberStatEqualityQueryService memberStatEqualityQueryService) {
-
-        // mate 일치율
-        Integer mateEquality = memberStatEqualityQueryService.getEquality(memberId, List.of(mate.getMember().getId()))
-            .getOrDefault(mate.getMember().getId(), 0);
-
+    public static CozymateInfoResponse toCozymateInfoResponse(Mate mate, Integer mateEquality) {
         return CozymateInfoResponse.builder()
             .memberId(mate.getMember().getId())
             .mateId(mate.getId())
             .nickname(mate.getMember().getNickname())
             .persona(mate.getMember().getPersona())
-            .mateEquality(mateEquality) // 일치율 추가
+            .mateEquality(mateEquality)
             .build();
     }
 
