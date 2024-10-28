@@ -45,12 +45,10 @@ public class RoomHashtagCommandService {
     }
 
     public void deleteRoomHashtags(Room room) {
-        // RoomHashtag 엔티티를 조회하여 삭제하는 로직 구현
         roomHashtagRepository.deleteAllByRoomId(room.getId());
     }
 
     public void updateRoomHashtags(Room room, List<String> hashtags) {
-        // 새로운 해시태그 추가
         createRoomHashtag(room, hashtags);
     }
 }
