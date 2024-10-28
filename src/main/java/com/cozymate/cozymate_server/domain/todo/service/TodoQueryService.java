@@ -6,7 +6,7 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListDetailResponseDto;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoDetailResponseDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListResponseDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoMateDetailResponseDto;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
@@ -29,21 +29,22 @@ public class TodoQueryService {
     private final TodoRepository todoRepository;
     private final MateRepository mateRepository;
 
-    public TodoListResponseDto getTodo(Long roomId, Member member, LocalDate timePoint) {
+    public TodoListResponseDto getTodo(Member member, Long roomId, LocalDate timePoint) {
 
-        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
+        Mate currentMate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
         List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(roomId, timePoint);
-        TodoMateDetailResponseDto myTodoListResponseDto = TodoConverter.toTodoMateDetailResponseDto(
-            mate.getMember().getPersona(), new ArrayList<>());
 
+        TodoMateDetailResponseDto myTodoListResponseDto = TodoConverter.toTodoMateDetailResponseDto(
+            currentMate.getMember().getPersona(), new ArrayList<>());
         Map<String, TodoMateDetailResponseDto> mateTodoResponseDto = new HashMap<>();
-        // mateTodoListResponseDto에 본인을 제외한 mate 정보 추가
+
+        // mateTodoListResponseDto에 본인을 제외한 currentMate 정보 추가
         List<Mate> mateList = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
             EntryStatus.JOINED);
         mateList.stream()
-            .filter(filterMate -> Boolean.FALSE.equals(mate.getId().equals(filterMate.getId())))
+            .filter(filteringMate -> isNotSameMate(currentMate, filteringMate))
             .forEach(filteredMate ->
                 mateTodoResponseDto.put(filteredMate.getMember().getNickname(),
                     TodoConverter.toTodoMateDetailResponseDto(filteredMate.getMember().getPersona(),
@@ -51,13 +52,13 @@ public class TodoQueryService {
             );
 
         todoList.forEach(todo -> {
-            if (todo.getMate().getId().equals(mate.getId())) {
+            if (todo.getMate().getId().equals(currentMate.getId())) {
                 myTodoListResponseDto.getMateTodoList()
                     .add(TodoConverter.toTodoListDetailResponseDto(todo));
             } else {
                 String mateName = todo.getMate().getMember().getNickname();
 
-                TodoListDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(todo);
+                TodoDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(todo);
                 mateTodoResponseDto.get(mateName).getMateTodoList().add(todoDto);
             }
         });
@@ -65,6 +66,10 @@ public class TodoQueryService {
         return TodoConverter.toTodoListResponseDto(timePoint, myTodoListResponseDto,
             mateTodoResponseDto);
 
+    }
+
+    private boolean isNotSameMate(Mate mate1, Mate mate2) {
+        return !mate1.getId().equals(mate2.getId());
     }
 
 }

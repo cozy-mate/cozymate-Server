@@ -3,7 +3,6 @@ package com.cozymate.cozymate_server.domain.todo.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoCompleteStateRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoContentRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoIdResponseDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListResponseDto;
@@ -17,7 +16,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
-import jdk.jfr.BooleanFlag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -48,11 +46,11 @@ public class TodoController {
     public ResponseEntity<ApiResponse<TodoIdResponseDto>> createTodo(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
-        @RequestBody @Valid CreateTodoRequestDto createTodoRequestDto
+        @RequestBody @Valid CreateTodoRequestDto requestDto
     ) {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            todoCommandService.createTodo(memberDetails.getMember(), roomId, createTodoRequestDto)
+            todoCommandService.createTodo(memberDetails.getMember(), roomId, requestDto)
         ));
 
     }
@@ -108,10 +106,10 @@ public class TodoController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long todoId,
-        @Valid @RequestBody UpdateTodoContentRequestDto updateTodoContentRequestDto
+        @Valid @RequestBody UpdateTodoContentRequestDto requestDto
     ) {
         todoCommandService.updateTodoContent(memberDetails.getMember(), roomId, todoId,
-            updateTodoContentRequestDto);
+            requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("수정되었습니다."));
     }
 }

@@ -34,7 +34,7 @@ public class TodoCommandService {
     private final ApplicationEventPublisher eventPublisher;
 
     public TodoIdResponseDto createTodo(Member member, Long roomId,
-        CreateTodoRequestDto createTodoRequestDto
+        CreateTodoRequestDto requestDto
     ) {
         Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
@@ -43,8 +43,8 @@ public class TodoCommandService {
         checkMaxTodoPerDay(roomId, member.getId(), LocalDate.now());
 
         Todo todo = todoRepository.save(
-            TodoConverter.toEntity(mate.getRoom(), mate, createTodoRequestDto.getContent(),
-                createTodoRequestDto.getTimePoint(), null)
+            TodoConverter.toEntity(mate.getRoom(), mate, requestDto.getContent(),
+                requestDto.getTimePoint(), null)
         );
         return TodoIdResponseDto.builder().id(todo.getId()).build();
     }
