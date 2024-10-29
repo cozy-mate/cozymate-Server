@@ -23,7 +23,7 @@ public class MemberStatConverter {
             .member(member)
             .university(university)
             .admissionYear(Integer.parseInt(memberStatCommandRequestDTO.getAdmissionYear()))
-            .major(memberStatCommandRequestDTO.getMajor())
+//            .major(memberStatCommandRequestDTO.getMajor())
             .numOfRoommate(memberStatCommandRequestDTO.getNumOfRoommate())
             .acceptance(memberStatCommandRequestDTO.getAcceptance())
             .wakeUpTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),
@@ -66,7 +66,7 @@ public class MemberStatConverter {
             .universityId(memberStat.getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
             .birthYear(birthYear)
-            .major(memberStat.getMajor())
+//            .major(memberStat.getMajor())
             .numOfRoommate(memberStat.getNumOfRoommate())
             .acceptance(memberStat.getAcceptance())
             .wakeUpMeridian(TimeUtil.convertToMeridian(memberStat.getWakeUpTime()))
