@@ -3,20 +3,25 @@ package com.cozymate.cozymate_server.domain.chatroom.service;
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
+import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomSimpleDto;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberblock.util.MemberBlockUtil;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -24,6 +29,7 @@ public class ChatRoomQueryService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
+    private final MemberRepository memberRepository;
     private final MemberBlockUtil memberBlockUtil;
 
     public List<ChatRoomResponseDto> getChatRoomList(Member member) {
@@ -36,6 +42,9 @@ public class ChatRoomQueryService {
         List<ChatRoom> chatRoomList = findChatRoomList.stream()
             .filter(chatRoom -> {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
+                if (chat == null) {
+                    return false;
+                }
                 LocalDateTime lastDeleteAt = getLastDeleteAtByMember(chatRoom, member);
                 return lastDeleteAt == null || chat.getCreatedAt().isAfter(lastDeleteAt);
             })
@@ -52,9 +61,21 @@ public class ChatRoomQueryService {
             ChatRoomResponseDto::getMemberId);
     }
 
+    public ChatRoomSimpleDto getChatRoom(Member member, Long recipientId) {
+        Member recipient = memberRepository.findById(recipientId)
+            .orElseThrow(
+                () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
+            );
+
+        Optional<ChatRoom> findChatRoom = chatRoomRepository.findByMemberAAndMemberB(member,
+            recipient);
+
+        return ChatRoomConverter.toChatRoomSimpleDto(findChatRoom, recipient);
+    }
+
     private Chat getLatestChatByChatRoom(ChatRoom chatRoom) {
         return chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._CHAT_NOT_FOUND));
+            .orElse(null);
     }
 
     private LocalDateTime getLastDeleteAtByMember(ChatRoom chatRoom, Member member) {
