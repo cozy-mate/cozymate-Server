@@ -25,6 +25,9 @@ public class RoleConverter {
     // Day List → Bitmask
     public static int convertDayListToBitmask(List<DayListBitmask> dayList) {
         int bitmask = 0;
+        if (dayList == null) {
+            return -1;
+        }
         for (DayListBitmask dayBitMask : dayList) {
             bitmask |= dayBitMask.getValue();
         }

@@ -6,15 +6,16 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
-import com.cozymate.cozymate_server.domain.room.dto.PublicRoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomExistResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PrivateRoomCreateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PublicRoomCreateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 
 public class RoomConverter {
-    public static Room toPrivateRoom(RoomCreateRequest request, String inviteCode){
+
+    public static Room toPrivateRoom(PrivateRoomCreateRequest request, String inviteCode){
         return Room.builder()
             .name(request.getName())
             .profileImage(request.getProfileImage())
@@ -55,11 +56,13 @@ public class RoomConverter {
             .build();
     }
 
-    public static CozymateInfoResponse toCozyMateInfoResponse(Mate mate) {
+    public static CozymateInfoResponse toCozymateInfoResponse(Mate mate, Integer mateEquality) {
         return CozymateInfoResponse.builder()
             .memberId(mate.getMember().getId())
             .mateId(mate.getId())
             .nickname(mate.getMember().getNickname())
+            .persona(mate.getMember().getPersona())
+            .mateEquality(mateEquality)
             .build();
     }
 

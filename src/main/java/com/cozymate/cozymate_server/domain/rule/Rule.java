@@ -34,4 +34,10 @@ public class Rule extends BaseTimeEntity {
 
     @Column(length = 40)
     private String memo;
+
+    // 메모가 nullable이라, 수정할 때 그냥 값을 덮어씌우도록 구성
+    public void updateEntity(String content, String memo) {
+            this.content = content;
+            this.memo = memo;
+    }
 }

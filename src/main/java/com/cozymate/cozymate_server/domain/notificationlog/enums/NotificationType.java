@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.notificationlog.enums;
 
-import static com.cozymate.cozymate_server.domain.memberstat.util.MemberUtil.getNicknameShowFormat;
+import static com.cozymate.cozymate_server.domain.memberstatequality.util.MemberStatEqualityUtil.getNicknameShowFormat;
 
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushContentDto;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushContentResultDto;

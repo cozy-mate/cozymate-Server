@@ -44,7 +44,7 @@ public class MemberBlockCommandService {
 
     private void checkBlockSelf(Long blockedMemberId, Long memberId) {
         if (blockedMemberId.equals(memberId)) {
-            throw new GeneralException(ErrorStatus._CANNOT_BLOCK_SELF);
+            throw new GeneralException(ErrorStatus._CANNOT_BLOCK_REQUEST_SELF);
         }
     }
 

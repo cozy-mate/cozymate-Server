@@ -1,8 +1,9 @@
 package com.cozymate.cozymate_server.domain.mail.controller;
 
 
+import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.mail.dto.MailResponseDTO;
+import com.cozymate.cozymate_server.domain.mail.dto.MailResponse;
 import com.cozymate.cozymate_server.domain.mail.service.MailService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,20 +25,17 @@ public class MailController {
             @AuthenticationPrincipal MemberDetails memberDetails,
             @PathVariable("mail-address") String mailAddress
     ) {
-        mailService.sendUniversityAuthenticationCode(memberDetails.getUsername(), mailAddress);
+        mailService.sendUniversityAuthenticationCode(memberDetails, mailAddress);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/verify/{code}")
-    public ResponseEntity<ApiResponse<MailResponseDTO.verifyResponseDTO>> verifyAuthenticationCode(
+    public ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> verifyAuthenticationCode(
             @AuthenticationPrincipal MemberDetails memberDetails,
             @PathVariable("code") String code
 
     ) {
-        MailResponseDTO.verifyResponseDTO verifyResponseDTO = mailService.verifyAuthenticationCode(
-                memberDetails.getUsername(), code);
-
-        return ResponseEntity.ok(ApiResponse.onSuccess(verifyResponseDTO));
+        return ResponseEntity.ok(ApiResponse.onSuccess(mailService.verifyAuthenticationCode(memberDetails, code)));
     }
 
 }

@@ -6,17 +6,19 @@ import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuild
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
-import java.sql.Time;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 public class MemberStatConverter {
 
     public static MemberStat toEntity(
-        Long memberStatId, Member member, University university, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        Long memberStatId, Member member, University university,
+        MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+
         MemberStatBuilder builder = MemberStat.builder()
             .member(member)
             .university(university)
@@ -24,11 +26,15 @@ public class MemberStatConverter {
             .major(memberStatCommandRequestDTO.getMajor())
             .numOfRoommate(memberStatCommandRequestDTO.getNumOfRoommate())
             .acceptance(memberStatCommandRequestDTO.getAcceptance())
-            .wakeUpTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(), memberStatCommandRequestDTO.getWakeUpTime()))
-            .sleepingTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(), memberStatCommandRequestDTO.getSleepingTime()))
-            .turnOffTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(), memberStatCommandRequestDTO.getTurnOffTime()))
+            .wakeUpTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),
+                memberStatCommandRequestDTO.getWakeUpTime()))
+            .sleepingTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),
+                memberStatCommandRequestDTO.getSleepingTime()))
+            .turnOffTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getTurnOffMeridian(),
+                memberStatCommandRequestDTO.getTurnOffTime()))
             .smoking(memberStatCommandRequestDTO.getSmokingState())
-            .sleepingHabit(memberStatCommandRequestDTO.getSleepingHabit())
+            .sleepingHabit(
+                MemberStatUtil.toSortedString(memberStatCommandRequestDTO.getSleepingHabit()))
             .airConditioningIntensity(memberStatCommandRequestDTO.getAirConditioningIntensity())
             .heatingIntensity(memberStatCommandRequestDTO.getHeatingIntensity())
             .lifePattern(memberStatCommandRequestDTO.getLifePattern())
@@ -41,9 +47,11 @@ public class MemberStatConverter {
             .cleanSensitivity(memberStatCommandRequestDTO.getCleanSensitivity())
             .noiseSensitivity(memberStatCommandRequestDTO.getNoiseSensitivity())
             .cleaningFrequency(memberStatCommandRequestDTO.getCleaningFrequency())
-            .personality(memberStatCommandRequestDTO.getPersonality())
+            .drinkingFrequency(memberStatCommandRequestDTO.getDrinkingFrequency())
+            .personality(
+                MemberStatUtil.toSortedString(memberStatCommandRequestDTO.getPersonality()))
             .mbti(memberStatCommandRequestDTO.getMbti())
-            .options(memberStatCommandRequestDTO.getOptions());
+            .selfIntroduction(memberStatCommandRequestDTO.getSelfIntroduction());
 
         if (memberStatId != null) {
             builder.id(memberStatId);
@@ -53,8 +61,7 @@ public class MemberStatConverter {
     }
 
 
-
-    public static MemberStatQueryResponseDTO toDto(MemberStat memberStat, Integer birthYear){
+    public static MemberStatQueryResponseDTO toDto(MemberStat memberStat, Integer birthYear) {
         return MemberStatQueryResponseDTO.builder()
             .universityId(memberStat.getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
@@ -69,7 +76,7 @@ public class MemberStatConverter {
             .turnOffMeridian(TimeUtil.convertToMeridian(memberStat.getTurnOffTime()))
             .turnOffTime(TimeUtil.convertToTime(memberStat.getTurnOffTime()))
             .smokingState(memberStat.getSmoking())
-            .sleepingHabit(memberStat.getSleepingHabit())
+            .sleepingHabit(MemberStatUtil.fromStringToList(memberStat.getSleepingHabit()))
             .airConditioningIntensity(memberStat.getAirConditioningIntensity())
             .heatingIntensity(memberStat.getHeatingIntensity())
             .lifePattern(memberStat.getLifePattern())
@@ -82,13 +89,14 @@ public class MemberStatConverter {
             .cleanSensitivity(memberStat.getCleanSensitivity())
             .noiseSensitivity(memberStat.getNoiseSensitivity())
             .cleaningFrequency(memberStat.getCleaningFrequency())
-            .personality(memberStat.getPersonality())
+            .drinkingFrequency(memberStat.getDrinkingFrequency())
+            .personality(MemberStatUtil.fromStringToList(memberStat.getPersonality()))
             .mbti(memberStat.getMbti())
-            .options(memberStat.getOptions())
+            .selfIntroduction(memberStat.getSelfIntroduction())
             .build();
     }
 
-    public static MemberStatEqualityResponseDTO toEqualityDto(MemberStat memberStat, int equality){
+    public static MemberStatEqualityResponseDTO toEqualityDto(MemberStat memberStat, int equality) {
         return MemberStatEqualityResponseDTO.builder()
             .memberId(memberStat.getMember().getId())
             .memberAge(TimeUtil.calculateAge(memberStat.getMember().getBirthDay()))
@@ -98,4 +106,6 @@ public class MemberStatConverter {
             .equality(equality)
             .build();
     }
+
+
 }

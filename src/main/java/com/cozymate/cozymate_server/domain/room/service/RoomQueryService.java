@@ -8,14 +8,15 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomCreateResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomExistResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomJoinResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
@@ -23,7 +24,9 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class RoomQueryService {
     private final MemberRepository memberRepository;
     private final FriendRepository friendRepository;
     private final RoomHashtagRepository roomHashtagRepository;
+    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
 
     public RoomCreateResponse getRoomById(Long roomId, Long memberId) {
 
@@ -47,20 +51,34 @@ public class RoomQueryService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+        Mate creatingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        List<CozymateInfoResponse> mates = mateRepository.findByRoomId(roomId).stream()
-            .filter(mate->mate.getEntryStatus().equals(EntryStatus.JOINED))
-            .map(RoomConverter::toCozyMateInfoResponse)
-            .toList();
+        List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED);
+
+        Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
+            joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
+
+        Integer roomEquality = getCalculateRoomEquality(memberId, equalityMap);
+
+        List<CozymateInfoResponse> mates = joinedMates.stream()
+            .map(mate -> {
+                Integer mateEquality = equalityMap.get(mate.getMember().getId());
+                return RoomConverter.toCozymateInfoResponse(mate, mateEquality);
+            }).toList();
 
         //해시태그 가져오기
         List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(roomId);
 
         return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),
             mates.isEmpty() ? new ArrayList<>() : mates,
-            room.getRoomType(), hashtags
+            creatingMate.isRoomManager(),
+            room.getMaxMateNum(),
+            room.getNumOfArrival(),
+            room.getRoomType(),
+            hashtags,
+            roomEquality
+            // Todo: 기숙사 정보 추가
             );
     }
 
@@ -139,6 +157,22 @@ public class RoomQueryService {
         } else {
             return RoomConverter.toRoomExistResponse(null);
         }
+    }
+
+    public Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap){
+        List<Integer> roomEquality = equalityMap.entrySet().stream()
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
+
+        if (roomEquality.isEmpty()) {
+            return 0;
+        }
+
+        return (int) Math.round(roomEquality.stream()
+            .mapToInt(Integer::intValue)
+            .average()
+            .orElse(0));
+
     }
 
 }

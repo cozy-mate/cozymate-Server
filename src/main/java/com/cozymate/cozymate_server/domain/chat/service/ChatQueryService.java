@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.memberblock.util.MemberBlockUtil;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class ChatQueryService {
 
     private final ChatRepository chatRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final MemberBlockUtil memberBlockUtil;
 
     public ChatResponseDto getChatList(Member member, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -32,6 +34,8 @@ public class ChatQueryService {
             && !member.getId().equals(chatRoom.getMemberB().getId())) {
             throw new GeneralException(ErrorStatus._CHATROOM_MEMBER_MISMATCH);
         }
+
+        checkBlockedMember(member, chatRoom);
 
         List<Chat> filteredChatList = getFilteredChatList(chatRoom, member);
 
@@ -71,5 +75,14 @@ public class ChatQueryService {
                     chat.getCreatedAt());
             })
             .toList();
+    }
+
+    private void checkBlockedMember(Member member, ChatRoom chatRoom) {
+        Member otherMember = member.getId().equals(chatRoom.getMemberA())
+            ? chatRoom.getMemberB() : chatRoom.getMemberA();
+
+        if (memberBlockUtil.existsMemberBlock(member, otherMember.getId())) {
+            throw new GeneralException(ErrorStatus._REQUEST_TO_BLOCKED_MEMBER);
+        }
     }
 }
