@@ -29,11 +29,11 @@ public class TodoConverter {
             .build();
     }
 
-    public static TodoDetailResponseDto toTodoListDetailResponseDto(Todo todo) {
+    public static TodoDetailResponseDto toTodoListDetailResponseDto(Todo todo, Mate mate) {
         return TodoDetailResponseDto.builder()
             .id(todo.getId())
             .content(todo.getContent())
-            .isCompleted(todo.isCompleted())
+            .isCompleted(todo.isAssigneeCompleted(mate.getId()))
             .build();
     }
 

@@ -52,15 +52,22 @@ public class TodoQueryService {
             );
 
         todoList.forEach(todo -> {
-            if (todo.getMate().getId().equals(currentMate.getId())) {
+            if (todo.getAssignedMateIdList().contains(currentMate.getId())) {
                 myTodoListResponseDto.getMateTodoList()
-                    .add(TodoConverter.toTodoListDetailResponseDto(todo));
-            } else {
-                String mateName = todo.getMate().getMember().getNickname();
-
-                TodoDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(todo);
-                mateTodoResponseDto.get(mateName).getMateTodoList().add(todoDto);
+                    .add(TodoConverter.toTodoListDetailResponseDto(todo, currentMate));
             }
+            // 투두마다 반복하면서 투두의 mateIdList에 존재하는 ID마다 mateList에서 찾아서 mateTodoList에 추가
+            todo.getAssignedMateIdList().forEach(
+                mateId -> mateList.stream()
+                    .filter(mate -> mate.getId().equals(mateId) && isNotSameMate(currentMate, mate))
+                    .findFirst()
+                    .ifPresent(mate -> {
+                        String mateName = mate.getMember().getNickname();
+                        TodoDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(
+                            todo, mate);
+                        mateTodoResponseDto.get(mateName).getMateTodoList().add(todoDto);
+                    })
+            );
         });
 
         return TodoConverter.toTodoListResponseDto(timePoint, myTodoListResponseDto,

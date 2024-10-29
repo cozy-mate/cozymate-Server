@@ -78,7 +78,7 @@ public class TodoCommandService {
         Todo todo = getTodo(todoId);
 
         checkTodoRoomId(todo, roomId);
-        checkValidUpdate(todo, member);
+        checkValidUpdate(todo, mate);
         // TODO: Assignee인지 확인 필요
 
         // 해당 투두가 현재 사용자 기준으로 완료되어있는지 확인
@@ -114,7 +114,7 @@ public class TodoCommandService {
         Todo todo = getTodo(todoId);
 
         checkTodoRoomId(todo, roomId);
-        checkValidUpdate(todo, member);
+        checkValidUpdate(todo, mate);
 
         int indexOfMateOnIdList = todo.getAssignedMateIdList().indexOf(mate.getId());
 
@@ -148,10 +148,11 @@ public class TodoCommandService {
         UpdateTodoContentRequestDto requestDto
     ) {
         // TODO: 할당자를 바꿀 수 있도록 해야함
+        Mate mate = getMate(member.getId(), roomId);
         Todo todo = getTodo(todoId);
 
         checkTodoRoomId(todo, roomId);
-        checkValidUpdate(todo, member);
+        checkValidUpdate(todo, mate);
 
         if (isTodoOfRole(todo)) {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
@@ -179,13 +180,13 @@ public class TodoCommandService {
     }
 
     private void checkTodoRoomId(Todo todo, Long roomId) {
-        if (todo.getRoom().getId().equals(roomId)) {
-            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
+        if (!todo.getRoom().getId().equals(roomId)) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_IN_ROOM);
         }
     }
 
-    private void checkValidUpdate(Todo todo, Member member) {
-        if (Boolean.FALSE.equals(todo.getMate().getMember().getId().equals(member.getId()))) {
+    private void checkValidUpdate(Todo todo, Mate mate) {
+        if (!todo.getAssignedMateIdList().contains(mate.getId())) {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
     }
@@ -194,29 +195,29 @@ public class TodoCommandService {
         return todo.getRole() != null;
     }
 
-    /**
-     * TODO: 바뀐 기획으로 수정해야됨
-     * 모든 투두가 완료되었을 때 알림을 보냄
-     *
-     * @param todo   투두
-     * @param member 사용자
-     */
-    private void allTodoCompleteNotification(Todo todo, Member member) {
-        boolean existsFalseTodo = todoRepository.existsByMateAndTimePointAndCompletedFalse(
-            todo.getMate(), LocalDate.now());
-
-        if (!existsFalseTodo) {
-            List<Mate> findRoomMates = mateRepository.findByRoom(todo.getRoom());
-
-            List<Member> memberList = findRoomMates.stream()
-                .map(Mate::getMember)
-                .filter(findMember -> !findMember.getId().equals(member.getId()))
-                .toList();
-
-            eventPublisher.publishEvent(GroupWithOutMeTargetDto.create(member, memberList,
-                NotificationType.COMPLETE_ALL_TODAY_TODO));
-        }
-    }
+//    /**
+//     * TODO: 바뀐 기획으로 수정해야됨
+//     * 모든 투두가 완료되었을 때 알림을 보냄
+//     *
+//     * @param todo   투두
+//     * @param member 사용자
+//     */
+////    private void allTodoCompleteNotification(Todo todo, Member member) {
+////        boolean existsFalseTodo = todoRepository.existsByMateAndTimePointAndCompletedFalse(
+////            todo.getMate(), LocalDate.now());
+////
+////        if (!existsFalseTodo) {
+////            List<Mate> findRoomMates = mateRepository.findByRoom(todo.getRoom());
+////
+////            List<Member> memberList = findRoomMates.stream()
+////                .map(Mate::getMember)
+////                .filter(findMember -> !findMember.getId().equals(member.getId()))
+////                .toList();
+////
+////            eventPublisher.publishEvent(GroupWithOutMeTargetDto.create(member, memberList,
+////                NotificationType.COMPLETE_ALL_TODAY_TODO));
+////        }
+////    }
 
     private TodoType classifyTodoType(List<Long> todoIdList) {
         // size가 1보다 크면 그룹투두

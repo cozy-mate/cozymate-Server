@@ -65,26 +65,27 @@ public class NotificationScheduler {
         });
     }
 
-    @Scheduled(cron = "0 0 21 * * *")
-    public void sendReminderRoleNotification() {
-        LocalDate today = LocalDate.now();
-        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNullCompletedFalse(today);
-
-        Map<Member, Todo> todoMap = todoList.stream()
-            .filter(todo -> !todo.isCompleted())
-            .collect(Collectors.toMap(
-                todo -> todo.getMate().getMember(),
-                Function.identity(),
-                (existingTodo, newTodo) -> newTodo.getId() > existingTodo.getId()
-                    ? newTodo : existingTodo
-            ));
-
-        todoMap.forEach((member, todo) ->
-            fcmPushService.sendNotification(
-                OneTargetDto.create(member, NotificationType.REMINDER_ROLE,
-                    todo.getRole().getContent())
-            ));
-    }
+    // TODO: 변경된 TODO 기획에 맞춰서 수정해야함
+//    @Scheduled(cron = "0 0 21 * * *")
+//    public void sendReminderRoleNotification() {
+//        LocalDate today = LocalDate.now();
+//        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNullCompletedFalse(today);
+//
+//        Map<Member, Todo> todoMap = todoList.stream()
+//            .filter(todo -> !todo.isCompleted())
+//            .collect(Collectors.toMap(
+//                todo -> todo.getMate().getMember(),
+//                Function.identity(),
+//                (existingTodo, newTodo) -> newTodo.getId() > existingTodo.getId()
+//                    ? newTodo : existingTodo
+//            ));
+//
+//        todoMap.forEach((member, todo) ->
+//            fcmPushService.sendNotification(
+//                OneTargetDto.create(member, NotificationType.REMINDER_ROLE,
+//                    todo.getRole().getContent())
+//            ));
+//    }
 
     @Scheduled(cron = "00 00 00 * * *") // 매일 22시에 실행
     public void addReminderRoleRoomLog() {
@@ -126,19 +127,20 @@ public class NotificationScheduler {
         );
     }
 
-    // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
-    @Scheduled(cron = "0 0 0 * * *")
-    public void addRoleToTodo() {
-        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
-        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
-        List<Role> roleList = roleRepository.findAll();
-        roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
-            .forEach(role ->
-                todoRepository.save(
-                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
-                        role.getContent(),
-                        LocalDate.now(), role)
-                )
-            );
-    }
+    // TODO: 수정된 기획에 맞춰서 수정해야함
+//    // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
+//    @Scheduled(cron = "0 0 0 * * *")
+//    public void addRoleToTodo() {
+//        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
+//        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
+//        List<Role> roleList = roleRepository.findAll();
+//        roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
+//            .forEach(role ->
+//                todoRepository.save(
+//                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
+//                        role.getContent(),
+//                        LocalDate.now(), role)
+//                )
+//            );
+//    }
 }
