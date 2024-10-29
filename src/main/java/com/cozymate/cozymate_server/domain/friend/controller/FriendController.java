@@ -130,6 +130,8 @@ public class FriendController {
                 friendQueryService.getFriendList(memberDetails.getMember())
             ));
     }
+
+    @Deprecated
     @Operation(
         summary = "[포비] 친구 여부 가져오기",
         description = "사용자의 토큰을 넣어 사용하고,\n"
