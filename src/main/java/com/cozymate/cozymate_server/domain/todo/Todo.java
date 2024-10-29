@@ -52,18 +52,50 @@ public class Todo extends BaseTimeEntity {
 
     private LocalDate timePoint;
 
-    private boolean completed = false;
+    // Bitmasking 방식으로 사용 예정
+    private Integer completeBitmask;
 
     @Enumerated(EnumType.STRING)
     private TodoType todoType;
 
-    public void updateCompleteState(boolean completed) {
-        this.completed = completed;
-    }
-
     public void updateContent(String content, LocalDate timePoint) {
         this.content = content;
         this.timePoint = timePoint;
+    }
+
+    // 할당자 추가
+    public void addAssignee(Long assigneeId) {
+        this.assignedMateIdList.add(assigneeId);
+        this.completeBitmask |= (1 << (this.assignedMateIdList.size() - 1));
+    }
+
+    public void markTodoComplete(Long assigneeId) {
+        this.completeBitmask |= (1 << findAssigneeIndex(this.assignedMateIdList, assigneeId));
+    }
+
+    public void unmarkTodoComplete(Long assigneeId) {
+        this.completeBitmask &= ~(1 << findAssigneeIndex(this.assignedMateIdList, assigneeId));
+    }
+
+    public void removeAssignee(Long assigneeId) {
+        this.assignedMateIdList.remove(assigneeId);
+        int mask = (1 << findAssigneeIndex(this.assignedMateIdList, assigneeId)) - 1;
+        this.completeBitmask =
+            (this.completeBitmask & mask) | ((this.completeBitmask >> 1) & ~mask);
+    }
+
+    public boolean isAssigneeCompleted(Long assigneeId) {
+        return
+            (this.completeBitmask & (1 << findAssigneeIndex(this.assignedMateIdList, assigneeId)))
+                != 0;
+    }
+
+    public void updateTodoType(TodoType todoType) {
+        this.todoType = todoType;
+    }
+
+    private int findAssigneeIndex(List<Long> assigneeIdList, Long assigneeId) {
+        return assigneeIdList.indexOf(assigneeId);
     }
 
 }

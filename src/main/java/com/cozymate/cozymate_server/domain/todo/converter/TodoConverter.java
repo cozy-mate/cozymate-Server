@@ -23,7 +23,7 @@ public class TodoConverter {
             .content(content)
             .timePoint(timePoint)
             .role(role) // role은 null이 될 수 있음
-            .completed(false)
+            .completeBitmask(0)
             .todoType(type)
             .assignedMateIdList(assignedMateIdList)
             .build();

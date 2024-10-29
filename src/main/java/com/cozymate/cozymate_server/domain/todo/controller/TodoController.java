@@ -92,7 +92,7 @@ public class TodoController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long todoId,
-        @RequestParam @Parameter(example = "true") Boolean completed
+        @RequestParam @Parameter(example = "true") boolean completed
     ) {
         todoCommandService.updateTodoCompleteState(memberDetails.getMember(), roomId, todoId,
             completed);
