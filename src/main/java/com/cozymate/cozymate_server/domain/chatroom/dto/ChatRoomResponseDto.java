@@ -9,6 +9,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ChatRoomResponseDto {
+
     private Integer persona;
     private String nickName;
     private String lastContent;
@@ -18,14 +19,15 @@ public class ChatRoomResponseDto {
     @Getter
     @Builder
     public static class ChatRoomIdResponse {
+
         private Long chatRoomId;
     }
 
     @Getter
     @Builder
-    public static class ChatRoomSimpDto {
+    public static class ChatRoomSimpleDto {
+
         private Optional<ChatRoom> chatRoom;
         private Member recipient;
-
     }
 }

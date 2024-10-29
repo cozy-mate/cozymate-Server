@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.chatroom.service;
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomSimpDto;
+import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomSimpleDto;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
@@ -61,7 +61,7 @@ public class ChatRoomQueryService {
             ChatRoomResponseDto::getMemberId);
     }
 
-    public ChatRoomSimpDto getChatRoom(Member member, Long recipientId) {
+    public ChatRoomSimpleDto getChatRoom(Member member, Long recipientId) {
         Member recipient = memberRepository.findById(recipientId)
             .orElseThrow(
                 () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
@@ -70,7 +70,7 @@ public class ChatRoomQueryService {
         Optional<ChatRoom> findChatRoom = chatRoomRepository.findByMemberAAndMemberB(member,
             recipient);
 
-        return ChatRoomConverter.toChatRoomSimpDto(findChatRoom, recipient);
+        return ChatRoomConverter.toChatRoomSimpleDto(findChatRoom, recipient);
     }
 
     private Chat getLatestChatByChatRoom(ChatRoom chatRoom) {

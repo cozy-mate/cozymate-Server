@@ -5,7 +5,7 @@ import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomIdResponse;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomSimpDto;
+import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomSimpleDto;
 import com.cozymate.cozymate_server.domain.chatroom.service.ChatRoomCommandService;
 import com.cozymate.cozymate_server.domain.chatroom.service.ChatRoomQueryService;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -63,14 +63,14 @@ public class ChatRoomController {
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long recipientId) {
         Member member = memberDetails.getMember();
 
-        ChatRoomSimpDto simpDto = chatRoomQueryService.getChatRoom(member, recipientId);
-        Optional<ChatRoom> chatRoom = simpDto.getChatRoom();
+        ChatRoomSimpleDto simpleDto = chatRoomQueryService.getChatRoom(member, recipientId);
+        Optional<ChatRoom> chatRoom = simpleDto.getChatRoom();
         if (chatRoom.isPresent()) {
             return ResponseEntity.ok(ApiResponse.onSuccess(
                 ChatRoomConverter.toChatRoomIdResponse(chatRoom.get().getId())));
         }
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            chatRoomCommandService.saveChatRoom(member, simpDto.getRecipient())));
+            chatRoomCommandService.saveChatRoom(member, simpleDto.getRecipient())));
     }
 }
