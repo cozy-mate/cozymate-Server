@@ -5,9 +5,13 @@ import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstatpreference.MemberStatPreference;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Entity;
@@ -15,9 +19,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
