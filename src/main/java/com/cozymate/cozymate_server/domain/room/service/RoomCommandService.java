@@ -267,13 +267,11 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
-        if (room.getRoomType()== RoomType.PRIVATE){
-            room.updateRoomName(request.getName());
-        } else if (room.getRoomType()==RoomType.PUBLIC) {
-            room.updateRoomName(request.getName());
+        if (room.getRoomType()==RoomType.PUBLIC) {
             roomHashtagCommandService.deleteRoomHashtags(room);
             roomHashtagCommandService.updateRoomHashtags(room, request.getHashtags());
         }
+        room.updateRoomName(request.getName());
         roomRepository.save(room);
 
         return roomQueryService.getRoomById(roomId, memberId);

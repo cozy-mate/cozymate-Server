@@ -54,11 +54,16 @@ public class RoomQueryService {
         Mate creatingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        List<CozymateInfoResponse> mates = mateRepository.findByRoomId(roomId).stream()
-            .filter(mate->mate.getEntryStatus().equals(EntryStatus.JOINED))
+        List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED);
+
+        Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
+            joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
+
+        Integer roomEquality = getCalculateRoomEquality(memberId, equalityMap);
+
+        List<CozymateInfoResponse> mates = joinedMates.stream()
             .map(mate -> {
-                Integer mateEquality = memberStatEqualityQueryService.getEquality(memberId, List.of(mate.getMember().getId()))
-                    .getOrDefault(mate.getMember().getId(), 0);
+                Integer mateEquality = equalityMap.get(mate.getMember().getId());
                 return RoomConverter.toCozymateInfoResponse(mate, mateEquality);
             }).toList();
 
@@ -71,7 +76,8 @@ public class RoomQueryService {
             room.getMaxMateNum(),
             room.getNumOfArrival(),
             room.getRoomType(),
-            hashtags, getCalculateRoomEquality(memberId, roomId)
+            hashtags,
+            roomEquality
             // Todo: 기숙사 정보 추가
             );
     }
@@ -153,19 +159,16 @@ public class RoomQueryService {
         }
     }
 
-    public Integer getCalculateRoomEquality(Long memberId, Long roomId){
-        List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED);
-        List<Long> joinedMateIds = joinedMates.stream()
-            .map(Mate::getId)
-            .filter(id -> !id.equals(memberId))
+    public Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap){
+        List<Integer> roomEquality = equalityMap.entrySet().stream()
+            .map(Map.Entry::getValue)
             .collect(Collectors.toList());
 
-        Map<Long, Integer> roomEquality = memberStatEqualityQueryService.getEquality(memberId, joinedMateIds);
-        if (roomEquality.isEmpty()){
+        if (roomEquality.isEmpty()) {
             return 0;
         }
 
-        return (int) Math.round(roomEquality.values().stream()
+        return (int) Math.round(roomEquality.stream()
             .mapToInt(Integer::intValue)
             .average()
             .orElse(0));
