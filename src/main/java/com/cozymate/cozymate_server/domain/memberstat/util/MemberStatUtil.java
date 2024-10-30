@@ -27,7 +27,7 @@ public class MemberStatUtil {
     }
 
     public static <T> DifferenceStatus compareField(List<MemberStat> memberStatList,
-        java.util.function.Function<MemberStat, T> getter) {
+        Function<MemberStat, T> getter) {
         boolean foundSame = false;
         boolean foundDifferent = false;
 
@@ -54,7 +54,7 @@ public class MemberStatUtil {
     }
 
     // 아래부터는 특정 멤버스탯을 가져오기 위한 Util들
-    private static Map<String, Function<MemberStat, Object>> createFieldGetters() {
+     public static Map<String, Function<MemberStat, Object>> createFieldGetters() {
         Map<String, Function<MemberStat, Object>> fieldGetters = new HashMap<>();
         fieldGetters.put("admissionYear", MemberStat::getAdmissionYear);
         fieldGetters.put("numOfRoommate", MemberStat::getNumOfRoommate);
@@ -84,7 +84,7 @@ public class MemberStatUtil {
 
     private static final Map<String, Function<MemberStat, Object>> fieldGetters = createFieldGetters();
 
-    private static Object getMemberStatField(MemberStat memberStat, String fieldName) {
+    public static Object getMemberStatField(MemberStat memberStat, String fieldName) {
         Function<MemberStat, Object> getter = fieldGetters.get(fieldName);
         if (getter == null) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_PARAMETER_NOT_VALID);

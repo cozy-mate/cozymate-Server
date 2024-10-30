@@ -1,6 +1,9 @@
 package com.cozymate.cozymate_server.domain.memberstat.converter;
 
 import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.compareField;
+import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.createFieldGetters;
+import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.getMemberStatField;
+import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.getMemberStatFields;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
@@ -10,11 +13,15 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.M
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
+import com.cozymate.cozymate_server.domain.room.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class MemberStatConverter {
 
@@ -112,32 +119,33 @@ public class MemberStatConverter {
     }
 
     public static MemberStatDifferenceResponseDTO toMemberStatDifferenceResponseDTO(List<MemberStat> memberStatList) {
-        return MemberStatDifferenceResponseDTO.builder()
-            .wakeUpTime(compareField(memberStatList, MemberStat::getWakeUpTime))
-            .smokingState(compareField(memberStatList, MemberStat::getSmoking))
-            .cleanSensitivity(compareField(memberStatList, MemberStat::getCleanSensitivity))
-            .personality(compareField(memberStatList, MemberStat::getPersonality))
-            .admissionYear(compareField(memberStatList, MemberStat::getAdmissionYear))
-            .numOfRoommate(compareField(memberStatList, MemberStat::getNumOfRoommate))
-            .acceptance(compareField(memberStatList, MemberStat::getAcceptance))
-            .sleepingTime(compareField(memberStatList, MemberStat::getSleepingTime))
-            .turnOffTime(compareField(memberStatList, MemberStat::getTurnOffTime))
-            .sleepingHabit(compareField(memberStatList, MemberStat::getSleepingHabit))
-            .airConditioningIntensity(compareField(memberStatList, MemberStat::getAirConditioningIntensity))
-            .heatingIntensity(compareField(memberStatList, MemberStat::getHeatingIntensity))
-            .lifePattern(compareField(memberStatList, MemberStat::getLifePattern))
-            .intimacy(compareField(memberStatList, MemberStat::getIntimacy))
-            .canShare(compareField(memberStatList, MemberStat::getCanShare))
-            .isPlayGame(compareField(memberStatList, MemberStat::getIsPlayGame))
-            .isPhoneCall(compareField(memberStatList, MemberStat::getIsPhoneCall))
-            .studying(compareField(memberStatList, MemberStat::getStudying))
-            .intake(compareField(memberStatList, MemberStat::getIntake))
-            .cleaningFrequency(compareField(memberStatList, MemberStat::getCleaningFrequency))
-            .drinkingFrequency(compareField(memberStatList, MemberStat::getDrinkingFrequency))
-            .noiseSensitivity(compareField(memberStatList, MemberStat::getNoiseSensitivity))
-            .mbti(compareField(memberStatList, MemberStat::getMbti))
-            .build();
+
+            List<String> blue = new ArrayList<>();
+            List<String> red = new ArrayList<>();
+            List<String> white = new ArrayList<>();
+
+            Map<String, Function<MemberStat, Object>> fieldGetters = createFieldGetters();
+
+            for (String fieldName : fieldGetters.keySet()) {
+                DifferenceStatus status = compareField(memberStatList, fieldGetters.get(fieldName));
+                switch (status) {
+                    case BLUE:
+                        blue.add(fieldName);
+                        break;
+                    case RED:
+                        red.add(fieldName);
+                        break;
+                    case WHITE:
+                        white.add(fieldName);
+                        break;
+                }
+            }
+
+            return MemberStatDifferenceResponseDTO.builder()
+                .blue(blue)
+                .red(red)
+                .white(white)
+                .build();
     }
-
-
 }
+
