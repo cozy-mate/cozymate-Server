@@ -65,6 +65,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBERSTAT_FILTER_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT403",
         "멤버 상세정보 filterList이 잘못되었습니다."),
     _MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE(HttpStatus.BAD_REQUEST, "MEMBERSTAT404", "인실이 정해진 경우 인실 필터링이 불가합니다."),
+    _MEMBERSTAT_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT405",
+        "멤버 상세정보 인자가 잘못되었습니다."),
 
     _MEMBERSTAT_PREFERENCE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTATPREFERENCE400", "멤버 선호 항목이 존재하지 않습니다."),
     _MEMBERSTAT_PREFERENCE_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST,"MEMBERSTATPREFERENCE401","존재하지 않는 멤버 항목(들)입니다."),
