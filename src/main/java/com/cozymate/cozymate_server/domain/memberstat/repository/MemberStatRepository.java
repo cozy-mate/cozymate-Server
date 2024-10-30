@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.memberstat.repository;
 
-import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.repository.querydsl.MemberStatQueryRepository;
@@ -26,5 +25,5 @@ public interface MemberStatRepository extends
     @Query("SELECT ms FROM MemberStat ms JOIN FETCH ms.member")
     List<MemberStat> findAllWithMember();
 
-    List<MemberStat> findByMember_GenderAndUniversity_Id(Gender gender, Long universityId);
+    List<MemberStat> findByMember_GenderAndMember_University_Id(Gender gender, Long universityId);
 }

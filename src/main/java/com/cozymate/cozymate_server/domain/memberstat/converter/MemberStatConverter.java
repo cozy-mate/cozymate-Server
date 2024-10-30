@@ -21,7 +21,6 @@ public class MemberStatConverter {
 
         MemberStatBuilder builder = MemberStat.builder()
             .member(member)
-            .university(university)
             .admissionYear(Integer.parseInt(memberStatCommandRequestDTO.getAdmissionYear()))
 //            .major(memberStatCommandRequestDTO.getMajor())
             .numOfRoommate(memberStatCommandRequestDTO.getNumOfRoommate())
@@ -63,7 +62,7 @@ public class MemberStatConverter {
 
     public static MemberStatQueryResponseDTO toDto(MemberStat memberStat, Integer birthYear) {
         return MemberStatQueryResponseDTO.builder()
-            .universityId(memberStat.getUniversity().getId())
+            .universityId(memberStat.getMember().getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
             .birthYear(birthYear)
 //            .major(memberStat.getMajor())

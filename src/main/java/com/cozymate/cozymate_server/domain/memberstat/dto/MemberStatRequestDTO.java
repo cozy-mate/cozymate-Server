@@ -108,8 +108,6 @@ public class MemberStatRequestDTO {
     @AllArgsConstructor
     public static class MemberStatSearchRequestDTO {
 
-//        @NotNull
-//        private Long universityId;
         //학번의 경우 처리하기 애매한 부분이 있어, String 2자리로 통일함. EX) 09 학번 -> "09"
         @NotEmpty
         @Size(min = 2, max = 2)
