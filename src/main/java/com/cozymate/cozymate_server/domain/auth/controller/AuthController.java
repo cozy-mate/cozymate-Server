@@ -4,7 +4,6 @@ package com.cozymate.cozymate_server.domain.auth.controller;
 import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;

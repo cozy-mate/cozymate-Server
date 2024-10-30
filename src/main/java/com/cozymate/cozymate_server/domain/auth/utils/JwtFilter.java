@@ -37,7 +37,6 @@ public class JwtFilter extends OncePerRequestFilter {
     );
 
     private static final List<String> VERIFIED_URLS = List.of(
-            "/admin/university/get-info"
             // todo: 공개방 url 추가
     );
 
