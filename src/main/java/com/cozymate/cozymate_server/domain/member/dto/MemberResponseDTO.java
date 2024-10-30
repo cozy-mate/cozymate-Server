@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.member.dto;
 
 import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,10 +13,11 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MemberInfoDTO {
-        private String name;
         private String nickname;
         private String gender;
         private String birthday;
+        private String universityName;
+        private String majorName;
         private Integer persona;
     }
 
@@ -39,7 +41,6 @@ public class MemberResponseDTO {
      *       "refreshToken": "refreshtokenheader.refreshtokenpayload.refreshtokensignature"
      *     },
      *     "memberInfoDTO": {
-     *       "name": "김수환",
      *       "nickname": "말즈",
      *       "gender": "MALE",
      *       "birthday": "2000-01-20",
