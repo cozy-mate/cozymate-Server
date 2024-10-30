@@ -1,10 +1,8 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
@@ -73,13 +71,11 @@ public class TodoCommandService {
      */
     public void updateTodoCompleteState(Member member, Long roomId, Long todoId, boolean completed
     ) {
-        // TODO: 만약 그룹투두인데, 내가 포함되어있지 않으면, 할당자 변경도 못하는지?
         Mate mate = getMate(member.getId(), roomId);
         Todo todo = getTodo(todoId);
 
         checkTodoRoomId(todo, roomId);
         checkValidUpdate(todo, mate);
-        // TODO: Assignee인지 확인 필요
 
         // 해당 투두가 현재 사용자 기준으로 완료되어있는지 확인
         boolean alreadyCompleted = todo.isAssigneeCompleted(mate.getId());
@@ -120,15 +116,12 @@ public class TodoCommandService {
 
         // 내가 할당된 사람에 없으면 삭제 불가능 (남 투두, 그룹 투두인데 난 없는 투두)
         if (indexOfMateOnIdList == -1) {
-            // TODO: 삭제 불가능으로 에러 핸들링
-            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
+            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
         }
 
         // 롤 투두면 삭제 불가능
-        if (todo.getTodoType() == TodoType.ROLETODO)
-        // TODO: 삭제 불가능으로 에러 핸들링
-        {
-            throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
+        if (todo.getTodoType() == TodoType.ROLETODO) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
         }
 
         // 내 투두면 투두 자체를 삭제
@@ -147,7 +140,6 @@ public class TodoCommandService {
     public void updateTodoContent(Member member, Long roomId, Long todoId,
         UpdateTodoContentRequestDto requestDto
     ) {
-        // TODO: 할당자를 바꿀 수 있도록 해야함
         Mate mate = getMate(member.getId(), roomId);
         Todo todo = getTodo(todoId);
 
@@ -158,6 +150,23 @@ public class TodoCommandService {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
 
+        // TODO: 할당자가 모두 Mate에 속하는지 판단해야함.
+        checkMateIdListIsSameRoomWithMate(mate, requestDto.getMateIdList());
+
+        // 삭제해야할 할당자 리스트
+        List<Long> removeIdList = todo.getAssignedMateIdList().stream()
+            .filter(mateId -> !requestDto.getMateIdList().contains(mateId))
+            .toList();
+
+        // 추가해야할 할당자 리스트
+        List<Long> addIdList = requestDto.getMateIdList().stream()
+            .filter(mateId -> !todo.getAssignedMateIdList().contains(mateId))
+            .toList();
+
+        todo.removeAssignees(removeIdList);
+        todo.addAssignees(addIdList);
+
+        // 컨텐츠 업데이트
         todo.updateContent(requestDto.getContent(), requestDto.getTimePoint());
     }
 

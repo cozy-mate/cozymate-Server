@@ -38,5 +38,8 @@ public class TodoRequestDto {
         @NotNull(message = "timePoint는 비어있을 수 없습니다.")
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate timePoint;
+
+        @NotEmpty(message = "mateIdList는 비어있을 수 없습니다.")
+        private List<Long> mateIdList;
     }
 }

@@ -63,10 +63,16 @@ public class Todo extends BaseTimeEntity {
         this.timePoint = timePoint;
     }
 
+    public void addAssignees(List<Long> assigneeIds) {
+        for (Long assigneeId : assigneeIds) {
+            addAssignee(assigneeId);
+        }
+    }
+
     // 할당자 추가
     public void addAssignee(Long assigneeId) {
         this.assignedMateIdList.add(assigneeId);
-        this.completeBitmask |= (1 << (this.assignedMateIdList.size() - 1));
+        this.completeBitmask &= ~(1 << (this.assignedMateIdList.size() - 1));
     }
 
     public void markTodoComplete(Long assigneeId) {
@@ -75,6 +81,12 @@ public class Todo extends BaseTimeEntity {
 
     public void unmarkTodoComplete(Long assigneeId) {
         this.completeBitmask &= ~(1 << findAssigneeIndex(this.assignedMateIdList, assigneeId));
+    }
+
+    public void removeAssignees(List<Long> assigneeIds) {
+        for (Long assigneeId : assigneeIds) {
+            removeAssignee(assigneeId);
+        }
     }
 
     public void removeAssignee(Long assigneeId) {
@@ -97,5 +109,6 @@ public class Todo extends BaseTimeEntity {
     private int findAssigneeIndex(List<Long> assigneeIdList, Long assigneeId) {
         return assigneeIdList.indexOf(assigneeId);
     }
+
 
 }
