@@ -27,7 +27,6 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder

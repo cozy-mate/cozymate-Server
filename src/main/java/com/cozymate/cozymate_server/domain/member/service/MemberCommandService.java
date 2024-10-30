@@ -4,13 +4,14 @@ import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.auth.utils.ClientIdMaker;
-import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 
+import com.cozymate.cozymate_server.domain.university.University;
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class MemberCommandService {
     private final MemberQueryService memberQueryService;
     private final MemberRepository memberRepository;
 
+    private final UniversityRepository universityRepository;
     /**
      * 닉네임 유효성 검사 메서드
      *
@@ -76,8 +78,6 @@ public class MemberCommandService {
             throw new GeneralException(ErrorStatus._MEMBER_EXISTING);
         }
         // 회원 정보를 Member 엔티티로 변환하고 저장
-        Member member = MemberConverter.toMember(clientId, signUpRequestDTO);
-        memberRepository.save(member);
 
         // 기존 회원으로 로그인 처리
         return signInByExistingMember(clientId);
@@ -94,8 +94,12 @@ public class MemberCommandService {
     }
 
     @Transactional
-    public AuthResponseDTO.TokenResponseDTO verifyMember(MemberDetails memberDetails) {
-        memberDetails.getMember().verify();
+    public AuthResponseDTO.TokenResponseDTO verifyMemberUniversity(MemberDetails memberDetails, Long universityId,
+                                                                   String majorName) {
+        University memberUniversity = universityRepository.findById(universityId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+
+        memberDetails.getMember().verify(memberUniversity, majorName);
         memberRepository.save(memberDetails.getMember());
 
         return authService.generateMemberTokenDTO(memberDetails);
@@ -107,7 +111,7 @@ public class MemberCommandService {
      * @param memberDetails 사용자 세부 정보
      */
 
-    // todo: 탈퇴로직 고도화
+
     public void withdraw(MemberDetails memberDetails) {
         // 리프레시 토큰 삭제 및 회원 삭제
         authService.deleteRefreshToken(memberDetails.getUsername());

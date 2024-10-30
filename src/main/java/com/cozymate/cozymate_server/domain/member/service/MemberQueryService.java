@@ -1,10 +1,13 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
-import static com.cozymate.cozymate_server.global.response.code.status.ErrorStatus._MEMBER_NOT_FOUND;
 
+import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,9 +27,15 @@ public class MemberQueryService {
     @Transactional
     public Member findByClientId(String clientId) {
         return memberRepository.findByClientId(clientId).orElseThrow(
-                () -> new GeneralException(_MEMBER_NOT_FOUND)
+                () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
         );
     }
+
+//    @Transactional
+//    public MemberResponseDTO.SearchResponseDTO searchByNickname(MemberDetails memberDetails, String searchTerm){
+//
+//
+//    }
 
     @Transactional
     public Boolean isPresent(String clientId) {

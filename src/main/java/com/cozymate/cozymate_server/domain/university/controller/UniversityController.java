@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.university.controller;
 
+import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.university.dto.UniversityRequest;
 import com.cozymate.cozymate_server.domain.university.dto.UniversityResponse;
 import com.cozymate.cozymate_server.domain.university.service.UniversityService;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/admin/university")
+@RequestMapping("/university")
 public class UniversityController {
     private final UniversityService universityService;
 
@@ -78,8 +80,37 @@ public class UniversityController {
                     + "\t dormitoryNames : [\"웅비재\", \"비룡재\", ...] <br>"
                     + "\t departments : [\"컴퓨터공학과\", \"문화콘텐츠문화경영학과\", ...] <br>" )
     public ResponseEntity<ApiResponse<UniversityResponse.UniversityDTO>>getUniversity(
-            @RequestParam String universityName){
-        UniversityResponse.UniversityDTO universityDTO = universityService.getUniversity(universityName);
+            @RequestParam Long universityId){
+        UniversityResponse.UniversityDTO universityDTO = universityService.getUniversity(universityId);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(universityDTO));
+    }
+
+    @GetMapping("/get-member-univ-info")
+    @Operation(summary = "[말즈] 사용자 대학교 조회 API",
+            description = "response body :  <br>"
+                    + "\t name : 인하대학교 <br>"
+                    + "\t mailPattern : inha.edu <br>"
+                    + "\t dormitoryNames : [\"웅비재\", \"비룡재\", ...] <br>"
+                    + "\t departments : [\"컴퓨터공학과\", \"문화콘텐츠문화경영학과\", ...] <br>" )
+    public ResponseEntity<ApiResponse<UniversityResponse.UniversityDTO>>getMemberUniversity(
+            @AuthenticationPrincipal MemberDetails memberDetails){
+        UniversityResponse.UniversityDTO universityDTO = universityService.getMemberUniversity(memberDetails);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(universityDTO));
+    }
+    @GetMapping("/get-list")
+    @Operation(summary = "[말즈] 대학교 전체 조회 API",
+            description = "response body :  <br>"
+                    + "\t [ <br>"
+                    + "\t\t { <br>"
+                    + "\t\t\t name : 인하대학교 <br>"
+                    + "\t\t\t id : 1 <br>"
+                    + "\t\t } <br>"
+                    + "\t ] <br>")
+
+    public ResponseEntity<ApiResponse<UniversityResponse.UniversityListDTO>>getUniversities(){
+        UniversityResponse.UniversityListDTO universityDTO = universityService.getUniversities();
 
         return ResponseEntity.ok(ApiResponse.onSuccess(universityDTO));
     }
