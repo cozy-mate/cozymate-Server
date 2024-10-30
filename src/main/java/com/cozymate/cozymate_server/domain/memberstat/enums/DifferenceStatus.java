@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.room.enums;
+package com.cozymate.cozymate_server.domain.memberstat.enums;
 
 public enum DifferenceStatus {
     RED,

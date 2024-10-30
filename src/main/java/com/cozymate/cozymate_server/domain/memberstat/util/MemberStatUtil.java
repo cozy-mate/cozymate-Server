@@ -1,11 +1,9 @@
 package com.cozymate.cozymate_server.domain.memberstat.util;
 
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
-import com.cozymate.cozymate_server.domain.room.enums.DifferenceStatus;
+import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

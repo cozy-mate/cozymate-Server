@@ -2,8 +2,6 @@ package com.cozymate.cozymate_server.domain.memberstat.converter;
 
 import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.compareField;
 import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.createFieldGetters;
-import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.getMemberStatField;
-import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.getMemberStatFields;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
@@ -13,12 +11,10 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.M
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
-import com.cozymate.cozymate_server.domain.room.enums.DifferenceStatus;
+import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
