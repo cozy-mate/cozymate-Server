@@ -10,12 +10,12 @@ public class TodoResponseDto {
 
     @Builder
     @Getter
-    public static class TodoListDetailResponseDto {
+    public static class TodoDetailResponseDto {
 
         private Long id;
         private String content;
         private boolean isCompleted;
-
+        private String type;
     }
 
     @Builder
@@ -23,7 +23,7 @@ public class TodoResponseDto {
     public static class TodoMateDetailResponseDto {
 
         private int persona;
-        private List<TodoListDetailResponseDto> mateTodoList;
+        private List<TodoDetailResponseDto> mateTodoList;
     }
 
     @Builder
@@ -33,6 +33,13 @@ public class TodoResponseDto {
         private LocalDate timePoint;
         private TodoMateDetailResponseDto myTodoList;
         private Map<String, TodoMateDetailResponseDto> mateTodoList;
+    }
+
+    @Builder
+    @Getter
+    public static class TodoIdResponseDto {
+
+            private Long id;
     }
 
 }

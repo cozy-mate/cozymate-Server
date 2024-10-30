@@ -4,9 +4,10 @@ import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.todo.Todo;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListDetailResponseDto;
+import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoDetailResponseDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListResponseDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoMateDetailResponseDto;
+import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -14,23 +15,26 @@ import java.util.Map;
 
 public class TodoConverter {
 
-    public static Todo toEntity(Room room, Mate mate, String content, LocalDate timePoint,
-        Role role) {
+    public static Todo toEntity(Room room, Mate mate, List<Long> assignedMateIdList, String content, LocalDate timePoint,
+        Role role, TodoType type) {
         return Todo.builder()
             .room(room)
             .mate(mate)
             .content(content)
             .timePoint(timePoint)
             .role(role) // role은 null이 될 수 있음
-            .completed(false)
+            .completeBitmask(0)
+            .todoType(type)
+            .assignedMateIdList(assignedMateIdList)
             .build();
     }
 
-    public static TodoListDetailResponseDto toTodoListDetailResponseDto(Todo todo) {
-        return TodoListDetailResponseDto.builder()
+    public static TodoDetailResponseDto toTodoListDetailResponseDto(Todo todo, Mate mate, String type) {
+        return TodoDetailResponseDto.builder()
             .id(todo.getId())
             .content(todo.getContent())
-            .isCompleted(todo.isCompleted())
+            .isCompleted(todo.isAssigneeCompleted(mate.getId()))
+            .type(type)
             .build();
     }
 
@@ -47,7 +51,7 @@ public class TodoConverter {
 
     public static TodoMateDetailResponseDto toTodoMateDetailResponseDto(
         int persona,
-        List<TodoListDetailResponseDto> mateTodoList) {
+        List<TodoDetailResponseDto> mateTodoList) {
         return TodoMateDetailResponseDto.builder()
             .persona(persona)
             .mateTodoList(mateTodoList)

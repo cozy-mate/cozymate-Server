@@ -38,29 +38,30 @@ public class RoomLogCommandService {
 
     public static final String DEFAULT_CHOICE_COZY_MATE_MESSAGE = "의 Best, Worst 코지메이트를 선정해주세요!";
 
-    // 투두 추가되었을 때
-    public void addRoomLogFromTodo(Todo todo) {
-        Optional<RoomLog> existingLog = roomLogRepository.findByTodoId(todo.getId());
-        // False일 때 기존 로그 삭제, True일 때 새로운 로그 생성
-        if (Boolean.FALSE.equals(todo.isCompleted()) && existingLog.isPresent()) {
-            roomLogRepository.delete(existingLog.get());
-        }
-        if (Boolean.TRUE.equals(todo.isCompleted()) && existingLog.isEmpty()) {
-            String who = "{" + todo.getMate().getMember().getNickname() + "}님이 ";
-            String what = "[" + todo.getContent() + "]을/를 ";
-            String finish = DEFAULT_FINAL_MESSAGE;
-
-            if (Objects.nonNull(todo.getRole())) {
-                finish = FINISH_MESSAGE_LIST.get(
-                    ThreadLocalRandom.current().nextInt(FINISH_MESSAGE_LIST.size()));
-
-            }
-
-            String content = who + what + finish;
-            roomLogRepository.save(RoomLogConverter.toEntity(content, todo.getRoom(), todo));
-        }
-
-    }
+    // TODO: 수정해야함
+//    // 투두 추가되었을 때
+//    public void addRoomLogFromTodo(Todo todo) {
+//        Optional<RoomLog> existingLog = roomLogRepository.findByTodoId(todo.getId());
+//        // False일 때 기존 로그 삭제, True일 때 새로운 로그 생성
+//        if (Boolean.FALSE.equals(todo.isCompleted()) && existingLog.isPresent()) {
+//            roomLogRepository.delete(existingLog.get());
+//        }
+//        if (Boolean.TRUE.equals(todo.isCompleted()) && existingLog.isEmpty()) {
+//            String who = "{" + todo.getMate().getMember().getNickname() + "}님이 ";
+//            String what = "[" + todo.getContent() + "]을/를 ";
+//            String finish = DEFAULT_FINAL_MESSAGE;
+//
+//            if (Objects.nonNull(todo.getRole())) {
+//                finish = FINISH_MESSAGE_LIST.get(
+//                    ThreadLocalRandom.current().nextInt(FINISH_MESSAGE_LIST.size()));
+//
+//            }
+//
+//            String content = who + what + finish;
+//            roomLogRepository.save(RoomLogConverter.toEntity(content, todo.getRoom(), todo));
+//        }
+//
+//    }
 
     // 방 생성이 완료되었을 때 실행
     public void addRoomLogCreationRoom(Room room) {
