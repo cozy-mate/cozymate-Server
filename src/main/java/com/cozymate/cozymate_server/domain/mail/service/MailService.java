@@ -4,8 +4,12 @@ package com.cozymate.cozymate_server.domain.mail.service;
 import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
+import com.cozymate.cozymate_server.domain.mail.dto.MailRequest;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
+import com.cozymate.cozymate_server.domain.university.University;
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
@@ -30,11 +34,17 @@ public class MailService {
 
     private final MemberCommandService memberCommandService;
 
+    private final UniversityRepository universityRepository;
+
     private static final Integer MAIL_AUTHENTICATION_EXPIRED_TIME = 30;
 
-    @Async
-    public void sendUniversityAuthenticationCode(MemberDetails memberDetails, String mailAddress) {
-        validateMailAddress(mailAddress);
+    @Transactional
+    public void sendUniversityAuthenticationCode(MemberDetails memberDetails, MailRequest.SendDTO sendDTO) {
+        University university = universityRepository.findById(sendDTO.getUniversityId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+
+        String mailAddress = sendDTO.getMailAddress();
+        validateMailAddress(mailAddress, university.getMailPattern());
 
         MailAuthentication mailAuthentication = createAndSendMail(memberDetails.getMember().getId(),
                 mailAddress);
@@ -49,11 +59,21 @@ public class MailService {
     }
 
     @Transactional
-    public AuthResponseDTO.TokenResponseDTO verifyAuthenticationCode(MemberDetails memberDetails, String requestCode) {
-        MailAuthentication mailAuthentication = mailRepository.findById(memberDetails.getMember().getId())
+    public AuthResponseDTO.TokenResponseDTO verifyMemberUniversity(MemberDetails memberDetails,
+                                                                   MailRequest.VerifyDTO verifyDTO) {
+        Member member = memberDetails.getMember();
+
+        verifyAuthenticationCode(member, verifyDTO.getCode());
+
+        return memberCommandService.verifyMemberUniversity(memberDetails, verifyDTO.getUniversityId(),
+                verifyDTO.getMajorName());
+    }
+
+    private void verifyAuthenticationCode(Member member, String requestCode) {
+
+        MailAuthentication mailAuthentication = mailRepository.findById(member.getId())
                 .orElseThrow(() -> new GeneralException(
                         ErrorStatus._MAIL_AUTHENTICATION_NOT_FOUND));
-
         // 만료 시간 초과 여부 확인
         if (LocalDateTime.now()
                 .isAfter(mailAuthentication.getUpdatedAt().plusMinutes(MAIL_AUTHENTICATION_EXPIRED_TIME))) {
@@ -66,8 +86,6 @@ public class MailService {
         }
 
         mailAuthentication.verify();
-
-        return memberCommandService.verifyMember(memberDetails);
     }
 
     private MailAuthentication createAndSendMail(Long memberId, String mailAddress) {
@@ -89,9 +107,12 @@ public class MailService {
                 .build();
     }
 
-    private void validateMailAddress(String mailAddress) {
+    private void validateMailAddress(String mailAddress, String mailPattern) {
         Optional<MailAuthentication> mailAuthentication = mailRepository.findByMailAddress(mailAddress);
 
+        if (!mailAddress.contains(mailPattern)) {
+            throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
+        }
         if (mailAuthentication.isPresent() && mailAuthentication.get().getIsVerified()) {
             throw new GeneralException(ErrorStatus._MAIL_ADDRESS_DUPLICATED);
         }
