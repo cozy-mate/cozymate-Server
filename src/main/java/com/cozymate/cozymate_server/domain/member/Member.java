@@ -65,16 +65,20 @@ public class Member extends BaseTimeEntity {
     @NonNull
     private Integer persona;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "university_id")
     private University university;
+
+    private String majorName;
 
     // 기존에 member -> memberstat 상속 관계를
     // member <-> memberstat one to one mapping으로 변경하였습니다.
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "member")
     private MemberStat memberStat;
 
-    public void verify(){
-        role = Role.USER_VERIFIED;
+    public void verify(University university, String majorName){
+        this.role = Role.USER_VERIFIED;
+        this.university = university;
+        this.majorName = majorName;
     }
 }
