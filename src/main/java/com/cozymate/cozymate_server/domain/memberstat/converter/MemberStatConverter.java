@@ -1,17 +1,23 @@
 package com.cozymate.cozymate_server.domain.memberstat.converter;
 
+import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.compareField;
+import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.createFieldGetters;
+
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuilder;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
+import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class MemberStatConverter {
 
@@ -107,5 +113,34 @@ public class MemberStatConverter {
             .build();
     }
 
+    public static MemberStatDifferenceResponseDTO toMemberStatDifferenceResponseDTO(List<MemberStat> memberStatList) {
 
+            List<String> blue = new ArrayList<>();
+            List<String> red = new ArrayList<>();
+            List<String> white = new ArrayList<>();
+
+            Map<String, Function<MemberStat, Object>> fieldGetters = createFieldGetters();
+
+            for (String fieldName : fieldGetters.keySet()) {
+                DifferenceStatus status = compareField(memberStatList, fieldGetters.get(fieldName));
+                switch (status) {
+                    case BLUE:
+                        blue.add(fieldName);
+                        break;
+                    case RED:
+                        red.add(fieldName);
+                        break;
+                    case WHITE:
+                        white.add(fieldName);
+                        break;
+                }
+            }
+
+            return MemberStatDifferenceResponseDTO.builder()
+                .blue(blue)
+                .red(red)
+                .white(white)
+                .build();
+    }
 }
+

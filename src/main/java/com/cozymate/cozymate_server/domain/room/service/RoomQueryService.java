@@ -8,6 +8,9 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
@@ -42,6 +45,7 @@ public class RoomQueryService {
     private final FriendRepository friendRepository;
     private final RoomHashtagRepository roomHashtagRepository;
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
+    private final MemberStatRepository memberStatRepository;
 
     public RoomCreateResponse getRoomById(Long roomId, Long memberId) {
 
@@ -67,6 +71,12 @@ public class RoomQueryService {
                 return RoomConverter.toCozymateInfoResponse(mate, mateEquality);
             }).toList();
 
+        // MemberStat이 null일 때 제외했음.
+        List<MemberStat> mateMemberStats = mates.stream()
+            .map(mate -> memberStatRepository.findByMemberId(mate.getMemberId()))
+            .flatMap(Optional::stream)
+            .toList();
+
         //해시태그 가져오기
         List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(roomId);
 
@@ -77,7 +87,8 @@ public class RoomQueryService {
             room.getNumOfArrival(),
             room.getRoomType(),
             hashtags,
-            roomEquality
+            roomEquality,
+            MemberStatConverter.toMemberStatDifferenceResponseDTO(mateMemberStats)
             // Todo: 기숙사 정보 추가
             );
     }
@@ -174,5 +185,8 @@ public class RoomQueryService {
             .orElse(0));
 
     }
+
+
+
 
 }
