@@ -30,7 +30,7 @@ public class MemberStatPreferenceController {
     private final MemberStatPreferenceCommandService memberStatPreferenceCommandService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-    @GetMapping("/")
+    @GetMapping("")
     @Operation(summary = "[포비] 멤버 선호 항목 조회", description = "")
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS
@@ -42,7 +42,7 @@ public class MemberStatPreferenceController {
             memberStatPreferenceQueryService.getPreferences(memberDetails.getMember().getId())));
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     @Operation(summary = "[포비] 멤버 선호 항목 생성", description = ""
         + "선호 항목은 List<String>으로 주시면 됩니다")
     @SwaggerApiError({
@@ -59,7 +59,7 @@ public class MemberStatPreferenceController {
         return ResponseEntity.ok(ApiResponse.onSuccess(createdId));
     }
 
-    @PutMapping("/")
+    @PutMapping("")
     @Operation(summary = "[포비] 멤버 선호 항목 업데이트", description = ""
         + "선호 항목은 List<String>으로 주시면 됩니다")
     @SwaggerApiError({
