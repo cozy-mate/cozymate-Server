@@ -75,7 +75,7 @@ public class TodoCommandService {
         Todo todo = getTodo(todoId);
 
         checkTodoRoomId(todo, roomId);
-        checkValidUpdate(todo, mate);
+        checkUpdatePermission(todo, mate);
 
         // 해당 투두가 현재 사용자 기준으로 완료되어있는지 확인
         boolean alreadyCompleted = todo.isAssigneeCompleted(mate.getId());
@@ -110,7 +110,7 @@ public class TodoCommandService {
         Todo todo = getTodo(todoId);
 
         checkTodoRoomId(todo, roomId);
-        checkValidUpdate(todo, mate);
+        checkUpdatePermission(todo, mate);
 
         int indexOfMateOnIdList = todo.getAssignedMateIdList().indexOf(mate.getId());
 
@@ -120,18 +120,18 @@ public class TodoCommandService {
         }
 
         // 롤 투두면 삭제 불가능
-        if (todo.getTodoType() == TodoType.ROLETODO) {
+        if (todo.getTodoType() == TodoType.ROLE_TODO) {
             throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
         }
 
         // 내 투두면 투두 자체를 삭제
-        if (todo.getTodoType() == TodoType.SINGLETODO) {
+        if (todo.getTodoType() == TodoType.SINGLE_TODO) {
             todoRepository.delete(todo);
             return;
         }
 
         // 그룹 투두일 때 타입 수정(SINGLE로) 필요하면 수정
-        if (todo.getTodoType() == TodoType.GROUPTODO && todo.getAssignedMateIdList().size() > 1) {
+        if (todo.getTodoType() == TodoType.GROUP_TODO && todo.getAssignedMateIdList().size() > 1) {
             todo.removeAssignee(mate.getId());
             todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
         }
@@ -144,7 +144,7 @@ public class TodoCommandService {
         Todo todo = getTodo(todoId);
 
         checkTodoRoomId(todo, roomId);
-        checkValidUpdate(todo, mate);
+        checkUpdatePermission(todo, mate);
 
         if (isTodoOfRole(todo)) {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
@@ -195,7 +195,7 @@ public class TodoCommandService {
         }
     }
 
-    private void checkValidUpdate(Todo todo, Mate mate) {
+    private void checkUpdatePermission(Todo todo, Mate mate) {
         if (!todo.getAssignedMateIdList().contains(mate.getId())) {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
@@ -232,10 +232,10 @@ public class TodoCommandService {
     private TodoType classifyTodoType(List<Long> todoIdList) {
         // size가 1보다 크면 그룹투두
         if (todoIdList.size() > SINGLE_NUM) {
-            return TodoType.GROUPTODO;
+            return TodoType.GROUP_TODO;
         }
         // size가 1이면 싱글투두
-        return TodoType.SINGLETODO;
+        return TodoType.SINGLE_TODO;
     }
 
     private void checkMateIdListIsSameRoomWithMate(Mate mate, List<Long> mateIdList) {

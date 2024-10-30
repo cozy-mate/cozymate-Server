@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum TodoType {
-    SINGLETODO("single"), // 남 투두
-    GROUPTODO("group"), // 그룹 투두
-    ROLETODO("role"); // 롤 투두
+    SINGLE_TODO("single"), // 남 투두
+    GROUP_TODO("group"), // 그룹 투두
+    ROLE_TODO("role"); // 롤 투두
 
     private String todoName;
 

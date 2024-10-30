@@ -90,7 +90,7 @@ public class TodoQueryService {
      * @return
      */
     private String getTodoType(Todo todo) {
-        if (todo.getTodoType() != TodoType.SINGLETODO) {
+        if (todo.getTodoType() != TodoType.SINGLE_TODO) {
             return todo.getTodoType().getTodoName();
         }
         if (todo.getAssignedMateIdList().contains(todo.getMate().getId())) {
