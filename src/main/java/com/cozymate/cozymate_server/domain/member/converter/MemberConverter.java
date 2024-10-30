@@ -32,9 +32,11 @@ public class MemberConverter {
     public static MemberResponseDTO.MemberInfoDTO toMemberInfoDTO(Member member) {
 
         return MemberResponseDTO.MemberInfoDTO.builder()
-                 .nickname(member.getNickname())
+                .nickname(member.getNickname())
                 .gender(member.getGender().toString())
                 .birthday(member.getBirthDay().toString())
+                .universityName(member.getUniversity().getName())
+                .majorName(member.getMajorName())
                 .persona(member.getPersona())
                 .build();
     }
