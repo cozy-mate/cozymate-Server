@@ -1,8 +1,11 @@
 package com.cozymate.cozymate_server.domain.memberstat.converter;
 
+import static com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil.compareField;
+
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuilder;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
@@ -105,6 +108,34 @@ public class MemberStatConverter {
             .memberPersona(memberStat.getMember().getPersona())
             .numOfRoommate(memberStat.getNumOfRoommate())
             .equality(equality)
+            .build();
+    }
+
+    public static MemberStatDifferenceResponseDTO toMemberStatDifferenceResponseDTO(List<MemberStat> memberStatList) {
+        return MemberStatDifferenceResponseDTO.builder()
+            .wakeUpTime(compareField(memberStatList, MemberStat::getWakeUpTime))
+            .smokingState(compareField(memberStatList, MemberStat::getSmoking))
+            .cleanSensitivity(compareField(memberStatList, MemberStat::getCleanSensitivity))
+            .personality(compareField(memberStatList, MemberStat::getPersonality))
+            .admissionYear(compareField(memberStatList, MemberStat::getAdmissionYear))
+            .numOfRoommate(compareField(memberStatList, MemberStat::getNumOfRoommate))
+            .acceptance(compareField(memberStatList, MemberStat::getAcceptance))
+            .sleepingTime(compareField(memberStatList, MemberStat::getSleepingTime))
+            .turnOffTime(compareField(memberStatList, MemberStat::getTurnOffTime))
+            .sleepingHabit(compareField(memberStatList, MemberStat::getSleepingHabit))
+            .airConditioningIntensity(compareField(memberStatList, MemberStat::getAirConditioningIntensity))
+            .heatingIntensity(compareField(memberStatList, MemberStat::getHeatingIntensity))
+            .lifePattern(compareField(memberStatList, MemberStat::getLifePattern))
+            .intimacy(compareField(memberStatList, MemberStat::getIntimacy))
+            .canShare(compareField(memberStatList, MemberStat::getCanShare))
+            .isPlayGame(compareField(memberStatList, MemberStat::getIsPlayGame))
+            .isPhoneCall(compareField(memberStatList, MemberStat::getIsPhoneCall))
+            .studying(compareField(memberStatList, MemberStat::getStudying))
+            .intake(compareField(memberStatList, MemberStat::getIntake))
+            .cleaningFrequency(compareField(memberStatList, MemberStat::getCleaningFrequency))
+            .drinkingFrequency(compareField(memberStatList, MemberStat::getDrinkingFrequency))
+            .noiseSensitivity(compareField(memberStatList, MemberStat::getNoiseSensitivity))
+            .mbti(compareField(memberStatList, MemberStat::getMbti))
             .build();
     }
 
