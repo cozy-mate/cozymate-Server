@@ -16,6 +16,8 @@ public class MemberResponseDTO {
         private String nickname;
         private String gender;
         private String birthday;
+        private String universityName;
+        private String majorName;
         private Integer persona;
     }
 
