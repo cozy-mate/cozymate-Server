@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.dto;
 
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class RoomResponseDto {
         private RoomType roomType;
         private List<String> hashtags;
         private Integer equaility;
+        private MemberStatDifferenceResponseDTO difference;
         // TODO: 기숙사 정보 추가
 
     }
