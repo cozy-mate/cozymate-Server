@@ -165,6 +165,7 @@ public class TodoCommandService {
 
         todo.removeAssignees(removeIdList);
         todo.addAssignees(addIdList);
+        todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
 
         // 컨텐츠 업데이트
         todo.updateContent(requestDto.getContent(), requestDto.getTimePoint());

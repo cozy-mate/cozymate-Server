@@ -90,11 +90,15 @@ public class Todo extends BaseTimeEntity {
     }
 
     public void removeAssignee(Long assigneeId) {
-        this.assignedMateIdList.remove(assigneeId);
-        int mask = (1 << findAssigneeIndex(this.assignedMateIdList, assigneeId)) - 1;
-        this.completeBitmask =
-            (this.completeBitmask & mask) | ((this.completeBitmask >> 1) & ~mask);
+        int index = this.assignedMateIdList.indexOf(assigneeId);
+        if (index != -1) { // 해당 할당자가 있는지 확인
+            this.assignedMateIdList.remove(assigneeId);
+            int mask = (1 << index) - 1;
+            this.completeBitmask =
+                (this.completeBitmask & mask) | ((this.completeBitmask >> 1) & ~mask);
+        }
     }
+
 
     public boolean isAssigneeCompleted(Long assigneeId) {
         return

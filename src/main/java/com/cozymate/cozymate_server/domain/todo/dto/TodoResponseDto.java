@@ -15,6 +15,7 @@ public class TodoResponseDto {
         private Long id;
         private String content;
         private boolean isCompleted;
+        private String type;
     }
 
     @Builder
