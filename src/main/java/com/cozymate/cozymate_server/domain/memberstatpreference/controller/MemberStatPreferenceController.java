@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,7 +59,7 @@ public class MemberStatPreferenceController {
         return ResponseEntity.ok(ApiResponse.onSuccess(createdId));
     }
 
-    @PatchMapping("/")
+    @PutMapping("/")
     @Operation(summary = "[포비] 멤버 선호 항목 업데이트", description = ""
         + "선호 항목은 List<String>으로 주시면 됩니다")
     @SwaggerApiError({
