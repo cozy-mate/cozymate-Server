@@ -10,4 +10,6 @@ public interface MemberStatEqualityRepository extends
     List<MemberStatEquality> findByMemberAIdAndMemberBIdIn(Long memberAId, List<Long> memberIds);
 
     List<MemberStatEquality> findAllByMemberAIdOrMemberBId(Long memberAId, Long memberBId);
+
+    Integer findMemberStatEqualitiesByMemberAIdAndMemberBId(Long memberAId, Long memberBId);
 }

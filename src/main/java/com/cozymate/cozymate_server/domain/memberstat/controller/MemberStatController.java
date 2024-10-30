@@ -114,11 +114,12 @@ public class MemberStatController {
     })
     @GetMapping("/{memberId}")
     public ResponseEntity<ApiResponse<MemberStatQueryResponseDTO>> getMemberStat(
+        @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long memberId
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getMemberStatWithId(memberId)
+                memberStatQueryService.getMemberStatWithId(memberDetails.getMember(),memberId)
             ));
     }
 

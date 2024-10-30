@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuilder;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
@@ -93,6 +94,46 @@ public class MemberStatConverter {
             .personality(MemberStatUtil.fromStringToList(memberStat.getPersonality()))
             .mbti(memberStat.getMbti())
             .selfIntroduction(memberStat.getSelfIntroduction())
+            .build();
+    }
+
+    public static MemberStatDetailResponseDTO toDetailDto(MemberStat memberStat,
+        Integer birthYear,
+        Integer equality,
+        Long roomId) {
+        return MemberStatDetailResponseDTO.builder()
+            .universityId(memberStat.getUniversity().getId())
+            .admissionYear(memberStat.getAdmissionYear())
+            .birthYear(birthYear)
+            .major(memberStat.getMajor())
+            .numOfRoommate(memberStat.getNumOfRoommate())
+            .acceptance(memberStat.getAcceptance())
+            .wakeUpMeridian(TimeUtil.convertToMeridian(memberStat.getWakeUpTime()))
+            .wakeUpTime(TimeUtil.convertToTime(memberStat.getWakeUpTime()))
+            .sleepingMeridian(TimeUtil.convertToMeridian(memberStat.getSleepingTime()))
+            .sleepingTime(TimeUtil.convertToTime(memberStat.getSleepingTime()))
+            .turnOffMeridian(TimeUtil.convertToMeridian(memberStat.getTurnOffTime()))
+            .turnOffTime(TimeUtil.convertToTime(memberStat.getTurnOffTime()))
+            .smokingState(memberStat.getSmoking())
+            .sleepingHabit(MemberStatUtil.fromStringToList(memberStat.getSleepingHabit()))
+            .airConditioningIntensity(memberStat.getAirConditioningIntensity())
+            .heatingIntensity(memberStat.getHeatingIntensity())
+            .lifePattern(memberStat.getLifePattern())
+            .intimacy(memberStat.getIntimacy())
+            .canShare(memberStat.getCanShare())
+            .isPlayGame(memberStat.getIsPlayGame())
+            .isPhoneCall(memberStat.getIsPhoneCall())
+            .studying(memberStat.getStudying())
+            .intake(memberStat.getIntake())
+            .cleanSensitivity(memberStat.getCleanSensitivity())
+            .noiseSensitivity(memberStat.getNoiseSensitivity())
+            .cleaningFrequency(memberStat.getCleaningFrequency())
+            .drinkingFrequency(memberStat.getDrinkingFrequency())
+            .personality(MemberStatUtil.fromStringToList(memberStat.getPersonality()))
+            .mbti(memberStat.getMbti())
+            .selfIntroduction(memberStat.getSelfIntroduction())
+            .equality(equality)
+            .roomId(roomId)
             .build();
     }
 

@@ -30,5 +30,11 @@ public class MemberStatEqualityQueryService {
             ));
     }
 
+    public Integer getSingleEquality(Long memberAId, Long memberBId) {
+        return memberStatEqualityRepository.findMemberStatEqualitiesByMemberAIdAndMemberBId(
+            memberAId, memberBId
+        );
+    }
+
 
 }

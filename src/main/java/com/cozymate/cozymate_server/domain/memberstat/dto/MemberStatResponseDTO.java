@@ -49,6 +49,47 @@ public class MemberStatResponseDTO {
         private String selfIntroduction;
     }
 
+    // 일치율, 방 존재 여부까지 들어있는 DTO
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberStatDetailResponseDTO {
+
+        private Long universityId;
+        private Integer admissionYear;
+        private Integer birthYear;
+        private String major;
+        private Integer numOfRoommate;
+        private String acceptance;
+        private String wakeUpMeridian;
+        private Integer wakeUpTime;
+        private String sleepingMeridian;
+        private Integer sleepingTime;
+        private String turnOffMeridian;
+        private Integer turnOffTime;
+        private String smokingState;
+        private List<String> sleepingHabit;
+        private Integer airConditioningIntensity;
+        private Integer heatingIntensity;
+        private String lifePattern;
+        private String intimacy;
+        private String canShare;
+        private String isPlayGame;
+        private String isPhoneCall;
+        private String studying;
+        private String intake;
+        private Integer cleanSensitivity;
+        private Integer noiseSensitivity;
+        private String cleaningFrequency;
+        private String drinkingFrequency;
+        private List<String> personality;
+        private String mbti;
+        private String selfIntroduction;
+        private Integer equality;
+        private Long roomId;
+    }
+
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor

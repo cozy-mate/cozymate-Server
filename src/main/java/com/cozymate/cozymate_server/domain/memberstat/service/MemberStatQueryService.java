@@ -1,14 +1,20 @@
 package com.cozymate.cozymate_server.domain.memberstat.service;
 
+import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
+import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
+import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
+import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -17,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +42,10 @@ public class MemberStatQueryService {
 
 
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
+    private final RoomRepository roomRepository;
+    private final MateRepository mateRepository;
+
+    private static final Long ROOM_NOT_EXISTS = 0L;
 
     public MemberStatQueryResponseDTO getMemberStat(Member member) {
 
@@ -50,7 +61,7 @@ public class MemberStatQueryService {
         );
     }
 
-    public MemberStatQueryResponseDTO getMemberStatWithId(Long memberId) {
+    public MemberStatDetailResponseDTO getMemberStatWithId(Member viewer, Long memberId) {
 
         Member member = memberRepository.findById(memberId). orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
@@ -62,8 +73,21 @@ public class MemberStatQueryService {
 
         Integer birthYear = member.getBirthDay().getYear();
 
-        return MemberStatConverter.toDto(
-            memberStat,birthYear
+        Integer equality = memberStatEqualityQueryService.getSingleEquality(
+            memberId,
+            viewer.getId()
+        );
+
+        Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
+            memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
+
+        return MemberStatConverter.toDetailDto(
+            memberStat,
+            birthYear,
+            equality,
+            mate.isPresent() ?
+                mate.get().getRoom().getId()
+                : ROOM_NOT_EXISTS
         );
     }
 
