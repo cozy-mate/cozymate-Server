@@ -2,6 +2,8 @@ package com.cozymate.cozymate_server.domain.memberstatequality.service;
 
 import com.cozymate.cozymate_server.domain.memberstatequality.MemberStatEquality;
 import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberStatEqualityRepository;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +30,16 @@ public class MemberStatEqualityQueryService {
                 MemberStatEquality::getMemberBId,
                 MemberStatEquality::getEquality
             ));
+    }
+
+    public Integer getSingleEquality(Long memberAId, Long memberBId) {
+        MemberStatEquality memberStatEquality = memberStatEqualityRepository.findMemberStatEqualitiesByMemberAIdAndMemberBId(
+            memberAId, memberBId
+        ).orElseThrow(
+            () ->  new GeneralException(ErrorStatus._MEMBERSTAT_EQUALITY_NOT_FOUND)
+        );
+
+        return memberStatEquality.getEquality();
     }
 
 

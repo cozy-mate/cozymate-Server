@@ -3,6 +3,8 @@ package com.cozymate.cozymate_server.domain.memberstat.controller;
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
@@ -113,12 +115,13 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_NOT_EXISTS
     })
     @GetMapping("/{memberId}")
-    public ResponseEntity<ApiResponse<MemberStatQueryResponseDTO>> getMemberStat(
+    public ResponseEntity<ApiResponse<MemberStatDetailResponseDTO>> getMemberStat(
+        @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long memberId
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getMemberStatWithId(memberId)
+                memberStatQueryService.getMemberStatWithId(memberDetails.getMember(),memberId)
             ));
     }
 
