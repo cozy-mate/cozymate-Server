@@ -107,7 +107,7 @@ public class MemberStatConverter {
         Integer equality,
         Long roomId) {
         return MemberStatDetailResponseDTO.builder()
-            .universityId(memberStat.getUniversity().getId())
+            //.universityId(memberStat.getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
             .birthYear(birthYear)
             .major(memberStat.getMajor())
