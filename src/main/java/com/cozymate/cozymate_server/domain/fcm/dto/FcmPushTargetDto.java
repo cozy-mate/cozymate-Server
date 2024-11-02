@@ -9,14 +9,9 @@ import lombok.Getter;
 public class FcmPushTargetDto {
 
     /**
-     * 상대에게만 알림이 가는 경우 or 나에게만 알림이 가는 경우 notificationType : 알림 종류
-     * <p>
-     * best, worst 투표가 완료되면 알림 -> 투표 요청이 마지막 투표자인지 체크하고 Member에 Best 멤버 넣어서 사용 여기까지는 파라미터에 Member,
-     * NotificationType만 사용하면 됩니다!
-     * <p>
-     * --------------
-     * <p>
-     * roleContent or todoContents 는 스케줄러에서만 사용합니다!
+     * 알림 내용에 알림을 받는 유저의 이름이 들어가는 경우 사용
+     * ex) member.getNickName()님 오늘 밥 먹기 잊지 않으셨죠?
+     * 매치되는 NotificationType -> REMINDER_ROLE, SELECT_COZY_MATE, TODO_LIST
      */
     @Getter
     public static class OneTargetDto {
@@ -64,12 +59,11 @@ public class FcmPushTargetDto {
     }
 
     /**
-     * 코지메이트 신청을 한 경우 - A(나)가 B(상대)에게 코지메이트를 신청했다고 가정하면 ex) A님에게서 코지메이트 신청이 도착했어요! 알림을 B(상대)가 받고 B의
-     * 알림 로그에 저장 -> contentMember : A, recipientMember : B ex) B님에게 코지메이트 신청을 보냈어요! 알림을 A(나)가 받고 A의
-     * 알림 로그에 저장 -> contentMember : B, recipientMember : A contentMember: "xx님"에서 xx에 들어갈 이름의 멤버
-     * recipientMember : 알림을 받는 member 즉, 로그가 저장될 대상 멤버 notificationType : 알림 종류
-     * <p>
-     * 요약하면 알림 내용에 포함되는 멤버의 닉네임과 실제 알림을 받는 멤버가 다른 경우 OneTargetReverSeDto 사용
+     * 알림 내용에 포함되는 멤버의 닉네임과 실제 알림을 받는 멤버가 다른 경우 사용
+     * ex) contentMember.getNickname()님이 초대 요청을 거절했어요
+     *     contentMember.getNickname()님이 방 초대 요청을 수락했어요
+     *     위 알림 내역은 recipientMember에게 저장
+     *  매치되는 NotificationType : REJECT_ROOM_INVITE, ACCEPT_ROOM_INVITE
      */
     @Getter
     public static class OneTargetReverseDto {
@@ -92,8 +86,9 @@ public class FcmPushTargetDto {
     }
 
     /**
+     * 특정 사용자들에게 동일한 알림 내용을 보내는 경우 사용
      * 방이 열렸어요, 얼른 가서 코지메이트를 만나봐요! -> 해당 방에 속한 멤버에게 전부 보냄 memberList : 알림을 받을 멤버 리스트
-     * notificationType : 알림 종류
+     * 매치되는 NotificationType -> 현재 해당 dto와 매칭되는 NotificationType은 없습니다
      */
     @Getter
     public static class GroupTargetDto {
@@ -113,7 +108,9 @@ public class FcmPushTargetDto {
     }
 
     /**
-     * 자신이 오늘의 모든 투두를 완료했을 때, 나를 제외한 룸메이트들에게 알림을 보낸다.
+     * 특정 사용자의 행위를 본인을 제외한 다른 사용자들에게 알림을 전송하는 경우 사용
+     * me.getNickname()님이 오늘 해야 할 일을 전부 완료했어요!
+     * 매치되는 NotificationType -> 현재 해당 dto와 매칭되는 NotificationType은 없습니다
      */
     @Getter
     public static class GroupWithOutMeTargetDto {
@@ -135,6 +132,13 @@ public class FcmPushTargetDto {
         }
     }
 
+
+    /**
+     * 아래의 경우 사용
+     * ex) me.getNickname()님이 room.getName()을/를 뛰쳐나갔어요!
+     * me.getNickname()님이 room.getName()에 뛰어들어왔요!
+     * 매치되는 NotificationType -> ROOM_OUT, ROOM_IN
+     */
     @Getter
     public static class GroupRoomNameWithOutMeTargetDto {
 
@@ -157,6 +161,9 @@ public class FcmPushTargetDto {
         }
     }
 
+    /**
+     * 얘는 필요 없어졌는데 나중에 필요할 수도 있을 것 같아서 남겨두었습니다
+     */
     @Getter
     public static class OneTargetReverseWithRoomName {
 
@@ -180,6 +187,20 @@ public class FcmPushTargetDto {
         }
     }
 
+
+    /**
+     *
+     * A 사용자가 B 사용자에게 특정 행위를 하면 A에게 B의 닉네임이 포함된 알림 내용이 오고, B에게는 A의 닉네임이 포함된 알림이 와야하는 경우 사용
+     * 추가로 알림 내용에 방 이름이 추가될 경우도 있고, targetId에 roomId를 저장하기 위해 room도 같이 넘깁니다
+     *
+     * 아래 한줄 씩 좌우로 짝을 이루는 알림입니다
+     * ex) 더기님에게 room.getName()방으로 초대 요청을 보냈어요 (델로가 받게되는 알림) <-> 델로님이 room.getName()방으로 나를 초대했어요 (더기가 받게되는 알림)
+     * 더기(member.getNickname())님의 방 참여 요청을 거절했어요 (델로가 받게되는 알림) <-> 델로(host.getNickname())님이 방 참여 요청을 거절했어요 (더기가 받게되는 알림)
+     * 더기(member.getNickname())님의 방 참여 요청을 수락햇어요 (델로가 받게되는 알림) <-> 델로(host.getNickname())님이 방 참여 요청을 수락했어요 (더기가 받게되는 알림)
+     *
+     * 매치되는 NotificationType -> SEND_ROOM_INVITE, ARRIVE_ROOM_INVITE, SELF_REJECT_ROOM_JOIN, REJECT_ROOM_JOIN, SELF_ACCEPT_ROOM_JOIN, ACCEPT_ROOM_JOIN
+     *
+     */
     @Getter
     public static class HostAndMemberAndRoomTargetDto {
 
@@ -206,6 +227,10 @@ public class FcmPushTargetDto {
         }
     }
 
+    /**
+     * 공지사항에 대한 알림처럼 같은 내용을 다수에게 보낼 때 사용
+     * fcm topic 사용해서 푸시 알림 보낼때 사용합니다
+     */
     @Getter
     public static class TopicTargetDto {
 
