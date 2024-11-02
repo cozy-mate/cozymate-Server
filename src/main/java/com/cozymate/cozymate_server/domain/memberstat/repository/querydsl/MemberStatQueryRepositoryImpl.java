@@ -74,10 +74,12 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 
     private BooleanBuilder initDefaultQuery(MemberStat criteriaMemberStat) {
 
+        Member criteriaMember = criteriaMemberStat.getMember();
+
         BooleanBuilder builder = new BooleanBuilder()
             .and(memberStat.id.ne(criteriaMemberStat.getId()))
-            .and(member.gender.eq(criteriaMemberStat.getMember().getGender()))
-            .and(memberStat.university.id.eq(criteriaMemberStat.getUniversity().getId()));
+            .and(member.gender.eq(criteriaMember.getGender()))
+            .and(member.university.id.eq(criteriaMember.getUniversity().getId()));
 
         // '미정'인 경우 인실 조건을 무시, 그렇지 않으면 인실 조건 추가
         if (!criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)) {

@@ -33,6 +33,7 @@ public class FriendController {
     private final FriendCommandService friendCommandService;
     private final FriendQueryService friendQueryService;
 
+    @Deprecated
     @Operation(
         summary = "[포비] 친구 신청 요청",
         description = "보내는 사용자의 토큰을 넣어 사용하고, Body로 친구 요청을 받는 멤버의 ID를 보내주세요."
@@ -52,6 +53,7 @@ public class FriendController {
                 friendCommandService.requestFriend(senderDetails.getMember(), sendFriendRequestDTO)));
     }
 
+    @Deprecated
     @Operation(
         summary = "[포비] 친구 신청 수락",
         description = "수락하는 사용자의 토큰을 넣어 사용하고, Body로 친구 신청을 보냈던 멤버의 ID를 보내주세요."
@@ -71,6 +73,7 @@ public class FriendController {
                 friendCommandService.acceptFriendRequest(receiverDetails.getMember(), sendFriendRequestDTO)));
     }
 
+    @Deprecated
     @Operation(
         summary = "[포비] 친구 신청 거절",
         description = "수락하는 사용자의 토큰을 넣어 사용하고, Body로 친구 신청을 보냈던 멤버의 ID를 보내주세요."
@@ -90,6 +93,7 @@ public class FriendController {
                 friendCommandService.denyFriendRequest(receiverDetails.getMember(), sendFriendRequestDTO)));
     }
 
+    @Deprecated
     @Operation(
         summary = "[포비] 친구 좋아요 토글",
         description = "사용자의 토큰을 넣어 사용하고, Body로 좋아하고자 하는 멤버의 ID를 보내주세요."
@@ -109,6 +113,7 @@ public class FriendController {
                 friendCommandService.toggleLikeFriend(likerDetails.getMember(), sendFriendRequestDTO)));
     }
 
+    @Deprecated
     @Operation(
         summary = "[포비] 친구 목록 가져오기",
         description = "사용자의 토큰을 넣어 사용하고,"
@@ -125,6 +130,8 @@ public class FriendController {
                 friendQueryService.getFriendList(memberDetails.getMember())
             ));
     }
+
+    @Deprecated
     @Operation(
         summary = "[포비] 친구 여부 가져오기",
         description = "사용자의 토큰을 넣어 사용하고,\n"

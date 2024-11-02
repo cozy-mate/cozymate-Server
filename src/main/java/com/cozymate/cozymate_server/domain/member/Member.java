@@ -71,8 +71,6 @@ public class Member extends BaseTimeEntity {
 
     private String majorName;
 
-    // 기존에 member -> memberstat 상속 관계를
-    // member <-> memberstat one to one mapping으로 변경하였습니다.
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "member")
     private MemberStat memberStat;
 

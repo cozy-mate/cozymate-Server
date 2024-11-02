@@ -34,9 +34,9 @@ public class MemberStatEqualityCommandService {
     public void createMemberStatEqualities(MemberStat newMemberStat) {
 
         // 성별이 같고, 같은 학교일 경우에 대해서만 일치율 계산
-        List<MemberStat> memberStatList = memberStatRepository.findByMember_GenderAndUniversity_Id(
+        List<MemberStat> memberStatList = memberStatRepository.findByMember_GenderAndMember_University_Id(
             newMemberStat.getMember().getGender(),
-            newMemberStat.getUniversity().getId()
+            newMemberStat.getMember().getUniversity().getId()
         );
 
         Long newMemberId = newMemberStat.getMember().getId();
@@ -94,7 +94,7 @@ public class MemberStatEqualityCommandService {
         // 성별과 학교를 기준으로 MemberStat을 그룹화
         Map<String, List<MemberStat>> groupedMemberStats = allMemberStats.stream()
             .collect(Collectors.groupingBy(
-                memberStat -> memberStat.getMember().getGender() + "-" + memberStat.getUniversity()
+                memberStat -> memberStat.getMember().getGender() + "-" + memberStat.getMember().getUniversity()
                     .getId()
             ));
 

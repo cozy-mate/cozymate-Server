@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.memberstat.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -20,19 +21,19 @@ public class MemberStatRequestDTO {
     @AllArgsConstructor
     public static class MemberStatCommandRequestDTO {
 
-        @NotNull
-        private Long universityId;
+//        @NotNull
+//        private Long universityId;
         //학번의 경우 처리하기 애매한 부분이 있어, String 2자리로 통일함. EX) 09 학번 -> "09"
         @NotBlank
         @Size(min = 2, max = 2)
         private String admissionYear;
-        @NotBlank
-        private String major;
+//        @NotBlank
+//        private String major;
         @NotNull
-        @Min(2)
+        @Min(0)
         @Max(6)
         private Integer numOfRoommate;
-        @NotBlank
+        @NotEmpty
         private String acceptance;
         @NotBlank
         @Size(min = 2, max = 2)
@@ -55,8 +56,9 @@ public class MemberStatRequestDTO {
         @Min(1)
         @Max(12)
         private Integer turnOffTime;
-        @NotBlank
+        @NotEmpty
         private String smokingState;
+        @NotEmpty
         private List<String> sleepingHabit;
         @NotNull
         @Min(0)
@@ -66,19 +68,19 @@ public class MemberStatRequestDTO {
         @Min(0)
         @Max(3)
         private Integer heatingIntensity;
-        @NotBlank
+        @NotEmpty
         private String lifePattern;
-        @NotBlank
+        @NotEmpty
         private String intimacy;
-        @NotBlank
+        @NotEmpty
         private String canShare;
-        @NotBlank
+        @NotEmpty
         private String isPlayGame;
-        @NotBlank
+        @NotEmpty
         private String isPhoneCall;
-        @NotBlank
+        @NotEmpty
         private String studying;
-        @NotBlank
+        @NotEmpty
         private String intake;
         @NotNull
         @Min(1)
@@ -88,15 +90,16 @@ public class MemberStatRequestDTO {
         @Min(1)
         @Max(5)
         private Integer noiseSensitivity;
-        @NotBlank
+        @NotEmpty
         private String cleaningFrequency;
-        @NotBlank
+        @NotEmpty
         private String drinkingFrequency;
+        @NotEmpty
         private List<String> personality;
         @NotBlank
         @Size(max = 4, min = 4)
         private String mbti;
-        @NotBlank
+        @NotEmpty
         private String selfIntroduction;
     }
 
@@ -105,19 +108,17 @@ public class MemberStatRequestDTO {
     @AllArgsConstructor
     public static class MemberStatSearchRequestDTO {
 
-        @NotNull
-        private Long universityId;
         //학번의 경우 처리하기 애매한 부분이 있어, String 2자리로 통일함. EX) 09 학번 -> "09"
-        @NotBlank
+        @NotEmpty
         @Size(min = 2, max = 2)
         private String admissionYear;
-        @NotBlank
-        private String major;
+//        @NotBlank
+//        private String major;
         @NotNull
-        @Min(2)
+        @Min(0)
         @Max(6)
         private Integer numOfRoommate;
-        @NotBlank
+        @NotEmpty
         private String acceptance;
         @NotBlank
         @Size(min = 2, max = 2)
@@ -140,8 +141,9 @@ public class MemberStatRequestDTO {
         @Min(1)
         @Max(12)
         private Integer turnOffTime;
-        @NotBlank
+        @NotEmpty
         private String smokingState;
+        @NotEmpty
         private List<String> sleepingHabit;
         @NotNull
         @Min(1)
@@ -151,19 +153,19 @@ public class MemberStatRequestDTO {
         @Min(1)
         @Max(3)
         private Integer heatingIntensity;
-        @NotBlank
+        @NotEmpty
         private String lifePattern;
-        @NotBlank
+        @NotEmpty
         private String intimacy;
-        @NotBlank
+        @NotEmpty
         private String canShare;
-        @NotBlank
+        @NotEmpty
         private String isPlayGame;
-        @NotBlank
+        @NotEmpty
         private String isPhoneCall;
-        @NotBlank
+        @NotEmpty
         private String studying;
-        @NotBlank
+        @NotEmpty
         private String intake;
         @NotNull
         @Min(1)
@@ -173,15 +175,16 @@ public class MemberStatRequestDTO {
         @Min(1)
         @Max(5)
         private Integer noiseSensitivity;
-        @NotBlank
+        @NotEmpty
         private String cleaningFrequency;
-        @NotBlank
+        @NotEmpty
         private String drinkingFrequency;
+        @NotEmpty
         private List<String> personality;
         @NotBlank
         @Size(max = 4, min = 4)
         private String mbti;
-        @NotBlank
+        @NotEmpty
         private String selfIntroduction;
     }
 }

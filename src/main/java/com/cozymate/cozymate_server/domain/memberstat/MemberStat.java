@@ -41,10 +41,6 @@ public class MemberStat extends BaseTimeEntity {
     @JoinColumn(name = "member_id", referencedColumnName = "id")
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "university_id")
-    private University university;
-
     private Integer admissionYear;
 
     private String major;
@@ -95,13 +91,13 @@ public class MemberStat extends BaseTimeEntity {
 
     private String selfIntroduction;
 
-    public void update(Member member, University university,
+    public void update(Member member,
         MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         this.member = member;
-        this.university = university;
+//        this.university = university;
         this.acceptance = memberStatCommandRequestDTO.getAcceptance();
         this.admissionYear = Integer.parseInt(memberStatCommandRequestDTO.getAdmissionYear());
-        this.major = memberStatCommandRequestDTO.getMajor();
+        //this.major = memberStatCommandRequestDTO.getMajor();
         this.numOfRoommate = memberStatCommandRequestDTO.getNumOfRoommate();
         this.wakeUpTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),
             memberStatCommandRequestDTO.getWakeUpTime());
