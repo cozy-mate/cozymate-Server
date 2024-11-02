@@ -156,4 +156,69 @@ public class FcmPushTargetDto {
             return new GroupRoomNameWithOutMeTargetDto(me, memberList, room, notificationType);
         }
     }
+
+    @Getter
+    public static class OneTargetReverseWithRoomName {
+
+        private final Member contentMember;
+        private final Member recipientMember;
+        private final Room room;
+        private final NotificationType notificationType;
+
+        private OneTargetReverseWithRoomName(Member contentMember, Member recipientMember,
+            Room room, NotificationType notificationType) {
+            this.contentMember = contentMember;
+            this.recipientMember = recipientMember;
+            this.room = room;
+            this.notificationType = notificationType;
+        }
+
+        public static OneTargetReverseWithRoomName create(Member contentMember,
+            Member recipientMember, Room room, NotificationType notificationType) {
+            return new OneTargetReverseWithRoomName(contentMember, recipientMember, room,
+                notificationType);
+        }
+    }
+
+    @Getter
+    public static class HostAndMemberAndRoomTargetDto {
+
+        private final Member host; // 방장
+        private final NotificationType hostNotificationType; // 방장이 받을 알림 종류 ex) SEND_ROOM_INVITE
+        private final Member member; // 방장이 초대 요청 보낸 대상
+        private final NotificationType memberNotificationType; // 상대가 받을 알림 종류 ex) ARRIVE_ROOM_INVITE
+        private final Room room; // 알림 내용에 들어갈 방 이름
+
+        private HostAndMemberAndRoomTargetDto(Member host, NotificationType hostNotificationType,
+            Member member, NotificationType memberNotificationType, Room room) {
+            this.host = host;
+            this.hostNotificationType = hostNotificationType;
+            this.member = member;
+            this.memberNotificationType = memberNotificationType;
+            this.room = room;
+        }
+
+        public static HostAndMemberAndRoomTargetDto create(Member host,
+            NotificationType hostNotificationType,
+            Member member, NotificationType memberNotificationType, Room room) {
+            return new HostAndMemberAndRoomTargetDto(host, hostNotificationType, member,
+                memberNotificationType, room);
+        }
+    }
+
+    @Getter
+    public static class TopicTargetDto {
+
+        private final String topic;
+        private final String content;
+
+        private TopicTargetDto(String topic, String content) {
+            this.topic = topic;
+            this.content = content;
+        }
+
+        public static TopicTargetDto create(String topic, String content) {
+            return new TopicTargetDto(topic, content);
+        }
+    }
 }

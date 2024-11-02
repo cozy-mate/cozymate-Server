@@ -10,4 +10,5 @@ public class NotificationLogResponseDto {
     private String content;
     private String createdAt;
     private String category;
+    private Long targetId;
 }
