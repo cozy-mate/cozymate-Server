@@ -153,13 +153,34 @@ public class MemberStatConverter {
             .build();
     }
 
+    // 함수 기능 : 멤버 상세정보를 비교한 대상들'만' 입력받아 DTO를 리턴합니다.
+    // 해당 함수를 사용하는 서비스는 꼭 비교할 대상들을 전처리 해서 사용하시면 되겠습니다.
     public static MemberStatDifferenceResponseDTO toMemberStatDifferenceResponseDTO(List<MemberStat> memberStatList) {
 
             List<String> blue = new ArrayList<>();
             List<String> red = new ArrayList<>();
             List<String> white = new ArrayList<>();
 
+
+            if(memberStatList.isEmpty()){
+                return MemberStatDifferenceResponseDTO.builder()
+                    .blue(blue)
+                    .red(red)
+                    .white(white)
+                    .build();
+            }
+
             Map<String, Function<MemberStat, Object>> fieldGetters = createFieldGetters();
+
+            // 방 초기 생성 시, 혹은 멤버 상세정보를 입력한 사람이 1명일 때
+            if(memberStatList.size()==1){
+                white.addAll(fieldGetters.keySet());
+                return MemberStatDifferenceResponseDTO.builder()
+                    .blue(blue)
+                    .red(red)
+                    .white(white)
+                    .build();
+            }
 
             for (String fieldName : fieldGetters.keySet()) {
                 DifferenceStatus status = compareField(memberStatList, fieldGetters.get(fieldName));
