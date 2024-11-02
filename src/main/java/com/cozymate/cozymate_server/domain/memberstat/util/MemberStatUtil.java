@@ -90,9 +90,12 @@ public class MemberStatUtil {
         return getter.apply(memberStat);
     }
 
-    public static List<Object> getMemberStatFields(MemberStat memberStat, List<String> fieldNames) {
+    public static Map<String, Object> getMemberStatFields(MemberStat memberStat, List<String> fieldNames) {
         return fieldNames.stream()
-            .map(fieldName -> getMemberStatField(memberStat, fieldName))
-            .toList();
+            .collect(Collectors.toMap(
+                fieldName -> fieldName, // Map의 키로 사용할 필드 이름
+                fieldName -> getMemberStatField(memberStat, fieldName) // Map의 값으로 사용할 필드 값
+            ));
     }
+
 }

@@ -187,4 +187,11 @@ public class MemberStatRequestDTO {
         @NotEmpty
         private String selfIntroduction;
     }
+
+        @Getter
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class MemberStatSeenListDTO {
+            List<Long> seenMemberStatIds;
+        }
 }

@@ -7,23 +7,31 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatSeenListDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
+import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
+import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -42,10 +50,11 @@ public class MemberStatQueryService {
 
 
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
-    private final RoomRepository roomRepository;
+    private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
     private final MateRepository mateRepository;
 
     private static final Long ROOM_NOT_EXISTS = 0L;
+    private final MemberStatPreferenceCommandService memberStatPreferenceCommandService;
 
     public MemberStatQueryResponseDTO getMemberStat(Member member) {
 
@@ -186,6 +195,53 @@ public class MemberStatQueryService {
 
 
     }
+
+    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member, MemberStatSeenListDTO currentMemberStatIds) {
+
+        // 기준 멤버의 선호도 필드 목록 가져오기
+        List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(member.getId());
+
+        List<Long> seenMemberStatIds = currentMemberStatIds.getSeenMemberStatIds();
+        // 같은 성별과 대학의 멤버 중, 자신과 이미 본 멤버를 제외
+        List<MemberStat> memberStatList = memberStatRepository.findByMember_GenderAndMember_University_Id(
+                member.getGender(), member.getUniversity().getId()
+            ).stream()
+            .filter(stat -> !stat.getMember().getId().equals(member.getId())) // 자신 제외
+            .filter(stat -> !seenMemberStatIds.contains(stat.getId())) // 이미 본 멤버 제외
+            .collect(Collectors.toList());
+
+        // 리스트를 랜덤하게 섞고, 최대 5개의 멤버를 선택
+        Collections.shuffle(memberStatList);
+        List<MemberStat> randomMemberStats = memberStatList.stream()
+            .limit(5)
+            .toList();
+
+        // 선택된 멤버들에 대해 MemberStatPreferenceResponseDTO 리스트 생성
+        List<MemberStatPreferenceResponseDTO> preferenceResponseList = randomMemberStats.stream()
+            .map(stat -> {
+                Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(stat, criteriaPreferences);
+                MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO = MemberStatPreferenceResponseDTO.builder()
+                    .memberId(stat.getMember().getId())
+                    .memberNickName(stat.getMember().getNickname())
+                    .preferenceStats(preferences)
+                    .build();
+
+                // 누적 ID 리스트에 새로 선택된 멤버 ID 추가
+                seenMemberStatIds.add(stat.getId());
+
+                return memberStatPreferenceResponseDTO;
+            })
+            .collect(Collectors.toList());
+
+        // MemberStatRandomListResponseDTO 생성하여 반환
+        return MemberStatRandomListResponseDTO.builder()
+            .memberList(preferenceResponseList) // 리스트 형식으로 추가
+            .seenMemberStatIds(new ArrayList<>(seenMemberStatIds)) // 누적 리스트 포함
+            .build();
+    }
+
+
+
 
     private List<MemberStatEqualityDetailResponseDTO> createDetailedResponse(
         Map<Member, MemberStat> memberStats, Map<Long, Integer> memberStatEqualities) {

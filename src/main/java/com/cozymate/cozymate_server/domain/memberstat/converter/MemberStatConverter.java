@@ -10,6 +10,7 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceRe
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
