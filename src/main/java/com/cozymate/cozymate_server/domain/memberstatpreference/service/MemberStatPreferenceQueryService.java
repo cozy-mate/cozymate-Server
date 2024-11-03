@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.domain.memberstatpreference.repository.Membe
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,13 @@ public class MemberStatPreferenceQueryService {
                 Arrays.asList(memberStatPreference.getSelectedPreferences().split(","))
             )
             .build();
+    }
+
+    public List<String> getPreferencesToList(Long memberId) {
+        MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(memberId)
+            .orElseThrow(()-> new GeneralException(ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS));
+
+        return Arrays.asList(memberStatPreference.getSelectedPreferences().split(","));
     }
 
 }

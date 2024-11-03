@@ -1,11 +1,11 @@
 package com.cozymate.cozymate_server.domain.memberstat.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatSeenListDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
@@ -384,6 +384,28 @@ public class MemberStatController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 true
+            ));
+    }
+
+    @Operation(
+        summary = "[포비] 사용자 랜덤 추천",
+        description = "요청자의 토큰을 넣고 사용합니다.\n\n"
+        +"1. 처음에 seenMemberStatIds 를 빈 배열로 요청합니다.\n"
+        +"2. 응답으로 memberList와 memberList에 보내진 Member들의 Id가 담긴 seenMemberStatIds 배열이 리턴됩니다.\n"
+        +"3. 2번에서 받은 배열을 그대로 복사해 다시 요청합니다.\n"
+        +"결론: seenMemberStatIds는 처음에 빈 배열로, 그 다음부터는 응답으로 받은 seenMemberStatIds를 그대로 요청에 넣어주세요"
+    )
+    @PostMapping("/random/list")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+    })
+    public ResponseEntity<ApiResponse<MemberStatRandomListResponseDTO>> getRandomMemberStatPreference(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @RequestBody MemberStatSeenListDTO memberStatSeenListDTO
+    ) {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.getMember(),memberStatSeenListDTO)
             ));
     }
 
