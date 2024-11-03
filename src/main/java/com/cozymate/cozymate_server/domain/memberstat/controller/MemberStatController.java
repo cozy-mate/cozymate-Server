@@ -187,13 +187,14 @@ public class MemberStatController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList,
-        @RequestParam(defaultValue = "false", required = false) boolean needsDetail
+        @RequestParam(defaultValue = "false", required = false) boolean needsDetail,
+        @RequestParam(defaultValue = "false", required = false) boolean needsPreferences
     ) {
         Pageable pageable = PageRequest.of(page, 5);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberStatList(
-                    memberDetails.getMember(), filterList, pageable, needsDetail)
+                    memberDetails.getMember(), filterList, pageable, needsDetail, needsPreferences)
             ));
     }
 
@@ -234,12 +235,17 @@ public class MemberStatController {
             "- **cleaningFrequency** (청소 빈도) : `[String]` 예) `[\"주1회\", \"월2회\"]`\n" +
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`" +
             "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
-            "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n"
+            "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n"+
+            "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다." +
+            "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
+            "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n"+
+            "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
         ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID,
-        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
+        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE,
+        ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST
     })
     @PostMapping("/filter/search/count")
     public ResponseEntity<ApiResponse<Integer>> getSizeOfAdvancedFilteredMemberList(
@@ -292,26 +298,31 @@ public class MemberStatController {
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`" +
             "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
             "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n" +
-            "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다."
+            "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다." +
+            "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
+            "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n"+
+            "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다."
 
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
         ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID,
-        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
+        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE,
+        ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST
     })
     @PostMapping("/filter/search")
     public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getAdvancedFilteredMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestBody HashMap<String, List<?>> filterMap,
-        @RequestParam(defaultValue = "false", required = false) boolean needsDetail) {
+        @RequestParam(defaultValue = "false", required = false) boolean needsDetail,
+        @RequestParam(defaultValue = "false", required = false) boolean needsPreferences) {
 
         Pageable pageable = PageRequest.of(page, 5);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getSearchedAndFilteredMemberStatList(
-                    memberDetails.getMember(), filterMap, pageable, needsDetail)
+                    memberDetails.getMember(), filterMap, pageable, needsDetail, needsPreferences)
             )
         );
     }
@@ -363,7 +374,7 @@ public class MemberStatController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberStatList(
-                    memberDetails.getMember(), filterList, pageable, true)
+                    memberDetails.getMember(), filterList, pageable, true, false)
             ));
     }
 

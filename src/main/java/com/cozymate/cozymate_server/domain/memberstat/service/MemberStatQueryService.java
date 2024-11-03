@@ -20,11 +20,9 @@ import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStat
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
-import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +49,6 @@ public class MemberStatQueryService {
 
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
-    private final MateRepository mateRepository;
 
     private static final Long ROOM_NOT_EXISTS = 0L;
     private final MemberStatPreferenceCommandService memberStatPreferenceCommandService;
@@ -110,7 +107,12 @@ public class MemberStatQueryService {
     }
 
     public PageResponseDto<List<?>> getMemberStatList(Member member,
-        List<String> filterList, Pageable pageable, boolean needsDetail) {
+        List<String> filterList, Pageable pageable, boolean needsDetail, boolean needsPreferences) {
+
+        if (needsDetail && needsPreferences) {
+            throw new GeneralException(
+                ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST);
+        }
 
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
@@ -143,15 +145,21 @@ public class MemberStatQueryService {
         // 일치율 조회 한번으로 줄이고(N+1 Problem -> 조회 1회), 응답속도를 비약적으로 개선함.
         if (needsDetail) {
             return toPageResponseDto(createDetailedResponse(filteredResult));
+        } else if (needsPreferences) {
+            return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,member));
         }
-
         return toPageResponseDto(createEqualityResponse(filteredResult));
 
 
     }
 
     public PageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member,
-        HashMap<String, List<?>> filterMap, Pageable pageable, boolean needsDetail) {
+        HashMap<String, List<?>> filterMap, Pageable pageable, boolean needsDetail, boolean needsPreferences) {
+
+        if (needsDetail && needsPreferences) {
+            throw new GeneralException(
+                ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST);
+        }
 
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
@@ -165,9 +173,11 @@ public class MemberStatQueryService {
 
         if (needsDetail) {
             return toPageResponseDto(createDetailedResponse(filteredResult));
+        } else if (needsPreferences) {
+            return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,member));
         }
-
         return toPageResponseDto(createEqualityResponse(filteredResult));
+
 
     }
 
@@ -197,6 +207,8 @@ public class MemberStatQueryService {
                     equality);
             }
         );
+    }
+
     public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member,
         MemberStatSeenListDTO currentMemberStatIds) {
 
@@ -226,7 +238,8 @@ public class MemberStatQueryService {
                     criteriaPreferences);
                 MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO = MemberStatConverter.toPreferenceResponseDTO(
                     stat,
-                    preferences
+                    preferences,
+                    null
                 );
 
                 // 누적 ID 리스트에 새로 선택된 멤버 ID 추가
@@ -242,31 +255,25 @@ public class MemberStatQueryService {
 
     }
 
-
-    private List<MemberStatEqualityDetailResponseDTO> createDetailedResponse(
-        Map<Member, MemberStat> memberStats, Map<Long, Integer> memberStatEqualities) {
-
-        List<MemberStatEqualityResponseDTO> memberStatEqualityResponseDTOList = createEqualityResponse(
-            memberStats, memberStatEqualities);
-
-        return memberStatEqualityResponseDTOList.stream()
-            .map(equalityResponse -> {
-
-                MemberStat memberStat = memberStats.values().stream()
-                    .filter(stat -> stat.getMember().getId().equals(equalityResponse.getMemberId()))
-                    .findFirst()
-                    .orElse(null);
-
-                MemberStatQueryResponseDTO queryResponse = MemberStatConverter.toDto(
-                    memberStat, memberStat.getMember().getBirthDay().getYear()
+    public Page<MemberStatPreferenceResponseDTO> createMemberStatPreferenceResponse(
+        Page<Map<MemberStat, Integer>> filteredResult, Member criteriaMember) {
+        return filteredResult.map(
+            memberStatIntegerMap ->{
+                Map.Entry<MemberStat, Integer> entry = memberStatIntegerMap.entrySet().iterator()
+                    .next();
+                MemberStat memberStat = entry.getKey();
+                Integer equality = entry.getValue();
+                List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
+                    criteriaMember.getId());
+                Map<String,Object> preferences = MemberStatUtil.getMemberStatFields(memberStat,
+                    criteriaPreferences);
+                return MemberStatConverter.toPreferenceResponseDTO(
+                    memberStat,
+                    preferences,
+                    equality
                 );
-
-                return MemberStatEqualityDetailResponseDTO.builder()
-                    .info(equalityResponse)
-                    .detail(queryResponse)
-                    .build();
-            })
-            .toList();
+            }
+        );
     }
 
     private Page<MemberStatEqualityResponseDTO> createEqualityResponse(
