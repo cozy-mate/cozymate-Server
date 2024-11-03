@@ -25,12 +25,10 @@ public class MessageUtil {
 
     public MessageResult createMessage(Member contentMember, Room room,
         Member recipientMember, NotificationType notificationType) {
-        List<Fcm> fcmList = fcmRepository.findByMemberAndIsValidIsTrue(recipientMember);
+        List<Fcm> fcmList = getFcmList(recipientMember);
 
         if (fcmList.isEmpty()) {
-            return MessageResult.builder()
-                .messages(new ArrayList<>())
-                .build();
+            return getEmptyMessageResult();
         }
 
         String content = getContent(contentMember, room, notificationType);
@@ -39,12 +37,10 @@ public class MessageUtil {
     }
 
     public MessageResult createMessage(Member member, NotificationType notificationType) {
-        List<Fcm> fcmList = fcmRepository.findByMemberAndIsValidIsTrue(member);
+        List<Fcm> fcmList = getFcmList(member);
 
         if (fcmList.isEmpty()) {
-            return MessageResult.builder()
-                .messages(new ArrayList<>())
-                .build();
+            return getEmptyMessageResult();
         }
 
         String content = getContent(member, notificationType);
@@ -54,12 +50,10 @@ public class MessageUtil {
 
     public MessageResult createMessage(Member contentMember, Member recipientMember,
         NotificationType notificationType) {
-        List<Fcm> fcmList = fcmRepository.findByMemberAndIsValidIsTrue(recipientMember);
+        List<Fcm> fcmList = getFcmList(recipientMember);
 
         if (fcmList.isEmpty()) {
-            return MessageResult.builder()
-                .messages(new ArrayList<>())
-                .build();
+            return getEmptyMessageResult();
         }
 
         String content = getContent(contentMember, notificationType);
@@ -69,12 +63,10 @@ public class MessageUtil {
 
     public MessageResult createMessage(Member member, NotificationType notificationType,
         List<String> todoContents) {
-        List<Fcm> fcmList = fcmRepository.findByMemberAndIsValidIsTrue(member);
+        List<Fcm> fcmList = getFcmList(member);
 
         if (fcmList.isEmpty()) {
-            return MessageResult.builder()
-                .messages(new ArrayList<>())
-                .build();
+            return getEmptyMessageResult();
         }
 
         String content = getContent(member, notificationType, todoContents);
@@ -84,12 +76,10 @@ public class MessageUtil {
 
     public MessageResult createMessage(Member member, NotificationType notificationType,
         String roleContent) {
-        List<Fcm> fcmList = fcmRepository.findByMemberAndIsValidIsTrue(member);
+        List<Fcm> fcmList = getFcmList(member);
 
         if (fcmList.isEmpty()) {
-            return MessageResult.builder()
-                .messages(new ArrayList<>())
-                .build();
+            return getEmptyMessageResult();
         }
 
         String content = getContent(member, notificationType, roleContent);
@@ -167,5 +157,15 @@ public class MessageUtil {
             .content(content)
             .build();
         return messageResult;
+    }
+
+    private List<Fcm> getFcmList(Member member) {
+        return fcmRepository.findByMemberAndIsValidIsTrue(member);
+    }
+
+    private MessageResult getEmptyMessageResult() {
+        return MessageResult.builder()
+            .messages(new ArrayList<>())
+            .build();
     }
 }
