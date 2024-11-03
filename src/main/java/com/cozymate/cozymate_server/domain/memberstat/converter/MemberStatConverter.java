@@ -212,7 +212,6 @@ public class MemberStatConverter {
                         break;
                 }
             }
-        }
 
         return MemberStatDifferenceResponseDTO.builder()
             .blue(blue)
