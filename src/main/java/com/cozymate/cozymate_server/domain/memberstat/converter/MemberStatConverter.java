@@ -9,12 +9,14 @@ import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuild
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +144,20 @@ public class MemberStatConverter {
             .build();
     }
 
+    public static MemberStatEqualityDetailResponseDTO toEqualityDetailDto(
+        MemberStat memberStat,
+        Integer equality
+    ) {
+        return MemberStatEqualityDetailResponseDTO.builder()
+            .info(MemberStatConverter.toEqualityDto(
+                memberStat, equality
+            ))
+            .detail(MemberStatConverter.toDto(
+                memberStat, memberStat.getMember().getBirthDay().getYear()
+            ))
+            .build();
+    }
+
     public static MemberStatEqualityResponseDTO toEqualityDto(MemberStat memberStat, int equality) {
         return MemberStatEqualityResponseDTO.builder()
             .memberId(memberStat.getMember().getId())
@@ -153,34 +169,35 @@ public class MemberStatConverter {
             .build();
     }
 
-    public static MemberStatDifferenceResponseDTO toMemberStatDifferenceResponseDTO(List<MemberStat> memberStatList) {
+    public static MemberStatDifferenceResponseDTO toMemberStatDifferenceResponseDTO(
+        List<MemberStat> memberStatList) {
 
-            List<String> blue = new ArrayList<>();
-            List<String> red = new ArrayList<>();
-            List<String> white = new ArrayList<>();
+        List<String> blue = new ArrayList<>();
+        List<String> red = new ArrayList<>();
+        List<String> white = new ArrayList<>();
 
-            Map<String, Function<MemberStat, Object>> fieldGetters = createFieldGetters();
+        Map<String, Function<MemberStat, Object>> fieldGetters = createFieldGetters();
 
-            for (String fieldName : fieldGetters.keySet()) {
-                DifferenceStatus status = compareField(memberStatList, fieldGetters.get(fieldName));
-                switch (status) {
-                    case BLUE:
-                        blue.add(fieldName);
-                        break;
-                    case RED:
-                        red.add(fieldName);
-                        break;
-                    case WHITE:
-                        white.add(fieldName);
-                        break;
-                }
+        for (String fieldName : fieldGetters.keySet()) {
+            DifferenceStatus status = compareField(memberStatList, fieldGetters.get(fieldName));
+            switch (status) {
+                case BLUE:
+                    blue.add(fieldName);
+                    break;
+                case RED:
+                    red.add(fieldName);
+                    break;
+                case WHITE:
+                    white.add(fieldName);
+                    break;
             }
+        }
 
-            return MemberStatDifferenceResponseDTO.builder()
-                .blue(blue)
-                .red(red)
-                .white(white)
-                .build();
+        return MemberStatDifferenceResponseDTO.builder()
+            .blue(blue)
+            .red(red)
+            .white(white)
+            .build();
     }
 }
 
