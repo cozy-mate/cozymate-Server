@@ -8,12 +8,12 @@ import jakarta.persistence.Converter;
 public class TodoTypeConverter implements AttributeConverter<TodoType, String> {
 
     @Override
-    public String convertToDatabaseColumn(TodoType attribute) {
-        return attribute != null ? attribute.name() : null;
+    public String convertToDatabaseColumn(TodoType type) {
+        return type != null ? type.name() : null;
     }
 
     @Override
-    public TodoType convertToEntityAttribute(String dbData) {
-        return dbData != null ? TodoType.valueOf(dbData) : null;
+    public TodoType convertToEntityAttribute(String data) {
+        return data != null ? TodoType.valueOf(data) : null;
     }
 }
