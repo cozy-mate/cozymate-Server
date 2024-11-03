@@ -4,8 +4,6 @@ import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupRoomNam
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.converter.FeedConverter;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
-import com.cozymate.cozymate_server.domain.friend.FriendRepository;
-import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.converter.MateConverter;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
@@ -61,7 +59,6 @@ public class RoomCommandService {
     private final PostImageRepository postImageRepository;
     private final RoleRepository roleRepository;
     private final FeedRepository feedRepository;
-    private final FriendRepository friendRepository;
     private final RoomQueryService roomQueryService;
     private final RoomLogCommandService roomLogCommandService;
     private final ApplicationEventPublisher eventPublisher;
@@ -277,62 +274,77 @@ public class RoomCommandService {
         return roomQueryService.getRoomById(roomId, memberId);
     }
 
-    @Deprecated
-    public void sendInvitation(Long roomId, List<Long> inviteeIdList, Long inviterId) {
-        memberRepository.findById(inviterId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        // 초대한 사용자가 방장인지 검증
-        mateRepository.findByRoomIdAndMemberId(roomId, inviterId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
-
-        Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        if (!inviter.getMember().getId().equals(inviterId)) {
-            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
-        }
-
-        // PENDING 상태를 포함해서 room에 연관된 mate수가 maxMateNum을 넘지 않도록 하기 위한 검증 (currentNumOfMate 사용)
-        Long currentNumOfMates = mateRepository.countByRoomId(roomId);
-
-        if (currentNumOfMates + inviteeIdList.size() > room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL);
-        }
-
-        for (Long inviteeId : inviteeIdList) {
-            Member member = memberRepository.findById(inviteeId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-            Optional<Mate> invitee = mateRepository.findByRoomIdAndMemberId(roomId, inviteeId);
-            if (invitee.isPresent()) {
-                if (invitee.get().getEntryStatus() == EntryStatus.PENDING) {
-                    throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
-                } else {
-                    throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
-                }
-            }
-
-            if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE,
-                RoomStatus.WAITING, EntryStatus.JOINED)) {
-                throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-            }
-
-            // 친구가 아닌 경우 예외 발생
-            boolean isFriend = friendRepository.findBySenderIdAndReceiverIdAndStatus(
-                inviteeId, inviterId, FriendStatus.ACCEPT).isPresent()
-                || friendRepository.findBySenderIdAndReceiverIdAndStatus(
-                inviterId, inviteeId, FriendStatus.ACCEPT).isPresent();
-            if (!isFriend) {
-                throw new GeneralException(ErrorStatus._NOT_FRIEND);
-            }
-            Mate mate = MateConverter.toInvitation(room, member, false);
-            mateRepository.save(mate);
-        }
-
-    }
+//    public void sendInvitation(Long inviteeId, Long inviterId) {
+//        memberRepository.findById(inviterId)
+//            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+//
+////        Room room = roomRepository.findById(roomId)
+////            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+////
+////        // 초대한 사용자가 방장인지 검증
+////        mateRepository.findByRoomIdAndMemberId(roomId, inviterId)
+////            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+////
+////
+////        Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
+////            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+////        if (!inviter.getMember().getId().equals(inviterId)) {
+////            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+////        }
+//
+//        Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).getRoomId())
+//            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+//
+////        Long inviterRoomId = roomQueryService.getExistRoom(inviterId).getRoomId();
+////        if (inviterRoomId == 0) {
+////            throw new GeneralException(ErrorStatus._NOT_IN_ANY_ROOM); // 초대자가 방에 속해 있지 않은 경우 예외 처리
+////        }
+////
+////        Room room = roomRepository.findById(inviterRoomId)
+////            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+//
+//
+//        // 이미 참가한 방인지 검사
+//        Optional<Mate> isExistingMate = mateRepository.findByRoomIdAndMemberId(room.getId(), inviteeId);
+//
+//        if (isExistingMate.isPresent()) {
+//            Mate exitingMate = isExistingMate.get();
+//            if (exitingMate.getEntryStatus() == EntryStatus.JOINED || exitingMate.getEntryStatus() == EntryStatus.PENDING) {
+//                throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+//            }
+//        }
+//
+//        // 초대하려는 사용자가 속한 방이 있는지 검사
+//        RoomExistResponse invitee_existingRoom = roomQueryService.getExistRoom(inviteeId);
+//        if (invitee_existingRoom != null && invitee_existingRoom.getRoomId() != 0) {
+//            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
+//        }
+//
+//
+//        // 방 정원 검사
+//        if (mateRepository.countActiveMatesByRoomId(room.getId()) >= room.getMaxMateNum()) {
+//            throw new GeneralException(ErrorStatus._ROOM_FULL);
+//        }
+//
+//            Optional<Mate> invitee = mateRepository.findByRoomIdAndMemberId(room.getId(), inviteeId);
+//            if (invitee.isPresent()) {
+//                if (invitee.get().getEntryStatus() == EntryStatus.PENDING) {
+//                    throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
+//                } else {
+//                    throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+//                }
+//            }
+//
+//            if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE,
+//                RoomStatus.WAITING, EntryStatus.JOINED)) {
+//                throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
+//            }
+//
+//            Mate mate = MateConverter.toInvitation(room, member, false);
+//            mateRepository.save(mate);
+//        }
+//
+//    }
 
     @Deprecated
     public void respondToInviteRequest(Long roomId, Long inviteeId, boolean accept) {
@@ -372,6 +384,27 @@ public class RoomCommandService {
         roomRepository.save(room);
     }
 
+    public void forceQuitRoom(Long roomId, Long targetMemberId, Long managerId) {
+        // 방장이 본인을 퇴장시킬 수 없음
+        if (managerId.equals(targetMemberId)) {
+            throw new GeneralException(ErrorStatus._CANNOT_SELF_FORCED_QUIT);
+        }
+        memberRepository.findById(managerId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        Mate managerMate = mateRepository.findByRoomIdAndMemberId(roomId, managerId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        // 방장이 아니면 예외 발생
+        if (!managerMate.isRoomManager()) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
+        quitRoom(roomId, targetMemberId);
+    }
+
     // 초대코드 생성 부분
     private String generateUniqueUppercaseKey() {
         String randomKey;
@@ -394,6 +427,5 @@ public class RoomCommandService {
         }
         return key.toString();
     }
-
 
 }

@@ -154,26 +154,25 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(roomId, memberDetails.getMember().getId())));
     }
 
-    @PostMapping("/{roomId}/invite")
-    @Deprecated
-    @Operation(summary = "[바니] 선택한 코지메이트 방에 초대요청 보내기", description = "해당하는 roomId에 선택한 코지메이트를 초대합니다.")
-    @SwaggerApiError({
-        ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
-        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MANAGER,
-        ErrorStatus._ROOM_FULL,
-        ErrorStatus._MEMBER_NOT_FOUND,
-        ErrorStatus._INVITATION_ALREADY_SENT,
-        ErrorStatus._ROOM_ALREADY_JOINED,
-        ErrorStatus._ROOM_ALREADY_EXISTS,
-        ErrorStatus._NOT_FRIEND
-    })
-    public ResponseEntity<ApiResponse<String>> inviteCozymate(@PathVariable Long roomId,
-        @RequestBody List<Long> inviteeIdList, @AuthenticationPrincipal MemberDetails inviterDetails) {
-        roomCommandService.sendInvitation(roomId, inviteeIdList, inviterDetails.getMember().getId());
-        return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
-    }
+//    @PostMapping("/{roomId}/invite")
+//    @Operation(summary = "[바니] 내방으로 코지메이트 초대하기", description = "해당하는 roomId에 선택한 코지메이트를 초대합니다.")
+//    @SwaggerApiError({
+//        ErrorStatus._ROOM_NOT_FOUND,
+//        ErrorStatus._NOT_ROOM_MATE,
+//        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
+//        ErrorStatus._NOT_ROOM_MANAGER,
+//        ErrorStatus._ROOM_FULL,
+//        ErrorStatus._MEMBER_NOT_FOUND,
+//        ErrorStatus._INVITATION_ALREADY_SENT,
+//        ErrorStatus._ROOM_ALREADY_JOINED,
+//        ErrorStatus._ROOM_ALREADY_EXISTS,
+//        ErrorStatus._NOT_FRIEND
+//    })
+//    public ResponseEntity<ApiResponse<String>> inviteCozymate(@PathVariable Long roomId,
+//        @RequestBody Long inviteeId, @AuthenticationPrincipal MemberDetails inviterDetails) {
+//        roomCommandService.sendInvitation(inviteeId, inviterDetails.getMember().getId());
+//        return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
+//    }
 
     @GetMapping ("/request-invites")
     @Deprecated
@@ -215,7 +214,7 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
-    @PatchMapping("/rooms/{roomId}")
+    @PatchMapping("/{roomId}")
     @Operation(summary = "[바니] 방 정보 수정", description = "해당 roomId의 정보를 수정합니다. (초대방은 방 이름만, 공개방은 방이름/해시태그 수정)")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
@@ -231,5 +230,23 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
 
     }
+
+    @PatchMapping("{roomId}/force-quit/{memberId}")
+    @Operation(summary = "[바니] 방에서 강제 퇴장 시키기", description = "방장이 해당 roomId의 특정 룸메이트를 강제퇴장 시킵니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MATE,
+        ErrorStatus._NOT_ROOM_MANAGER,
+        ErrorStatus._CANNOT_SELF_FORCED_QUIT
+    })
+    public ResponseEntity<ApiResponse<String>> forceQuitRoom(
+        @PathVariable Long roomId, @PathVariable Long memberId,
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        roomCommandService.forceQuitRoom(roomId, memberId, memberDetails.getMember().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess("강제 퇴장 완료"));
+    }
+
+
 
 }
