@@ -232,4 +232,13 @@ public class RoomController {
 
     }
 
+    @GetMapping("/list")
+    @Operation(summary = "[포비] 방 추천 리스트 조회", description = "방 추천 리스트를 조건별로 조회가 가능합니다.")
+    @SwaggerApiError({
+
+    })
+    public ResponseEntity<ApiResponse<?>> getRoomList(@AuthenticationPrincipal MemberDetails memberDetails){
+        return null;
+    }
+
 }

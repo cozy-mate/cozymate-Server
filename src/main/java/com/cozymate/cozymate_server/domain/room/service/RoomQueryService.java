@@ -20,6 +20,7 @@ import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomRecommendationResponseList;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
@@ -195,7 +196,8 @@ public class RoomQueryService {
 
     }
 
-
-
+    public RoomRecommendationResponseList getRecommendationList(Member member) {
+        return null;
+    }
 
 }
