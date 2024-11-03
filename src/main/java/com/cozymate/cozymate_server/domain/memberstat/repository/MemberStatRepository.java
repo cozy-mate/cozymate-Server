@@ -18,6 +18,8 @@ public interface MemberStatRepository extends
 
     Optional<MemberStat> findByMemberId(Long memberId);
 
+    Boolean existsByMemberId(Long memberId);
+
     @Query("SELECT ms, ms.member.id FROM MemberStat ms WHERE ms.member.id IN :memberIds")
     List<Tuple> findMemberStatsAndMemberIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
 
@@ -26,4 +28,6 @@ public interface MemberStatRepository extends
     List<MemberStat> findAllWithMember();
 
     List<MemberStat> findByMember_GenderAndMember_University_Id(Gender gender, Long universityId);
+
+
 }

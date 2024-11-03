@@ -109,6 +109,28 @@ public class MemberStatResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class MemberStatPreferenceResponseDTO {
+        private Long memberId;
+        private String memberNickName;
+        private Map<String,Object> preferenceStats;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberStatRandomListResponseDTO {
+        List<MemberStatPreferenceResponseDTO> memberList;
+        // 누적 ID List
+        List<Long> seenMemberStatIds;
+
+    }
+
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MemberStatEqualityDetailResponseDTO {
 
         private MemberStatEqualityResponseDTO info;

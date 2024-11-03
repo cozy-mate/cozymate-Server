@@ -10,7 +10,9 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceRe
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
@@ -202,6 +204,23 @@ public class MemberStatConverter {
                 .red(red)
                 .white(white)
                 .build();
+    }
+
+    public static MemberStatPreferenceResponseDTO toPreferenceResponseDTO(MemberStat stat, Map<String,Object> preferences) {
+        return MemberStatPreferenceResponseDTO.builder()
+            .memberId(stat.getMember().getId())
+            .memberNickName(stat.getMember().getNickname())
+            .preferenceStats(preferences)
+            .build();
+    }
+
+    public static MemberStatRandomListResponseDTO toRandomListResponseDTO(
+        List<MemberStatPreferenceResponseDTO> memberList, List<Long> seenMemberStatIds
+    ) {
+        return MemberStatRandomListResponseDTO.builder()
+            .memberList(memberList)
+            .seenMemberStatIds(seenMemberStatIds)
+            .build();
     }
 }
 
