@@ -90,7 +90,7 @@ public class RoleController {
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long roleId
     ) {
-        roleCommandService.deleteRole(memberDetails.getMember(), roleId);
+        roleCommandService.deleteRole(memberDetails.getMember(), roomId, roleId);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 삭제 완료"));
     }
 
@@ -113,7 +113,7 @@ public class RoleController {
         @PathVariable @Positive Long roleId,
         @RequestBody @Valid RoleRequestDto.UpdateRoleRequestDto requestDto
     ) {
-        roleCommandService.updateRole(memberDetails.getMember(), roleId, requestDto);
+        roleCommandService.updateRole(memberDetails.getMember(), roomId, roleId, requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 수정 완료"));
     }
 

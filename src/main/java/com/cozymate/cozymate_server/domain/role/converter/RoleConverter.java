@@ -7,6 +7,8 @@ import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleListDeta
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class RoleConverter {
 
@@ -42,16 +44,12 @@ public class RoleConverter {
         return dayList;
     }
 
-    public static RoleDetailResponseDto toRoleDetailResponseDto(Role role, List<Mate> mateList) {
+    public static RoleDetailResponseDto toRoleDetailResponseDto(Role role,
+        Map<Long, String> mateList) {
         return RoleDetailResponseDto.builder()
             .id(role.getId())
             .mateNameList(role.getAssignedMateIdList().stream()
-                .map(mateId -> mateList.stream()
-                    .filter(mate -> mate.getId().equals(mateId))
-                    .findFirst()
-                    .orElseThrow()
-                    .getMember().getNickname())
-                .toList())
+                .map(mateList::get).filter(Objects::nonNull).toList())
             .content(role.getContent())
             .repeatDayList(
                 convertBitmaskToDayList(role.getRepeatDays()).stream()

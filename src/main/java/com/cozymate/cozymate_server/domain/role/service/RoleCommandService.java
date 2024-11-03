@@ -37,6 +37,7 @@ public class RoleCommandService {
         // 해당 방의 mate가 맞는지 확인
         Mate mate = getMate(member.getId(), roomId);
 
+        // TODO role max 개수 제한 추가
         int repeatDayBitmast = getDayBitmask(requestDto.getRepeatDayList());
 
         roleRepository.save(
@@ -50,12 +51,11 @@ public class RoleCommandService {
      * @param member 사용자 본인것만 삭제가능
      * @param roleId Role Id
      */
-    public void deleteRole(Member member, Long roleId) {
-
-        // role 검색
+    public void deleteRole(Member member, Long roomId, Long roleId) {
         Role role = getRole(roleId);
+        Mate mate = getMate(member.getId(), roomId);
 
-        checkUpdatePermission(role, member);
+        checkUpdatePermission(role, mate);
 
         roleRepository.delete(role);
     }
@@ -67,11 +67,11 @@ public class RoleCommandService {
      * @param roleId     Role Id
      * @param requestDto 수정할 Role 데이터
      */
-    public void updateRole(Member member, Long roleId, UpdateRoleRequestDto requestDto) {
-        // role 검색
+    public void updateRole(Member member, Long roomId, Long roleId, UpdateRoleRequestDto requestDto) {
         Role role = getRole(roleId);
+        Mate mate = getMate(member.getId(), roomId);
 
-        checkUpdatePermission(role, member);
+        checkUpdatePermission(role, mate);
 
         // role 수정
         role.updateEntity(requestDto.getMateIdList(), requestDto.getTitle(),
@@ -117,10 +117,10 @@ public class RoleCommandService {
      * Role 수정 가능한지 권한 확인
      *
      * @param role
-     * @param member
+     * @param mate
      */
-    private void checkUpdatePermission(Role role, Member member) {
-        if (!role.getAssignedMateIdList().contains(member.getId())) {
+    private void checkUpdatePermission(Role role, Mate mate) {
+        if (!role.getAssignedMateIdList().contains(mate.getId())) {
             throw new GeneralException(ErrorStatus._ROLE_NOT_VALID);
         }
     }

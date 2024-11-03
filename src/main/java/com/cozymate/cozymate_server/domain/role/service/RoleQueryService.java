@@ -11,7 +11,9 @@ import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleListDeta
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,9 @@ public class RoleQueryService {
         List<Mate> mateList = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
             EntryStatus.JOINED);
 
+        Map<Long, String> mateNameMap = new HashMap<>();
+        mateList.forEach(mate -> mateNameMap.put(mate.getId(), mate.getMember().getNickname()));
+
         Mate currentMate = mateList.stream()
             .filter(mate -> Objects.equals(mate.getMember().getId(), member.getId())).findFirst()
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
@@ -38,7 +43,7 @@ public class RoleQueryService {
 
         List<RoleDetailResponseDto> roleResponseDto = roleList.stream()
             .map(role ->
-                RoleConverter.toRoleDetailResponseDto(role, mateList)
+                RoleConverter.toRoleDetailResponseDto(role, mateNameMap)
             ).toList();
 
         return RoleListDetailResponseDto.builder()
