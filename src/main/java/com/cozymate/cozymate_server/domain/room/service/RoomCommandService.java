@@ -271,7 +271,7 @@ public class RoomCommandService {
             roomHashtagCommandService.deleteRoomHashtags(room);
             roomHashtagCommandService.updateRoomHashtags(room, request.getHashtags());
         }
-        room.updateRoomName(request.getName());
+        room.updateRoom(request.getName(), request.getProfileImage());
         roomRepository.save(room);
 
         return roomQueryService.getRoomById(roomId, memberId);
