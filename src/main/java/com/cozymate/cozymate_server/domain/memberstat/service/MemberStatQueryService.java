@@ -66,13 +66,13 @@ public class MemberStatQueryService {
             );
 
         return MemberStatConverter.toDto(
-            memberStat,birthYear
+            memberStat, birthYear
         );
     }
 
     public MemberStatDetailResponseDTO getMemberStatWithId(Member viewer, Long memberId) {
 
-        Member member = memberRepository.findById(memberId). orElseThrow(
+        Member member = memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
         );
 
@@ -116,10 +116,11 @@ public class MemberStatQueryService {
 
         // List<MemberStat> -> Map<Member,MemberStat>으로 변경,
         // LazyFetch로 인해서 N+1 문제 발생해, 쿼리를 한번에 처리하기로 결정.
-        Map<Member, MemberStat> filteredResult = memberStatRepository.getFilteredMemberStat(filterList,
+        Map<Member, MemberStat> filteredResult = memberStatRepository.getFilteredMemberStat(
+            filterList,
             criteriaMemberStat);
 
-        if (filteredResult.isEmpty()){
+        if (filteredResult.isEmpty()) {
             return createEmptyPageResponse(pageable);
         }
 
@@ -132,13 +133,12 @@ public class MemberStatQueryService {
 //            filteredResult.stream().map(memberStat -> memberStat.getMember().getId()).toList()
 //        );
 
-
         List<Long> memberIds = filteredResult.keySet().stream()
             .map(Member::getId)
             .toList();
 
-
-        Map<Long,Integer> memberStatEqualities = memberStatEqualityQueryService.getEquality(member.getId(), memberIds);
+        Map<Long, Integer> memberStatEqualities = memberStatEqualityQueryService.getEquality(
+            member.getId(), memberIds);
 
         // 이 부분 이후는 DB 안 건들고, Application 내에서 계산.
         // 쿼리는 필터링은 한번,
@@ -155,11 +155,13 @@ public class MemberStatQueryService {
 
     }
 
-    public PageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member, HashMap<String, List<?>> filterMap, Pageable pageable, boolean needsDetail) {
+    public PageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member,
+        HashMap<String, List<?>> filterMap, Pageable pageable, boolean needsDetail) {
 
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
-        Map<Member,MemberStat> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(filterMap,
+        Map<Member, MemberStat> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(
+            filterMap,
             criteriaMemberStat);
 
         if (filteredResult.isEmpty()) {
@@ -170,7 +172,8 @@ public class MemberStatQueryService {
             .map(Member::getId)
             .toList();
 
-        Map<Long,Integer> memberStatEqualities = memberStatEqualityQueryService.getEquality(member.getId(), memberIds);
+        Map<Long, Integer> memberStatEqualities = memberStatEqualityQueryService.getEquality(
+            member.getId(), memberIds);
 
         if (needsDetail) {
             List<MemberStatEqualityDetailResponseDTO> result =
@@ -184,11 +187,13 @@ public class MemberStatQueryService {
 
     }
 
-    public Integer getNumOfSearchedAndFilteredMemberStatList(Member member, HashMap<String, List<?>> filterMap) {
+    public Integer getNumOfSearchedAndFilteredMemberStatList(Member member,
+        HashMap<String, List<?>> filterMap) {
         // 여기서 드는 의문.. 쿼리 개수 vs 쿼리 무게
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
-        Map<Member,MemberStat> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(filterMap,
+        Map<Member, MemberStat> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(
+            filterMap,
             criteriaMemberStat);
 
         return filteredResult.size();
@@ -196,10 +201,12 @@ public class MemberStatQueryService {
 
     }
 
-    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member, MemberStatSeenListDTO currentMemberStatIds) {
+    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member,
+        MemberStatSeenListDTO currentMemberStatIds) {
 
         // 기준 멤버의 선호도 필드 목록 가져오기
-        List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(member.getId());
+        List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
+            member.getId());
 
         List<Long> seenMemberStatIds = currentMemberStatIds.getSeenMemberStatIds();
         // 같은 성별과 대학의 멤버 중, 자신과 이미 본 멤버를 제외
@@ -219,34 +226,32 @@ public class MemberStatQueryService {
         // 선택된 멤버들에 대해 MemberStatPreferenceResponseDTO 리스트 생성
         List<MemberStatPreferenceResponseDTO> preferenceResponseList = randomMemberStats.stream()
             .map(stat -> {
-                Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(stat, criteriaPreferences);
-                MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO = MemberStatPreferenceResponseDTO.builder()
-                    .memberId(stat.getMember().getId())
-                    .memberNickName(stat.getMember().getNickname())
-                    .preferenceStats(preferences)
-                    .build();
+                Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(stat,
+                    criteriaPreferences);
+                MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO = MemberStatConverter.toPreferenceResponseDTO(
+                    stat,
+                    preferences
+                );
 
                 // 누적 ID 리스트에 새로 선택된 멤버 ID 추가
                 seenMemberStatIds.add(stat.getId());
 
                 return memberStatPreferenceResponseDTO;
             })
-            .collect(Collectors.toList());
+            .toList();
 
-        // MemberStatRandomListResponseDTO 생성하여 반환
-        return MemberStatRandomListResponseDTO.builder()
-            .memberList(preferenceResponseList) // 리스트 형식으로 추가
-            .seenMemberStatIds(new ArrayList<>(seenMemberStatIds)) // 누적 리스트 포함
-            .build();
+        return MemberStatConverter.toRandomListResponseDTO(
+            preferenceResponseList,
+            seenMemberStatIds);
+
     }
-
-
 
 
     private List<MemberStatEqualityDetailResponseDTO> createDetailedResponse(
         Map<Member, MemberStat> memberStats, Map<Long, Integer> memberStatEqualities) {
 
-        List<MemberStatEqualityResponseDTO> memberStatEqualityResponseDTOList = createEqualityResponse(memberStats,memberStatEqualities);
+        List<MemberStatEqualityResponseDTO> memberStatEqualityResponseDTOList = createEqualityResponse(
+            memberStats, memberStatEqualities);
 
         return memberStatEqualityResponseDTOList.stream()
             .map(equalityResponse -> {
