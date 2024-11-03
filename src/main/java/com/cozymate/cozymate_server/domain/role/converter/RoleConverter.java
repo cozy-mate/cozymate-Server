@@ -4,17 +4,16 @@ import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleDetailResponseDto;
 import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleListDetailResponseDto;
-import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleMateDetailResponseDto;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class RoleConverter {
 
     private static final int ALL_DAYS_BITMASK = 127;
 
-    public static Role toEntity(Mate mate, List<Long> assignedMateIdList, String content, int repeatDays) {
+    public static Role toEntity(Mate mate, List<Long> assignedMateIdList, String content,
+        int repeatDays) {
         return Role.builder()
             .mate(mate)
             .assignedMateIdList(assignedMateIdList)
@@ -43,9 +42,16 @@ public class RoleConverter {
         return dayList;
     }
 
-    public static RoleDetailResponseDto toRoleDetailResponseDto(Role role) {
+    public static RoleDetailResponseDto toRoleDetailResponseDto(Role role, List<Mate> mateList) {
         return RoleDetailResponseDto.builder()
             .id(role.getId())
+            .mateNameList(role.getAssignedMateIdList().stream()
+                .map(mateId -> mateList.stream()
+                    .filter(mate -> mate.getId().equals(mateId))
+                    .findFirst()
+                    .orElseThrow()
+                    .getMember().getNickname())
+                .toList())
             .content(role.getContent())
             .repeatDayList(
                 convertBitmaskToDayList(role.getRepeatDays()).stream()
@@ -56,22 +62,10 @@ public class RoleConverter {
             .build();
     }
 
-    public static RoleMateDetailResponseDto toRoleMateDetailResponseDto(
-        int persona,
-        List<RoleDetailResponseDto> mateRoleList) {
-        return RoleMateDetailResponseDto.builder()
-            .persona(persona)
-            .mateRoleList(mateRoleList)
-            .build();
-    }
-
-
     public static RoleListDetailResponseDto toRoleListDetailResponseDto(
-        RoleMateDetailResponseDto myRoleList,
-        Map<String, RoleMateDetailResponseDto> otherRoleList) {
+        List<RoleDetailResponseDto> roleList) {
         return RoleListDetailResponseDto.builder()
-            .myRoleList(myRoleList)
-            .otherRoleList(otherRoleList)
+            .roleList(roleList)
             .build();
     }
 

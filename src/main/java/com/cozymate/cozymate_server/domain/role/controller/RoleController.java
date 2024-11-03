@@ -84,7 +84,7 @@ public class RoleController {
      */
     @DeleteMapping("/{roomId}/roles/{roleId}")
     @Operation(summary = "[무빗] 특정 role 삭제", description = "본인의 룸메라면 Role을 삭제할 수 있습니다.")
-    @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_MATE_MISMATCH})
+    @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_NOT_VALID})
     public ResponseEntity<ApiResponse<String>> deleteRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
@@ -106,7 +106,7 @@ public class RoleController {
      */
     @PutMapping("/{roomId}/roles/{roleId}")
     @Operation(summary = "[무빗] 특정 role 수정", description = "본인 Role을 수정할 수 있습니다.")
-    @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_MATE_MISMATCH})
+    @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_NOT_VALID})
     public ResponseEntity<ApiResponse<String>> updateRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,

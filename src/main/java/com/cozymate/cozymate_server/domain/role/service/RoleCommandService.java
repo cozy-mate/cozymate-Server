@@ -113,7 +113,12 @@ public class RoleCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROLE_NOT_FOUND));
     }
 
-    // TODO 할당된 사람들 모두 삭제 가능하게
+    /**
+     * Role 수정 가능한지 권한 확인
+     *
+     * @param role
+     * @param member
+     */
     private void checkUpdatePermission(Role role, Member member) {
         if (!role.getAssignedMateIdList().contains(member.getId())) {
             throw new GeneralException(ErrorStatus._ROLE_NOT_VALID);
