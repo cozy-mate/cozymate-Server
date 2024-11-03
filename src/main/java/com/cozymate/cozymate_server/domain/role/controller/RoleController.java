@@ -18,9 +18,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -97,13 +97,14 @@ public class RoleController {
 
     /**
      * 특정 role 수정
+     *
      * @param memberDetails 사용자
-     * @param roomId 사용안함
-     * @param roleId 수정할 role Id
-     * @param requestDto 수정할 role 데이터
+     * @param roomId        사용안함
+     * @param roleId        수정할 role Id
+     * @param requestDto    수정할 role 데이터
      * @return 수정 완료 메시지
      */
-    @PatchMapping("/{roomId}/roles/{roleId}")
+    @PutMapping("/{roomId}/roles/{roleId}")
     @Operation(summary = "[무빗] 특정 role 수정", description = "본인 Role을 수정할 수 있습니다.")
     @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_MATE_MISMATCH})
     public ResponseEntity<ApiResponse<String>> updateRole(
