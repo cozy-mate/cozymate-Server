@@ -160,7 +160,7 @@ public class RoomCommandService {
         }
 
         // Room의 Mate들을 찾아온다
-        List<Mate> findRoomMates = mateRepository.findByRoom(room);
+        List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room);
 
         List<Member> memberList = findRoomMates.stream()
             .map(Mate::getMember)
@@ -171,7 +171,7 @@ public class RoomCommandService {
         // 알림을 받는 대상은 방에 있는 메이트들이다.
         // 넘겨야 할 파라미터 = member, room, memberList(알림 받을 대상 멤버 리스트), NotificationType
         eventPublisher.publishEvent(GroupRoomNameWithOutMeTargetDto.create(member, memberList, room,
-            NotificationType.JOIN_ROOM));
+            NotificationType.ROOM_IN));
 
     }
 
@@ -201,7 +201,7 @@ public class RoomCommandService {
     }
 
     public void quitRoom(Long roomId, Long memberId) {
-        memberRepository.findById(memberId)
+        Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Room room = roomRepository.findById(roomId)
@@ -224,7 +224,22 @@ public class RoomCommandService {
             // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
             deleteRoomDatas(roomId);
             roomRepository.delete(room);
+            return;
         }
+
+        // Room의 Mate들을 찾아온다
+        List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room);
+
+        List<Member> memberList = findRoomMates.stream()
+            .map(Mate::getMember)
+            .filter(findMember -> !findMember.getId().equals(member.getId()))
+            .toList();
+
+        // 알림 내용에는 현재 코드 상 member의 이름이 담겨야하고, 현재 코드 상의 room의 이름도 담긴다
+        // 알림을 받는 대상은 방에 있는 메이트들이다.
+        // 넘겨야 할 파라미터 = member, room, memberList(알림 받을 대상 멤버 리스트), NotificationType
+        eventPublisher.publishEvent(GroupRoomNameWithOutMeTargetDto.create(member, memberList, room,
+            NotificationType.ROOM_OUT));
     }
 
     private void deleteRoomDatas(Long roomId) {
