@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 public class NotificationLogConverter {
 
     public static NotificationLogResponseDto toResponseDto(String content, LocalDateTime createdAt,
-        String category) {
+        String category, Long targetId) {
         Duration duration = Duration.between(createdAt, LocalDateTime.now());
         long minutes = duration.toMinutes();
         long hours = duration.toHours();
@@ -29,6 +29,7 @@ public class NotificationLogConverter {
             .content(content)
             .createdAt(formattedCreatedAt)
             .category(category)
+            .targetId(targetId)
             .build();
     }
 }

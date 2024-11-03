@@ -11,6 +11,7 @@ public class FcmConverter {
             .id(member.getClientId())
             .token(fcmRequestDto.getToken())
             .member(member)
+            .isValid(true)
             .build();
     }
 }

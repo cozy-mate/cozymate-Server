@@ -22,12 +22,14 @@ public class Fcm extends BaseTimeEntity {
 
     @Id
     @Column(name = "device_id")
-    String id;
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    Member member;
+    private Member member;
 
-    String token;
+    private String token;
+
+    private boolean isValid;
 
     public void updateToken(String token) {
         this.token = token;

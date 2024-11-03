@@ -35,4 +35,6 @@ public class NotificationLog extends BaseTimeEntity {
     private NotificationCategory category;
 
     private String content;
+
+    private Long targetId;
 }

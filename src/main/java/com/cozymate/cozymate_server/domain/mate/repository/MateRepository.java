@@ -54,6 +54,9 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     List<Mate> findByRoom(Room room);
 
+    @Query("select m from Mate m join fetch m.member where m.room = :room")
+    List<Mate> findFetchMemberByRoom(@Param("room") Room room);
+
     Optional<Mate> findByMember(Member member);
 
     @Query("select m from Mate m join fetch m.member")
@@ -65,5 +68,4 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findByIdIn(List<Long> memberIdList);
 
     void deleteByRoomIdAndMemberId(Long roomId, Long memberId);
-
 }
