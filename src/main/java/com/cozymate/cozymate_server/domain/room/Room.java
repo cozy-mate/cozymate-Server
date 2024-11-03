@@ -77,8 +77,9 @@ public class Room extends BaseTimeEntity {
         }
     }
 
-    public void updateRoomName(String newRoomName) {
+    public void updateRoom(String newRoomName, Integer newProfileImage) {
         this.name = newRoomName;
+        this.profileImage = newProfileImage;
     }
 
 }
