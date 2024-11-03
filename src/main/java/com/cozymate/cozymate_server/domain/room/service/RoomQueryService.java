@@ -21,6 +21,7 @@ import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateRe
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
+import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -55,8 +56,15 @@ public class RoomQueryService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate creatingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+        if (room.getRoomType()== RoomType.PRIVATE) {
+            mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+        }
+
+        Mate creatingMate = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+
+        Boolean isRoomManager = creatingMate.getMember().getId().equals(memberId);
 
         List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED);
 
@@ -82,7 +90,8 @@ public class RoomQueryService {
 
         return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),
             mates.isEmpty() ? new ArrayList<>() : mates,
-            creatingMate.isRoomManager(),
+            creatingMate.getMember().getId(),
+            isRoomManager,
             room.getMaxMateNum(),
             room.getNumOfArrival(),
             room.getRoomType(),
