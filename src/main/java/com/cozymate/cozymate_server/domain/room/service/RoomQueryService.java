@@ -74,7 +74,6 @@ public class RoomQueryService {
                 .collect(Collectors.toList()));
 
         Integer roomEquality = getCalculateRoomEquality(memberId, equalityMap);
-
         List<CozymateInfoResponse> mates = joinedMates.stream()
             .map(mate -> {
                 Integer mateEquality = equalityMap.get(mate.getMember().getId());

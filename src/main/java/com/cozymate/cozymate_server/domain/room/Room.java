@@ -9,6 +9,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,13 +52,15 @@ public class Room extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private RoomType roomType;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomHashtag> roomHashtags;
 
     // 화면상에서 베스트 룸메이트를 연관 시킬 필요가 없어보여서 이름만 저장하도록 했습니다.
     private String bestMateName;
 
     private int numOfArrival = 1;
+
+
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
     private Feed feed;

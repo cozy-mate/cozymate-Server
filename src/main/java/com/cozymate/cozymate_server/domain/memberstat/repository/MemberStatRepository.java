@@ -20,7 +20,7 @@ public interface MemberStatRepository extends
 
     Boolean existsByMemberId(Long memberId);
 
-    @Query("SELECT ms, ms.member.id FROM MemberStat ms WHERE ms.member.id IN :memberIds")
+    @Query("SELECT ms, ms.id FROM MemberStat ms WHERE ms.member.id IN :memberIds")
     List<Tuple> findMemberStatsAndMemberIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
 
     //Eager Fetch가 필요한 경우
@@ -29,5 +29,10 @@ public interface MemberStatRepository extends
 
     List<MemberStat> findByMember_GenderAndMember_University_Id(Gender gender, Long universityId);
 
+    @Query("SELECT m.wakeUpTime AS wakeUpTime, m.smoking AS smoking, m.cleaningFrequency AS cleaningFrequency, m.personality AS personality FROM MemberStat m WHERE m.member.id IN :memberIds")
+    List<Tuple> findMemberStatsAndMemberIdsByMemberIdsWithAlias(@Param("memberIds") Set<Long> memberIds);
+
+    @Query("SELECT m.wakeUpTime AS wakeUpTime, m.smoking AS smoking, m.cleaningFrequency AS cleaningFrequency, m.personality AS personality FROM MemberStat m WHERE m.member.id = :memberId")
+    Tuple findMemberStatAndMemberIdByMemberId(Long memberId);
 
 }
