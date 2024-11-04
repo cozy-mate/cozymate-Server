@@ -248,5 +248,4 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
 
     }
-
 }
