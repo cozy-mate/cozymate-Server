@@ -37,6 +37,7 @@ public class RoomRecommendService {
     private final MemberStatEqualityRepository memberStatEqualityRepository;
     private final MemberStatPreferenceRepository memberStatPreferenceRepository;
 
+    // TODO: 대규모 리팩토링 필요
     public RoomRecommendationResponseList getRecommendationList(Member member, int size) {
 
         List<Room> roomList = roomRepository.findAllByRoomType(RoomType.PUBLIC);
