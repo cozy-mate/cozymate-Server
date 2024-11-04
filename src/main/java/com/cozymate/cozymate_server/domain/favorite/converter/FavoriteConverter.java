@@ -5,7 +5,7 @@ import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteMemberResponse;
 import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteRoomResponse;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
 import java.util.List;
 
@@ -19,16 +19,12 @@ public class FavoriteConverter {
             .build();
     }
 
-    public static FavoriteMemberResponse toFavoriteMemberResponse(Long favoriteId,
-        MemberStat favoriteMemberStat, Integer equality, Member favoriteMember) {
+    public static FavoriteMemberResponse toFavoriteMemberResponse(Long favoriteId, Integer equality,
+        MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO) {
         return FavoriteMemberResponse.builder()
             .favoriteId(favoriteId)
-            .nickname(favoriteMember.getNickname())
             .equality(equality)
-            .wakeUpTime(favoriteMemberStat.getWakeUpTime())
-            .sleepingTime(favoriteMemberStat.getSleepingTime())
-            .noiseSensitivity(favoriteMemberStat.getNoiseSensitivity())
-            .cleanSensitivity(favoriteMemberStat.getCleanSensitivity())
+            .memberStatPreferenceResponseDTO(memberStatPreferenceResponseDTO)
             .build();
     }
 

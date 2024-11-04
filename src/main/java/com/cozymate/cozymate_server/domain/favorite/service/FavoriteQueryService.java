@@ -11,7 +11,10 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
+import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
@@ -34,6 +37,7 @@ public class FavoriteQueryService {
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final RoomHashtagRepository roomHashtagRepository;
+    private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
     public List<FavoriteMemberResponse> getFavoriteMemberList(Member member) {
         List<Favorite> favoriteList = favoriteRepository.findByMemberAndFavoriteType(
@@ -53,12 +57,20 @@ public class FavoriteQueryService {
         Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(member.getId(),
             favoriteMemberIdList);
 
+        List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
+            member.getId());
+
         List<FavoriteMemberResponse> favoriteMemberResponseList = favoriteMemberList.stream()
             .map(favoriteMember -> {
-                return FavoriteConverter.toFavoriteMemberResponse(memberIdFavoriteIdMap.get(favoriteMember.getId()),
-                    favoriteMember.getMemberStat(), equalityMap.get(favoriteMember.getId()), favoriteMember);
-            })
-            .toList();
+                Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(
+                    favoriteMember.getMemberStat(), criteriaPreferences);
+
+                return FavoriteConverter.toFavoriteMemberResponse(
+                    memberIdFavoriteIdMap.get(favoriteMember.getId()),
+                    equalityMap.get(favoriteMember.getId()),
+                    MemberStatConverter.toPreferenceResponseDTO(favoriteMember.getMemberStat(),
+                        preferences));
+            }).toList();
 
         return favoriteMemberResponseList;
     }

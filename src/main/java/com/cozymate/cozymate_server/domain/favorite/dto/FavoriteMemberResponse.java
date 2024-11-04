@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.favorite.dto;
 
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,10 +9,6 @@ import lombok.Getter;
 public class FavoriteMemberResponse {
 
     private Long favoriteId;
-    private String nickname;
     private Integer equality;
-    private Integer wakeUpTime;
-    private Integer sleepingTime;
-    private Integer noiseSensitivity;
-    private Integer cleanSensitivity;
+    private MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO;
 }
