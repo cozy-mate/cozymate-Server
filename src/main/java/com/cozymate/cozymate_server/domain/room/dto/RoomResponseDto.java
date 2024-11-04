@@ -3,7 +3,6 @@ package com.cozymate.cozymate_server.domain.room.dto;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -47,4 +46,5 @@ public class RoomResponseDto {
         private String managerName;
         private Integer maxMateNum;
     }
+    
 }
