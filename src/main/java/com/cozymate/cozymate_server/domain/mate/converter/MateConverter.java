@@ -22,5 +22,13 @@ public class MateConverter {
             .entryStatus(EntryStatus.INVITED)
             .build();
     }
+    public static Mate toPending(Room room, Member member, boolean isRoomManager) {
+        return Mate.builder()
+            .room(room)
+            .member(member)
+            .isRoomManager(isRoomManager)
+            .entryStatus(EntryStatus.PENDING)
+            .build();
+    }
 
 }
