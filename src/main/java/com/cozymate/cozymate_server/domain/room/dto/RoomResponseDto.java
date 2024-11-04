@@ -46,5 +46,5 @@ public class RoomResponseDto {
         private String managerName;
         private Integer maxMateNum;
     }
-    
+
 }
