@@ -47,26 +47,4 @@ public class RoomResponseDto {
         private String managerName;
         private Integer maxMateNum;
     }
-
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    public static class RoomRecommendationResponse{
-        private Long roomId;
-        private String name;
-        private List<String> hashtags;
-        private Integer equality;
-        private Integer numOfArrival;
-        private Integer maxMateNum;
-        private Map<String, Integer> equalMemberStatNum;
-    }
-
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    public static class RoomRecommendationResponseList{
-        List<RoomRecommendationResponse> recommendations;
-    }
-
-
 }

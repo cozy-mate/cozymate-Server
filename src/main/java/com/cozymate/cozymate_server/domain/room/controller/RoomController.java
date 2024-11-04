@@ -45,9 +45,11 @@ public class RoomController {
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_ALREADY_EXISTS
     })
-    public ResponseEntity<ApiResponse<RoomCreateResponse>> createRoom(@Valid @RequestBody RoomRequestDto.PrivateRoomCreateRequest request,
+    public ResponseEntity<ApiResponse<RoomCreateResponse>> createRoom(
+        @Valid @RequestBody RoomRequestDto.PrivateRoomCreateRequest request,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomCreateResponse response = roomCommandService.createPrivateRoom(request, memberDetails.getMember());
+        RoomCreateResponse response = roomCommandService.createPrivateRoom(request,
+            memberDetails.getMember());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -61,7 +63,8 @@ public class RoomController {
     public ResponseEntity<ApiResponse<RoomCreateResponse>> createPublicRoom(
         @Valid @RequestBody RoomRequestDto.PublicRoomCreateRequest request,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomCreateResponse response = roomCommandService.createPublicRoom(request, memberDetails.getMember());
+        RoomCreateResponse response = roomCommandService.createPublicRoom(request,
+            memberDetails.getMember());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -74,7 +77,8 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<RoomCreateResponse>> getRoom(@PathVariable Long roomId,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomCreateResponse response = roomQueryService.getRoomById(roomId, memberDetails.getMember().getId());
+        RoomCreateResponse response = roomQueryService.getRoomById(roomId,
+            memberDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -114,9 +118,11 @@ public class RoomController {
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER
     })
-    public ResponseEntity<ApiResponse<RoomJoinResponse>> getRoomInfo(@RequestParam String inviteCode,
+    public ResponseEntity<ApiResponse<RoomJoinResponse>> getRoomInfo(
+        @RequestParam String inviteCode,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomJoinResponse roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode, memberDetails.getMember().getId());
+        RoomJoinResponse roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode,
+            memberDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(roomJoinResponse));
     }
 
@@ -139,7 +145,8 @@ public class RoomController {
     @Operation(summary = "[바니] 방 이름 중복 검증", description = "가능하면 true가, 중복시 false가 리턴됩니다.")
     ResponseEntity<ApiResponse<Boolean>> checkRoomName(@RequestParam String roomName) {
         Boolean isValid = roomCommandService.checkRoomName(roomName);
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(isValid));
+        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
+            .body(ApiResponse.onSuccess(isValid));
     }
 
     @GetMapping("/{roomId}/available-friends")
@@ -151,7 +158,8 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<List<CozymateResponse>>> getCozymateList(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(roomId, memberDetails.getMember().getId())));
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            roomQueryService.getCozymateList(roomId, memberDetails.getMember().getId())));
     }
 
     @PostMapping("/{roomId}/invite")
@@ -170,12 +178,14 @@ public class RoomController {
         ErrorStatus._NOT_FRIEND
     })
     public ResponseEntity<ApiResponse<String>> inviteCozymate(@PathVariable Long roomId,
-        @RequestBody List<Long> inviteeIdList, @AuthenticationPrincipal MemberDetails inviterDetails) {
-        roomCommandService.sendInvitation(roomId, inviteeIdList, inviterDetails.getMember().getId());
+        @RequestBody List<Long> inviteeIdList,
+        @AuthenticationPrincipal MemberDetails inviterDetails) {
+        roomCommandService.sendInvitation(roomId, inviteeIdList,
+            inviterDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
     }
 
-    @GetMapping ("/request-invites")
+    @GetMapping("/request-invites")
     @Deprecated
     @Operation(summary = "[바니] 방 초대 요청 조회", description = "해당 사용자가 수신한 초대 요청을 조회합니다.")
     @SwaggerApiError({
@@ -183,8 +193,10 @@ public class RoomController {
         ErrorStatus._INVITATION_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<InviteRequest>> getRequestInvite(@AuthenticationPrincipal MemberDetails inviteeDetails) {
-        InviteRequest inviteRequest = roomQueryService.getInvitation(inviteeDetails.getMember().getId());
+    public ResponseEntity<ApiResponse<InviteRequest>> getRequestInvite(
+        @AuthenticationPrincipal MemberDetails inviteeDetails) {
+        InviteRequest inviteRequest = roomQueryService.getInvitation(
+            inviteeDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(inviteRequest));
     }
 
@@ -200,8 +212,10 @@ public class RoomController {
         ErrorStatus._ROOM_ALREADY_EXISTS
     })
     public ResponseEntity<ApiResponse<String>> getInviteRequest(
-        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails inviteeDetails, @RequestParam boolean accept) {
-        roomCommandService.respondToInviteRequest(roomId, inviteeDetails.getMember().getId(), accept);
+        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails inviteeDetails,
+        @RequestParam boolean accept) {
+        roomCommandService.respondToInviteRequest(roomId, inviteeDetails.getMember().getId(),
+            accept);
         return ResponseEntity.ok(ApiResponse.onSuccess("초대 요청에 대한 처리 완료"));
     }
 
@@ -210,8 +224,10 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<RoomExistResponse>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomExistResponse response = roomQueryService.getExistRoom(memberDetails.getMember().getId());
+    public ResponseEntity<ApiResponse<RoomExistResponse>> getExistRoom(
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        RoomExistResponse response = roomQueryService.getExistRoom(
+            memberDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -227,18 +243,10 @@ public class RoomController {
     public ResponseEntity<ApiResponse<RoomCreateResponse>> updateRoom(@PathVariable Long roomId,
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid @RequestBody RoomUpdateRequest request) {
-        RoomCreateResponse response = roomCommandService.updateRoom(roomId, memberDetails.getMember().getId(), request);
+        RoomCreateResponse response = roomCommandService.updateRoom(roomId,
+            memberDetails.getMember().getId(), request);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
 
-    }
-
-    @GetMapping("/list")
-    @Operation(summary = "[포비] 방 추천 리스트 조회", description = "방 추천 리스트를 조건별로 조회가 가능합니다.")
-    @SwaggerApiError({
-
-    })
-    public ResponseEntity<ApiResponse<?>> getRoomList(@AuthenticationPrincipal MemberDetails memberDetails){
-        return null;
     }
 
 }
