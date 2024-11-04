@@ -154,7 +154,7 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(roomId, memberDetails.getMember().getId())));
     }
 
-    @PostMapping("/{roomId}/invite")
+    @PostMapping("/invite/{inviteeId}")
     @Operation(summary = "[바니] 내방으로 초대하기", description = "방장이 속해있는 roomId에 선택한 코지메이트를 초대합니다.")
     @SwaggerApiError({
         ErrorStatus._ROOM_NOT_FOUND,
@@ -169,7 +169,7 @@ public class RoomController {
         ErrorStatus._NOT_FRIEND
     })
     public ResponseEntity<ApiResponse<String>> inviteCozymate(
-        @RequestParam Long inviteeId, @AuthenticationPrincipal MemberDetails inviterDetails) {
+        @PathVariable Long inviteeId, @AuthenticationPrincipal MemberDetails inviterDetails) {
         roomCommandService.sendInvitation(inviteeId, inviterDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
     }
@@ -194,7 +194,6 @@ public class RoomController {
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._ROOM_FULL,
         ErrorStatus._INVITATION_NOT_FOUND,
-        ErrorStatus._ROOM_ALREADY_JOINED,
         ErrorStatus._ROOM_ALREADY_EXISTS
     })
     public ResponseEntity<ApiResponse<String>> respondToInvitation(
@@ -244,6 +243,23 @@ public class RoomController {
         @AuthenticationPrincipal MemberDetails memberDetails) {
         roomCommandService.forceQuitRoom(roomId, memberId, memberDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess("강제 퇴장 완료"));
+    }
+
+    @DeleteMapping("/cancel-invitation/{inviteeId}")
+    @Operation(summary = "[바니] 내방으로 초대 취소 기능", description = "해당 roomId와 초대 받은 inviteeId를 이용해 초대를 취소합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MATE,
+        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MANAGER,
+        ErrorStatus._INVITATION_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<String>> cancelInvitation(
+        @PathVariable Long inviteeId,
+        @AuthenticationPrincipal MemberDetails inviterDetails) {
+        roomCommandService.cancelInvitation(inviteeId, inviterDetails.getMember().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess("초대 취소 완료"));
     }
 
 

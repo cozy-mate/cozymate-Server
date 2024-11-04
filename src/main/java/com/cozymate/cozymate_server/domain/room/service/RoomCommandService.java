@@ -291,9 +291,7 @@ public class RoomCommandService {
         // 초대한 사용자가 방장인지 검증
         Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-
-        // 방장이 아니면 예외 발생
-        if (!inviter.isRoomManager()) {
+        if (!inviter.getMember().getId().equals(inviterId)) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
@@ -385,6 +383,33 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
         quitRoom(roomId, targetMemberId);
+    }
+
+    public void cancelInvitation(Long inviteeId, Long inviterId) {
+        memberRepository.findById(inviterId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        memberRepository.findById(inviteeId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).getRoomId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        mateRepository.findByRoomIdAndMemberId(room.getId(), inviterId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        // 초대한 사용자가 방장인지 검증
+        Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        if (!inviter.getMember().getId().equals(inviterId)) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
+
+        Mate invitee = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), inviteeId, EntryStatus.INVITED)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
+
+        mateRepository.delete(invitee);
+
     }
 
     // 초대코드 생성 부분
