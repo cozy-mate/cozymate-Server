@@ -137,7 +137,13 @@ public enum ErrorStatus implements BaseErrorCode {
     // Report 관련
     _REPORT_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT400", "신고 대상 멤버를 찾을 수 없습니다."),
     _REPORT_DUPLICATE(HttpStatus.BAD_REQUEST, "REPORT401", "중복된 신고 요청입니다."),
-    _CANNOT_REPORT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
+    _REPORT_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
+
+    // Favorite 관련
+    _FAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "FAVORITE400", "이미 찜이 되어 있습니다."),
+    _FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "FAVORITE401", "찜을 찾을 수 없습니다."),
+    _FAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "FAVORITE402", "해당 찜에 대한 권한이 없습니다."),
+    _FAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "FAVORITE403", "자신에 대한 찜 관련 요청을 할 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;
