@@ -112,6 +112,7 @@ public class MemberStatResponseDTO {
     public static class MemberStatPreferenceResponseDTO {
         private Long memberId;
         private String memberNickName;
+        private Integer equality;
         private Map<String,Object> preferenceStats;
     }
 
