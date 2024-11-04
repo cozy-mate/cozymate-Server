@@ -19,7 +19,7 @@ public class MateConverter {
             .room(room)
             .member(member)
             .isRoomManager(isRoomManager)
-            .entryStatus(EntryStatus.PENDING)
+            .entryStatus(EntryStatus.INVITED)
             .build();
     }
 

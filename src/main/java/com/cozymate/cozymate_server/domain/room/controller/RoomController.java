@@ -154,25 +154,25 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(roomId, memberDetails.getMember().getId())));
     }
 
-//    @PostMapping("/{roomId}/invite")
-//    @Operation(summary = "[바니] 내방으로 코지메이트 초대하기", description = "해당하는 roomId에 선택한 코지메이트를 초대합니다.")
-//    @SwaggerApiError({
-//        ErrorStatus._ROOM_NOT_FOUND,
-//        ErrorStatus._NOT_ROOM_MATE,
-//        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
-//        ErrorStatus._NOT_ROOM_MANAGER,
-//        ErrorStatus._ROOM_FULL,
-//        ErrorStatus._MEMBER_NOT_FOUND,
-//        ErrorStatus._INVITATION_ALREADY_SENT,
-//        ErrorStatus._ROOM_ALREADY_JOINED,
-//        ErrorStatus._ROOM_ALREADY_EXISTS,
-//        ErrorStatus._NOT_FRIEND
-//    })
-//    public ResponseEntity<ApiResponse<String>> inviteCozymate(@PathVariable Long roomId,
-//        @RequestBody Long inviteeId, @AuthenticationPrincipal MemberDetails inviterDetails) {
-//        roomCommandService.sendInvitation(inviteeId, inviterDetails.getMember().getId());
-//        return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
-//    }
+    @PostMapping("/{roomId}/invite")
+    @Operation(summary = "[바니] 내방으로 초대하기", description = "방장이 속해있는 roomId에 선택한 코지메이트를 초대합니다.")
+    @SwaggerApiError({
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MATE,
+        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MANAGER,
+        ErrorStatus._ROOM_FULL,
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._INVITATION_ALREADY_SENT,
+        ErrorStatus._ROOM_ALREADY_JOINED,
+        ErrorStatus._ROOM_ALREADY_EXISTS,
+        ErrorStatus._NOT_FRIEND
+    })
+    public ResponseEntity<ApiResponse<String>> inviteCozymate(
+        @RequestParam Long inviteeId, @AuthenticationPrincipal MemberDetails inviterDetails) {
+        roomCommandService.sendInvitation(inviteeId, inviterDetails.getMember().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
+    }
 
     @GetMapping ("/request-invites")
     @Deprecated
@@ -188,7 +188,6 @@ public class RoomController {
     }
 
     @PostMapping("/{roomId}/invite-request")
-    @Deprecated
     @Operation(summary = "[바니] 방 초대 요청/수락", description = "해당 roomId에서 온 초대요청을 수락 또는 거절합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
@@ -198,9 +197,9 @@ public class RoomController {
         ErrorStatus._ROOM_ALREADY_JOINED,
         ErrorStatus._ROOM_ALREADY_EXISTS
     })
-    public ResponseEntity<ApiResponse<String>> getInviteRequest(
+    public ResponseEntity<ApiResponse<String>> respondToInvitation(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails inviteeDetails, @RequestParam boolean accept) {
-        roomCommandService.respondToInviteRequest(roomId, inviteeDetails.getMember().getId(), accept);
+        roomCommandService.respondToInvitation(roomId, inviteeDetails.getMember().getId(), accept);
         return ResponseEntity.ok(ApiResponse.onSuccess("초대 요청에 대한 처리 완료"));
     }
 
