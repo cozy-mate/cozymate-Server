@@ -34,6 +34,7 @@ public class FavoriteConverter {
         List<String> roomHashTags, Integer currentMateNum) {
         return FavoriteRoomResponse.builder()
             .favoriteId(favoriteId)
+            .roomId(room.getId())
             .name(room.getName())
             .equality(roomEquality)
             .preferenceStatsMatchCountList(preferenceStatsMatchCountList)

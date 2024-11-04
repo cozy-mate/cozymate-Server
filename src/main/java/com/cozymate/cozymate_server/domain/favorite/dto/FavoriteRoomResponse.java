@@ -9,6 +9,7 @@ import lombok.Getter;
 public class FavoriteRoomResponse {
 
     private Long favoriteId;
+    private Long roomId;
     private String name;
     private Integer equality;
     private List<PreferenceStatsMatchCount> preferenceStatsMatchCountList;
