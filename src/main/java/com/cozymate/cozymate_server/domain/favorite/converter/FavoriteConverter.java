@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.favorite.converter;
 import com.cozymate.cozymate_server.domain.favorite.Favorite;
 import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteMemberResponse;
 import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteRoomResponse;
+import com.cozymate.cozymate_server.domain.favorite.dto.PreferenceStatsMatchCount;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
@@ -28,18 +29,14 @@ public class FavoriteConverter {
             .build();
     }
 
-    public static FavoriteRoomResponse toFavoriteRoomResponse(Long favoriteId,
-        Room room, Integer roomEquality, Integer wakeUptimeEqualNum, Integer sleepingTimeEqualNum,
-        Integer noiseSensitivityEqualNum, Integer cleanSensitivityEqualNum,
+    public static FavoriteRoomResponse toFavoriteRoomResponse(Long favoriteId, Room room,
+        Integer roomEquality, List<PreferenceStatsMatchCount> preferenceStatsMatchCountList,
         List<String> roomHashTags, Integer currentMateNum) {
         return FavoriteRoomResponse.builder()
             .favoriteId(favoriteId)
             .name(room.getName())
             .equality(roomEquality)
-            .wakeUptimeEqualNum(wakeUptimeEqualNum)
-            .sleepingTimeEqualNum(sleepingTimeEqualNum)
-            .noiseSensitivityEqualNum(noiseSensitivityEqualNum)
-            .cleanSensitivityEqualNum(cleanSensitivityEqualNum)
+            .preferenceStatsMatchCountList(preferenceStatsMatchCountList)
             .hashtagList(roomHashTags)
             .MaxMateNum(room.getMaxMateNum())
             .currentMateNum(currentMateNum)
