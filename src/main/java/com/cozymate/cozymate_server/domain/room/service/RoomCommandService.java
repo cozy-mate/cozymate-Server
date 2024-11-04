@@ -22,7 +22,6 @@ import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PrivateRoomCr
 import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PublicRoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.RoomUpdateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
@@ -282,64 +281,54 @@ public class RoomCommandService {
         Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-
         // 방장이 속한 방의 정보
         Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).getRoomId())
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-
-        // 초대한 사용자가 방장인지 검증
         mateRepository.findByRoomIdAndMemberId(room.getId(), inviterId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-
+        // 초대한 사용자가 방장인지 검증
         Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        if (!inviter.getMember().getId().equals(inviterId)) {
+
+        // 방장이 아니면 예외 발생
+        if (!inviter.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
         // 이미 참가한 방인지 검사
-        Optional<Mate> isExistingMate = mateRepository.findByRoomIdAndMemberId(room.getId(), inviteeId);
-
-        if (isExistingMate.isPresent()) {
-            Mate exitingMate = isExistingMate.get();
-            if (exitingMate.getEntryStatus() == EntryStatus.JOINED || exitingMate.getEntryStatus() == EntryStatus.PENDING) {
+        Optional<Mate> invitee = mateRepository.findByRoomIdAndMemberId(room.getId(), inviteeId);
+        if (invitee.isPresent()) {
+            EntryStatus status = invitee.get().getEntryStatus();
+            if (status == EntryStatus.JOINED || status == EntryStatus.PENDING) {
                 throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
             }
-            if (exitingMate.getEntryStatus() == EntryStatus.INVITED) {
+            else if (status == EntryStatus.INVITED) {
                 throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
             }
         }
 
         // 초대하려는 사용자가 속한 방이 있는지 검사
-        RoomExistResponse invitee_existingRoom = roomQueryService.getExistRoom(inviteeId);
-        if (invitee_existingRoom != null && invitee_existingRoom.getRoomId() != 0) {
+        if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE, RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
-
 
         // 방 정원 검사
         if (mateRepository.countActiveMatesByRoomId(room.getId()) >= room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
-            Optional<Mate> invitee = mateRepository.findByRoomIdAndMemberId(room.getId(), inviteeId);
-            if (invitee.isPresent()) {
-                if (invitee.get().getEntryStatus() == EntryStatus.PENDING) {
-                    throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
-                } else {
-                    throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
-                }
-            }
-
-            if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE,
-                RoomStatus.WAITING, EntryStatus.JOINED)) {
-                throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-            }
-
-            Mate mate = MateConverter.toInvitation(room, inviteeMember, false);
+        if (invitee.isPresent()) {
+            Mate mate = invitee.get();
+            mate.setEntryStatus(EntryStatus.INVITED);
+            mate.setNotExit();
             mateRepository.save(mate);
+            return;
+        }
+
+        Mate mate = MateConverter.toInvitation(room, inviteeMember, false);
+        mateRepository.save(mate);
 
     }
 
