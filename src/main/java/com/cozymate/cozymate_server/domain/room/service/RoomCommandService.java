@@ -127,8 +127,11 @@ public class RoomCommandService {
             Mate exitingMate = isExistingMate.get();
             if (exitingMate.getEntryStatus() == EntryStatus.JOINED) {
                 throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
-            } else if (exitingMate.getEntryStatus() == EntryStatus.PENDING)
+            } else if (exitingMate.getEntryStatus() == EntryStatus.PENDING) {
                 throw new GeneralException(ErrorStatus._REQUEST_ALREADY_SENT);
+            } else if (exitingMate.getEntryStatus()== EntryStatus.INVITED) {
+                throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
+            }
         }
 
         if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE,
@@ -300,10 +303,11 @@ public class RoomCommandService {
         Optional<Mate> invitee = mateRepository.findByRoomIdAndMemberId(room.getId(), inviteeId);
         if (invitee.isPresent()) {
             EntryStatus status = invitee.get().getEntryStatus();
-            if (status == EntryStatus.JOINED || status == EntryStatus.PENDING) {
+            if (status == EntryStatus.JOINED) {
                 throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
-            }
-            else if (status == EntryStatus.INVITED) {
+            } else if (status == EntryStatus.PENDING) {
+                throw new GeneralException(ErrorStatus._REQUEST_ALREADY_SENT);
+            } else if (status == EntryStatus.INVITED) {
                 throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
             }
         }
