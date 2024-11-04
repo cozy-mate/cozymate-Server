@@ -13,6 +13,8 @@ import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.Roo
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponseList;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.persistence.Tuple;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,7 +51,8 @@ public class RoomRecommendService {
             .toList();
 
         MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(
-            member.getId()).orElseThrow();
+                member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS));
         List<String> preferenceList = Arrays.asList(
             memberStatPreference.getSelectedPreferences().split(","));
 
