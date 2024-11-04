@@ -23,7 +23,7 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Optional<Mate> findByRoomIdAndMemberId(Long roomId, Long memberId);
 
-    @Query("SELECT COUNT(m) FROM Mate m WHERE m.room.id = :roomId AND m.entryStatus != 'EXITED'")
+    @Query("SELECT COUNT(m) FROM Mate m WHERE m.room.id = :roomId AND m.entryStatus == 'JOINED'")
     long countActiveMatesByRoomId(@Param("roomId") Long roomId);
 
     Long countByRoomId(Long roomId);
