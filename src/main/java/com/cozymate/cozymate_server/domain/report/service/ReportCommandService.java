@@ -33,7 +33,7 @@ public class ReportCommandService {
 
     private void checkReportSelf(Member member, Long reportedMemberId) {
         if (member.getId().equals(reportedMemberId)) {
-            throw new GeneralException(ErrorStatus._CANNOT_REPORT_REQUEST_SELF);
+            throw new GeneralException(ErrorStatus._REPORT_CANNOT_REQUEST_SELF);
         }
     }
 
