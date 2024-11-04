@@ -20,7 +20,7 @@ public interface MemberStatRepository extends
 
     Boolean existsByMemberId(Long memberId);
 
-    @Query("SELECT ms, ms.id FROM MemberStat ms WHERE ms.member.id IN :memberIds")
+    @Query("SELECT ms, ms.member.id FROM MemberStat ms WHERE ms.member.id IN :memberIds")
     List<Tuple> findMemberStatsAndMemberIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
 
     //Eager Fetch가 필요한 경우
