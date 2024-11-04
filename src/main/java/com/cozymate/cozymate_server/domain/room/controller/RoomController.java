@@ -157,16 +157,15 @@ public class RoomController {
     @PostMapping("/invite/{inviteeId}")
     @Operation(summary = "[바니] 방장 -> 내방으로 초대하기", description = "방장이 속해있는 roomId에 선택한 코지메이트를 초대합니다.")
     @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER,
         ErrorStatus._ROOM_FULL,
-        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._INVITATION_ALREADY_SENT,
         ErrorStatus._ROOM_ALREADY_JOINED,
-        ErrorStatus._ROOM_ALREADY_EXISTS,
-        ErrorStatus._NOT_FRIEND
+        ErrorStatus._ROOM_ALREADY_EXISTS
     })
     public ResponseEntity<ApiResponse<String>> inviteCozymate(
         @PathVariable Long inviteeId, @AuthenticationPrincipal MemberDetails inviterDetails) {
@@ -298,7 +297,9 @@ public class RoomController {
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MATE,
+        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER,
+        ErrorStatus._ROOM_ALREADY_EXISTS,
         ErrorStatus._REQUEST_NOT_FOUND,
         ErrorStatus._ROOM_FULL
     })
