@@ -26,13 +26,15 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBER_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "MEMBER403", "메일 인증을 완료해주세요"),
     _MEMBER_EXISTING(HttpStatus.BAD_REQUEST, "MEMBER402", "이미 존재하는 사용자 입니다"),
 
+    _INVALID_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, "SOCIAL400", "제공하지 않는 소셜 타입입니다."),
+    _INVALID_GENDER(HttpStatus.BAD_REQUEST, "GENDER400", "제공하지 않는 성별입니다."),
+
     // Token
     _TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN400", "사용자의 리프레시 토큰을 찾을 수 없습니다."),
     _TOKEN_INVALID(HttpStatus.BAD_REQUEST, "TOKEN401", "토큰이 유효하지 않습니다."),
     _TEMPORARY_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN402", "임시토큰으로 접근 할 수 없습니다."),
     _REFRESH_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN403", "refresh 토큰으로 접근 할 수 없습니다."),
-    // Social type
-    _INVALID_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, "SOCIAL400", "제공하지 않는 소셜 타입입니다."),
+
 
     // S3 관련
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
