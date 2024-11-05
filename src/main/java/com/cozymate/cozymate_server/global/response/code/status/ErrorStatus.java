@@ -49,7 +49,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _ROOM_FULL(HttpStatus.BAD_REQUEST, "ROOM406", "방 정원이 꽉 찼습니다."),
     _ROOM_WAITING(HttpStatus.BAD_REQUEST,"ROOM407","대기 중인 방입니다."),
     _INVITATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM408", "존재하지 않는 초대요청입니다."),
-    _INVITATION_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM409", "이미 보낸 초대요청입니다."),
+    _INVITATION_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM409", "이미 초대되었습니다."),
+    _CANNOT_SELF_FORCED_QUIT(HttpStatus.BAD_REQUEST, "ROOM410", "자신을 강제퇴장시킬 수 없습니다."),
+    _REQUEST_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM411", "이미 참여요청 되었습니다."),
+    _REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM412", "존재하지 않는 참여요청입니다."),
 
     // Hashtag
     _DUPLICATE_HASHTAGS(HttpStatus.BAD_REQUEST, "HASHTAG400", "중복된 해시태그는 입력할 수 없습니다."),
