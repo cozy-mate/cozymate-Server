@@ -121,18 +121,8 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Optional<Mate> isExistingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId);
-
-        if (isExistingMate.isPresent()) {
-            Mate exitingMate = isExistingMate.get();
-            if (exitingMate.getEntryStatus() == EntryStatus.JOINED) {
-                throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
-            } else if (exitingMate.getEntryStatus() == EntryStatus.PENDING) {
-                throw new GeneralException(ErrorStatus._REQUEST_ALREADY_SENT);
-            } else if (exitingMate.getEntryStatus()== EntryStatus.INVITED) {
-                throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
-            }
-        }
+        Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId);
+        checkEntryStatus(existingMate);
 
         if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE,
             RoomStatus.WAITING, EntryStatus.JOINED)) {
@@ -143,9 +133,9 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
-        if (isExistingMate.isPresent()) {
+        if (existingMate.isPresent()) {
             // 재입장 처리
-            Mate exitingMate = isExistingMate.get();
+            Mate exitingMate = existingMate.get();
             exitingMate.setEntryStatus(EntryStatus.JOINED);
             exitingMate.setNotExit();
             mateRepository.save(exitingMate);
@@ -301,16 +291,7 @@ public class RoomCommandService {
 
         // 이미 참가한 방인지 검사
         Optional<Mate> invitee = mateRepository.findByRoomIdAndMemberId(room.getId(), inviteeId);
-        if (invitee.isPresent()) {
-            EntryStatus status = invitee.get().getEntryStatus();
-            if (status == EntryStatus.JOINED) {
-                throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
-            } else if (status == EntryStatus.PENDING) {
-                throw new GeneralException(ErrorStatus._REQUEST_ALREADY_SENT);
-            } else if (status == EntryStatus.INVITED) {
-                throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
-            }
-        }
+        checkEntryStatus(invitee);
 
         // 초대하려는 사용자가 속한 방이 있는지 검사
         if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE, RoomStatus.WAITING, EntryStatus.JOINED)) {
@@ -352,7 +333,7 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        if (room.getNumOfArrival() + 1 > room.getMaxMateNum()) {
+        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
@@ -430,24 +411,31 @@ public class RoomCommandService {
         }
 
         Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId);
-        if (existingMate.isPresent()) {
-            EntryStatus status = existingMate.get().getEntryStatus();
-            if (status == EntryStatus.JOINED) {
-                throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
-            } else if (status == EntryStatus.PENDING) {
-                throw new GeneralException(ErrorStatus._REQUEST_ALREADY_SENT);
-            } else if (status == EntryStatus.INVITED) {
-                throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
-            }
-        }
+        checkEntryStatus(existingMate);
 
-        if (room.getNumOfArrival() + 1 > room.getMaxMateNum()) {
+        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
         Mate mate = MateConverter.toPending(room, member, false);
         mateRepository.save(mate);
 
+    }
+
+    private void checkEntryStatus(Optional<Mate> existingMate) {
+        if (existingMate.isPresent()) {
+            EntryStatus status = existingMate.get().getEntryStatus();
+            switch (status) {
+                case JOINED:
+                    throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
+                case PENDING:
+                    throw new GeneralException(ErrorStatus._REQUEST_ALREADY_SENT);
+                case INVITED:
+                    throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
+                default:
+                    break;
+            }
+        }
     }
 
     public void cancelRequestToJoin(Long roomId, Long memberId) {
