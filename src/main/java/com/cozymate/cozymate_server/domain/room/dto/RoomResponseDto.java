@@ -47,4 +47,14 @@ public class RoomResponseDto {
         private Integer maxMateNum;
     }
 
+    @Getter
+    @Builder
+    public static class RoomListResponse {
+        public Long roomId;
+        public String name;
+        public Integer roomEquality;
+        private List<String> hashtags;
+        private Integer numOfArrival;
+    }
+
 }
