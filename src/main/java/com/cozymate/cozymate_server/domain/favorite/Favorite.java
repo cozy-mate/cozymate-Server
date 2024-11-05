@@ -31,8 +31,8 @@ public class Favorite extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private Long targetId; // 찜한 대상 id (User or Room ID)
+    private Long targetId;
 
     @Enumerated(EnumType.STRING)
-    private FavoriteType favoriteType; // 대상의 타입 (USER 또는 ROOM)
+    private FavoriteType favoriteType;
 }

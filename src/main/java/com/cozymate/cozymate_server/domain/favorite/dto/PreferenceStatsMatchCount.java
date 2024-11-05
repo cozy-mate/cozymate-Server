@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 public class PreferenceStatsMatchCount {
 
-    private String preferenceName; // 선호도 이름
-    private int matchCount;        // 일치하는 수
+    private String preferenceName;
+    private int matchCount;
 }
