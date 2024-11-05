@@ -174,9 +174,9 @@ public class RoomQueryService {
             memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
         if (mate.isPresent()) {
             return RoomConverter.toRoomExistResponse(mate.get().getRoom());
-        } else {
-            return RoomConverter.toRoomExistResponse(null);
         }
+        return RoomConverter.toRoomExistResponse(null);
+
     }
 
     public RoomExistResponse getExistRoom(Long otherMemberId, Long memberId) {
@@ -189,9 +189,10 @@ public class RoomQueryService {
             otherMemberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
         if (mate.isPresent()) {
             return RoomConverter.toRoomExistResponse(mate.get().getRoom());
-        } else {
-            return RoomConverter.toRoomExistResponse(null);
         }
+
+        return RoomConverter.toRoomExistResponse(null);
+
     }
 
     public Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap){
@@ -209,8 +210,5 @@ public class RoomQueryService {
             .orElse(0));
 
     }
-
-
-
 
 }
