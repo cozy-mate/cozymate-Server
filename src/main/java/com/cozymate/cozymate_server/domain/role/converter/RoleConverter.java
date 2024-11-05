@@ -45,11 +45,11 @@ public class RoleConverter {
     }
 
     public static RoleDetailResponseDto toRoleDetailResponseDto(Role role,
-        Map<Long, String> mateList) {
+        Map<Long, String> mateNameMap) {
         return RoleDetailResponseDto.builder()
             .id(role.getId())
             .mateNameList(role.getAssignedMateIdList().stream()
-                .map(mateList::get).filter(Objects::nonNull).toList())
+                .map(mateNameMap::get).filter(Objects::nonNull).toList())
             .content(role.getContent())
             .repeatDayList(
                 convertBitmaskToDayList(role.getRepeatDays()).stream()
