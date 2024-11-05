@@ -34,6 +34,8 @@ public class MemberStatRequestDTO {
         @Max(6)
         private Integer numOfRoommate;
         @NotEmpty
+        private String dormitoryType;
+        @NotEmpty
         private String acceptance;
         @NotBlank
         @Size(min = 2, max = 2)
@@ -118,6 +120,8 @@ public class MemberStatRequestDTO {
         @Min(0)
         @Max(6)
         private Integer numOfRoommate;
+        @NotEmpty
+        private String dormitoryType;
         @NotEmpty
         private String acceptance;
         @NotBlank

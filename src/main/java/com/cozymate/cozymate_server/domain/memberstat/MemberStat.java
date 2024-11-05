@@ -45,6 +45,8 @@ public class MemberStat extends BaseTimeEntity {
 
     private String major;
 
+    private String dormitoryType;
+
     private Integer numOfRoommate;
 
     private String acceptance;

@@ -36,6 +36,7 @@ public class MemberStatConverter {
 //            .major(memberStatCommandRequestDTO.getMajor())
             .numOfRoommate(memberStatCommandRequestDTO.getNumOfRoommate())
             .acceptance(memberStatCommandRequestDTO.getAcceptance())
+            .dormitoryType(memberStatCommandRequestDTO.getDormitoryType())
             .wakeUpTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),
                 memberStatCommandRequestDTO.getWakeUpTime()))
             .sleepingTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),
@@ -78,6 +79,7 @@ public class MemberStatConverter {
             .birthYear(birthYear)
 //            .major(memberStat.getMajor())
             .numOfRoommate(memberStat.getNumOfRoommate())
+            .dormitoryType(memberStat.getDormitoryType())
             .acceptance(memberStat.getAcceptance())
             .wakeUpMeridian(TimeUtil.convertToMeridian(memberStat.getWakeUpTime()))
             .wakeUpTime(TimeUtil.convertToTime(memberStat.getWakeUpTime()))
@@ -116,6 +118,7 @@ public class MemberStatConverter {
             .birthYear(birthYear)
             .major(memberStat.getMajor())
             .numOfRoommate(memberStat.getNumOfRoommate())
+            .dormitoryType(memberStat.getDormitoryType())
             .acceptance(memberStat.getAcceptance())
             .wakeUpMeridian(TimeUtil.convertToMeridian(memberStat.getWakeUpTime()))
             .wakeUpTime(TimeUtil.convertToTime(memberStat.getWakeUpTime()))

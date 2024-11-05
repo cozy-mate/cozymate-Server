@@ -56,6 +56,7 @@ public class MemberStatUtil {
         Map<String, Function<MemberStat, Object>> fieldGetters = new HashMap<>();
         fieldGetters.put("admissionYear", MemberStat::getAdmissionYear);
         fieldGetters.put("numOfRoommate", MemberStat::getNumOfRoommate);
+        fieldGetters.put("dormitoryType", MemberStat::getDormitoryType);
         fieldGetters.put("acceptance", MemberStat::getAcceptance);
         fieldGetters.put("wakeUpTime", MemberStat::getWakeUpTime);
         fieldGetters.put("sleepingTime", MemberStat::getSleepingTime);
