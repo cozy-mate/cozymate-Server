@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
@@ -14,6 +15,7 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
@@ -24,6 +26,7 @@ import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +54,8 @@ public class MemberStatQueryService {
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
     private static final Long ROOM_NOT_EXISTS = 0L;
+    private static final Integer NUM_OF_ROOMMATE_NOT_DETERMINED = 0;
+
     private final MemberStatPreferenceCommandService memberStatPreferenceCommandService;
 
     public MemberStatQueryResponseDTO getMemberStat(Member member) {
@@ -289,6 +294,28 @@ public class MemberStatQueryService {
             }
         );
     }
+
+    public List<MemberStatSearchResponseDTO> getMemberSearchResponse(String subString, Member searchingMember) {
+
+        // 가독성을 위해 분리해 봄
+        Integer numOfRoomMateOfSearchingMember = searchingMember.getMemberStat().getNumOfRoommate();
+        Long universityId = searchingMember.getUniversity().getId();
+        Gender gender = searchingMember.getGender();
+        Long searchingMemberId = searchingMember.getId();
+
+        List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
+            subString, universityId, gender, numOfRoomMateOfSearchingMember, searchingMemberId
+        );
+
+        return memberList.stream()
+            .map(member -> {
+                Integer equality = memberStatEqualityQueryService.getSingleEquality(searchingMember.getId(), member.getId());
+                return MemberStatConverter.toMemberStatSearchResponseDTO(member, equality);
+            })
+            .sorted(Comparator.comparing(MemberStatSearchResponseDTO::getEquality).reversed()) // equality 기준으로 내림차순 정렬
+            .toList();
+    }
+
 
     private MemberStat getCriteriaMemberStat(Member member) {
         return memberStatRepository.findByMemberId(member.getId())

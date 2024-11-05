@@ -14,6 +14,7 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
@@ -238,6 +239,17 @@ public class MemberStatConverter {
         return MemberStatRandomListResponseDTO.builder()
             .memberList(memberList)
             .seenMemberStatIds(seenMemberStatIds)
+            .build();
+    }
+
+    public static MemberStatSearchResponseDTO toMemberStatSearchResponseDTO(
+        Member member, Integer equality
+    ){
+        return MemberStatSearchResponseDTO.builder()
+            .memberId(member.getId())
+            .memberNickName(member.getNickname())
+            .memberPersona(member.getPersona())
+            .equality(equality)
             .build();
     }
 }
