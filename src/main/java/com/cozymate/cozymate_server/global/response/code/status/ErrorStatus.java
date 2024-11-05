@@ -55,6 +55,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _CANNOT_SELF_FORCED_QUIT(HttpStatus.BAD_REQUEST, "ROOM410", "자신을 강제퇴장시킬 수 없습니다."),
     _REQUEST_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM411", "이미 참여요청 되었습니다."),
     _REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM412", "존재하지 않는 참여요청입니다."),
+    _PUBLIC_ROOM(HttpStatus.BAD_REQUEST, "ROOM413", "공개방입니다."),
 
     // Hashtag
     _DUPLICATE_HASHTAGS(HttpStatus.BAD_REQUEST, "HASHTAG400", "중복된 해시태그는 입력할 수 없습니다."),
