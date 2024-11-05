@@ -16,7 +16,7 @@ public class MdcLoggingInterceptor implements HandlerInterceptor {
         // TODO: SessionId
         MDC.put("startTime", String.valueOf(System.currentTimeMillis()));
         MDC.put("requestId", java.util.UUID.randomUUID().toString());
-        log.info("REQUESTID: {}, IP: {}, METHOD: {}, URI: {}, PARAMS: {}",
+        log.info("[REQUEST] REQUESTID: {}, IP: {}, METHOD: {}, URI: {}, PARAMS: {}",
             MDC.get("requestId"),
             request.getRemoteAddr(),
             request.getMethod(),
@@ -34,13 +34,14 @@ public class MdcLoggingInterceptor implements HandlerInterceptor {
             long startTime = Long.parseLong(MDC.get("startTime"));
             long endTime = System.currentTimeMillis();
             log.info(
-                "REQUESTID: {}, IP: {}, METHOD: {}, URI: {}, STATUS: {}, TIME: {}ms",
+                "[RESPONSE] REQUESTID: {}, METHOD: {}, URI: {}, STATUS: {}, TIME: {}ms, IP: {}, Agent: {}",
                 MDC.get("requestId"),
-                request.getRemoteAddr(),
                 request.getMethod(),
                 request.getRequestURI(),
                 response.getStatus(),
-                endTime - startTime
+                endTime - startTime,
+                request.getRemoteAddr(),
+                request.getHeader("User-Agent")
             );
         }
         MDC.clear();
