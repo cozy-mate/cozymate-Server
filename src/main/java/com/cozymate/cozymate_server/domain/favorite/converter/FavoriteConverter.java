@@ -1,9 +1,10 @@
 package com.cozymate.cozymate_server.domain.favorite.converter;
 
 import com.cozymate.cozymate_server.domain.favorite.Favorite;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteMemberResponse;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteRoomResponse;
-import com.cozymate.cozymate_server.domain.favorite.dto.PreferenceStatsMatchCount;
+import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto;
+import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteMemberResponse;
+import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteRoomResponse;
+import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.PreferenceStatsMatchCount;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
@@ -23,8 +24,10 @@ public class FavoriteConverter {
     public static FavoriteMemberResponse toFavoriteMemberResponse(Long favoriteId, Integer equality,
         MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO) {
         return FavoriteMemberResponse.builder()
-            .favoriteId(favoriteId)
-            .equality(equality)
+            .favoriteResponseDto(FavoriteResponseDto.builder()
+                .favoriteId(favoriteId)
+                .equality(equality)
+                .build())
             .memberStatPreferenceResponseDTO(memberStatPreferenceResponseDTO)
             .build();
     }
@@ -33,10 +36,12 @@ public class FavoriteConverter {
         Integer roomEquality, List<PreferenceStatsMatchCount> preferenceStatsMatchCountList,
         List<String> roomHashTags, Integer currentMateNum) {
         return FavoriteRoomResponse.builder()
-            .favoriteId(favoriteId)
+            .favoriteResponseDto(FavoriteResponseDto.builder()
+                .favoriteId(favoriteId)
+                .equality(roomEquality)
+                .build())
             .roomId(room.getId())
             .name(room.getName())
-            .equality(roomEquality)
             .preferenceStatsMatchCountList(preferenceStatsMatchCountList)
             .hashtagList(roomHashTags)
             .MaxMateNum(room.getMaxMateNum())

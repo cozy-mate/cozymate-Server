@@ -2,9 +2,9 @@ package com.cozymate.cozymate_server.domain.favorite.service;
 
 import com.cozymate.cozymate_server.domain.favorite.Favorite;
 import com.cozymate.cozymate_server.domain.favorite.converter.FavoriteConverter;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteMemberResponse;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteRoomResponse;
-import com.cozymate.cozymate_server.domain.favorite.dto.PreferenceStatsMatchCount;
+import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteMemberResponse;
+import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteRoomResponse;
+import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.PreferenceStatsMatchCount;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
