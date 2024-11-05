@@ -45,7 +45,7 @@ public class MemberStat extends BaseTimeEntity {
 
     private String major;
 
-    private String dormitoryType;
+    private String dormitoryNames;
 
     private Integer numOfRoommate;
 
@@ -100,6 +100,7 @@ public class MemberStat extends BaseTimeEntity {
         this.acceptance = memberStatCommandRequestDTO.getAcceptance();
         this.admissionYear = Integer.parseInt(memberStatCommandRequestDTO.getAdmissionYear());
         //this.major = memberStatCommandRequestDTO.getMajor();
+        this.dormitoryNames = memberStatCommandRequestDTO.getDormitoryNames();
         this.numOfRoommate = memberStatCommandRequestDTO.getNumOfRoommate();
         this.wakeUpTime = TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),
             memberStatCommandRequestDTO.getWakeUpTime());

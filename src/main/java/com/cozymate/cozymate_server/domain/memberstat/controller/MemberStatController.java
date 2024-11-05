@@ -158,7 +158,7 @@ public class MemberStatController {
             + "- birthYear: 출생년도"
             + "- acceptance : 합격여부\n"
             + "- admissionYear : 학번\n"
-            + "- dormitoryType: 기숙사 정보\n"
+            + "- dormitoryNames: 기숙사 이름\n"
             + "- major : 학과\n"
             + "- numOfRoommate : 신청실\n"
             + "- wakeUpTime : 기상시간\n"
@@ -223,7 +223,7 @@ public class MemberStatController {
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
             "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
-            "- **dormitoryType** (기숙사 종류): `[String]` `[\"1기숙사\"]`\n" +
+            "- **dormitoryNames** (기숙사 이름): `[String]` `[\"1기숙사\"]`\n" +
             "- **major** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
@@ -283,7 +283,7 @@ public class MemberStatController {
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
             "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
-            "- **dormitoryType(기숙사 종류): `[String]` 예) `[\"1기숙사\"]`\n" +
+            "- **dormitoryNames(기숙사 이름): `[String]` 예) `[\"1기숙사\"]`\n" +
             "- **major** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
@@ -345,7 +345,7 @@ public class MemberStatController {
             + "- acceptance : 합격여부\n"
             + "- admissionYear :  학번\n"
             + "- major : 전공\n"
-            + "- dormitoryType: 기숙사 종류\n"
+            + "- dormitoryNames: 기숙사 이름\n"
             + "- numOfRoommate : 신청실\n"
             + "- wakeUpTime : 기상시간\n"
             + "- sleepingTime : 취침시간\n"

@@ -22,7 +22,7 @@ public class MemberStatResponseDTO {
         private Integer birthYear;
         private String major;
         private Integer numOfRoommate;
-        private String dormitoryType;
+        private String dormitoryNames;
         private String acceptance;
         private String wakeUpMeridian;
         private Integer wakeUpTime;
@@ -62,7 +62,7 @@ public class MemberStatResponseDTO {
         private Integer birthYear;
         private String major;
         private Integer numOfRoommate;
-        private String dormitoryType;
+        private String dormitoryNames;
         private String acceptance;
         private String wakeUpMeridian;
         private Integer wakeUpTime;

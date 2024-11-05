@@ -301,18 +301,29 @@ public class MemberStatQueryService {
         Integer numOfRoomMateOfSearchingMember = searchingMember.getMemberStat().getNumOfRoommate();
         Long universityId = searchingMember.getUniversity().getId();
         Gender gender = searchingMember.getGender();
+        String dormitoryNames = searchingMember.getMemberStat().getDormitoryNames();
         Long searchingMemberId = searchingMember.getId();
 
-        List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
-            subString, universityId, gender, numOfRoomMateOfSearchingMember, searchingMemberId
-        );
+        //memberStat이 존재할 때
+        if(memberStatRepository.existsByMemberId(searchingMemberId)){
+            List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
+                subString, universityId, gender, numOfRoomMateOfSearchingMember, dormitoryNames, searchingMemberId
+            );
+            return memberList.stream()
+                .map(member -> {
+                    Integer equality = memberStatEqualityQueryService.getSingleEquality(searchingMember.getId(), member.getId());
+                    return MemberStatConverter.toMemberStatSearchResponseDTO(member, equality);
+                })
+                .sorted(Comparator.comparing(MemberStatSearchResponseDTO::getEquality).reversed()) // equality 기준으로 내림차순 정렬
+                .toList();
+        }
 
+        // memberStat이 존재하지 않을 때
+        List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
+            subString, universityId, gender,searchingMemberId
+        );
         return memberList.stream()
-            .map(member -> {
-                Integer equality = memberStatEqualityQueryService.getSingleEquality(searchingMember.getId(), member.getId());
-                return MemberStatConverter.toMemberStatSearchResponseDTO(member, equality);
-            })
-            .sorted(Comparator.comparing(MemberStatSearchResponseDTO::getEquality).reversed()) // equality 기준으로 내림차순 정렬
+            .map(member-> MemberStatConverter.toMemberStatSearchResponseDTO(member, null))
             .toList();
     }
 
