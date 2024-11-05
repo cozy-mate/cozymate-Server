@@ -18,7 +18,6 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import jakarta.persistence.Tuple;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -119,16 +118,17 @@ public class RoomRecommendService {
             preferenceList);
         List<MemberStat> memberStatList = memberStatRepository.findAllById(mateMemberIds);
 
-
-        preferenceList.forEach(preference ->
+        preferenceList.forEach(preference -> {
+            preferenceMap.put(preference, 0);
             memberStatList.forEach(memberStat -> {
-                Map<String, Object> memberPreference = MemberStatUtil.getMemberStatFields(memberStat,
+                Map<String, Object> memberPreference = MemberStatUtil.getMemberStatFields(
+                    memberStat,
                     preferenceList);
                 if (myPreference.get(preference) == memberPreference.get(preference)) {
                     preferenceMap.merge(preference, 1, Integer::sum);
                 }
-            })
-        );
+            });
+        });
 
         return RoomRecommendConverter.toRoomRecommendationResponse(room, pair, preferenceMap);
     }

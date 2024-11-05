@@ -28,6 +28,6 @@ public interface MemberStatRepository extends
     List<MemberStat> findAllWithMember();
 
     List<MemberStat> findByMember_GenderAndMember_University_Id(Gender gender, Long universityId);
-    
+
 
 }
