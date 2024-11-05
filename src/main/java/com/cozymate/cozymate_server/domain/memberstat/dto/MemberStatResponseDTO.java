@@ -127,6 +127,17 @@ public class MemberStatResponseDTO {
 
     }
 
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberStatSearchResponseDTO{
+        private Long memberId;
+        private String memberNickName;
+        private Integer memberPersona;
+        private Integer equality;
+    }
+
 
     @Getter
     @NoArgsConstructor
@@ -141,7 +152,5 @@ public class MemberStatResponseDTO {
         public MemberStatEqualityResponseDTO getMemberStatEqualityResponseDTO() {
             return this.info;
         }
-
-
     }
 }
