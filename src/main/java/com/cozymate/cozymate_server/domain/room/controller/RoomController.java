@@ -206,12 +206,23 @@ public class RoomController {
     }
 
     @GetMapping("/exist")
-    @Operation(summary = "[바니] 사용자가 참여한 방이 있는지 여부 조회", description = "현재 참여중인 방이 있다면 해당 roomId가, 없다면 roomId값이 0으로 리턴됩니다.")
+    @Operation(summary = "[바니] 로그인한 사용자가 참여한 방이 있는지 여부 조회", description = "현재 참여중인 방이 있다면 해당 roomId가, 없다면 roomId값이 0으로 리턴됩니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
     public ResponseEntity<ApiResponse<RoomExistResponse>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
         RoomExistResponse response = roomQueryService.getExistRoom(memberDetails.getMember().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+    @GetMapping("/exist/{memberId}")
+    @Operation(summary = "[바니] 다른 사용자가 참여한 방이 있는지 여부 조회", description = "현재 참여중인 방이 있다면 해당 roomId가, 없다면 roomId값이 0으로 리턴됩니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<RoomExistResponse>> getExistRoom(
+        @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        RoomExistResponse response = roomQueryService.getExistRoom(memberId, memberDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
