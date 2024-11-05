@@ -3,7 +3,9 @@ package com.cozymate.cozymate_server.domain.room.service;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.MemberStatEquality;
 import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberStatEqualityRepository;
 import com.cozymate.cozymate_server.domain.memberstatpreference.MemberStatPreference;
@@ -20,7 +22,6 @@ import jakarta.persistence.Tuple;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -112,14 +113,18 @@ public class RoomRecommendService {
             .map(mate -> mate.getMember().getId())
             .toList();
 
-        Tuple memberStat = memberStatRepository.findMemberStatAndMemberIdByMemberId(
-            member.getId());
-        List<Tuple> memberStatList = memberStatRepository.findMemberStatsAndMemberIdsByMemberIdsWithAlias(
-            new HashSet<>(mateMemberIds));
+        MemberStat myMemberStat = memberStatRepository.findByMemberId(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
+        Map<String, Object> myPreference = MemberStatUtil.getMemberStatFields(myMemberStat,
+            preferenceList);
+        List<MemberStat> memberStatList = memberStatRepository.findAllById(mateMemberIds);
+
 
         preferenceList.forEach(preference ->
-            memberStatList.forEach(tuple -> {
-                if (tuple.get(preference) == memberStat.get(preference)) {
+            memberStatList.forEach(memberStat -> {
+                Map<String, Object> memberPreference = MemberStatUtil.getMemberStatFields(memberStat,
+                    preferenceList);
+                if (myPreference.get(preference) == memberPreference.get(preference)) {
                     preferenceMap.merge(preference, 1, Integer::sum);
                 }
             })
