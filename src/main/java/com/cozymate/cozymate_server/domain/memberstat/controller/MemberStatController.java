@@ -153,10 +153,11 @@ public class MemberStatController {
             "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n" +
             "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다." +
             "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
-            + "사용 가능한 필터명(24개):\n"
+            + "사용 가능한 필터명(25개):\n"
             + "- birthYear: 출생년도"
             + "- acceptance : 합격여부\n"
             + "- admissionYear : 학번\n"
+            + "- dormitoryType: 기숙사 정보\n"
             + "- major : 학과\n"
             + "- numOfRoommate : 신청실\n"
             + "- wakeUpTime : 기상시간\n"
@@ -217,10 +218,11 @@ public class MemberStatController {
             "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
             "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n" +
             "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다." +
-            "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 24개):\n\n" +
+            "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 25개):\n\n" +
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
             "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
+            "- **dormitoryType** (기숙사 종류): `[String]` `[\"1기숙사\"]`\n" +
             "- **major** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
@@ -276,10 +278,11 @@ public class MemberStatController {
             "  \"mbti\": [\"INTJ\", \"ENTP\"]\n" +
             "}\n" +
             "```\n\n" +
-            "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 24개):\n\n" +
+            "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 25개):\n\n" +
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
             "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
+            "- **dormitoryType(기숙사 종류): `[String]` 예) `[\"1기숙사\"]`\n" +
             "- **major** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
@@ -341,6 +344,7 @@ public class MemberStatController {
             + "- acceptance : 합격여부\n"
             + "- admissionYear :  학번\n"
             + "- major : 전공\n"
+            + "- dormitoryType: 기숙사 종류\n"
             + "- numOfRoommate : 신청실\n"
             + "- wakeUpTime : 기상시간\n"
             + "- sleepingTime : 취침시간\n"
