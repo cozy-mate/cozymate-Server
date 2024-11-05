@@ -57,4 +57,11 @@ public class RoomResponseDto {
         private Integer numOfArrival;
     }
 
+    @Getter
+    @Builder
+    public static class InvitedRoomResponse {
+        private Integer requestCount;
+        private List<RoomListResponse> roomList;
+    }
+
 }

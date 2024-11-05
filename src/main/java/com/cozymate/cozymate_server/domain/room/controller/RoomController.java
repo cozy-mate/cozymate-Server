@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.RoomUpdateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.InvitedRoomResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
@@ -348,7 +349,7 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<List<RoomListResponse>>> getInvitedRoomList(
+    public ResponseEntity<ApiResponse<InvitedRoomResponse>> getInvitedRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedRoomList(memberDetails.member().getId())));
     }

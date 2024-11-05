@@ -17,6 +17,7 @@ import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.InvitedRoomResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
@@ -255,16 +256,18 @@ public class RoomQueryService {
             .toList();
     }
 
-    public List<RoomListResponse> getInvitedRoomList(Long memberId) {
+    public InvitedRoomResponse getInvitedRoomList(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Integer invitedCount = mateRepository.countByMemberIdAndEntryStatus(memberId, EntryStatus.INVITED);
 
         List<Room> invitedRooms = mateRepository.findAllByMemberIdAndEntryStatus(memberId, EntryStatus.INVITED)
             .stream()
             .map(Mate::getRoom)
             .toList();
 
-        return invitedRooms.stream()
+        List<RoomListResponse> rooms = invitedRooms.stream()
             .map(room -> {
                 List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
@@ -274,5 +277,10 @@ public class RoomQueryService {
                 return RoomConverter.toRoomListResponse(room, roomEquality, hashtags);
             })
             .toList();
+
+        return InvitedRoomResponse.builder()
+            .requestCount(invitedCount)
+            .roomList(rooms)
+            .build();
     }
 }

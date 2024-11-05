@@ -74,4 +74,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     void deleteByRoomIdAndMemberId(Long roomId, Long memberId);
 
     List<Mate> findByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
+
+    Integer countByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
 }
