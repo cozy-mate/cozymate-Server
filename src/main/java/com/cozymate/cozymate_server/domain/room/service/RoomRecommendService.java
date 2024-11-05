@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberS
 import com.cozymate.cozymate_server.domain.memberstatpreference.MemberStatPreference;
 import com.cozymate.cozymate_server.domain.memberstatpreference.repository.MemberStatPreferenceRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.room.converter.RoomRecommendConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponseList;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
@@ -57,12 +58,13 @@ public class RoomRecommendService {
         List<String> preferenceList = Arrays.asList(
             memberStatPreference.getSelectedPreferences().split(","));
 
-        return RoomRecommendationResponseList.builder()
-            .recommendations(
-                buildRoomRecommendationResponses(member, sortedRoomList, roomMateMap, roomList,
-                    preferenceList))
-            .build();
+        List<RoomRecommendationResponse> roomRecommendationResponseList = buildRoomRecommendationResponses(
+            member, sortedRoomList, roomMateMap, roomList, preferenceList);
+
+        return RoomRecommendConverter.toRoomRecommendationResponseList(
+            roomRecommendationResponseList);
     }
+
 
     private Map<Long, List<Mate>> groupMatesByRoom(List<Mate> mateList) {
         return mateList.stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
@@ -123,16 +125,6 @@ public class RoomRecommendService {
             })
         );
 
-        return RoomRecommendationResponse.builder()
-            .roomId(pair.getLeft())
-            .name(room.getName())
-            .hashtags(room.getRoomHashtags().stream()
-                .map(roomHashtag -> roomHashtag.getHashtag().getHashtag())
-                .toList())
-            .equality(pair.getRight())
-            .maxMateNum(room.getMaxMateNum())
-            .numOfArrival(room.getNumOfArrival())
-            .equalMemberStatNum(preferenceMap)
-            .build();
+        return RoomRecommendConverter.toRoomRecommendationResponse(room, pair, preferenceMap);
     }
 }
