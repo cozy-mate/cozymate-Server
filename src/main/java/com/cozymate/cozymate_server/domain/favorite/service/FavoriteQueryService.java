@@ -106,20 +106,8 @@ public class FavoriteQueryService {
             .map(room -> {
                 List<Mate> mates = roomIdMatesMap.get(room.getId());
 
-                List<PreferenceStatsMatchCount> preferenceStatsMatchCountList = criteriaPreferences.stream()
-                    .map(preference -> {
-                        long equalCount = mates.stream()
-                            .map(mate -> mate.getMember().getMemberStat())
-                            .filter(mateStat -> mateStat != null && !mateStat.getMember().getId().equals(member.getId())
-                                && Objects.equals(MemberStatUtil.getMemberStatField(mateStat, preference),
-                                MemberStatUtil.getMemberStatField(memberStat, preference)))
-                            .count();
-
-                        return PreferenceStatsMatchCount.builder()
-                            .preferenceName(preference)
-                            .matchCount((int) equalCount)
-                            .build();
-                    }).toList();
+                List<PreferenceStatsMatchCount> preferenceStatsMatchCountList = getPreferenceStatsMatchCounts(
+                    member, criteriaPreferences, mates, memberStat);
 
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
                     member.getId(), mates.stream().map(mate -> mate.getMember().getId())
@@ -138,6 +126,26 @@ public class FavoriteQueryService {
             .toList();
 
         return favoriteRoomResponseList;
+    }
+
+    private static List<PreferenceStatsMatchCount> getPreferenceStatsMatchCounts(Member member,
+        List<String> criteriaPreferences, List<Mate> mates, MemberStat memberStat) {
+        List<PreferenceStatsMatchCount> preferenceStatsMatchCountList = criteriaPreferences.stream()
+            .map(preference -> {
+                long equalCount = mates.stream()
+                    .map(mate -> mate.getMember().getMemberStat())
+                    .filter(mateStat -> mateStat != null && !mateStat.getMember().getId().equals(
+                        member.getId())
+                        && Objects.equals(MemberStatUtil.getMemberStatField(mateStat, preference),
+                        MemberStatUtil.getMemberStatField(memberStat, preference)))
+                    .count();
+
+                return PreferenceStatsMatchCount.builder()
+                    .preferenceName(preference)
+                    .matchCount((int) equalCount)
+                    .build();
+            }).toList();
+        return preferenceStatsMatchCountList;
     }
 
     private Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap) {
