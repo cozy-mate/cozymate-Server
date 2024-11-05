@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.global.config;
 
+import com.cozymate.cozymate_server.global.logging.MdcCopyTaskDecorator;
 import com.cozymate.cozymate_server.global.response.exception.CustomAsyncUncaughtExceptionHandler;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -25,6 +26,7 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(QUEUE_CAPACITY);
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setThreadNamePrefix("async-executor-");
+        executor.setTaskDecorator(new MdcCopyTaskDecorator()); // TaskDecorator 설정
         executor.initialize();
 
         return executor;

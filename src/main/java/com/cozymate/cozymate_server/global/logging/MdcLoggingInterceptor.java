@@ -12,6 +12,7 @@ public class MdcLoggingInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
         Object handler) throws Exception {
+
         // TODO: SessionId
         MDC.put("startTime", String.valueOf(System.currentTimeMillis()));
         MDC.put("requestId", java.util.UUID.randomUUID().toString());
@@ -39,7 +40,8 @@ public class MdcLoggingInterceptor implements HandlerInterceptor {
                 request.getMethod(),
                 request.getRequestURI(),
                 response.getStatus(),
-                endTime - startTime);
+                endTime - startTime
+            );
         }
         MDC.clear();
     }
