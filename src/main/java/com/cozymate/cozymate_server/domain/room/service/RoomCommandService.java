@@ -519,7 +519,7 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장이 아니면 예외 발생
