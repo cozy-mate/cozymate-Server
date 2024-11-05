@@ -1,7 +1,8 @@
 package com.cozymate.cozymate_server.domain.member.enums;
 
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Arrays;
-import java.util.Optional;
 
 public enum SocialType {
     KAKAO,
@@ -16,9 +17,10 @@ public enum SocialType {
         return name();
     }
 
-    public static Optional<SocialType> getValue(String socialTypeString) {
+    public static SocialType getValue(String socialTypeString) {
         return Arrays.stream(values())
                 .filter(socialType -> socialType.name().equalsIgnoreCase(socialTypeString))
-                .findFirst();
+                .findFirst()
+                .orElseThrow( () -> new GeneralException(ErrorStatus._INVALID_SOCIAL_TYPE));
     }
 }
