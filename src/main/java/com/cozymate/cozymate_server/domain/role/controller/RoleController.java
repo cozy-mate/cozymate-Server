@@ -18,9 +18,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -84,35 +84,36 @@ public class RoleController {
      */
     @DeleteMapping("/{roomId}/roles/{roleId}")
     @Operation(summary = "[무빗] 특정 role 삭제", description = "본인의 룸메라면 Role을 삭제할 수 있습니다.")
-    @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_MATE_MISMATCH})
+    @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_NOT_VALID})
     public ResponseEntity<ApiResponse<String>> deleteRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long roleId
     ) {
-        roleCommandService.deleteRole(memberDetails.getMember(), roleId);
+        roleCommandService.deleteRole(memberDetails.getMember(), roomId, roleId);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 삭제 완료"));
     }
 
 
     /**
      * 특정 role 수정
+     *
      * @param memberDetails 사용자
-     * @param roomId 사용안함
-     * @param roleId 수정할 role Id
-     * @param requestDto 수정할 role 데이터
+     * @param roomId        사용안함
+     * @param roleId        수정할 role Id
+     * @param requestDto    수정할 role 데이터
      * @return 수정 완료 메시지
      */
-    @PatchMapping("/{roomId}/roles/{roleId}")
+    @PutMapping("/{roomId}/roles/{roleId}")
     @Operation(summary = "[무빗] 특정 role 수정", description = "본인 Role을 수정할 수 있습니다.")
-    @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_MATE_MISMATCH})
+    @SwaggerApiError({ErrorStatus._ROLE_NOT_FOUND, ErrorStatus._ROLE_NOT_VALID})
     public ResponseEntity<ApiResponse<String>> updateRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long roleId,
         @RequestBody @Valid RoleRequestDto.UpdateRoleRequestDto requestDto
     ) {
-        roleCommandService.updateRole(memberDetails.getMember(), roleId, requestDto);
+        roleCommandService.updateRole(memberDetails.getMember(), roomId, roleId, requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 수정 완료"));
     }
 

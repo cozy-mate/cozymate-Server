@@ -3,13 +3,13 @@ package com.cozymate.cozymate_server.domain.todo;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.todo.converter.TodoTypeConverter;
 import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -55,7 +55,8 @@ public class Todo extends BaseTimeEntity {
     // Bitmasking 방식으로 사용 예정
     private Integer completeBitmask;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = TodoTypeConverter.class)
+    @Column(length = 20)
     private TodoType todoType;
 
     public void updateContent(String content, LocalDate timePoint) {

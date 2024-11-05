@@ -15,6 +15,7 @@ import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
+import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -22,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -126,21 +126,20 @@ public class NotificationScheduler {
             roomLogCommandService.addRoomLogBirthday(mate, today)
         );
     }
-
-    // TODO: 수정된 기획에 맞춰서 수정해야함
-//    // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
-//    @Scheduled(cron = "0 0 0 * * *")
-//    public void addRoleToTodo() {
-//        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
-//        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
-//        List<Role> roleList = roleRepository.findAll();
-//        roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
-//            .forEach(role ->
-//                todoRepository.save(
-//                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
-//                        role.getContent(),
-//                        LocalDate.now(), role)
-//                )
-//            );
-//    }
+    
+    // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
+    @Scheduled(cron = "0 0 0 * * *")
+    public void addRoleToTodo() {
+        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
+        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
+        List<Role> roleList = roleRepository.findAll(); // TODO 페이징 반복 처리?
+        roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
+            .forEach(role ->
+                todoRepository.save(
+                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
+                        role.getAssignedMateIdList(), role.getContent(),
+                        LocalDate.now(), role, TodoType.ROLE_TODO)
+                )
+            );
+    }
 }

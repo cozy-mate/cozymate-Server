@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.role.dto;
 
 import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,6 +25,8 @@ public class RoleResponseDto {
 
         private Long id;
 
+        private List<String> mateNameList;
+
         private String content;
 
         private List<String> repeatDayList;
@@ -38,22 +39,9 @@ public class RoleResponseDto {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class RoleMateDetailResponseDto {
-
-        private int persona;
-
-        private List<RoleDetailResponseDto> mateRoleList;
-    }
-
-    @Builder
-    @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
     public static class RoleListDetailResponseDto {
 
-        private RoleMateDetailResponseDto myRoleList;
-
-        private Map<String, RoleMateDetailResponseDto> otherRoleList;
+        List<RoleDetailResponseDto> roleList;
     }
 
 }
