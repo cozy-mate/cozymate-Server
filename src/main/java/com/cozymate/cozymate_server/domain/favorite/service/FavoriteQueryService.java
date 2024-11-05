@@ -17,6 +17,7 @@ import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import java.util.ArrayList;
@@ -92,9 +93,14 @@ public class FavoriteQueryService {
 
         List<Long> favoriteRoomIdList = new ArrayList<>(roomIdFavoriteIdMap.keySet());
 
-        List<Room> favoriteRoomList = roomRepository.findAllById(favoriteRoomIdList);
+        List<Room> findFavoriteRoomList = roomRepository.findAllById(favoriteRoomIdList);
+        Map<Boolean, List<Room>> partitionedRoomsMap = findFavoriteRoomList.stream()
+            .collect(Collectors.partitioningBy(room -> room.getStatus().equals(RoomStatus.ENABLE)));
 
-        Map<Long, List<Mate>> roomIdMatesMap = favoriteRoomList.stream().collect(
+        List<Room> enableFavoriteRoomList = partitionedRoomsMap.get(true);
+        List<Room> notEnableFavoriteRoomList = partitionedRoomsMap.get(false);
+
+        Map<Long, List<Mate>> roomIdMatesMap = notEnableFavoriteRoomList.stream().collect(
             Collectors.toMap(Room::getId, room -> mateRepository.findFetchMemberByRoom(room)));
 
         List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
@@ -102,7 +108,7 @@ public class FavoriteQueryService {
 
         MemberStat memberStat = member.getMemberStat();
 
-        List<FavoriteRoomResponse> favoriteRoomResponseList = favoriteRoomList.stream()
+        List<FavoriteRoomResponse> favoriteRoomResponseList = notEnableFavoriteRoomList.stream()
             .map(room -> {
                 List<Mate> mates = roomIdMatesMap.get(room.getId());
 
@@ -124,6 +130,14 @@ public class FavoriteQueryService {
                 );
             })
             .toList();
+
+        // 활성화된 방이 존재한다면 찜에서 삭제
+        if (!enableFavoriteRoomList.isEmpty()) {
+            List<Long> roomIds = enableFavoriteRoomList.stream()
+                .map(Room::getId)
+                .toList();
+            favoriteRepository.deleteAllByTargetIdsAndFavoriteType(roomIds, FavoriteType.ROOM);
+        }
 
         return favoriteRoomResponseList;
     }
