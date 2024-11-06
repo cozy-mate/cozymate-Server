@@ -23,9 +23,9 @@ public class AopLogger {
             long startTime = Long.parseLong(MDC.get("startTime"));
             long endTime = System.currentTimeMillis();
             String functionName = joinPoint.getSignature().getName();
-            log.info("[ FUNCION] REQUIESID: {}, FUNC: {}, TIME: {}ms",
+            log.info("[FUNCTION] rid {} | func {} | time {}ms",
                 MDC.get("requestId"), functionName, endTime - startTime
-            );
+            ); // RequestId | FunctionName | Time
         }
 
     }
