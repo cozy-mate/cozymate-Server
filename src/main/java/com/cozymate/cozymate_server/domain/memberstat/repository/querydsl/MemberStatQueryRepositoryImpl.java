@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.memberstat.repository.querydsl;
 
 import static com.cozymate.cozymate_server.domain.member.QMember.member;
 import static com.cozymate.cozymate_server.domain.memberstat.QMemberStat.memberStat;
+import static com.cozymate.cozymate_server.domain.memberstatequality.QMemberStatEquality.memberStatEquality;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
@@ -20,6 +21,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
@@ -34,9 +38,12 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 
     private JPAQuery<Tuple> createBaseQuery(MemberStat criteriaMemberStat) {
         return queryFactory
-            .select(memberStat, member)
+            .select(memberStat, memberStatEquality.equality)
             .from(memberStat)
             .join(memberStat.member, member)
+            .leftJoin(memberStatEquality)
+            .on(memberStat.member.id.eq(memberStatEquality.memberBId)
+                .and(memberStatEquality.memberAId.eq(criteriaMemberStat.getMember().getId())))
             .where(initDefaultQuery(criteriaMemberStat));
     }
 
@@ -71,6 +78,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
                 tuple -> tuple.get(memberStat)      // value: MemberStat
             ));
     }
+
 
     private BooleanBuilder initDefaultQuery(MemberStat criteriaMemberStat) {
 
@@ -107,6 +115,55 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         }
         return builder;
     }
+
+    public Page<Map<MemberStat, Integer>> getFilteredMemberStat(MemberStat criteriaMemberStat,
+        List<String> filterList, Pageable pageable) {
+
+        List<Tuple> results = createBaseQuery(criteriaMemberStat)
+            .where(applyFilters(filterList, criteriaMemberStat))
+            .orderBy(memberStatEquality.equality.desc()) // equality 기준으로 정렬
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        // 결과를 Map<MemberStat, Integer> 형식으로 변환
+        List<Map<MemberStat, Integer>> resultList = results.stream()
+            .map(tuple -> {
+                MemberStat stat = tuple.get(memberStat);
+                Integer equality = tuple.get(memberStatEquality.equality);
+                Map<MemberStat, Integer> statMap = new HashMap<>();
+                statMap.put(stat, equality != null ? equality : 0);
+                return statMap;
+            })
+            .collect(Collectors.toList());
+
+        return new PageImpl<>(resultList, pageable, results.size());
+    }
+
+    public Page<Map<MemberStat, Integer>> getAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
+        HashMap<String, List<?>> filterMap, Pageable pageable) {
+
+        List<Tuple> results = createBaseQuery(criteriaMemberStat)
+            .where(applyFilters(filterMap, criteriaMemberStat))
+            .orderBy(memberStatEquality.equality.desc()) // equality 기준으로 정렬
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        // 결과를 Map<MemberStat, Integer> 형식으로 변환
+        List<Map<MemberStat, Integer>> resultList = results.stream()
+            .map(tuple -> {
+                MemberStat stat = tuple.get(memberStat);
+                Integer equality = tuple.get(memberStatEquality.equality);
+                Map<MemberStat, Integer> statMap = new HashMap<>();
+                statMap.put(stat, equality != null ? equality : 0);
+                return statMap;
+            })
+            .collect(Collectors.toList());
+
+        return new PageImpl<>(resultList, pageable, results.size());
+    }
+
 
     // 상세 검색 필터링 (key : value) 필터링
     private BooleanBuilder applyFilters(HashMap<String, List<?>> filterMap,

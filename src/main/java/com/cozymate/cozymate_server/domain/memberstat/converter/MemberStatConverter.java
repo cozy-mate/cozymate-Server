@@ -9,14 +9,17 @@ import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuild
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +147,20 @@ public class MemberStatConverter {
             .build();
     }
 
+    public static MemberStatEqualityDetailResponseDTO toEqualityDetailDto(
+        MemberStat memberStat,
+        Integer equality
+    ) {
+        return MemberStatEqualityDetailResponseDTO.builder()
+            .info(MemberStatConverter.toEqualityDto(
+                memberStat, equality
+            ))
+            .detail(MemberStatConverter.toDto(
+                memberStat, memberStat.getMember().getBirthDay().getYear()
+            ))
+            .build();
+    }
+
     public static MemberStatEqualityResponseDTO toEqualityDto(MemberStat memberStat, int equality) {
         return MemberStatEqualityResponseDTO.builder()
             .memberId(memberStat.getMember().getId())
@@ -157,59 +174,61 @@ public class MemberStatConverter {
 
     // 함수 기능 : 멤버 상세정보를 비교한 대상들'만' 입력받아 DTO를 리턴합니다.
     // 해당 함수를 사용하는 서비스는 꼭 비교할 대상들을 전처리 해서 사용하시면 되겠습니다.
-    public static MemberStatDifferenceResponseDTO toMemberStatDifferenceResponseDTO(List<MemberStat> memberStatList) {
+    public static MemberStatDifferenceResponseDTO toMemberStatDifferenceResponseDTO(
+        List<MemberStat> memberStatList) {
 
-            List<String> blue = new ArrayList<>();
-            List<String> red = new ArrayList<>();
-            List<String> white = new ArrayList<>();
+        List<String> blue = new ArrayList<>();
+        List<String> red = new ArrayList<>();
+        List<String> white = new ArrayList<>();
 
-
-            if(memberStatList.isEmpty()){
-                return MemberStatDifferenceResponseDTO.builder()
-                    .blue(blue)
-                    .red(red)
-                    .white(white)
-                    .build();
-            }
-
-            Map<String, Function<MemberStat, Object>> fieldGetters = createFieldGetters();
-
-            // 방 초기 생성 시, 혹은 멤버 상세정보를 입력한 사람이 1명일 때
-            if(memberStatList.size()==1){
-                white.addAll(fieldGetters.keySet());
-                return MemberStatDifferenceResponseDTO.builder()
-                    .blue(blue)
-                    .red(red)
-                    .white(white)
-                    .build();
-            }
-
-            for (String fieldName : fieldGetters.keySet()) {
-                DifferenceStatus status = compareField(memberStatList, fieldGetters.get(fieldName));
-                switch (status) {
-                    case BLUE:
-                        blue.add(fieldName);
-                        break;
-                    case RED:
-                        red.add(fieldName);
-                        break;
-                    case WHITE:
-                        white.add(fieldName);
-                        break;
-                }
-            }
-
+        if (memberStatList.isEmpty()) {
             return MemberStatDifferenceResponseDTO.builder()
                 .blue(blue)
                 .red(red)
                 .white(white)
                 .build();
+        }
+
+        Map<String, Function<MemberStat, Object>> fieldGetters = createFieldGetters();
+
+        // 방 초기 생성 시, 혹은 멤버 상세정보를 입력한 사람이 1명일 때
+        if (memberStatList.size() == 1) {
+            white.addAll(fieldGetters.keySet());
+            return MemberStatDifferenceResponseDTO.builder()
+                .blue(blue)
+                .red(red)
+                .white(white)
+                .build();
+        }
+
+        for (String fieldName : fieldGetters.keySet()) {
+            DifferenceStatus status = compareField(memberStatList, fieldGetters.get(fieldName));
+            switch (status) {
+                case BLUE:
+                    blue.add(fieldName);
+                    break;
+                case RED:
+                    red.add(fieldName);
+                    break;
+                case WHITE:
+                    white.add(fieldName);
+                    break;
+            }
+        }
+
+        return MemberStatDifferenceResponseDTO.builder()
+            .blue(blue)
+            .red(red)
+            .white(white)
+            .build();
     }
 
-    public static MemberStatPreferenceResponseDTO toPreferenceResponseDTO(MemberStat stat, Map<String,Object> preferences) {
+    public static MemberStatPreferenceResponseDTO toPreferenceResponseDTO(MemberStat stat,
+        Map<String, Object> preferences, Integer equality) {
         return MemberStatPreferenceResponseDTO.builder()
             .memberId(stat.getMember().getId())
             .memberNickName(stat.getMember().getNickname())
+            .equality(equality)
             .preferenceStats(preferences)
             .build();
     }
@@ -220,6 +239,17 @@ public class MemberStatConverter {
         return MemberStatRandomListResponseDTO.builder()
             .memberList(memberList)
             .seenMemberStatIds(seenMemberStatIds)
+            .build();
+    }
+
+    public static MemberStatSearchResponseDTO toMemberStatSearchResponseDTO(
+        Member member, Integer equality
+    ){
+        return MemberStatSearchResponseDTO.builder()
+            .memberId(member.getId())
+            .memberNickName(member.getNickname())
+            .memberPersona(member.getPersona())
+            .equality(equality)
             .build();
     }
 }

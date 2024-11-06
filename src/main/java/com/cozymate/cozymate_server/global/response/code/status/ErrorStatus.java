@@ -26,13 +26,15 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBER_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "MEMBER403", "메일 인증을 완료해주세요"),
     _MEMBER_EXISTING(HttpStatus.BAD_REQUEST, "MEMBER402", "이미 존재하는 사용자 입니다"),
 
+    _INVALID_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, "SOCIAL400", "제공하지 않는 소셜 타입입니다."),
+    _INVALID_GENDER(HttpStatus.BAD_REQUEST, "GENDER400", "제공하지 않는 성별입니다."),
+
     // Token
     _TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN400", "사용자의 리프레시 토큰을 찾을 수 없습니다."),
     _TOKEN_INVALID(HttpStatus.BAD_REQUEST, "TOKEN401", "토큰이 유효하지 않습니다."),
     _TEMPORARY_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN402", "임시토큰으로 접근 할 수 없습니다."),
     _REFRESH_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN403", "refresh 토큰으로 접근 할 수 없습니다."),
-    // Social type
-    _INVALID_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, "SOCIAL400", "제공하지 않는 소셜 타입입니다."),
+
 
     // S3 관련
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
@@ -49,7 +51,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _ROOM_FULL(HttpStatus.BAD_REQUEST, "ROOM406", "방 정원이 꽉 찼습니다."),
     _ROOM_WAITING(HttpStatus.BAD_REQUEST,"ROOM407","대기 중인 방입니다."),
     _INVITATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM408", "존재하지 않는 초대요청입니다."),
-    _INVITATION_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM409", "이미 보낸 초대요청입니다."),
+    _INVITATION_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM409", "이미 초대되었습니다."),
+    _CANNOT_SELF_FORCED_QUIT(HttpStatus.BAD_REQUEST, "ROOM410", "자신을 강제퇴장시킬 수 없습니다."),
+    _REQUEST_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM411", "이미 참여요청 되었습니다."),
+    _REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM412", "존재하지 않는 참여요청입니다."),
 
     // Hashtag
     _DUPLICATE_HASHTAGS(HttpStatus.BAD_REQUEST, "HASHTAG400", "중복된 해시태그는 입력할 수 없습니다."),
@@ -67,6 +72,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE(HttpStatus.BAD_REQUEST, "MEMBERSTAT404", "인실이 정해진 경우 인실 필터링이 불가합니다."),
     _MEMBERSTAT_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT405",
         "멤버 상세정보 인자가 잘못되었습니다."),
+    _MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST(HttpStatus.BAD_REQUEST, "MEMBERSTAT406",
+        "needsDetail 옵션과 needsPreferences 옵션은 공존할 수 없습니다."),
 
     _MEMBERSTAT_PREFERENCE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTATPREFERENCE400", "멤버 선호 항목이 존재하지 않습니다."),
     _MEMBERSTAT_PREFERENCE_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST,"MEMBERSTATPREFERENCE401","존재하지 않는 멤버 항목(들)입니다."),
@@ -106,7 +113,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Role 관련
     _ROLE_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROLE400", "역할을 찾을 수 없습니다."),
-    _ROLE_MATE_MISMATCH(HttpStatus.BAD_REQUEST, "ROLE401", "Mate에게 해당 Role을 삭제할 권한이 없습니다."),
+    _ROLE_NOT_VALID(HttpStatus.BAD_REQUEST, "ROLE401", "Role을 수정할 권한이 없습니다."),
 
     // Feed 관련 에러
     _FEED_EXISTS(HttpStatus.BAD_REQUEST, "FEED400", "피드 정보가 이미 존재합니다."),
@@ -137,7 +144,13 @@ public enum ErrorStatus implements BaseErrorCode {
     // Report 관련
     _REPORT_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT400", "신고 대상 멤버를 찾을 수 없습니다."),
     _REPORT_DUPLICATE(HttpStatus.BAD_REQUEST, "REPORT401", "중복된 신고 요청입니다."),
-    _CANNOT_REPORT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
+    _REPORT_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
+
+    // Favorite 관련
+    _FAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "FAVORITE400", "이미 찜이 되어 있습니다."),
+    _FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "FAVORITE401", "찜을 찾을 수 없습니다."),
+    _FAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "FAVORITE402", "해당 찜에 대한 권한이 없습니다."),
+    _FAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "FAVORITE403", "자신에 대한 찜 관련 요청을 할 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

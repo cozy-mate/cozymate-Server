@@ -112,6 +112,7 @@ public class MemberStatResponseDTO {
     public static class MemberStatPreferenceResponseDTO {
         private Long memberId;
         private String memberNickName;
+        private Integer equality;
         private Map<String,Object> preferenceStats;
     }
 
@@ -124,6 +125,17 @@ public class MemberStatResponseDTO {
         // 누적 ID List
         List<Long> seenMemberStatIds;
 
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberStatSearchResponseDTO{
+        private Long memberId;
+        private String memberNickName;
+        private Integer memberPersona;
+        private Integer equality;
     }
 
 
@@ -140,7 +152,5 @@ public class MemberStatResponseDTO {
         public MemberStatEqualityResponseDTO getMemberStatEqualityResponseDTO() {
             return this.info;
         }
-
-
     }
 }

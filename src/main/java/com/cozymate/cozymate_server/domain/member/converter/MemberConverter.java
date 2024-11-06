@@ -22,7 +22,7 @@ public class MemberConverter {
                 .socialType(ClientIdMaker.getSocialTypeInClientId(clientId))
                 .role(Role.USER)
                 .nickname(signUpRequestDTO.getNickname())
-                .gender(Gender.valueOf(signUpRequestDTO.getGender()))
+                .gender(Gender.getValue(signUpRequestDTO.getGender()))
                 .birthDay(signUpRequestDTO.getBirthday())
                 .persona(signUpRequestDTO.getPersona())
                 .university(university)

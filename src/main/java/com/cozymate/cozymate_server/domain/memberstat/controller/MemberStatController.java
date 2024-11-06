@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.M
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
@@ -121,7 +122,7 @@ public class MemberStatController {
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getMemberStatWithId(memberDetails.getMember(),memberId)
+                memberStatQueryService.getMemberStatWithId(memberDetails.getMember(), memberId)
             ));
     }
 
@@ -148,8 +149,11 @@ public class MemberStatController {
 
     @Operation(
         summary = "[포비] 사용자 상세정보 완전 일치 필터링 및 일치율 조회",
-        description = "사용자의 토큰을 넣어 사용합니다."
-            + "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
+        description = "사용자의 토큰을 넣어 사용합니다."+
+            "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
+            "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n" +
+            "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다." +
+            "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
             + "사용 가능한 필터명(24개):\n"
             + "- birthYear: 출생년도"
             + "- acceptance : 합격여부\n"
@@ -187,13 +191,14 @@ public class MemberStatController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList,
-        @RequestParam(defaultValue = "false", required = false) boolean needsDetail
+        @RequestParam(defaultValue = "false", required = false) boolean needsDetail,
+        @RequestParam(defaultValue = "false", required = false) boolean needsPreferences
     ) {
         Pageable pageable = PageRequest.of(page, 5);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberStatList(
-                    memberDetails.getMember(), filterList, pageable, needsDetail)
+                    memberDetails.getMember(), filterList, pageable, needsDetail, needsPreferences)
             ));
     }
 
@@ -209,6 +214,10 @@ public class MemberStatController {
             "  \"mbti\": [\"INTJ\", \"ENTP\"]\n" +
             "}\n" +
             "```\n\n" +
+            "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다." +
+            "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
+            "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n" +
+            "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다." +
             "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 24개):\n\n" +
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
             "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
@@ -235,11 +244,13 @@ public class MemberStatController {
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`" +
             "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
             "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n"
+
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
         ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID,
-        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
+        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE,
+        ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST
     })
     @PostMapping("/filter/search/count")
     public ResponseEntity<ApiResponse<Integer>> getSizeOfAdvancedFilteredMemberList(
@@ -292,26 +303,31 @@ public class MemberStatController {
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`" +
             "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
             "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n" +
-            "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다."
+            "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다." +
+            "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
+            "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n" +
+            "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다."
 
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_NOT_EXISTS,
         ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID,
-        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
+        ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE,
+        ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST
     })
     @PostMapping("/filter/search")
     public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getAdvancedFilteredMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestBody HashMap<String, List<?>> filterMap,
-        @RequestParam(defaultValue = "false", required = false) boolean needsDetail) {
+        @RequestParam(defaultValue = "false", required = false) boolean needsDetail,
+        @RequestParam(defaultValue = "false", required = false) boolean needsPreferences) {
 
         Pageable pageable = PageRequest.of(page, 5);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getSearchedAndFilteredMemberStatList(
-                    memberDetails.getMember(), filterMap, pageable, needsDetail)
+                    memberDetails.getMember(), filterMap, pageable, needsDetail, needsPreferences)
             )
         );
     }
@@ -363,7 +379,7 @@ public class MemberStatController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberStatList(
-                    memberDetails.getMember(), filterList, pageable, true)
+                    memberDetails.getMember(), filterList, pageable, true, false)
             ));
     }
 
@@ -390,10 +406,10 @@ public class MemberStatController {
     @Operation(
         summary = "[포비] 사용자 랜덤 추천",
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
-        +"1. 처음에 seenMemberStatIds 를 빈 배열로 요청합니다.\n"
-        +"2. 응답으로 memberList와 memberList에 보내진 Member들의 Id가 담긴 seenMemberStatIds 배열이 리턴됩니다.\n"
-        +"3. 2번에서 받은 배열을 그대로 복사해 다시 요청합니다.\n"
-        +"결론: seenMemberStatIds는 처음에 빈 배열로, 그 다음부터는 응답으로 받은 seenMemberStatIds를 그대로 요청에 넣어주세요"
+            + "1. 처음에 seenMemberStatIds 를 빈 배열로 요청합니다.\n"
+            + "2. 응답으로 memberList와 memberList에 보내진 Member들의 Id가 담긴 seenMemberStatIds 배열이 리턴됩니다.\n"
+            + "3. 2번에서 받은 배열을 그대로 복사해 다시 요청합니다.\n"
+            + "결론: seenMemberStatIds는 처음에 빈 배열로, 그 다음부터는 응답으로 받은 seenMemberStatIds를 그대로 요청에 넣어주세요"
     )
     @PostMapping("/random/list")
     @SwaggerApiError({
@@ -405,8 +421,34 @@ public class MemberStatController {
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.getMember(),memberStatSeenListDTO)
+                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.getMember(),
+                    memberStatSeenListDTO)
             ));
+    }
+
+    @GetMapping("/search")
+    @Operation(
+        summary = "[포비] 사용자 검색",
+        description = "요청자의 토큰을 넣고 사용합니다.\n\n"
+            + "검색어의 일부만 일치해도, 일치율이 높은 순으로 결과를 리턴합니다.\n\n"
+            + "완전일치 순으로 주는게 좋긴 하지만, 우선 일치율, ID 순으로 구현했습니다.\n\n"
+            + "QueryString으로 keyword=${검색어 일부}로 사용합니다."
+    )
+    @SwaggerApiError({
+        ErrorStatus._MEMBERSTAT_EQUALITY_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<List<MemberStatSearchResponseDTO>>> getMemberSearchResponse(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @RequestParam String keyword
+    ){
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                memberStatQueryService.getMemberSearchResponse(
+                    keyword,
+                    memberDetails.getMember()
+                )
+            )
+        );
     }
 
 }

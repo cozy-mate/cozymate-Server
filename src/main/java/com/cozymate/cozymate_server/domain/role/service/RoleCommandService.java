@@ -35,21 +35,14 @@ public class RoleCommandService {
         Member member, Long roomId, CreateRoleRequestDto requestDto
     ) {
         // 해당 방의 mate가 맞는지 확인
-        mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
+        Mate mate = getMate(member.getId(), roomId);
 
+        // TODO role max 개수 제한 추가
         int repeatDayBitmast = getDayBitmask(requestDto.getRepeatDayList());
 
-        List<Mate> mateList = mateRepository.findByIdIn(requestDto.getMateIdList());
-        if (mateList.size() != requestDto.getMateIdList().size()) {
-            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
-        }
-
-        List<Role> roleList = mateList.stream()
-            .map(mate -> RoleConverter.toEntity(mate, requestDto.getTitle(), repeatDayBitmast)
-            ).toList();
-
-        roleRepository.saveAll(roleList);
+        roleRepository.save(
+            RoleConverter.toEntity(mate, requestDto.getMateIdList(), requestDto.getTitle(),
+                repeatDayBitmast));
     }
 
     /**
@@ -58,32 +51,31 @@ public class RoleCommandService {
      * @param member 사용자 본인것만 삭제가능
      * @param roleId Role Id
      */
-    public void deleteRole(Member member, Long roleId) {
+    public void deleteRole(Member member, Long roomId, Long roleId) {
+        Role role = getRole(roleId);
+        Mate mate = getMate(member.getId(), roomId);
 
-        // role 검색
-        Role role = roleRepository.findById(roleId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROLE_NOT_FOUND));
-
-        // role의 mate와 member가 일치하는지 확인 (삭제할 권한이 있는지 확인)
-        if (!member.getId().equals(role.getMate().getMember().getId())) {
-            throw new GeneralException(ErrorStatus._ROLE_MATE_MISMATCH);
-        }
+        checkUpdatePermission(role, mate);
 
         roleRepository.delete(role);
     }
 
-    public void updateRole(Member member, Long roleId, UpdateRoleRequestDto requestDto) {
-        // role 검색
-        Role role = roleRepository.findById(roleId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROLE_NOT_FOUND));
+    /**
+     * Role 수정
+     *
+     * @param member     사용자
+     * @param roleId     Role Id
+     * @param requestDto 수정할 Role 데이터
+     */
+    public void updateRole(Member member, Long roomId, Long roleId, UpdateRoleRequestDto requestDto) {
+        Role role = getRole(roleId);
+        Mate mate = getMate(member.getId(), roomId);
 
-        // role의 mate와 member가 일치하는지 확인 (수정할 권한이 있는지 확인)
-        if (!member.getId().equals(role.getMate().getMember().getId())) {
-            throw new GeneralException(ErrorStatus._ROLE_MATE_MISMATCH);
-        }
+        checkUpdatePermission(role, mate);
 
         // role 수정
-        role.updateEntity(requestDto.getTitle(), getDayBitmask(requestDto.getRepeatDayList()));
+        role.updateEntity(requestDto.getMateIdList(), requestDto.getTitle(),
+            getDayBitmask(requestDto.getRepeatDayList()));
     }
 
     /**
@@ -93,11 +85,43 @@ public class RoleCommandService {
      * @return 비트마스크 값
      */
     private int getDayBitmask(List<String> repeatDayStringList) {
-        if(repeatDayStringList == null) {
-            return -1;
-        }
         List<DayListBitmask> repeatDayEnumList = repeatDayStringList.stream()
             .map(DayListBitmask::valueOf).toList();
         return RoleConverter.convertDayListToBitmask(repeatDayEnumList);
+    }
+
+    /**
+     * Mate 가져오기
+     *
+     * @param memberId 사용자 Id
+     * @param roomId   방 Id
+     * @return Mate
+     */
+    private Mate getMate(Long memberId, Long roomId) {
+        return mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
+    }
+
+    /**
+     * Role 가져오기
+     *
+     * @param roleId 가져올 Role
+     * @return Role
+     */
+    private Role getRole(Long roleId) {
+        return roleRepository.findById(roleId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROLE_NOT_FOUND));
+    }
+
+    /**
+     * Role 수정 가능한지 권한 확인
+     *
+     * @param role
+     * @param mate
+     */
+    private void checkUpdatePermission(Role role, Mate mate) {
+        if (!role.getAssignedMateIdList().contains(mate.getId())) {
+            throw new GeneralException(ErrorStatus._ROLE_NOT_VALID);
+        }
     }
 }
