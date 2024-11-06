@@ -318,5 +318,4 @@ public class RoomController {
         roomCommandService.respondToJoinRequest(requesterId, accept, managerDetails.getMember().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(accept ? "참여 요청 수락 완료" : "참여 요청 거절 완료"));
     }
-
 }

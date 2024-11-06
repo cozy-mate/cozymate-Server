@@ -99,7 +99,7 @@ public class RoomQueryService {
             roomEquality,
             MemberStatConverter.toMemberStatDifferenceResponseDTO(mateMemberStats)
             // Todo: 기숙사 정보 추가
-            );
+        );
     }
 
     public RoomJoinResponse getRoomByInviteCode(String inviteCode, Long memberId) {
@@ -210,5 +210,4 @@ public class RoomQueryService {
             .orElse(0));
 
     }
-
 }
