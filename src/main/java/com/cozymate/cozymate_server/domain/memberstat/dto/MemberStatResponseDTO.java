@@ -124,9 +124,6 @@ public class MemberStatResponseDTO {
     @Builder
     public static class MemberStatRandomListResponseDTO {
         List<MemberStatPreferenceResponseDTO> memberList;
-        // 누적 ID List
-        List<Long> seenMemberStatIds;
-
     }
 
     @Getter

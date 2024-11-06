@@ -237,11 +237,10 @@ public class MemberStatConverter {
     }
 
     public static MemberStatRandomListResponseDTO toRandomListResponseDTO(
-        List<MemberStatPreferenceResponseDTO> memberList, List<Long> seenMemberStatIds
+        List<MemberStatPreferenceResponseDTO> memberList
     ) {
         return MemberStatRandomListResponseDTO.builder()
             .memberList(memberList)
-            .seenMemberStatIds(seenMemberStatIds)
             .build();
     }
 

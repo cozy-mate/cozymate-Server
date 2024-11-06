@@ -75,6 +75,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST(HttpStatus.BAD_REQUEST, "MEMBERSTAT406",
         "needsDetail 옵션과 needsPreferences 옵션은 공존할 수 없습니다."),
 
+
     _MEMBERSTAT_PREFERENCE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTATPREFERENCE400", "멤버 선호 항목이 존재하지 않습니다."),
     _MEMBERSTAT_PREFERENCE_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST,"MEMBERSTATPREFERENCE401","존재하지 않는 멤버 항목(들)입니다."),
     // ChatRoom 관련 애러

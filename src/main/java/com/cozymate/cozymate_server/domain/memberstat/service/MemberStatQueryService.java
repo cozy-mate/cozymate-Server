@@ -214,20 +214,20 @@ public class MemberStatQueryService {
         );
     }
 
-    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member,
-        MemberStatSeenListDTO currentMemberStatIds) {
+    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member) {
 
+        // 상세정보가 있다면 불러올 수 없는 API
+        if(memberStatRepository.existsByMemberId(member.getId())){
+            throw new GeneralException(ErrorStatus._MEMBERSTAT_EXISTS);
+        }
         // 기준 멤버의 선호도 필드 목록 가져오기
         List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
-
-        List<Long> seenMemberStatIds = currentMemberStatIds.getSeenMemberStatIds();
         // 같은 성별과 대학의 멤버 중, 자신과 이미 본 멤버를 제외
         List<MemberStat> memberStatList = memberStatRepository.findByMember_GenderAndMember_University_Id(
                 member.getGender(), member.getUniversity().getId()
             ).stream()
             .filter(stat -> !stat.getMember().getId().equals(member.getId())) // 자신 제외
-            .filter(stat -> !seenMemberStatIds.contains(stat.getId())) // 이미 본 멤버 제외
             .collect(Collectors.toList());
 
         // 리스트를 랜덤하게 섞고, 최대 5개의 멤버를 선택
@@ -241,22 +241,16 @@ public class MemberStatQueryService {
             .map(stat -> {
                 Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(stat,
                     criteriaPreferences);
-                MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO = MemberStatConverter.toPreferenceResponseDTO(
+                return MemberStatConverter.toPreferenceResponseDTO(
                     stat,
                     preferences,
                     null
                 );
-
-                // 누적 ID 리스트에 새로 선택된 멤버 ID 추가
-                seenMemberStatIds.add(stat.getId());
-
-                return memberStatPreferenceResponseDTO;
             })
             .toList();
 
         return MemberStatConverter.toRandomListResponseDTO(
-            preferenceResponseList,
-            seenMemberStatIds);
+            preferenceResponseList);
 
     }
 

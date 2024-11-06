@@ -149,7 +149,7 @@ public class MemberStatController {
 
     @Operation(
         summary = "[포비] 사용자 상세정보 완전 일치 필터링 및 일치율 조회",
-        description = "사용자의 토큰을 넣어 사용합니다."+
+        description = "사용자의 토큰을 넣어 사용합니다." +
             "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
             "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n" +
             "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다." +
@@ -410,23 +410,19 @@ public class MemberStatController {
     @Operation(
         summary = "[포비] 사용자 랜덤 추천",
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
-            + "1. 처음에 seenMemberStatIds 를 빈 배열로 요청합니다.\n"
-            + "2. 응답으로 memberList와 memberList에 보내진 Member들의 Id가 담긴 seenMemberStatIds 배열이 리턴됩니다.\n"
-            + "3. 2번에서 받은 배열을 그대로 복사해 다시 요청합니다.\n"
-            + "결론: seenMemberStatIds는 처음에 빈 배열로, 그 다음부터는 응답으로 받은 seenMemberStatIds를 그대로 요청에 넣어주세요"
+            + "랜덤 사용자 5명을 리턴합니다.\n\n"
+            + "사용자 멤버 스탯이 없을 때 사용합니다.\n\n"
     )
-    @PostMapping("/random/list")
+    @GetMapping("/random")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
     })
     public ResponseEntity<ApiResponse<MemberStatRandomListResponseDTO>> getRandomMemberStatPreference(
-        @AuthenticationPrincipal MemberDetails memberDetails,
-        @RequestBody MemberStatSeenListDTO memberStatSeenListDTO
+        @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.getMember(),
-                    memberStatSeenListDTO)
+                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.getMember())
             ));
     }
 
@@ -444,7 +440,7 @@ public class MemberStatController {
     public ResponseEntity<ApiResponse<List<MemberStatSearchResponseDTO>>> getMemberSearchResponse(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam String keyword
-    ){
+    ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberSearchResponse(
