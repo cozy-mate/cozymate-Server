@@ -26,13 +26,15 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBER_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "MEMBER403", "메일 인증을 완료해주세요"),
     _MEMBER_EXISTING(HttpStatus.BAD_REQUEST, "MEMBER402", "이미 존재하는 사용자 입니다"),
 
+    _INVALID_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, "SOCIAL400", "제공하지 않는 소셜 타입입니다."),
+    _INVALID_GENDER(HttpStatus.BAD_REQUEST, "GENDER400", "제공하지 않는 성별입니다."),
+
     // Token
     _TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN400", "사용자의 리프레시 토큰을 찾을 수 없습니다."),
     _TOKEN_INVALID(HttpStatus.BAD_REQUEST, "TOKEN401", "토큰이 유효하지 않습니다."),
     _TEMPORARY_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN402", "임시토큰으로 접근 할 수 없습니다."),
     _REFRESH_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN403", "refresh 토큰으로 접근 할 수 없습니다."),
-    // Social type
-    _INVALID_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, "SOCIAL400", "제공하지 않는 소셜 타입입니다."),
+
 
     // S3 관련
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
@@ -142,7 +144,13 @@ public enum ErrorStatus implements BaseErrorCode {
     // Report 관련
     _REPORT_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT400", "신고 대상 멤버를 찾을 수 없습니다."),
     _REPORT_DUPLICATE(HttpStatus.BAD_REQUEST, "REPORT401", "중복된 신고 요청입니다."),
-    _CANNOT_REPORT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
+    _REPORT_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
+
+    // Favorite 관련
+    _FAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "FAVORITE400", "이미 찜이 되어 있습니다."),
+    _FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "FAVORITE401", "찜을 찾을 수 없습니다."),
+    _FAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "FAVORITE402", "해당 찜에 대한 권한이 없습니다."),
+    _FAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "FAVORITE403", "자신에 대한 찜 관련 요청을 할 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

@@ -99,7 +99,7 @@ public class RoomQueryService {
             roomEquality,
             MemberStatConverter.toMemberStatDifferenceResponseDTO(mateMemberStats)
             // Todo: 기숙사 정보 추가
-            );
+        );
     }
 
     public RoomJoinResponse getRoomByInviteCode(String inviteCode, Long memberId) {
@@ -174,9 +174,25 @@ public class RoomQueryService {
             memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
         if (mate.isPresent()) {
             return RoomConverter.toRoomExistResponse(mate.get().getRoom());
-        } else {
-            return RoomConverter.toRoomExistResponse(null);
         }
+        return RoomConverter.toRoomExistResponse(null);
+
+    }
+
+    public RoomExistResponse getExistRoom(Long otherMemberId, Long memberId) {
+        memberRepository.findById(otherMemberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
+            otherMemberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
+        if (mate.isPresent()) {
+            return RoomConverter.toRoomExistResponse(mate.get().getRoom());
+        }
+
+        return RoomConverter.toRoomExistResponse(null);
+
     }
 
     public Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap){
@@ -194,8 +210,4 @@ public class RoomQueryService {
             .orElse(0));
 
     }
-
-
-
-
 }

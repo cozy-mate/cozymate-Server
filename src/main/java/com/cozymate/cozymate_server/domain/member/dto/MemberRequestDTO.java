@@ -40,10 +40,6 @@ public class MemberRequestDTO {
 
         @NotNull
         @NotEmpty
-        private String name;
-
-        @NotNull
-        @NotEmpty
         private String nickname;
 
         @NotNull

@@ -1,12 +1,11 @@
-package com.cozymate.cozymate_server.domain.roomhashtag;
+package com.cozymate.cozymate_server.domain.favorite;
 
-import static jakarta.persistence.FetchType.LAZY;
-
-import com.cozymate.cozymate_server.domain.hashtag.Hashtag;
-import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,16 +22,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
-public class RoomHashtag extends BaseTimeEntity {
+public class Favorite extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
-    private Room room;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Hashtag hashtag;
+    private Long targetId;
 
+    @Enumerated(EnumType.STRING)
+    private FavoriteType favoriteType;
 }

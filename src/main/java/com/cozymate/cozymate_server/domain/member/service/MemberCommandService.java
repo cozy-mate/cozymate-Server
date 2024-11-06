@@ -29,6 +29,7 @@ public class MemberCommandService {
     private final MemberRepository memberRepository;
 
     private final UniversityRepository universityRepository;
+
     /**
      * 닉네임 유효성 검사 메서드
      *
@@ -48,8 +49,7 @@ public class MemberCommandService {
      */
     public MemberResponseDTO.SignInResponseDTO signIn(MemberRequestDTO.SignInRequestDTO signInRequestDTO) {
         // 소셜 타입 검증 및 조회
-        SocialType socialType = SocialType.getValue(signInRequestDTO.getSocialType())
-                .orElseThrow(() -> new GeneralException(ErrorStatus._INVALID_SOCIAL_TYPE));
+        SocialType socialType = SocialType.getValue(signInRequestDTO.getSocialType());
 
         String clientId = ClientIdMaker.makeClientId(signInRequestDTO.getClientId(), socialType);
 
@@ -77,7 +77,12 @@ public class MemberCommandService {
         if (memberQueryService.isPresent(clientId)) { // 사용자 중복 검증
             throw new GeneralException(ErrorStatus._MEMBER_EXISTING);
         }
-        // 회원 정보를 Member 엔티티로 변환하고 저장
+        University memberUniversity = universityRepository.findById(signUpRequestDTO.getUniversityId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+
+
+        memberRepository.save(MemberConverter.toMember(clientId, signUpRequestDTO,memberUniversity));
+        log.info(clientId);
 
         // 기존 회원으로 로그인 처리
         return signInByExistingMember(clientId);

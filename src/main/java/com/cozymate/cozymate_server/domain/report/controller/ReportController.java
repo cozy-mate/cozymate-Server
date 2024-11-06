@@ -37,7 +37,7 @@ public class ReportController {
     )
     @SwaggerApiError({
         ErrorStatus._REPORT_MEMBER_NOT_FOUND,
-        ErrorStatus._CANNOT_REPORT_REQUEST_SELF,
+        ErrorStatus._REPORT_CANNOT_REQUEST_SELF,
         ErrorStatus._REPORT_DUPLICATE
     })
     public ResponseEntity<ApiResponse<String>> saveReport(
