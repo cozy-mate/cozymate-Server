@@ -141,7 +141,7 @@ public class FavoriteQueryService {
         return favoriteRoomResponseList;
     }
 
-    private static List<PreferenceStatsMatchCount> getPreferenceStatsMatchCounts(Member member,
+    private List<PreferenceStatsMatchCount> getPreferenceStatsMatchCounts(Member member,
         List<String> criteriaPreferences, List<Mate> mates, MemberStat memberStat) {
         List<PreferenceStatsMatchCount> preferenceStatsMatchCountList = criteriaPreferences.stream()
             .map(preference -> {
