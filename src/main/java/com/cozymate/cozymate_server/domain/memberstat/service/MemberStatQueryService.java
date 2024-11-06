@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatPageResponseDto;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatSeenListDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityDetailResponseDTO;
@@ -111,7 +112,7 @@ public class MemberStatQueryService {
         return memberStat.getNumOfRoommate();
     }
 
-    public PageResponseDto<List<?>> getMemberStatList(Member member,
+    public MemberStatPageResponseDto<List<?>> getMemberStatList(Member member,
         List<String> filterList, Pageable pageable, boolean needsDetail, boolean needsPreferences) {
 
         if (needsDetail && needsPreferences) {
@@ -158,7 +159,7 @@ public class MemberStatQueryService {
 
     }
 
-    public PageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member,
+    public MemberStatPageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member,
         HashMap<String, List<?>> filterMap, Pageable pageable, boolean needsDetail, boolean needsPreferences) {
 
         if (needsDetail && needsPreferences) {
@@ -327,12 +328,12 @@ public class MemberStatQueryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
     }
 
-    private PageResponseDto<List<?>> createEmptyPageResponse(Pageable pageable) {
-        return new PageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
+    private MemberStatPageResponseDto<List<?>> createEmptyPageResponse(Pageable pageable) {
+        return new MemberStatPageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
     }
 
-    private PageResponseDto<List<?>> toPageResponseDto(Page<?> page) {
-        return new PageResponseDto<>(
+    private MemberStatPageResponseDto<List<?>> toPageResponseDto(Page<?> page) {
+        return new MemberStatPageResponseDto<>(
             page.getNumber(),
             page.hasNext(),
             page.getContent()

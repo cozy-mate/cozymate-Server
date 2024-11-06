@@ -1,15 +1,14 @@
 package com.cozymate.cozymate_server.domain.memberstat.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatPageResponseDto;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatSeenListDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
-import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
@@ -188,7 +187,7 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
     })
     @GetMapping("/filter")
-    public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getFilteredMemberList(
+    public ResponseEntity<ApiResponse<MemberStatPageResponseDto<List<?>>>> getFilteredMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList,
@@ -319,7 +318,7 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST
     })
     @PostMapping("/filter/search")
-    public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getAdvancedFilteredMemberList(
+    public ResponseEntity<ApiResponse<MemberStatPageResponseDto<List<?>>>> getAdvancedFilteredMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestBody HashMap<String, List<?>> filterMap,
@@ -373,7 +372,7 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
     })
     @GetMapping("/filter/details")
-    public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getFilteredMemberListWithMemberDetails(
+    public ResponseEntity<ApiResponse<MemberStatPageResponseDto<List<?>>>> getFilteredMemberListWithMemberDetails(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList) {
