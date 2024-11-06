@@ -10,7 +10,6 @@ import lombok.Getter;
 public class FavoriteResponseDto {
 
     private Long favoriteId;
-    private Integer equality;
 
     @Getter
     @Builder
@@ -25,6 +24,7 @@ public class FavoriteResponseDto {
     public static class FavoriteRoomResponse {
 
         private FavoriteResponseDto favoriteResponseDto;
+        private Integer equality;
         private Long roomId;
         private String name;
         private List<PreferenceStatsMatchCount> preferenceStatsMatchCountList;

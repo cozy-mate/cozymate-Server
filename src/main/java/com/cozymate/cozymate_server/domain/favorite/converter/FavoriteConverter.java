@@ -21,12 +21,11 @@ public class FavoriteConverter {
             .build();
     }
 
-    public static FavoriteMemberResponse toFavoriteMemberResponse(Long favoriteId, Integer equality,
+    public static FavoriteMemberResponse toFavoriteMemberResponse(Long favoriteId,
         MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO) {
         return FavoriteMemberResponse.builder()
             .favoriteResponseDto(FavoriteResponseDto.builder()
                 .favoriteId(favoriteId)
-                .equality(equality)
                 .build())
             .memberStatPreferenceResponseDTO(memberStatPreferenceResponseDTO)
             .build();
@@ -38,9 +37,9 @@ public class FavoriteConverter {
         return FavoriteRoomResponse.builder()
             .favoriteResponseDto(FavoriteResponseDto.builder()
                 .favoriteId(favoriteId)
-                .equality(roomEquality)
                 .build())
             .roomId(room.getId())
+            .equality(roomEquality)
             .name(room.getName())
             .preferenceStatsMatchCountList(preferenceStatsMatchCountList)
             .hashtagList(roomHashTags)

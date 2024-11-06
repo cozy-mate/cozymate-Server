@@ -44,26 +44,6 @@ public class FavoriteQueryService {
     private final RoomHashtagRepository roomHashtagRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-    private static List<PreferenceStatsMatchCount> getPreferenceStatsMatchCounts(Member member,
-        List<String> criteriaPreferences, List<Mate> mates, MemberStat memberStat) {
-        List<PreferenceStatsMatchCount> preferenceStatsMatchCountList = criteriaPreferences.stream()
-            .map(preference -> {
-                long equalCount = mates.stream()
-                    .map(mate -> mate.getMember().getMemberStat())
-                    .filter(mateStat -> mateStat != null && !mateStat.getMember().getId().equals(
-                        member.getId())
-                        && Objects.equals(MemberStatUtil.getMemberStatField(mateStat, preference),
-                        MemberStatUtil.getMemberStatField(memberStat, preference)))
-                    .count();
-
-                return PreferenceStatsMatchCount.builder()
-                    .preferenceName(preference)
-                    .matchCount((int) equalCount)
-                    .build();
-            }).toList();
-        return preferenceStatsMatchCountList;
-    }
-
     public List<FavoriteMemberResponse> getFavoriteMemberList(Member member) {
         List<Favorite> favoriteList = favoriteRepository.findByMemberAndFavoriteType(
             member, FavoriteType.MEMBER);
@@ -90,12 +70,10 @@ public class FavoriteQueryService {
                 Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(
                     favoriteMember.getMemberStat(), criteriaPreferences);
 
-                // TODO: 2024-11-06 MemberStatConverter.toPreferenceResponseDTO() 메서드 수정 필요 - equality null에서 변경
                 return FavoriteConverter.toFavoriteMemberResponse(
                     memberIdFavoriteIdMap.get(favoriteMember.getId()),
-                    equalityMap.get(favoriteMember.getId()),
                     MemberStatConverter.toPreferenceResponseDTO(favoriteMember.getMemberStat(),
-                        preferences, null));
+                        preferences, equalityMap.get(favoriteMember.getId())));
             }).toList();
 
         return favoriteMemberResponseList;
@@ -161,6 +139,26 @@ public class FavoriteQueryService {
         }
 
         return favoriteRoomResponseList;
+    }
+
+    private static List<PreferenceStatsMatchCount> getPreferenceStatsMatchCounts(Member member,
+        List<String> criteriaPreferences, List<Mate> mates, MemberStat memberStat) {
+        List<PreferenceStatsMatchCount> preferenceStatsMatchCountList = criteriaPreferences.stream()
+            .map(preference -> {
+                long equalCount = mates.stream()
+                    .map(mate -> mate.getMember().getMemberStat())
+                    .filter(mateStat -> mateStat != null && !mateStat.getMember().getId().equals(
+                        member.getId())
+                        && Objects.equals(MemberStatUtil.getMemberStatField(mateStat, preference),
+                        MemberStatUtil.getMemberStatField(memberStat, preference)))
+                    .count();
+
+                return PreferenceStatsMatchCount.builder()
+                    .preferenceName(preference)
+                    .matchCount((int) equalCount)
+                    .build();
+            }).toList();
+        return preferenceStatsMatchCountList;
     }
 
     private Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap) {
