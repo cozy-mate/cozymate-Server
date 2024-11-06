@@ -436,7 +436,7 @@ public class MemberStatController {
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
             + "검색어의 일부만 일치해도, 일치율이 높은 순으로 결과를 리턴합니다.\n\n"
             + "완전일치 순으로 주는게 좋긴 하지만, 우선 일치율, ID 순으로 구현했습니다.\n\n"
-            + "QueryString으로 keyword=${검색어 일부}로 사용합니다."
+            + "QueryString으로 keyword=검색어 일부로 사용합니다."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_EQUALITY_NOT_FOUND
