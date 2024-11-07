@@ -101,8 +101,7 @@ public class MemberStatResponseDTO {
     public static class MemberStatEqualityResponseDTO {
 
         private Long memberId;
-        private String memberName;
-        private String memberNickName;
+        private String memberNickname;
         private Integer memberAge;
         private Integer memberPersona;
         private Integer numOfRoommate;
@@ -115,7 +114,7 @@ public class MemberStatResponseDTO {
     @Builder
     public static class MemberStatPreferenceResponseDTO {
         private Long memberId;
-        private String memberNickName;
+        private String memberNickname;
         private Integer equality;
         private Map<String,Object> preferenceStats;
     }
@@ -134,7 +133,7 @@ public class MemberStatResponseDTO {
     @Builder
     public static class MemberStatSearchResponseDTO{
         private Long memberId;
-        private String memberNickName;
+        private String memberNickname;
         private Integer memberPersona;
         private Integer equality;
     }

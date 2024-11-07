@@ -169,7 +169,7 @@ public class MemberStatConverter {
         return MemberStatEqualityResponseDTO.builder()
             .memberId(memberStat.getMember().getId())
             .memberAge(TimeUtil.calculateAge(memberStat.getMember().getBirthDay()))
-            .memberNickName(memberStat.getMember().getNickname())
+            .memberNickname(memberStat.getMember().getNickname())
             .memberPersona(memberStat.getMember().getPersona())
             .numOfRoommate(memberStat.getNumOfRoommate())
             .equality(equality)
@@ -231,7 +231,7 @@ public class MemberStatConverter {
         Map<String, Object> preferences, Integer equality) {
         return MemberStatPreferenceResponseDTO.builder()
             .memberId(stat.getMember().getId())
-            .memberNickName(stat.getMember().getNickname())
+            .memberNickname(stat.getMember().getNickname())
             .equality(equality)
             .preferenceStats(preferences)
             .build();
@@ -250,7 +250,7 @@ public class MemberStatConverter {
     ){
         return MemberStatSearchResponseDTO.builder()
             .memberId(member.getId())
-            .memberNickName(member.getNickname())
+            .memberNickname(member.getNickname())
             .memberPersona(member.getPersona())
             .equality(equality)
             .build();
