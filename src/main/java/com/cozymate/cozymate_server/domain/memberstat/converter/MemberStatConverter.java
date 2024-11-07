@@ -19,7 +19,6 @@ import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -73,11 +72,12 @@ public class MemberStatConverter {
     }
 
 
-    public static MemberStatQueryResponseDTO toDto(MemberStat memberStat, Integer birthYear) {
+    public static MemberStatQueryResponseDTO toDto(MemberStat memberStat, Member member) {
         return MemberStatQueryResponseDTO.builder()
             .universityId(memberStat.getMember().getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
-            .birthYear(birthYear)
+            .birthYear(member.getBirthDay().getYear())
+            .memberPersona(member.getPersona())
 //            .major(memberStat.getMajor())
             .numOfRoommate(memberStat.getNumOfRoommate())
             .dormitoryNames(memberStat.getDormitoryNames())
@@ -110,14 +110,15 @@ public class MemberStatConverter {
     }
 
     public static MemberStatDetailResponseDTO toDetailDto(MemberStat memberStat,
-        Integer birthYear,
+        Member member,
         Integer equality,
         Long roomId) {
         return MemberStatDetailResponseDTO.builder()
             //.universityId(memberStat.getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
-            .birthYear(birthYear)
-            .major(memberStat.getMajor())
+            .birthYear(member.getBirthDay().getYear())
+            .memberPersona(member.getPersona())
+            .major(memberStat.getMember().getMajorName())
             .numOfRoommate(memberStat.getNumOfRoommate())
             .dormitoryNames(memberStat.getDormitoryNames())
             .acceptance(memberStat.getAcceptance())
@@ -159,7 +160,7 @@ public class MemberStatConverter {
                 memberStat, equality
             ))
             .detail(MemberStatConverter.toDto(
-                memberStat, memberStat.getMember().getBirthDay().getYear()
+                memberStat, memberStat.getMember()
             ))
             .build();
     }

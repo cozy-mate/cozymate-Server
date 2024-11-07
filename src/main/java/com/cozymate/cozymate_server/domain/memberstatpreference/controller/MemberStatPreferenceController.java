@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,7 +53,7 @@ public class MemberStatPreferenceController {
     ) {
         Long createdId = memberStatPreferenceCommandService.savePreferences(
             memberDetails.getMember().getId(),
-            memberStatPreferenceDto.getPreferences());
+            memberStatPreferenceDto.getPreferenceList());
 
         return ResponseEntity.ok(ApiResponse.onSuccess(createdId));
     }
@@ -72,7 +71,7 @@ public class MemberStatPreferenceController {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             memberStatPreferenceCommandService.updatePreferences(
                 memberDetails.getMember().getId(),
-                memberStatPreferenceDto.getPreferences()
+                memberStatPreferenceDto.getPreferenceList()
             )
         ));
     }

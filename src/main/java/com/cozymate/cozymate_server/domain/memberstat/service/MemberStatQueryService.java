@@ -69,7 +69,7 @@ public class MemberStatQueryService {
             );
 
         return MemberStatConverter.toDto(
-            memberStat, birthYear
+            memberStat, memberStat.getMember()
         );
     }
 
@@ -83,19 +83,20 @@ public class MemberStatQueryService {
             () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
         );
 
-        Integer birthYear = member.getBirthDay().getYear();
 
         Integer equality = memberStatEqualityQueryService.getSingleEquality(
             memberId,
             viewer.getId()
         );
 
+
+
         Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
             memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
 
         return MemberStatConverter.toDetailDto(
             memberStat,
-            birthYear,
+            member,
             equality,
             mate.isPresent() ?
                 mate.get().getRoom().getId()
