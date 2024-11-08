@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record UniversityListDTO(
-        List<UniversityBasicInfoDTO> universityList
+public record UniversityListResponseDTO(
+        List<UniversityBasicInfoResponseDTO> universityList
 ) {
 }

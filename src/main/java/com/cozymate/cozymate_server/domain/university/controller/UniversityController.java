@@ -3,8 +3,8 @@ package com.cozymate.cozymate_server.domain.university.controller;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 
 import com.cozymate.cozymate_server.domain.university.dto.request.UniversityRequestDTO;
-import com.cozymate.cozymate_server.domain.university.dto.response.UniversityDetailDTO;
-import com.cozymate.cozymate_server.domain.university.dto.response.UniversityListDTO;
+import com.cozymate.cozymate_server.domain.university.dto.response.UniversityDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.university.dto.response.UniversityListResponseDTO;
 import com.cozymate.cozymate_server.domain.university.service.UniversityService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -45,10 +45,10 @@ public class UniversityController {
                     + "삭제 될 예정..")
     @SwaggerApiError({
     })
-    public ResponseEntity<ApiResponse<UniversityDetailDTO>> createUniversity
+    public ResponseEntity<ApiResponse<UniversityDetailResponseDTO>> createUniversity
             (@RequestBody @Valid UniversityRequestDTO universityRequestDTO) {
 
-        UniversityDetailDTO universityDTO = universityService.createUniversity(universityRequestDTO);
+        UniversityDetailResponseDTO universityDTO = universityService.createUniversity(universityRequestDTO);
         return ResponseEntity.ok(ApiResponse.onSuccess(universityDTO));
     }
 
@@ -69,9 +69,9 @@ public class UniversityController {
     @SwaggerApiError({
             ErrorStatus._UNIVERSITY_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<UniversityDetailDTO>> updateUniversity
+    public ResponseEntity<ApiResponse<UniversityDetailResponseDTO>> updateUniversity
             (@RequestBody @Valid UniversityRequestDTO universityRequestDTO){
-        UniversityDetailDTO universityDTO = universityService.updateUniversity(universityRequestDTO);
+        UniversityDetailResponseDTO universityDTO = universityService.updateUniversity(universityRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(universityDTO));
     }
@@ -83,9 +83,9 @@ public class UniversityController {
                     + "\t mailPattern : inha.edu <br>"
                     + "\t dormitoryNames : [\"웅비재\", \"비룡재\", ...] <br>"
                     + "\t departments : [\"컴퓨터공학과\", \"문화콘텐츠문화경영학과\", ...] <br>" )
-    public ResponseEntity<ApiResponse<UniversityDetailDTO>>getUniversity(
+    public ResponseEntity<ApiResponse<UniversityDetailResponseDTO>>getUniversity(
             @RequestParam Long universityId){
-        UniversityDetailDTO universityDTO = universityService.getUniversity(universityId);
+        UniversityDetailResponseDTO universityDTO = universityService.getUniversity(universityId);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(universityDTO));
     }
@@ -97,9 +97,9 @@ public class UniversityController {
                     + "\t mailPattern : inha.edu <br>"
                     + "\t dormitoryNames : [\"웅비재\", \"비룡재\", ...] <br>"
                     + "\t departments : [\"컴퓨터공학과\", \"문화콘텐츠문화경영학과\", ...] <br>" )
-    public ResponseEntity<ApiResponse<UniversityDetailDTO>>getMemberUniversity(
+    public ResponseEntity<ApiResponse<UniversityDetailResponseDTO>>getMemberUniversity(
             @AuthenticationPrincipal MemberDetails memberDetails){
-        UniversityDetailDTO universityDTO = universityService.getMemberUniversity(memberDetails);
+        UniversityDetailResponseDTO universityDTO = universityService.getMemberUniversity(memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(universityDTO));
     }
@@ -113,9 +113,9 @@ public class UniversityController {
                     + "\t\t } <br>"
                     + "\t ] <br>")
 
-    public ResponseEntity<ApiResponse<UniversityListDTO>>getUniversities(){
-        UniversityListDTO universityListDTO = universityService.getUniversities();
+    public ResponseEntity<ApiResponse<UniversityListResponseDTO>>getUniversities(){
+        UniversityListResponseDTO universityListResponseDTO = universityService.getUniversities();
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(universityListDTO));
+        return ResponseEntity.ok(ApiResponse.onSuccess(universityListResponseDTO));
     }
 }

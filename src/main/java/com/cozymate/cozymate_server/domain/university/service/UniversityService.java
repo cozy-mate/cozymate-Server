@@ -4,8 +4,8 @@ import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.converter.UniversityConverter;
 import com.cozymate.cozymate_server.domain.university.dto.request.UniversityRequestDTO;
-import com.cozymate.cozymate_server.domain.university.dto.response.UniversityDetailDTO;
-import com.cozymate.cozymate_server.domain.university.dto.response.UniversityListDTO;
+import com.cozymate.cozymate_server.domain.university.dto.response.UniversityDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.university.dto.response.UniversityListResponseDTO;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -23,7 +23,7 @@ public class UniversityService {
 
 
     @Transactional
-    public UniversityDetailDTO createUniversity(UniversityRequestDTO requestDTO) {
+    public UniversityDetailResponseDTO createUniversity(UniversityRequestDTO requestDTO) {
         University university = UniversityConverter.toUniversity(requestDTO);
         universityRepository.save(university);
 
@@ -31,7 +31,7 @@ public class UniversityService {
     }
 
     @Transactional
-    public UniversityDetailDTO updateUniversity(UniversityRequestDTO requestDTO) {
+    public UniversityDetailResponseDTO updateUniversity(UniversityRequestDTO requestDTO) {
         University university = universityRepository.findByName(requestDTO.name())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
@@ -40,19 +40,19 @@ public class UniversityService {
         return UniversityConverter.toUniversityDTOFromEntity(university);
     }
 
-    public UniversityDetailDTO getUniversity(Long id) {
+    public UniversityDetailResponseDTO getUniversity(Long id) {
         University university = universityRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
         return UniversityConverter.toUniversityDTOFromEntity(university);
     }
 
-    public UniversityListDTO getUniversities(){
+    public UniversityListResponseDTO getUniversities(){
         List<University> universityList = universityRepository.findAll();
 
         return UniversityConverter.toUniversityListDTO(universityList);
     }
 
-    public UniversityDetailDTO getMemberUniversity(MemberDetails memberDetails){
+    public UniversityDetailResponseDTO getMemberUniversity(MemberDetails memberDetails){
         return  UniversityConverter.toUniversityDTOFromEntity(memberDetails.member().getUniversity());
     }
 
