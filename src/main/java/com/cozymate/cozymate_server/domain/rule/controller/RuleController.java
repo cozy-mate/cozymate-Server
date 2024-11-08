@@ -104,6 +104,8 @@ public class RuleController {
         return ResponseEntity.ok(ApiResponse.onSuccess("삭제되었습니다."));
     }
 
+    // TODO: Rule 수정 API 추가
+
     /**
      * 특정 Rule 수정
      *
