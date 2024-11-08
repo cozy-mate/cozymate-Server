@@ -5,9 +5,8 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoContentRequestDto;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoIdResponseDto;
+import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO;
+import com.cozymate.cozymate_server.domain.todo.dto.response.TodoSimpleResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -42,23 +41,23 @@ public class TodoCommandService {
      * @param requestDto 생성할 투두 정보
      * @return 생성된 투두 Id
      */
-    public TodoIdResponseDto createTodo(Member member, Long roomId, CreateTodoRequestDto requestDto
+    public TodoSimpleResponseDTO createTodo(Member member, Long roomId, CreateTodoRequestDTO requestDto
     ) {
         // 사용자의 mate 정보 조회
         Mate mate = getMate(member.getId(), roomId);
         // 투두 타입 분류 (내 투두, 남 투두, 그룹 투두)
-        TodoType type = classifyTodoType(requestDto.getMateIdList());
+        TodoType type = classifyTodoType(requestDto.mateIdList());
         // TODO: 추후 구현
         // 모든 메이트가 방에 메이트로 존재하는지 확인이 필요
-        checkMateIdListIsSameRoomWithMate(mate, requestDto.getMateIdList());
+        checkMateIdListIsSameRoomWithMate(mate, requestDto.mateIdList());
         // 최대 투두 생성 개수 초과 여부 판단
         checkMaxTodoPerDay(roomId, member.getId(), LocalDate.now());
 
         Todo todo = todoRepository.save(
-            TodoConverter.toEntity(mate.getRoom(), mate, requestDto.getMateIdList(),
-                requestDto.getContent(), requestDto.getTimePoint(), null, type)
+            TodoConverter.toEntity(mate.getRoom(), mate, requestDto.mateIdList(),
+                requestDto.content(), requestDto.timePoint(), null, type)
         );
-        return TodoIdResponseDto.builder().id(todo.getId()).build();
+        return TodoConverter.toTodoSimpleResponseDTO(todo);
     }
 
     /**
@@ -90,11 +89,10 @@ public class TodoCommandService {
 //            //모든 투두가 완료되었을 때 알림을 보냄
 //            // TODO: 바뀐 기획에 따라 로직 변경이 필요함, 추후 수정 예정
 //            allTodoCompleteNotification(todo, member);
+            return;
         }
-
-        if (!completed) { // 미완료 상태로 바꾸는 경우
-            todo.unmarkTodoComplete(mate.getId());
-        }
+        // 미완료 상태로 바꾸는 경우
+        todo.unmarkTodoComplete(mate.getId());
     }
 
     /**
@@ -138,7 +136,7 @@ public class TodoCommandService {
     }
 
     public void updateTodoContent(Member member, Long roomId, Long todoId,
-        UpdateTodoContentRequestDto requestDto
+        CreateTodoRequestDTO requestDto
     ) {
         Mate mate = getMate(member.getId(), roomId);
         Todo todo = getTodo(todoId);
@@ -151,15 +149,15 @@ public class TodoCommandService {
         }
 
         // TODO: 할당자가 모두 Mate에 속하는지 판단해야함.
-        checkMateIdListIsSameRoomWithMate(mate, requestDto.getMateIdList());
+        checkMateIdListIsSameRoomWithMate(mate, requestDto.mateIdList());
 
         // 삭제해야할 할당자 리스트
         List<Long> removeIdList = todo.getAssignedMateIdList().stream()
-            .filter(mateId -> !requestDto.getMateIdList().contains(mateId))
+            .filter(mateId -> !requestDto.mateIdList().contains(mateId))
             .toList();
 
         // 추가해야할 할당자 리스트
-        List<Long> addIdList = requestDto.getMateIdList().stream()
+        List<Long> addIdList = requestDto.mateIdList().stream()
             .filter(mateId -> !todo.getAssignedMateIdList().contains(mateId))
             .toList();
 
@@ -168,7 +166,7 @@ public class TodoCommandService {
         todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
 
         // 컨텐츠 업데이트
-        todo.updateContent(requestDto.getContent(), requestDto.getTimePoint());
+        todo.updateContent(requestDto.content(), requestDto.timePoint());
     }
 
     private Mate getMate(Long memberId, Long roomId) {
