@@ -33,48 +33,48 @@ public class TodoQueryService {
     public TodoListResponseDto getTodo(Member member, Long roomId, LocalDate timePoint) {
 
         Mate currentMate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
 
         List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(roomId, timePoint);
 
         TodoMateDetailResponseDto myTodoListResponseDto = TodoConverter.toTodoMateDetailResponseDto(
-            currentMate.getMember().getPersona(), new ArrayList<>());
+                currentMate.getMember().getPersona(), new ArrayList<>());
         Map<String, TodoMateDetailResponseDto> mateTodoResponseDto = new HashMap<>();
 
         // mateTodoListResponseDto에 본인을 제외한 currentMate 정보 추가
         List<Mate> mateList = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
-            EntryStatus.JOINED);
+                EntryStatus.JOINED);
         mateList.stream()
-            .filter(filteringMate -> isNotSameMate(currentMate, filteringMate))
-            .forEach(filteredMate ->
-                mateTodoResponseDto.put(filteredMate.getMember().getNickname(),
-                    TodoConverter.toTodoMateDetailResponseDto(filteredMate.getMember().getPersona(),
-                        new ArrayList<>()))
-            );
+                .filter(filteringMate -> isNotSameMate(currentMate, filteringMate))
+                .forEach(filteredMate ->
+                        mateTodoResponseDto.put(filteredMate.getMember().getNickname(),
+                                TodoConverter.toTodoMateDetailResponseDto(filteredMate.getMember().getPersona(),
+                                        new ArrayList<>()))
+                );
 
         todoList.forEach(todo -> {
             String todoType = getTodoType(todo);
 
             if (todo.getAssignedMateIdList().contains(currentMate.getId())) {
                 myTodoListResponseDto.getMateTodoList()
-                    .add(TodoConverter.toTodoListDetailResponseDto(todo, currentMate, todoType));
+                        .add(TodoConverter.toTodoListDetailResponseDto(todo, currentMate, todoType));
             }
             // 투두마다 반복하면서 투두의 mateIdList에 존재하는 ID마다 mateList에서 찾아서 mateTodoList에 추가
             todo.getAssignedMateIdList().forEach(
-                mateId -> mateList.stream()
-                    .filter(mate -> mate.getId().equals(mateId) && isNotSameMate(currentMate, mate))
-                    .findFirst()
-                    .ifPresent(mate -> {
-                        String mateName = mate.getMember().getNickname();
-                        TodoDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(
-                            todo, mate, todoType);
-                        mateTodoResponseDto.get(mateName).getMateTodoList().add(todoDto);
-                    })
+                    mateId -> mateList.stream()
+                            .filter(mate -> mate.getId().equals(mateId) && isNotSameMate(currentMate, mate))
+                            .findFirst()
+                            .ifPresent(mate -> {
+                                String mateName = mate.getMember().getNickname();
+                                TodoDetailResponseDto todoDto = TodoConverter.toTodoListDetailResponseDto(
+                                        todo, mate, todoType);
+                                mateTodoResponseDto.get(mateName).getMateTodoList().add(todoDto);
+                            })
             );
         });
 
         return TodoConverter.toTodoListResponseDto(timePoint, myTodoListResponseDto,
-            mateTodoResponseDto);
+                mateTodoResponseDto);
 
     }
 

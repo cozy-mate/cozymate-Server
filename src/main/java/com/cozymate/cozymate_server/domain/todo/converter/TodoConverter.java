@@ -16,45 +16,45 @@ import java.util.Map;
 public class TodoConverter {
 
     public static Todo toEntity(Room room, Mate mate, List<Long> assignedMateIdList, String content, LocalDate timePoint,
-        Role role, TodoType type) {
+                                Role role, TodoType type) {
         return Todo.builder()
-            .room(room)
-            .mate(mate)
-            .content(content)
-            .timePoint(timePoint)
-            .role(role) // role은 null이 될 수 있음
-            .completeBitmask(0)
-            .todoType(type)
-            .assignedMateIdList(assignedMateIdList)
-            .build();
+                .room(room)
+                .mate(mate)
+                .content(content)
+                .timePoint(timePoint)
+                .role(role) // role은 null이 될 수 있음
+                .completeBitmask(0)
+                .todoType(type)
+                .assignedMateIdList(assignedMateIdList)
+                .build();
     }
 
     public static TodoDetailResponseDto toTodoListDetailResponseDto(Todo todo, Mate mate, String type) {
         return TodoDetailResponseDto.builder()
-            .id(todo.getId())
-            .content(todo.getContent())
-            .isCompleted(todo.isAssigneeCompleted(mate.getId()))
-            .type(type)
-            .build();
+                .id(todo.getId())
+                .content(todo.getContent())
+                .isCompleted(todo.isAssigneeCompleted(mate.getId()))
+                .type(type)
+                .build();
     }
 
     public static TodoListResponseDto toTodoListResponseDto(
-        LocalDate timePoint,
-        TodoMateDetailResponseDto myTodoListResponseDto,
-        Map<String, TodoMateDetailResponseDto> mateTodoListResponseDto) {
+            LocalDate timePoint,
+            TodoMateDetailResponseDto myTodoListResponseDto,
+            Map<String, TodoMateDetailResponseDto> mateTodoListResponseDto) {
         return TodoListResponseDto.builder()
-            .timePoint(timePoint)
-            .myTodoList(myTodoListResponseDto)
-            .mateTodoList(mateTodoListResponseDto)
-            .build();
+                .timePoint(timePoint)
+                .myTodoList(myTodoListResponseDto)
+                .mateTodoList(mateTodoListResponseDto)
+                .build();
     }
 
     public static TodoMateDetailResponseDto toTodoMateDetailResponseDto(
-        int persona,
-        List<TodoDetailResponseDto> mateTodoList) {
+            int persona,
+            List<TodoDetailResponseDto> mateTodoList) {
         return TodoMateDetailResponseDto.builder()
-            .persona(persona)
-            .mateTodoList(mateTodoList)
-            .build();
+                .persona(persona)
+                .mateTodoList(mateTodoList)
+                .build();
     }
 }
