@@ -53,7 +53,7 @@ public class MemberStatPreferenceController {
     ) {
         Long createdId = memberStatPreferenceCommandService.savePreferences(
             memberDetails.member().getId(),
-            memberStatPreferenceDto.getPreferences());
+            memberStatPreferenceDto.getPreferenceList());
 
         return ResponseEntity.ok(ApiResponse.onSuccess(createdId));
     }
@@ -71,7 +71,7 @@ public class MemberStatPreferenceController {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             memberStatPreferenceCommandService.updatePreferences(
                 memberDetails.member().getId(),
-                memberStatPreferenceDto.getPreferences()
+                memberStatPreferenceDto.getPreferenceList()
             )
         ));
     }

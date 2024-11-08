@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstat.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatPageResponseDto;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
@@ -421,7 +421,7 @@ public class MemberStatController {
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.getMember())
+                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.member())
             ));
     }
 
