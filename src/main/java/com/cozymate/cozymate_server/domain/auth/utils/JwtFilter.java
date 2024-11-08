@@ -33,7 +33,8 @@ public class JwtFilter extends OncePerRequestFilter {
     // 임시 토큰으로만 접근 가능한 URL 목록
     private static final List<String> TEMPORARY_URLS = List.of(
             "/members/sign-up",
-            "/members/check-nickname"
+            "/members/check-nickname",
+            "/university/get-list"
     );
 
     private static final List<String> VERIFIED_URLS = List.of(

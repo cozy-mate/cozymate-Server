@@ -32,6 +32,7 @@ public class UniversityController {
      * 삭제 될 예정..
      */
     @PostMapping("/create")
+    @Deprecated
     @Operation(summary = "[말즈] 대학교 생성 API",
             description = "request Body :  <br>"
                     + "\t name : 인하대학교 <br>"
@@ -54,6 +55,7 @@ public class UniversityController {
      * 삭제 될 예정..
      */
     @PostMapping("/update")
+    @Deprecated
     @Operation(summary = "[말즈] 대학교 수정 API",
             description = "request body :  <br>"
                     + "\t name : 인하대학교 <br>"
