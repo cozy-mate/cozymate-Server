@@ -5,8 +5,8 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.role.converter.RoleConverter;
-import com.cozymate.cozymate_server.domain.role.dto.RoleRequestDto.CreateRoleRequestDto;
-import com.cozymate.cozymate_server.domain.role.dto.RoleRequestDto.UpdateRoleRequestDto;
+import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleSimpleResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -31,18 +31,17 @@ public class RoleCommandService {
      * @param roomId     방 Id
      * @param requestDto Role 생성 요청 DTO
      */
-    public void createRole(
-        Member member, Long roomId, CreateRoleRequestDto requestDto
-    ) {
+    public RoleSimpleResponseDTO createRole(Member member, Long roomId, CreateRoleRequestDTO requestDto) {
         // 해당 방의 mate가 맞는지 확인
         Mate mate = getMate(member.getId(), roomId);
 
         // TODO role max 개수 제한 추가
-        int repeatDayBitmast = getDayBitmask(requestDto.getRepeatDayList());
+        int repeatDayBitmast = getDayBitmask(requestDto.repeatDayList());
 
-        roleRepository.save(
-            RoleConverter.toEntity(mate, requestDto.getMateIdList(), requestDto.getTitle(),
+        Role role = roleRepository.save(
+            RoleConverter.toEntity(mate, requestDto.mateIdList(), requestDto.title(),
                 repeatDayBitmast));
+        return RoleConverter.toRoleSimpleResponseDTOWithEntity(role);
     }
 
     /**
@@ -67,15 +66,16 @@ public class RoleCommandService {
      * @param roleId     Role Id
      * @param requestDto 수정할 Role 데이터
      */
-    public void updateRole(Member member, Long roomId, Long roleId, UpdateRoleRequestDto requestDto) {
+    public void updateRole(Member member, Long roomId, Long roleId,
+        CreateRoleRequestDTO requestDto) {
         Role role = getRole(roleId);
         Mate mate = getMate(member.getId(), roomId);
 
         checkUpdatePermission(role, mate);
 
         // role 수정
-        role.updateEntity(requestDto.getMateIdList(), requestDto.getTitle(),
-            getDayBitmask(requestDto.getRepeatDayList()));
+        role.updateEntity(requestDto.mateIdList(), requestDto.title(),
+            getDayBitmask(requestDto.repeatDayList()));
     }
 
     /**
