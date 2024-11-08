@@ -1,15 +1,14 @@
 package com.cozymate.cozymate_server.domain.memberstat.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatPageResponseDto;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatSeenListDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
-import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
@@ -149,15 +148,16 @@ public class MemberStatController {
 
     @Operation(
         summary = "[포비] 사용자 상세정보 완전 일치 필터링 및 일치율 조회",
-        description = "사용자의 토큰을 넣어 사용합니다."+
+        description = "사용자의 토큰을 넣어 사용합니다." +
             "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
             "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n" +
             "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다." +
             "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
-            + "사용 가능한 필터명(24개):\n"
+            + "사용 가능한 필터명(25개):\n"
             + "- birthYear: 출생년도"
             + "- acceptance : 합격여부\n"
             + "- admissionYear : 학번\n"
+            + "- dormitoryNames: 기숙사 이름\n"
             + "- major : 학과\n"
             + "- numOfRoommate : 신청실\n"
             + "- wakeUpTime : 기상시간\n"
@@ -187,7 +187,7 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE
     })
     @GetMapping("/filter")
-    public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getFilteredMemberList(
+    public ResponseEntity<ApiResponse<MemberStatPageResponseDto<List<?>>>> getFilteredMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList,
@@ -218,10 +218,11 @@ public class MemberStatController {
             "needsDetail : 필수는 아님, true시 해당 멤버의 모든 상세정보도 같이 출력함\n" +
             "needsPreferences: 필수 아님, true시 멤버 ID, 닉네임, 일치율, 요청자의 선호도 4가지 설정 출력함\n" +
             "현재는 needsDetail과 needsPreferences가 둘 다 true일 수 없음. 예외처리 해놨습니다." +
-            "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 24개):\n\n" +
+            "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 25개):\n\n" +
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
             "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
+            "- **dormitoryNames** (기숙사 이름): `[String]` `[\"1기숙사\"]`\n" +
             "- **major** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
@@ -277,10 +278,11 @@ public class MemberStatController {
             "  \"mbti\": [\"INTJ\", \"ENTP\"]\n" +
             "}\n" +
             "```\n\n" +
-            "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 24개):\n\n" +
+            "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 25개):\n\n" +
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
             "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
+            "- **dormitoryNames(기숙사 이름): `[String]` 예) `[\"1기숙사\"]`\n" +
             "- **major** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
@@ -316,7 +318,7 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST
     })
     @PostMapping("/filter/search")
-    public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getAdvancedFilteredMemberList(
+    public ResponseEntity<ApiResponse<MemberStatPageResponseDto<List<?>>>> getAdvancedFilteredMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestBody HashMap<String, List<?>> filterMap,
@@ -342,6 +344,7 @@ public class MemberStatController {
             + "- acceptance : 합격여부\n"
             + "- admissionYear :  학번\n"
             + "- major : 전공\n"
+            + "- dormitoryNames: 기숙사 이름\n"
             + "- numOfRoommate : 신청실\n"
             + "- wakeUpTime : 기상시간\n"
             + "- sleepingTime : 취침시간\n"
@@ -369,7 +372,7 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
     })
     @GetMapping("/filter/details")
-    public ResponseEntity<ApiResponse<PageResponseDto<List<?>>>> getFilteredMemberListWithMemberDetails(
+    public ResponseEntity<ApiResponse<MemberStatPageResponseDto<List<?>>>> getFilteredMemberListWithMemberDetails(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(required = false) List<String> filterList) {
@@ -406,23 +409,19 @@ public class MemberStatController {
     @Operation(
         summary = "[포비] 사용자 랜덤 추천",
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
-            + "1. 처음에 seenMemberStatIds 를 빈 배열로 요청합니다.\n"
-            + "2. 응답으로 memberList와 memberList에 보내진 Member들의 Id가 담긴 seenMemberStatIds 배열이 리턴됩니다.\n"
-            + "3. 2번에서 받은 배열을 그대로 복사해 다시 요청합니다.\n"
-            + "결론: seenMemberStatIds는 처음에 빈 배열로, 그 다음부터는 응답으로 받은 seenMemberStatIds를 그대로 요청에 넣어주세요"
+            + "랜덤 사용자 5명을 리턴합니다.\n\n"
+            + "사용자 멤버 스탯이 없을 때 사용합니다.\n\n"
     )
-    @PostMapping("/random/list")
+    @GetMapping("/random")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
     })
     public ResponseEntity<ApiResponse<MemberStatRandomListResponseDTO>> getRandomMemberStatPreference(
-        @AuthenticationPrincipal MemberDetails memberDetails,
-        @RequestBody MemberStatSeenListDTO memberStatSeenListDTO
+        @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.getMember(),
-                    memberStatSeenListDTO)
+                memberStatQueryService.getRandomMemberStatWithPreferences(memberDetails.getMember())
             ));
     }
 
@@ -432,7 +431,7 @@ public class MemberStatController {
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
             + "검색어의 일부만 일치해도, 일치율이 높은 순으로 결과를 리턴합니다.\n\n"
             + "완전일치 순으로 주는게 좋긴 하지만, 우선 일치율, ID 순으로 구현했습니다.\n\n"
-            + "QueryString으로 keyword=${검색어 일부}로 사용합니다."
+            + "QueryString으로 keyword=검색어 일부로 사용합니다."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_EQUALITY_NOT_FOUND
@@ -440,7 +439,7 @@ public class MemberStatController {
     public ResponseEntity<ApiResponse<List<MemberStatSearchResponseDTO>>> getMemberSearchResponse(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam String keyword
-    ){
+    ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberSearchResponse(

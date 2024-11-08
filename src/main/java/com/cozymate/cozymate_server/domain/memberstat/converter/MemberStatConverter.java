@@ -19,7 +19,6 @@ import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.TimeUtil;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +36,7 @@ public class MemberStatConverter {
 //            .major(memberStatCommandRequestDTO.getMajor())
             .numOfRoommate(memberStatCommandRequestDTO.getNumOfRoommate())
             .acceptance(memberStatCommandRequestDTO.getAcceptance())
+            .dormitoryNames(memberStatCommandRequestDTO.getDormitoryNames())
             .wakeUpTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getWakeUpMeridian(),
                 memberStatCommandRequestDTO.getWakeUpTime()))
             .sleepingTime(TimeUtil.convertTime(memberStatCommandRequestDTO.getSleepingMeridian(),
@@ -72,13 +72,15 @@ public class MemberStatConverter {
     }
 
 
-    public static MemberStatQueryResponseDTO toDto(MemberStat memberStat, Integer birthYear) {
+    public static MemberStatQueryResponseDTO toDto(MemberStat memberStat, Member member) {
         return MemberStatQueryResponseDTO.builder()
             .universityId(memberStat.getMember().getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
-            .birthYear(birthYear)
+            .birthYear(member.getBirthDay().getYear())
+            .memberPersona(member.getPersona())
 //            .major(memberStat.getMajor())
             .numOfRoommate(memberStat.getNumOfRoommate())
+            .dormitoryNames(memberStat.getDormitoryNames())
             .acceptance(memberStat.getAcceptance())
             .wakeUpMeridian(TimeUtil.convertToMeridian(memberStat.getWakeUpTime()))
             .wakeUpTime(TimeUtil.convertToTime(memberStat.getWakeUpTime()))
@@ -108,15 +110,17 @@ public class MemberStatConverter {
     }
 
     public static MemberStatDetailResponseDTO toDetailDto(MemberStat memberStat,
-        Integer birthYear,
+        Member member,
         Integer equality,
         Long roomId) {
         return MemberStatDetailResponseDTO.builder()
             //.universityId(memberStat.getUniversity().getId())
             .admissionYear(memberStat.getAdmissionYear())
-            .birthYear(birthYear)
-            .major(memberStat.getMajor())
+            .birthYear(member.getBirthDay().getYear())
+            .memberPersona(member.getPersona())
+            .major(memberStat.getMember().getMajorName())
             .numOfRoommate(memberStat.getNumOfRoommate())
+            .dormitoryNames(memberStat.getDormitoryNames())
             .acceptance(memberStat.getAcceptance())
             .wakeUpMeridian(TimeUtil.convertToMeridian(memberStat.getWakeUpTime()))
             .wakeUpTime(TimeUtil.convertToTime(memberStat.getWakeUpTime()))
@@ -156,7 +160,7 @@ public class MemberStatConverter {
                 memberStat, equality
             ))
             .detail(MemberStatConverter.toDto(
-                memberStat, memberStat.getMember().getBirthDay().getYear()
+                memberStat, memberStat.getMember()
             ))
             .build();
     }
@@ -165,7 +169,7 @@ public class MemberStatConverter {
         return MemberStatEqualityResponseDTO.builder()
             .memberId(memberStat.getMember().getId())
             .memberAge(TimeUtil.calculateAge(memberStat.getMember().getBirthDay()))
-            .memberNickName(memberStat.getMember().getNickname())
+            .memberNickname(memberStat.getMember().getNickname())
             .memberPersona(memberStat.getMember().getPersona())
             .numOfRoommate(memberStat.getNumOfRoommate())
             .equality(equality)
@@ -227,18 +231,17 @@ public class MemberStatConverter {
         Map<String, Object> preferences, Integer equality) {
         return MemberStatPreferenceResponseDTO.builder()
             .memberId(stat.getMember().getId())
-            .memberNickName(stat.getMember().getNickname())
+            .memberNickname(stat.getMember().getNickname())
             .equality(equality)
             .preferenceStats(preferences)
             .build();
     }
 
     public static MemberStatRandomListResponseDTO toRandomListResponseDTO(
-        List<MemberStatPreferenceResponseDTO> memberList, List<Long> seenMemberStatIds
+        List<MemberStatPreferenceResponseDTO> memberList
     ) {
         return MemberStatRandomListResponseDTO.builder()
             .memberList(memberList)
-            .seenMemberStatIds(seenMemberStatIds)
             .build();
     }
 
@@ -247,7 +250,7 @@ public class MemberStatConverter {
     ){
         return MemberStatSearchResponseDTO.builder()
             .memberId(member.getId())
-            .memberNickName(member.getNickname())
+            .memberNickname(member.getNickname())
             .memberPersona(member.getPersona())
             .equality(equality)
             .build();

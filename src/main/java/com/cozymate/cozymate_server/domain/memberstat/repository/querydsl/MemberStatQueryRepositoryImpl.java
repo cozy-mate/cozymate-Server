@@ -87,7 +87,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         BooleanBuilder builder = new BooleanBuilder()
             .and(memberStat.id.ne(criteriaMemberStat.getId()))
             .and(member.gender.eq(criteriaMember.getGender()))
-            .and(member.university.id.eq(criteriaMember.getUniversity().getId()));
+            .and(member.university.id.eq(criteriaMember.getUniversity().getId()))
+            .and(memberStat.dormitoryNames.eq(criteriaMemberStat.getDormitoryNames()));
 
         // '미정'인 경우 인실 조건을 무시, 그렇지 않으면 인실 조건 추가
         if (!criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)) {
@@ -338,6 +339,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "drinkingFrequency" -> memberStat.drinkingFrequency;
             case "mbti" -> memberStat.mbti;
             case "birthYear" -> member.birthDay;
+            case "dormitoryNames" -> memberStat.dormitoryNames;
             default ->
                 throw new GeneralException(ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID);
         };
@@ -371,6 +373,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "drinkingFrequency" -> criteriaMemberStat.getDrinkingFrequency();
             case "mbti" -> criteriaMemberStat.getMbti();
             case "birthYear" -> criteriaMemberStat.getMember().getBirthDay();
+            case "dormitoryNames" -> criteriaMemberStat.getDormitoryNames();
             default -> null;
         };
     }

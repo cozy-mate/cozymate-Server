@@ -24,7 +24,7 @@ public class MemberStatPreferenceQueryService {
         MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(memberId)
             .orElseThrow(()-> new GeneralException(ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS));
         return MemberStatPreferenceDto.builder()
-            .preferences(
+            .preferenceList(
                 Arrays.asList(memberStatPreference.getSelectedPreferences().split(","))
             )
             .build();

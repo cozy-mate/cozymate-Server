@@ -31,13 +31,27 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         "AND m.gender = :gender " +
         "AND m.id <> :searchingMemberId " +
         "AND (:numOfRoomMateOfSearchingMember = 0 OR ms.numOfRoommate = :numOfRoomMateOfSearchingMember) " +
+        "AND ms.dormitoryNames = :dormitoryNames "+
         "AND m.nickname LIKE %:subString%")
     List<Member> findMembersWithMatchingCriteria(
         @Param("subString") String subString,
         @Param("universityId") Long universityId,
         @Param("gender") Gender gender,
         @Param("numOfRoomMateOfSearchingMember") Integer numOfRoomMateOfSearchingMember,
+        @Param("dormitoryNames") String dormitoryNames,
         @Param("searchingMemberId") Long searchingMemberId
     );
+    @Query("SELECT m FROM Member m " +
+        "WHERE m.university.id = :universityId " +
+        "AND m.gender = :gender " +
+        "AND m.id <> :searchingMemberId " +
+        "AND m.nickname LIKE %:subString%")
+    List<Member> findMembersWithMatchingCriteria(
+        @Param("subString") String subString,
+        @Param("universityId") Long universityId,
+        @Param("gender") Gender gender,
+        @Param("searchingMemberId") Long searchingMemberId
+    );
+
 
 }

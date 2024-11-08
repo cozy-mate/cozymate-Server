@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberStatCommandService {
 
     private final MemberStatRepository memberStatRepository;
-    private final UniversityRepository universityRepository;
     private final MemberStatEqualityCommandService memberStatEqualityCommandService;
 
     public Long createMemberStat(

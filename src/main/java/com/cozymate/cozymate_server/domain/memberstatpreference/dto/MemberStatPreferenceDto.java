@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class MemberStatPreferenceDto {
 
     @Size(min = 4, max = 4, message = "항목은 무조건 4개여야 합니다.")
-    public List<String> preferences;
+    public List<String> preferenceList;
 }

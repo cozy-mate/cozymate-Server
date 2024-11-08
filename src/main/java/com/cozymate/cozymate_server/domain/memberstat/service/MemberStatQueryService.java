@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatPageResponseDto;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatSeenListDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityDetailResponseDTO;
@@ -68,7 +69,7 @@ public class MemberStatQueryService {
             );
 
         return MemberStatConverter.toDto(
-            memberStat, birthYear
+            memberStat, memberStat.getMember()
         );
     }
 
@@ -82,19 +83,20 @@ public class MemberStatQueryService {
             () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
         );
 
-        Integer birthYear = member.getBirthDay().getYear();
 
         Integer equality = memberStatEqualityQueryService.getSingleEquality(
             memberId,
             viewer.getId()
         );
 
+
+
         Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
             memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
 
         return MemberStatConverter.toDetailDto(
             memberStat,
-            birthYear,
+            member,
             equality,
             mate.isPresent() ?
                 mate.get().getRoom().getId()
@@ -111,7 +113,7 @@ public class MemberStatQueryService {
         return memberStat.getNumOfRoommate();
     }
 
-    public PageResponseDto<List<?>> getMemberStatList(Member member,
+    public MemberStatPageResponseDto<List<?>> getMemberStatList(Member member,
         List<String> filterList, Pageable pageable, boolean needsDetail, boolean needsPreferences) {
 
         if (needsDetail && needsPreferences) {
@@ -158,7 +160,7 @@ public class MemberStatQueryService {
 
     }
 
-    public PageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member,
+    public MemberStatPageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member,
         HashMap<String, List<?>> filterMap, Pageable pageable, boolean needsDetail, boolean needsPreferences) {
 
         if (needsDetail && needsPreferences) {
@@ -214,20 +216,20 @@ public class MemberStatQueryService {
         );
     }
 
-    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member,
-        MemberStatSeenListDTO currentMemberStatIds) {
+    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member) {
 
+        // 상세정보가 있다면 불러올 수 없는 API
+        if(memberStatRepository.existsByMemberId(member.getId())){
+            throw new GeneralException(ErrorStatus._MEMBERSTAT_EXISTS);
+        }
         // 기준 멤버의 선호도 필드 목록 가져오기
         List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
-
-        List<Long> seenMemberStatIds = currentMemberStatIds.getSeenMemberStatIds();
         // 같은 성별과 대학의 멤버 중, 자신과 이미 본 멤버를 제외
         List<MemberStat> memberStatList = memberStatRepository.findByMember_GenderAndMember_University_Id(
                 member.getGender(), member.getUniversity().getId()
             ).stream()
             .filter(stat -> !stat.getMember().getId().equals(member.getId())) // 자신 제외
-            .filter(stat -> !seenMemberStatIds.contains(stat.getId())) // 이미 본 멤버 제외
             .collect(Collectors.toList());
 
         // 리스트를 랜덤하게 섞고, 최대 5개의 멤버를 선택
@@ -241,22 +243,16 @@ public class MemberStatQueryService {
             .map(stat -> {
                 Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(stat,
                     criteriaPreferences);
-                MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO = MemberStatConverter.toPreferenceResponseDTO(
+                return MemberStatConverter.toPreferenceResponseDTO(
                     stat,
                     preferences,
                     null
                 );
-
-                // 누적 ID 리스트에 새로 선택된 멤버 ID 추가
-                seenMemberStatIds.add(stat.getId());
-
-                return memberStatPreferenceResponseDTO;
             })
             .toList();
 
         return MemberStatConverter.toRandomListResponseDTO(
-            preferenceResponseList,
-            seenMemberStatIds);
+            preferenceResponseList);
 
     }
 
@@ -301,18 +297,29 @@ public class MemberStatQueryService {
         Integer numOfRoomMateOfSearchingMember = searchingMember.getMemberStat().getNumOfRoommate();
         Long universityId = searchingMember.getUniversity().getId();
         Gender gender = searchingMember.getGender();
+        String dormitoryNames = searchingMember.getMemberStat().getDormitoryNames();
         Long searchingMemberId = searchingMember.getId();
 
-        List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
-            subString, universityId, gender, numOfRoomMateOfSearchingMember, searchingMemberId
-        );
+        //memberStat이 존재할 때
+        if(memberStatRepository.existsByMemberId(searchingMemberId)){
+            List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
+                subString, universityId, gender, numOfRoomMateOfSearchingMember, dormitoryNames, searchingMemberId
+            );
+            return memberList.stream()
+                .map(member -> {
+                    Integer equality = memberStatEqualityQueryService.getSingleEquality(searchingMember.getId(), member.getId());
+                    return MemberStatConverter.toMemberStatSearchResponseDTO(member, equality);
+                })
+                .sorted(Comparator.comparing(MemberStatSearchResponseDTO::getEquality).reversed()) // equality 기준으로 내림차순 정렬
+                .toList();
+        }
 
+        // memberStat이 존재하지 않을 때
+        List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
+            subString, universityId, gender,searchingMemberId
+        );
         return memberList.stream()
-            .map(member -> {
-                Integer equality = memberStatEqualityQueryService.getSingleEquality(searchingMember.getId(), member.getId());
-                return MemberStatConverter.toMemberStatSearchResponseDTO(member, equality);
-            })
-            .sorted(Comparator.comparing(MemberStatSearchResponseDTO::getEquality).reversed()) // equality 기준으로 내림차순 정렬
+            .map(member-> MemberStatConverter.toMemberStatSearchResponseDTO(member, null))
             .toList();
     }
 
@@ -322,12 +329,12 @@ public class MemberStatQueryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
     }
 
-    private PageResponseDto<List<?>> createEmptyPageResponse(Pageable pageable) {
-        return new PageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
+    private MemberStatPageResponseDto<List<?>> createEmptyPageResponse(Pageable pageable) {
+        return new MemberStatPageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
     }
 
-    private PageResponseDto<List<?>> toPageResponseDto(Page<?> page) {
-        return new PageResponseDto<>(
+    private MemberStatPageResponseDto<List<?>> toPageResponseDto(Page<?> page) {
+        return new MemberStatPageResponseDto<>(
             page.getNumber(),
             page.hasNext(),
             page.getContent()

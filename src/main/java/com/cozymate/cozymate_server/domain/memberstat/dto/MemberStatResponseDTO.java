@@ -21,7 +21,9 @@ public class MemberStatResponseDTO {
         private Integer admissionYear;
         private Integer birthYear;
         private String major;
+        private Integer memberPersona;
         private Integer numOfRoommate;
+        private String dormitoryNames;
         private String acceptance;
         private String wakeUpMeridian;
         private Integer wakeUpTime;
@@ -57,10 +59,12 @@ public class MemberStatResponseDTO {
     public static class MemberStatDetailResponseDTO {
 
         private Long universityId;
+        private Integer memberPersona;
         private Integer admissionYear;
         private Integer birthYear;
         private String major;
         private Integer numOfRoommate;
+        private String dormitoryNames;
         private String acceptance;
         private String wakeUpMeridian;
         private Integer wakeUpTime;
@@ -97,8 +101,7 @@ public class MemberStatResponseDTO {
     public static class MemberStatEqualityResponseDTO {
 
         private Long memberId;
-        private String memberName;
-        private String memberNickName;
+        private String memberNickname;
         private Integer memberAge;
         private Integer memberPersona;
         private Integer numOfRoommate;
@@ -111,7 +114,7 @@ public class MemberStatResponseDTO {
     @Builder
     public static class MemberStatPreferenceResponseDTO {
         private Long memberId;
-        private String memberNickName;
+        private String memberNickname;
         private Integer equality;
         private Map<String,Object> preferenceStats;
     }
@@ -122,9 +125,6 @@ public class MemberStatResponseDTO {
     @Builder
     public static class MemberStatRandomListResponseDTO {
         List<MemberStatPreferenceResponseDTO> memberList;
-        // 누적 ID List
-        List<Long> seenMemberStatIds;
-
     }
 
     @Getter
@@ -133,7 +133,7 @@ public class MemberStatResponseDTO {
     @Builder
     public static class MemberStatSearchResponseDTO{
         private Long memberId;
-        private String memberNickName;
+        private String memberNickname;
         private Integer memberPersona;
         private Integer equality;
     }
