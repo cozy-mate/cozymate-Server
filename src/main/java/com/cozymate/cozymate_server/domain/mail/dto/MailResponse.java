@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.mail.dto;
 
-import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
+import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +13,6 @@ public class MailResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class VerifyDTO{
-        AuthResponseDTO.TokenResponseDTO tokenResponseDTO;
+        TokenResponseDTO tokenResponseDTO;
     }
 }

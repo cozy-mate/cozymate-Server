@@ -1,22 +1,24 @@
 package com.cozymate.cozymate_server.domain.university.converter;
 
 import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.university.dto.UniversityRequest;
-import com.cozymate.cozymate_server.domain.university.dto.UniversityResponse;
+import com.cozymate.cozymate_server.domain.university.dto.request.UniversityRequestDTO;
+import com.cozymate.cozymate_server.domain.university.dto.response.UniversityBasicInfoDTO;
+import com.cozymate.cozymate_server.domain.university.dto.response.UniversityDetailDTO;
+import com.cozymate.cozymate_server.domain.university.dto.response.UniversityListDTO;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class UniversityConverter {
-    public static University toUniversity(UniversityRequest.UniversityDTO universityDTO){
+    public static University toUniversity(UniversityRequestDTO universityDTO){
         return University.builder()
-                .name(universityDTO.getName())
-                .dormitoryNames(universityDTO.getDormitoryNames())
-                .departments(universityDTO.getDepartments())
+                .name(universityDTO.name())
+                .dormitoryNames(universityDTO.dormitoryNames())
+                .departments(universityDTO.departments())
                 .build();
     }
 
-    public static UniversityResponse.UniversityDTO toUniversityDTO(University university){
-        return UniversityResponse.UniversityDTO.builder()
+    public static UniversityDetailDTO toUniversityDTOFromEntity(University university){
+        return UniversityDetailDTO.builder()
                 .id(university.getId())
                 .name(university.getName())
                 .mailPattern(university.getMailPattern())
@@ -25,18 +27,18 @@ public class UniversityConverter {
                 .build();
     }
 
-    public static UniversityResponse.UniversityBasicInfoDTO toUniversityBasicInfoDTO(University university){
-        return UniversityResponse.UniversityBasicInfoDTO.builder()
+    public static UniversityBasicInfoDTO toUniversityBasicInfoDTOFromEntity(University university){
+        return UniversityBasicInfoDTO.builder()
                 .id(university.getId())
                 .name(university.getName())
                 .build();
     }
-    public static UniversityResponse.UniversityListDTO toUniversityListDTO(List<University> universityList){
-        List<UniversityResponse.UniversityBasicInfoDTO> universityDTOList = universityList.stream()
-                .map(UniversityConverter::toUniversityBasicInfoDTO)
+    public static UniversityListDTO toUniversityListDTO(List<University> universityList){
+        List<UniversityBasicInfoDTO> universityDTOList = universityList.stream()
+                .map(UniversityConverter::toUniversityBasicInfoDTOFromEntity)
                 .collect(Collectors.toList());
 
-        return UniversityResponse.UniversityListDTO.builder()
+        return UniversityListDTO.builder()
                 .universityList(universityDTOList)
                 .build();
 

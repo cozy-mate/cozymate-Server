@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.chatroom.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
@@ -42,7 +42,7 @@ public class ChatRoomController {
     })
     public ResponseEntity<ApiResponse<String>> deleteChatRoom(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long chatRoomId) {
-        chatRoomCommandService.deleteChatRoom(memberDetails.getMember(), chatRoomId);
+        chatRoomCommandService.deleteChatRoom(memberDetails.member(), chatRoomId);
         return ResponseEntity.ok(ApiResponse.onSuccess("쪽지방 삭제 완료"));
     }
 
@@ -51,7 +51,7 @@ public class ChatRoomController {
     public ResponseEntity<ApiResponse<List<ChatRoomResponseDto>>> getChatRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(
-            ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberDetails.getMember())));
+            ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberDetails.member())));
     }
 
     @GetMapping("/members/{recipientId}")
@@ -61,7 +61,7 @@ public class ChatRoomController {
     )
     public ResponseEntity<ApiResponse<ChatRoomIdResponse>> getChatRoom(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long recipientId) {
-        Member member = memberDetails.getMember();
+        Member member = memberDetails.member();
 
         ChatRoomSimpleDto simpleDto = chatRoomQueryService.getChatRoom(member, recipientId);
         Optional<ChatRoom> chatRoom = simpleDto.getChatRoom();

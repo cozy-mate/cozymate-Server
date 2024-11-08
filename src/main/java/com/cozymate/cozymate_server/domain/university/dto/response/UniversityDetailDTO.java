@@ -1,0 +1,13 @@
+package com.cozymate.cozymate_server.domain.university.dto.response;
+
+import java.util.List;
+import lombok.Builder;
+
+@Builder
+public record UniversityDetailDTO(
+        Long id,
+        String name,
+        String mailPattern,
+        List<String> dormitoryNames,
+        List<String> departments) {
+}

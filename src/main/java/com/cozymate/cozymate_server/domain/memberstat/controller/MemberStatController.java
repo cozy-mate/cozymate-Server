@@ -60,7 +60,7 @@ public class MemberStatController {
         @Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatCommandService.createMemberStat(memberDetails.getMember(),
+                memberStatCommandService.createMemberStat(memberDetails.member(),
                     memberStatCommandRequestDTO)));
     }
 
@@ -83,7 +83,7 @@ public class MemberStatController {
         @Valid @RequestBody MemberStatRequestDTO.MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatCommandService.modifyMemberStat(memberDetails.getMember(),
+                memberStatCommandService.modifyMemberStat(memberDetails.member(),
                     memberStatCommandRequestDTO)));
     }
 
@@ -102,7 +102,7 @@ public class MemberStatController {
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getMemberStat(memberDetails.getMember())
+                memberStatQueryService.getMemberStat(memberDetails.member())
             ));
     }
 
@@ -121,7 +121,7 @@ public class MemberStatController {
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getMemberStatWithId(memberDetails.getMember(), memberId)
+                memberStatQueryService.getMemberStatWithId(memberDetails.member(), memberId)
             ));
     }
 
@@ -142,7 +142,7 @@ public class MemberStatController {
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getNumOfRoommateStatus(memberDetails.getMember().getId())
+                memberStatQueryService.getNumOfRoommateStatus(memberDetails.member().getId())
             ));
     }
 
@@ -198,7 +198,7 @@ public class MemberStatController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberStatList(
-                    memberDetails.getMember(), filterList, pageable, needsDetail, needsPreferences)
+                    memberDetails.member(), filterList, pageable, needsDetail, needsPreferences)
             ));
     }
 
@@ -261,7 +261,7 @@ public class MemberStatController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(
-                    memberDetails.getMember(), filterMap)
+                    memberDetails.member(), filterMap)
             )
         );
     }
@@ -329,7 +329,7 @@ public class MemberStatController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getSearchedAndFilteredMemberStatList(
-                    memberDetails.getMember(), filterMap, pageable, needsDetail, needsPreferences)
+                    memberDetails.member(), filterMap, pageable, needsDetail, needsPreferences)
             )
         );
     }
@@ -382,7 +382,7 @@ public class MemberStatController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberStatList(
-                    memberDetails.getMember(), filterList, pageable, true, false)
+                    memberDetails.member(), filterList, pageable, true, false)
             ));
     }
 
@@ -444,7 +444,7 @@ public class MemberStatController {
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberSearchResponse(
                     keyword,
-                    memberDetails.getMember()
+                    memberDetails.member()
                 )
             )
         );

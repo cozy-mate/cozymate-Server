@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.rule.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.CreateRuleRequestDto;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.CreateRuleResponseDto;
 import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.RuleDetailResponseDto;
@@ -55,7 +55,7 @@ public class RuleController {
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             ruleCommandService.createRule(
-                memberDetails.getMember(), roomId, requestDto
+                memberDetails.member(), roomId, requestDto
             )
         ));
     }
@@ -77,7 +77,7 @@ public class RuleController {
         @PathVariable @Positive Long roomId
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            ruleQueryService.getRule(memberDetails.getMember(), roomId)
+            ruleQueryService.getRule(memberDetails.member(), roomId)
         ));
     }
 
@@ -100,7 +100,7 @@ public class RuleController {
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long ruleId
     ) {
-        ruleCommandService.deleteRule(memberDetails.getMember(), roomId, ruleId);
+        ruleCommandService.deleteRule(memberDetails.member(), roomId, ruleId);
         return ResponseEntity.ok(ApiResponse.onSuccess("삭제되었습니다."));
     }
 
@@ -126,7 +126,7 @@ public class RuleController {
         @PathVariable @Positive Long ruleId,
         @RequestBody @Valid CreateRuleRequestDto requestDto
     ) {
-        ruleCommandService.updateRule(memberDetails.getMember(), roomId, ruleId, requestDto);
+        ruleCommandService.updateRule(memberDetails.member(), roomId, ruleId, requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("수정되었습니다."));
     }
 }

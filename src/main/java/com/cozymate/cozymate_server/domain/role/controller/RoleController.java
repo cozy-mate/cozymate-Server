@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.role.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.role.dto.RoleRequestDto;
 import com.cozymate.cozymate_server.domain.role.dto.RoleRequestDto.CreateRoleRequestDto;
 import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleListDetailResponseDto;
@@ -50,7 +50,7 @@ public class RoleController {
         @PathVariable @Positive Long roomId,
         @RequestBody @Valid CreateRoleRequestDto requestDto
     ) {
-        roleCommandService.createRole(memberDetails.getMember(), roomId, requestDto);
+        roleCommandService.createRole(memberDetails.member(), roomId, requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 생성 완료"));
     }
 
@@ -70,7 +70,7 @@ public class RoleController {
     ) {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            roleQueryService.getRole(memberDetails.getMember(), roomId)
+            roleQueryService.getRole(memberDetails.member(), roomId)
         ));
     }
 
@@ -90,7 +90,7 @@ public class RoleController {
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long roleId
     ) {
-        roleCommandService.deleteRole(memberDetails.getMember(), roomId, roleId);
+        roleCommandService.deleteRole(memberDetails.member(), roomId, roleId);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 삭제 완료"));
     }
 
@@ -113,7 +113,7 @@ public class RoleController {
         @PathVariable @Positive Long roleId,
         @RequestBody @Valid RoleRequestDto.UpdateRoleRequestDto requestDto
     ) {
-        roleCommandService.updateRole(memberDetails.getMember(), roomId, roleId, requestDto);
+        roleCommandService.updateRole(memberDetails.member(), roomId, roleId, requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 수정 완료"));
     }
 

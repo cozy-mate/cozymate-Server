@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.postcomment.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.post.Post;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.postcomment.dto.PostCommentCreateDTO;
 import com.cozymate.cozymate_server.domain.postcomment.dto.PostCommentUpdateDTO;
 import com.cozymate.cozymate_server.domain.postcomment.dto.PostCommentViewDTO;
@@ -49,7 +48,7 @@ public class PostCommentController {
         @Valid @RequestBody PostCommentCreateDTO postCommentCreateDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                postCommentCommandService.createPostComment(memberDetails.getMember(),
+                postCommentCommandService.createPostComment(memberDetails.member(),
                     postCommentCreateDTO)));
     }
 
@@ -67,7 +66,7 @@ public class PostCommentController {
         @Valid @RequestBody PostCommentUpdateDTO postCommentUpdateDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                postCommentCommandService.updatePostComment(memberDetails.getMember(), postCommentUpdateDTO)));
+                postCommentCommandService.updatePostComment(memberDetails.member(), postCommentUpdateDTO)));
     }
 
     @Operation(
@@ -86,7 +85,7 @@ public class PostCommentController {
         @PathVariable Long postId,
         @PathVariable Long commentId
     ) {
-        postCommentCommandService.deletePostComment(memberDetails.getMember(), roomId, postId,commentId);
+        postCommentCommandService.deletePostComment(memberDetails.member(), roomId, postId,commentId);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 true));
@@ -110,7 +109,7 @@ public class PostCommentController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 postCommentQueryService.getPostCommentList(
-                    memberDetails.getMember(),roomId,postId
+                    memberDetails.member(),roomId,postId
                 )
             )
         );

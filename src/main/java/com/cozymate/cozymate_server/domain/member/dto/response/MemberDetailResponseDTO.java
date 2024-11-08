@@ -5,7 +5,6 @@ import lombok.Builder;
 @Builder
 public record MemberDetailResponseDTO(
     Long memberId,
-
     String nickname,
     String gender,
     String birthday,

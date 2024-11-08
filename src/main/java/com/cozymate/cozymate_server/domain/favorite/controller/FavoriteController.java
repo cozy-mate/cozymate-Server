@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.favorite.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteRequestDto;
 import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteMemberResponse;
 import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteRoomResponse;
@@ -43,7 +43,7 @@ public class FavoriteController {
     public ResponseEntity<ApiResponse<String>> saveFavorite(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid @RequestBody FavoriteRequestDto favoriteRequestDto) {
-        favoriteCommandService.saveFavorite(memberDetails.getMember(), favoriteRequestDto);
+        favoriteCommandService.saveFavorite(memberDetails.member(), favoriteRequestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("찜 완료"));
     }
 
@@ -55,7 +55,7 @@ public class FavoriteController {
     })
     public ResponseEntity<ApiResponse<String>> deleteFavorite(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long favoriteId) {
-        favoriteCommandService.deleteFavorite(memberDetails.getMember(), favoriteId);
+        favoriteCommandService.deleteFavorite(memberDetails.member(), favoriteId);
         return ResponseEntity.ok(ApiResponse.onSuccess("찜 삭제 완료"));
     }
 
@@ -64,7 +64,7 @@ public class FavoriteController {
     public ResponseEntity<ApiResponse<List<FavoriteMemberResponse>>> getFavoriteMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            favoriteQueryService.getFavoriteMemberList(memberDetails.getMember())));
+            favoriteQueryService.getFavoriteMemberList(memberDetails.member())));
     }
 
     @GetMapping("/rooms")
@@ -72,6 +72,6 @@ public class FavoriteController {
     public ResponseEntity<ApiResponse<List<FavoriteRoomResponse>>> getFavoriteRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            favoriteQueryService.getFavoriteRoomList(memberDetails.getMember())));
+            favoriteQueryService.getFavoriteRoomList(memberDetails.member())));
     }
 }

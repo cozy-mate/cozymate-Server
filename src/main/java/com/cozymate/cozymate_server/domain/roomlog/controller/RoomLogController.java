@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.roomlog.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.roomlog.dto.RoomLogResponseDto.RoomLogDetailResponseDto;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogQueryService;
@@ -9,7 +9,6 @@ import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +38,7 @@ public class RoomLogController {
     ) {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            roomLogQueryService.getRoomLogList(roomId, memberDetails.getMember(), page, size)
+            roomLogQueryService.getRoomLogList(roomId, memberDetails.member(), page, size)
         ));
     }
 

@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponseList;
 import com.cozymate.cozymate_server.domain.room.service.RoomRecommendService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -34,6 +34,6 @@ public class RoomRecommendController {
         @RequestParam @Positive @Max(10) int size
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            roomRecommendService.getRecommendationList(memberDetails.getMember(), size)));
+            roomRecommendService.getRecommendationList(memberDetails.member(), size)));
     }
 }
