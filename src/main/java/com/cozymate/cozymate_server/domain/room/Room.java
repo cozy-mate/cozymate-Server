@@ -85,4 +85,8 @@ public class Room extends BaseTimeEntity {
         this.profileImage = newProfileImage;
     }
 
+    public void convertToPublicRoom() {
+        this.roomType = RoomType.PUBLIC;
+    }
+
 }
