@@ -1,14 +1,17 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
 
+import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.RoomUpdateRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.InvitedRoomResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomListResponse;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -318,6 +321,39 @@ public class RoomController {
         roomCommandService.respondToJoinRequest(requesterId, accept, managerDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(accept ? "참여 요청 수락 완료" : "참여 요청 거절 완료"));
     }
+
+    @GetMapping("/{roomId}/invited-members")
+    @Operation(summary = "[바니] 우리방으로 초대한 멤버 목록 조회", description = "해당 roomId에 초대받은 멤버들을 조회합니다")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MATE
+    })
+    public ResponseEntity<ApiResponse<List<CozymateInfoResponse>>> getInvitedMemberList(
+        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedMemberList(roomId, memberDetails.member().getId())));
+    }
+
+    @GetMapping("/requested")
+    @Operation(summary = "[바니] 사용자가 참여 요청한 방 목록 조회", description = "로그인한 사용자가 참여 요청한 방 목록을 조회합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<List<RoomListResponse>>> getRequestedRoomList(
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getRequestedRoomList(memberDetails.member().getId())));
+    }
+
+    @GetMapping("/invited")
+    @Operation(summary = "[바니] 사용자가 초대 요청받은 방 목록 조회", description = "로그인한 사용자가 초대 요청 받은 방 목록을 조회합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<InvitedRoomResponse>> getInvitedRoomList(
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedRoomList(memberDetails.member().getId())));
+    }
+}
 
     @PatchMapping("/{roomId}/to-public")
     @Operation(summary = "[바니] 공개방으로 전환", description = "roomId에 해당하는 방을 공개방으로 전환합니다.")
