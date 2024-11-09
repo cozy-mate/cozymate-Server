@@ -2,9 +2,9 @@ package com.cozymate.cozymate_server.domain.favorite.service;
 
 import com.cozymate.cozymate_server.domain.favorite.Favorite;
 import com.cozymate.cozymate_server.domain.favorite.converter.FavoriteConverter;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteMemberResponse;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteRoomResponse;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.PreferenceStatsMatchCount;
+import com.cozymate.cozymate_server.domain.favorite.dto.response.FavoriteMemberResponseDTO;
+import com.cozymate.cozymate_server.domain.favorite.dto.response.FavoriteRoomResponseDTO;
+import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
@@ -44,7 +44,7 @@ public class FavoriteQueryService {
     private final RoomHashtagRepository roomHashtagRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-    public List<FavoriteMemberResponse> getFavoriteMemberList(Member member) {
+    public List<FavoriteMemberResponseDTO> getFavoriteMemberList(Member member) {
         List<Favorite> favoriteList = favoriteRepository.findByMemberAndFavoriteType(
             member, FavoriteType.MEMBER);
 
@@ -65,21 +65,21 @@ public class FavoriteQueryService {
         List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
 
-        List<FavoriteMemberResponse> favoriteMemberResponseList = favoriteMemberList.stream()
+        List<FavoriteMemberResponseDTO> favoriteMemberResponseDTOList = favoriteMemberList.stream()
             .map(favoriteMember -> {
                 Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(
                     favoriteMember.getMemberStat(), criteriaPreferences);
 
-                return FavoriteConverter.toFavoriteMemberResponse(
+                return FavoriteConverter.toFavoriteMemberResponseDTO(
                     memberIdFavoriteIdMap.get(favoriteMember.getId()),
                     MemberStatConverter.toPreferenceResponseDTO(favoriteMember.getMemberStat(),
                         preferences, equalityMap.get(favoriteMember.getId())));
             }).toList();
 
-        return favoriteMemberResponseList;
+        return favoriteMemberResponseDTOList;
     }
 
-    public List<FavoriteRoomResponse> getFavoriteRoomList(Member member) {
+    public List<FavoriteRoomResponseDTO> getFavoriteRoomList(Member member) {
         List<Favorite> favoriteList = favoriteRepository.findByMemberAndFavoriteType(member,
             FavoriteType.ROOM);
 
@@ -102,17 +102,17 @@ public class FavoriteQueryService {
         Map<Long, List<Mate>> roomIdMatesMap = notEnableFavoriteRoomList.stream().collect(
             Collectors.toMap(Room::getId, room -> mateRepository.findFetchMemberByRoom(room)));
 
-        List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
+        List<String> criteriaPreferenceList = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
 
         MemberStat memberStat = member.getMemberStat();
 
-        List<FavoriteRoomResponse> favoriteRoomResponseList = notEnableFavoriteRoomList.stream()
+        List<FavoriteRoomResponseDTO> favoriteRoomResponseList = notEnableFavoriteRoomList.stream()
             .map(room -> {
                 List<Mate> mates = roomIdMatesMap.get(room.getId());
 
-                List<PreferenceStatsMatchCount> preferenceStatsMatchCountList = getPreferenceStatsMatchCounts(
-                    member, criteriaPreferences, mates, memberStat);
+                List<PreferenceMatchCountDTO> preferenceStatsMatchCountList = getPreferenceStatsMatchCounts(
+                    member, criteriaPreferenceList, mates, memberStat);
 
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
                     member.getId(), mates.stream().map(mate -> mate.getMember().getId())
@@ -123,7 +123,7 @@ public class FavoriteQueryService {
                 List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(
                     room.getId());
 
-                return FavoriteConverter.toFavoriteRoomResponse(
+                return FavoriteConverter.toFavoriteRoomResponseDTO(
                     roomIdFavoriteIdMap.get(room.getId()), room, roomEquality,
                     preferenceStatsMatchCountList, roomHashTags, mates.size()
                 );
@@ -141,9 +141,9 @@ public class FavoriteQueryService {
         return favoriteRoomResponseList;
     }
 
-    private List<PreferenceStatsMatchCount> getPreferenceStatsMatchCounts(Member member,
-        List<String> criteriaPreferences, List<Mate> mates, MemberStat memberStat) {
-        List<PreferenceStatsMatchCount> preferenceStatsMatchCountList = criteriaPreferences.stream()
+    private List<PreferenceMatchCountDTO> getPreferenceStatsMatchCounts(Member member,
+        List<String> criteriaPreferenceList, List<Mate> mates, MemberStat memberStat) {
+        List<PreferenceMatchCountDTO> preferenceMatchCountDTOList = criteriaPreferenceList.stream()
             .map(preference -> {
                 long equalCount = mates.stream()
                     .map(mate -> mate.getMember().getMemberStat())
@@ -153,12 +153,12 @@ public class FavoriteQueryService {
                         MemberStatUtil.getMemberStatField(memberStat, preference)))
                     .count();
 
-                return PreferenceStatsMatchCount.builder()
+                return PreferenceMatchCountDTO.builder()
                     .preferenceName(preference)
-                    .matchCount((int) equalCount)
+                    .count((int) equalCount)
                     .build();
             }).toList();
-        return preferenceStatsMatchCountList;
+        return preferenceMatchCountDTOList;
     }
 
     private Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap) {
