@@ -1,8 +1,8 @@
 package com.cozymate.cozymate_server.domain.memberblock.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.memberblock.dto.MemberBlockRequestDto;
-import com.cozymate.cozymate_server.domain.memberblock.dto.MemberBlockResponseDto;
+import com.cozymate.cozymate_server.domain.memberblock.dto.request.MemberBlockRequestDTO;
+import com.cozymate.cozymate_server.domain.memberblock.dto.response.MemberBlockResponseDTO;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockCommandService;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -37,15 +37,15 @@ public class MemberBlockController {
         ErrorStatus._ALREADY_BLOCKED_MEMBER
     })
     public ResponseEntity<ApiResponse<String>> saveMemberBlock(
-        @RequestBody MemberBlockRequestDto requestDto,
+        @RequestBody MemberBlockRequestDTO requestDTO,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        memberBlockCommandService.saveMemberBlock(requestDto, memberDetails.member());
+        memberBlockCommandService.saveMemberBlock(requestDTO, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("차단 완료"));
     }
 
     @GetMapping
     @Operation(summary = "[베로] 멤버 차단 목록 조회", description = "")
-    public ResponseEntity<ApiResponse<List<MemberBlockResponseDto>>> getMemberBlockList(
+    public ResponseEntity<ApiResponse<List<MemberBlockResponseDTO>>> getMemberBlockList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             memberBlockQueryService.getMemberBlockList(memberDetails.member())));
