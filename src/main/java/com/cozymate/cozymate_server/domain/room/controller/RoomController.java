@@ -318,4 +318,20 @@ public class RoomController {
         roomCommandService.respondToJoinRequest(requesterId, accept, managerDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(accept ? "참여 요청 수락 완료" : "참여 요청 거절 완료"));
     }
+
+    @PatchMapping("/{roomId}/to-public")
+    @Operation(summary = "[바니] 공개방으로 전환", description = "roomId에 해당하는 방을 공개방으로 전환합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MATE,
+        ErrorStatus._NOT_ROOM_MANAGER,
+        ErrorStatus._PUBLIC_ROOM,
+    })
+    public ResponseEntity<ApiResponse<String>> convertToPublicRoom(
+        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        roomCommandService.convertToPublicRoom(roomId, memberDetails.getMember().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess("공개방 전환 완료"));
+    }
+
 }
