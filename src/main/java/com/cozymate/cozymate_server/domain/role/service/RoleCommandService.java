@@ -39,7 +39,7 @@ public class RoleCommandService {
         int repeatDayBitmast = getDayBitmask(requestDto.repeatDayList());
 
         Role role = roleRepository.save(
-            RoleConverter.toEntity(mate, requestDto.mateIdList(), requestDto.title(),
+            RoleConverter.toEntity(mate, requestDto.mateIdList(), requestDto.content(),
                 repeatDayBitmast));
         return RoleConverter.toRoleSimpleResponseDTOWithEntity(role);
     }
@@ -74,7 +74,7 @@ public class RoleCommandService {
         checkUpdatePermission(role, mate);
 
         // role 수정
-        role.updateEntity(requestDto.mateIdList(), requestDto.title(),
+        role.updateEntity(requestDto.mateIdList(), requestDto.content(),
             getDayBitmask(requestDto.repeatDayList()));
     }
 
