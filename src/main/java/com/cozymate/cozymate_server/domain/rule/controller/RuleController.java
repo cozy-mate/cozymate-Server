@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.rule.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.CreateRuleRequestDto;
-import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.CreateRuleResponseDto;
-import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.RuleDetailResponseDto;
+import com.cozymate.cozymate_server.domain.rule.dto.request.CreateRuleRequestDTO;
+import com.cozymate.cozymate_server.domain.rule.dto.response.CreateRuleResponseDTO;
+import com.cozymate.cozymate_server.domain.rule.dto.response.RuleDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.service.RuleCommandService;
 import com.cozymate.cozymate_server.domain.rule.service.RuleQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -48,10 +48,10 @@ public class RuleController {
         summary = "[무빗] 특정 방의 Rule 생성",
         description = "rule 내용은 필수, memo는 선택입니다.")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._RULE_OVER_MAX})
-    public ResponseEntity<ApiResponse<CreateRuleResponseDto>> createRule(
+    public ResponseEntity<ApiResponse<CreateRuleResponseDTO>> createRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
-        @RequestBody @Valid CreateRuleRequestDto requestDto
+        @RequestBody @Valid CreateRuleRequestDTO requestDto
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             ruleCommandService.createRule(
@@ -72,7 +72,7 @@ public class RuleController {
         summary = "[무빗] 특정 방의 Rule 목록 조회",
         description = "Rule에서 memo는 null 반환이 가능합니다.")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
-    public ResponseEntity<ApiResponse<List<RuleDetailResponseDto>>> getRuleList(
+    public ResponseEntity<ApiResponse<List<RuleDetailResponseDTO>>> getRuleList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId
     ) {
@@ -124,7 +124,7 @@ public class RuleController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long ruleId,
-        @RequestBody @Valid CreateRuleRequestDto requestDto
+        @RequestBody @Valid CreateRuleRequestDTO requestDto
     ) {
         ruleCommandService.updateRule(memberDetails.member(), roomId, ruleId, requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("수정되었습니다."));

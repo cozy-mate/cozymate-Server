@@ -5,7 +5,7 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.rule.Rule;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
-import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.RuleDetailResponseDto;
+import com.cozymate.cozymate_server.domain.rule.dto.response.RuleDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -29,19 +29,20 @@ public class RuleQueryService {
      * @param roomId Rule을 조회하려는 방 Id
      * @return Rule 목록
      */
-    public List<RuleDetailResponseDto> getRule(Member member, Long roomId) {
+    public List<RuleDetailResponseDTO> getRule(Member member, Long roomId) {
         // Mate 조회
         Mate mate = findMateByMemberIdAndRoomId(member, roomId);
 
         // Rule 목록 조회
         List<Rule> ruleList = ruleRepository.findAllByRoomId(mate.getRoom().getId());
         // Rule 목록을 RuleDetailResponseDto로 변환하여 반환
-        return ruleList.stream().map(RuleConverter::toRuleDetailResponseDto).toList();
+        return ruleList.stream().map(RuleConverter::toRuleDetailResponseDTOFromEntity).toList();
 
     }
 
     /**
      * Mate 조회
+     *
      * @param member 사용자
      * @param roomId 방 Id
      * @return Mate

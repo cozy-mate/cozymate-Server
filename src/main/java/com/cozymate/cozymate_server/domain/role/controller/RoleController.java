@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.role.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.role.dto.RoleRequestDto;
-import com.cozymate.cozymate_server.domain.role.dto.RoleRequestDto.CreateRoleRequestDto;
-import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleListDetailResponseDto;
+import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleListResponseDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleSimpleResponseDTO;
 import com.cozymate.cozymate_server.domain.role.service.RoleCommandService;
 import com.cozymate.cozymate_server.domain.role.service.RoleQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -45,13 +45,15 @@ public class RoleController {
     @PostMapping("/{roomId}/roles")
     @Operation(summary = "[무빗] 특정 방에 role 생성", description = "본인의 룸메라면 Role을 할당할 수 있습니다.")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
-    public ResponseEntity<ApiResponse<String>> createRole(
+    public ResponseEntity<ApiResponse<RoleSimpleResponseDTO>> createRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
-        @RequestBody @Valid CreateRoleRequestDto requestDto
+        @RequestBody @Valid CreateRoleRequestDTO requestDto
     ) {
-        roleCommandService.createRole(memberDetails.member(), roomId, requestDto);
-        return ResponseEntity.ok(ApiResponse.onSuccess("Role 생성 완료"));
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            roleCommandService.createRole(memberDetails.member(), roomId, requestDto)
+        ));
     }
 
     /**
@@ -64,7 +66,7 @@ public class RoleController {
     @GetMapping("/{roomId}/roles")
     @Operation(summary = "[무빗] 특정 방에 role 목록 조회", description = "")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
-    public ResponseEntity<ApiResponse<RoleListDetailResponseDto>> getRoleList(
+    public ResponseEntity<ApiResponse<RoleListResponseDTO>> getRoleList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId
     ) {
@@ -111,7 +113,7 @@ public class RoleController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long roleId,
-        @RequestBody @Valid RoleRequestDto.UpdateRoleRequestDto requestDto
+        @RequestBody @Valid CreateRoleRequestDTO requestDto
     ) {
         roleCommandService.updateRole(memberDetails.member(), roomId, roleId, requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("Role 수정 완료"));
