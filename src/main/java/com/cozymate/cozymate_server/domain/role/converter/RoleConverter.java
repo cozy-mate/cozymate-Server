@@ -2,8 +2,9 @@ package com.cozymate.cozymate_server.domain.role.converter;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
-import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleDetailResponseDto;
-import com.cozymate.cozymate_server.domain.role.dto.RoleResponseDto.RoleListDetailResponseDto;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleListResponseDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleSimpleResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +45,16 @@ public class RoleConverter {
         return dayList;
     }
 
-    public static RoleDetailResponseDto toRoleDetailResponseDto(Role role,
+    public static RoleSimpleResponseDTO toRoleSimpleResponseDTOWithEntity(Role role) {
+        return RoleSimpleResponseDTO.builder()
+            .roleId(role.getId())
+            .build();
+    }
+
+    public static RoleDetailResponseDTO toRoleDetailResponseDto(Role role,
         Map<Long, String> mateNameMap) {
-        return RoleDetailResponseDto.builder()
-            .id(role.getId())
+        return RoleDetailResponseDTO.builder()
+            .roleId(role.getId())
             .mateNameList(role.getAssignedMateIdList().stream()
                 .map(mateNameMap::get).filter(Objects::nonNull).toList())
             .content(role.getContent())
@@ -60,9 +67,9 @@ public class RoleConverter {
             .build();
     }
 
-    public static RoleListDetailResponseDto toRoleListDetailResponseDto(
-        List<RoleDetailResponseDto> roleList) {
-        return RoleListDetailResponseDto.builder()
+    public static RoleListResponseDTO toRoleListDetailResponseDto(
+        List<RoleDetailResponseDTO> roleList) {
+        return RoleListResponseDTO.builder()
             .roleList(roleList)
             .build();
     }

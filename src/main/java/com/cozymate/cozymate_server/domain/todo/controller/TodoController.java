@@ -2,10 +2,9 @@ package com.cozymate.cozymate_server.domain.todo.controller;
 
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoContentRequestDto;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoIdResponseDto;
-import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoListResponseDto;
+import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO;
+import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateResponseDTO;
+import com.cozymate.cozymate_server.domain.todo.dto.response.TodoSimpleResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.domain.todo.service.TodoQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -43,10 +42,10 @@ public class TodoController {
     @PostMapping("/{roomId}/todos")
     @Operation(summary = "[무빗] 특정 방에 본인의 Todo 생성", description = "내 투두, 남 투두, 그룹 투두 모두 생성 가능합니다.")
     @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._TODO_OVER_MAX})
-    public ResponseEntity<ApiResponse<TodoIdResponseDto>> createTodo(
+    public ResponseEntity<ApiResponse<TodoSimpleResponseDTO>> createTodo(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
-        @RequestBody @Valid CreateTodoRequestDto requestDto
+        @RequestBody @Valid CreateTodoRequestDTO requestDto
     ) {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
@@ -60,7 +59,7 @@ public class TodoController {
         summary = "[무빗] 특정 방의 특정 날짜 기준 룸메별 To-Do 조회",
         description = "본인이 참가한 방에서만 조회가 가능합니다. | timePoint를 지정하지 않으면 오늘 날짜 기준으로 반환합니다.")
     @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND})
-    public ResponseEntity<ApiResponse<TodoListResponseDto>> getTodo(
+    public ResponseEntity<ApiResponse<TodoMateResponseDTO>> getTodo(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") @Parameter(example = "2024-08-01") LocalDate timePoint
@@ -106,7 +105,7 @@ public class TodoController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long todoId,
-        @Valid @RequestBody UpdateTodoContentRequestDto requestDto
+        @Valid @RequestBody CreateTodoRequestDTO requestDto
     ) {
         todoCommandService.updateTodoContent(memberDetails.member(), roomId, todoId,
             requestDto);

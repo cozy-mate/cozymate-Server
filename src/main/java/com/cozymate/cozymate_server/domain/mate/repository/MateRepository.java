@@ -38,6 +38,8 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Optional<Mate> findByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
 
+    List<Mate> findAllByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
+
     boolean existsByMemberIdAndEntryStatusAndRoomStatusIn(Long memberId, EntryStatus entryStatus,
         List<RoomStatus> roomStatuses);
 
@@ -70,4 +72,8 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findByIdIn(List<Long> memberIdList);
 
     void deleteByRoomIdAndMemberId(Long roomId, Long memberId);
+
+    List<Mate> findByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
+
+    Integer countByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
 }

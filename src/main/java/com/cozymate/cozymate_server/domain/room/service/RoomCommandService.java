@@ -173,7 +173,7 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
@@ -198,7 +198,7 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate quittingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+        Mate quittingMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 이미 나간 방에 대한 예외 처리
@@ -264,7 +264,7 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
@@ -294,7 +294,7 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).getRoomId())
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberId(room.getId(), inviterId)
+        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), inviterId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 초대한 사용자가 방장인지 검증
@@ -376,7 +376,7 @@ public class RoomCommandService {
         roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate managerMate = mateRepository.findByRoomIdAndMemberId(roomId, managerId)
+        Mate managerMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, managerId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장이 아니면 예외 발생
@@ -396,7 +396,7 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).getRoomId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberId(room.getId(), inviterId)
+        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), inviterId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 초대한 사용자가 방장인지 검증
@@ -477,7 +477,7 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomQueryService.getExistRoom(managerId).getRoomId())
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberId(room.getId(), managerId)
+        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), managerId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장인지 검증
@@ -510,6 +510,29 @@ public class RoomCommandService {
         }
         roomRepository.save(room);
 
+    }
+
+    public void convertToPublicRoom(Long roomId, Long memberId) {
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        // 방장이 아니면 예외 발생
+        if (!member.isRoomManager()) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
+
+        if (room.getRoomType() != RoomType.PRIVATE) {
+            throw new GeneralException(ErrorStatus._PUBLIC_ROOM);
+        }
+
+        room.convertToPublicRoom();
+        roomRepository.save(room);
     }
 
     // 초대코드 생성 부분

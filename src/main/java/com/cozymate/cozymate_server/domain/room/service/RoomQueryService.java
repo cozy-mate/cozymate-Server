@@ -17,9 +17,11 @@ import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.InvitedRoomResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomListResponse;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
@@ -57,7 +59,7 @@ public class RoomQueryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         if (room.getRoomType()== RoomType.PRIVATE) {
-            mateRepository.findByRoomIdAndMemberId(roomId, memberId)
+            mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
         }
 
@@ -71,7 +73,7 @@ public class RoomQueryService {
         Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
             joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
 
-        Integer roomEquality = getCalculateRoomEquality(memberId, equalityMap);
+        Integer roomEquality = getCalculateRoomEquality(equalityMap);
 
         List<CozymateInfoResponse> mates = joinedMates.stream()
             .map(mate -> {
@@ -195,10 +197,9 @@ public class RoomQueryService {
 
     }
 
-    public Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap){
-        List<Integer> roomEquality = equalityMap.entrySet().stream()
-            .map(Map.Entry::getValue)
-            .collect(Collectors.toList());
+    public Integer getCalculateRoomEquality(Map<Long, Integer> equalityMap){
+        List<Integer> roomEquality = equalityMap.values().stream()
+            .toList();
 
         if (roomEquality.isEmpty()) {
             return 0;
@@ -209,5 +210,77 @@ public class RoomQueryService {
             .average()
             .orElse(0));
 
+    }
+
+    public List<CozymateInfoResponse> getInvitedMemberList(Long roomId, Long memberId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId, EntryStatus.JOINED)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        List<Mate> invitedMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(), EntryStatus.INVITED);
+
+        Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
+            invitedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
+
+        return invitedMates.stream()
+            .map(mate -> {
+                Integer mateEquality = equalityMap.get(mate.getMember().getId());
+                return RoomConverter.toCozymateInfoResponse(mate, mateEquality);
+            }).toList();
+
+    }
+
+    public List<RoomListResponse> getRequestedRoomList(Long memberId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        List<Room> requestedRooms = mateRepository.findAllByMemberIdAndEntryStatus(memberId, EntryStatus.PENDING)
+            .stream()
+            .map(Mate::getRoom)
+            .toList();
+
+        return requestedRooms.stream()
+            .map(room -> {
+                List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
+                Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
+                    joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
+                Integer roomEquality = getCalculateRoomEquality(equalityMap);
+                List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
+                return RoomConverter.toRoomListResponse(room, roomEquality, hashtags);
+            })
+            .toList();
+    }
+
+    public InvitedRoomResponse getInvitedRoomList(Long memberId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Integer invitedCount = mateRepository.countByMemberIdAndEntryStatus(memberId, EntryStatus.INVITED);
+
+        List<Room> invitedRooms = mateRepository.findAllByMemberIdAndEntryStatus(memberId, EntryStatus.INVITED)
+            .stream()
+            .map(Mate::getRoom)
+            .toList();
+
+        List<RoomListResponse> rooms = invitedRooms.stream()
+            .map(room -> {
+                List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
+                Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
+                    joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
+                Integer roomEquality = getCalculateRoomEquality(equalityMap);
+                List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
+                return RoomConverter.toRoomListResponse(room, roomEquality, hashtags);
+            })
+            .toList();
+
+        return InvitedRoomResponse.builder()
+            .requestCount(invitedCount)
+            .roomList(rooms)
+            .build();
     }
 }

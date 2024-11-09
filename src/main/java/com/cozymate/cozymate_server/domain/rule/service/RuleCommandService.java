@@ -5,8 +5,8 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.rule.Rule;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
-import com.cozymate.cozymate_server.domain.rule.dto.RuleRequestDto.CreateRuleRequestDto;
-import com.cozymate.cozymate_server.domain.rule.dto.RuleResponseDto.CreateRuleResponseDto;
+import com.cozymate.cozymate_server.domain.rule.dto.request.CreateRuleRequestDTO;
+import com.cozymate.cozymate_server.domain.rule.dto.response.CreateRuleResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -32,8 +32,8 @@ public class RuleCommandService {
      * @param roomId     규칙을 생성하려는 방
      * @param requestDto 규칙 내용 return 생성된 규칙의 id
      */
-    public CreateRuleResponseDto createRule(
-        Member member, Long roomId, CreateRuleRequestDto requestDto) {
+    public CreateRuleResponseDTO createRule(
+        Member member, Long roomId, CreateRuleRequestDTO requestDto) {
         // Mate 조회
         Mate mate = findMateByMemberIdAndRoomId(member, roomId);
 
@@ -42,11 +42,11 @@ public class RuleCommandService {
 
         // 규칙 생성
         Rule rule = ruleRepository.save(
-            RuleConverter.toEntity(requestDto.getContent(), requestDto.getMemo(), mate.getRoom())
+            RuleConverter.toEntity(requestDto.content(), requestDto.memo(), mate.getRoom())
         );
 
         // 생성된 규칙의 id 반환
-        return CreateRuleResponseDto.builder().id(rule.getId()).build();
+        return RuleConverter.toCreateRuleResponseDTOFromEntity(rule);
     }
 
     /**
@@ -71,7 +71,7 @@ public class RuleCommandService {
     }
 
     public void updateRule(Member member, Long roomId, Long ruleId,
-        CreateRuleRequestDto requestDto) {
+        CreateRuleRequestDTO requestDto) {
         // Rule 조회
         Rule rule = ruleRepository.findById(ruleId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._RULE_NOT_FOUND));
@@ -83,7 +83,7 @@ public class RuleCommandService {
         validateRulePermission(mate, rule);
 
         // @Transactional 에 의해 더티 체크
-        rule.updateEntity(requestDto.getContent(), requestDto.getMemo());
+        rule.updateEntity(requestDto.content(), requestDto.memo());
     }
 
     /**

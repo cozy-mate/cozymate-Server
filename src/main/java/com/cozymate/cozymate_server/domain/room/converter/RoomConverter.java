@@ -10,6 +10,7 @@ import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PrivateRoomCr
 import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PublicRoomCreateRequest;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
+import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomListResponse;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
@@ -117,4 +118,13 @@ public class RoomConverter {
             .build();
     }
 
+    public static RoomListResponse toRoomListResponse(Room room, Integer roomEquality, List<String> hashtags) {
+        return RoomListResponse.builder()
+            .roomId(room.getId())
+            .name(room.getName())
+            .roomEquality(roomEquality)
+            .hashtags(hashtags)
+            .numOfArrival(room.getNumOfArrival())
+            .build();
+    }
 }
