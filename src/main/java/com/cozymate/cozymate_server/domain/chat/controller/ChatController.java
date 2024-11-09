@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.chat.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatSuccessResponseDto;
+import com.cozymate.cozymate_server.domain.chat.dto.request.ChatRequestDTO;
+import com.cozymate.cozymate_server.domain.chat.dto.response.ChatResponseDTO;
+import com.cozymate.cozymate_server.domain.chat.dto.response.ChatSuccessResponseDTO;
 import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;
 import com.cozymate.cozymate_server.domain.chat.service.ChatQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -35,8 +35,8 @@ public class ChatController {
             ErrorStatus._CHAT_NOT_FOUND_RECIPIENT,
             ErrorStatus._REQUEST_TO_BLOCKED_MEMBER
     })
-    public ResponseEntity<ApiResponse<ChatSuccessResponseDto>> createChat(
-        @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId,
+    public ResponseEntity<ApiResponse<ChatSuccessResponseDTO>> createChat(
+        @Valid @RequestBody ChatRequestDTO chatRequestDto, @PathVariable Long recipientId,
         @AuthenticationPrincipal
         MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
@@ -51,7 +51,7 @@ public class ChatController {
         ErrorStatus._CHATROOM_MEMBER_MISMATCH,
         ErrorStatus._REQUEST_TO_BLOCKED_MEMBER
     })
-    public ResponseEntity<ApiResponse<ChatResponseDto>> getChatList(
+    public ResponseEntity<ApiResponse<ChatResponseDTO>> getChatList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long chatRoomId) {
         return ResponseEntity.ok(
