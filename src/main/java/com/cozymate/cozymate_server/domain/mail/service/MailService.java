@@ -1,10 +1,13 @@
 package com.cozymate.cozymate_server.domain.mail.service;
 
 
-import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
-import com.cozymate.cozymate_server.domain.mail.dto.MailRequest;
+import com.cozymate.cozymate_server.domain.mail.converter.MailConverter;
+import com.cozymate.cozymate_server.domain.mail.dto.request.MailSendRequestDTO;
+import com.cozymate.cozymate_server.domain.mail.dto.request.VerifyRequestDTO;
+import com.cozymate.cozymate_server.domain.mail.dto.response.VerifyResponseDTO;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
@@ -19,7 +22,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,34 +41,30 @@ public class MailService {
     private static final Integer MAIL_AUTHENTICATION_EXPIRED_TIME = 30;
 
     @Transactional
-    public void sendUniversityAuthenticationCode(MemberDetails memberDetails, MailRequest.SendDTO sendDTO) {
-        University university = universityRepository.findById(sendDTO.getUniversityId())
+    public void sendUniversityAuthenticationCode(MemberDetails memberDetails, MailSendRequestDTO sendDTO) {
+        University university = universityRepository.findById(sendDTO.universityId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
-        String mailAddress = sendDTO.getMailAddress();
+        String mailAddress = sendDTO.mailAddress();
         validateMailAddress(mailAddress, university.getMailPattern());
 
-        MailAuthentication mailAuthentication = createAndSendMail(memberDetails.getMember().getId(),
+        MailAuthentication mailAuthentication = createAndSendMail(memberDetails.member().getId(),
                 mailAddress);
 
-//        log.info("code : {}", mailAuthentication.getCode());
-//        log.info("member : {}", memberDetails.getMember().getNickname());
-//        log.info("email : {}", mailAddress);
-
         mailRepository.save(mailAuthentication);
-
-
     }
 
     @Transactional
-    public AuthResponseDTO.TokenResponseDTO verifyMemberUniversity(MemberDetails memberDetails,
-                                                                   MailRequest.VerifyDTO verifyDTO) {
-        Member member = memberDetails.getMember();
+    public VerifyResponseDTO verifyMemberUniversity(MemberDetails memberDetails,
+                                                    VerifyRequestDTO verifyDTO) {
+        Member member = memberDetails.member();
 
-        verifyAuthenticationCode(member, verifyDTO.getCode());
+        verifyAuthenticationCode(member, verifyDTO.code());
 
-        return memberCommandService.verifyMemberUniversity(memberDetails, verifyDTO.getUniversityId(),
-                verifyDTO.getMajorName());
+        TokenResponseDTO tokenResponseDTO = memberCommandService.verifyMemberUniversity(memberDetails,
+                verifyDTO.universityId(),
+                verifyDTO.majorName());
+        return MailConverter.toVerifyResponseDTO(tokenResponseDTO);
     }
 
     private void verifyAuthenticationCode(Member member, String requestCode) {
@@ -99,12 +97,7 @@ public class MailService {
         message.setText("COZYMATE 대학교 메일인증 코드입니다 : " + authenticationCode);
         mailSender.send(message);
 
-        return MailAuthentication.builder()
-                .memberId(memberId)
-                .mailAddress(mailAddress)
-                .code(authenticationCode)
-                .isVerified(false)
-                .build();
+        return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress, authenticationCode, false);
     }
 
     private void validateMailAddress(String mailAddress, String mailPattern) {

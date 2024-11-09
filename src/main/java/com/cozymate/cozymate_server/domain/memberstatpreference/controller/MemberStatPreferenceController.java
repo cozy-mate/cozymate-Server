@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstatpreference.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberstatpreference.dto.MemberStatPreferenceDto;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
@@ -38,7 +38,7 @@ public class MemberStatPreferenceController {
         @AuthenticationPrincipal MemberDetails memberDetails) {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            memberStatPreferenceQueryService.getPreferences(memberDetails.getMember().getId())));
+            memberStatPreferenceQueryService.getPreferences(memberDetails.member().getId())));
     }
 
     @PostMapping("")
@@ -52,7 +52,7 @@ public class MemberStatPreferenceController {
         @Valid @RequestBody MemberStatPreferenceDto memberStatPreferenceDto
     ) {
         Long createdId = memberStatPreferenceCommandService.savePreferences(
-            memberDetails.getMember().getId(),
+            memberDetails.member().getId(),
             memberStatPreferenceDto.getPreferenceList());
 
         return ResponseEntity.ok(ApiResponse.onSuccess(createdId));
@@ -70,7 +70,7 @@ public class MemberStatPreferenceController {
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             memberStatPreferenceCommandService.updatePreferences(
-                memberDetails.getMember().getId(),
+                memberDetails.member().getId(),
                 memberStatPreferenceDto.getPreferenceList()
             )
         ));

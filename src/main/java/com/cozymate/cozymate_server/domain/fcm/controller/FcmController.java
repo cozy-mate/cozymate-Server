@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.fcm.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.fcm.Fcm;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmRequestDto;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmCommandService;
@@ -11,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +28,7 @@ public class FcmController {
     public ResponseEntity<ApiResponse<String>> createFcm(
         @AuthenticationPrincipal MemberDetails memberDetails, @Valid @RequestBody
     FcmRequestDto fcmRequestDto) {
-        fcmCommandService.createFcm(memberDetails.getMember(), fcmRequestDto);
+        fcmCommandService.createFcm(memberDetails.member(), fcmRequestDto);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("fcm토큰 및 기기 고유 값 저장 완료"));
     }

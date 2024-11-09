@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.feed.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.feed.dto.FeedRequestDTO;
 import com.cozymate.cozymate_server.domain.feed.dto.FeedResponseDTO;
 import com.cozymate.cozymate_server.domain.feed.service.FeedCommandService;
@@ -47,7 +47,7 @@ public class FeedController {
         @Valid @RequestBody FeedRequestDTO feedRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                feedCommandService.createFeedInfo(memberDetails.getMember(), feedRequestDTO)));
+                feedCommandService.createFeedInfo(memberDetails.member(), feedRequestDTO)));
     }
 
     @Operation(
@@ -64,7 +64,7 @@ public class FeedController {
         @Valid @RequestBody FeedRequestDTO feedRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                feedCommandService.updateFeedInfo(memberDetails.getMember(), feedRequestDTO)));
+                feedCommandService.updateFeedInfo(memberDetails.member(), feedRequestDTO)));
     }
 
     @Operation(
@@ -81,6 +81,6 @@ public class FeedController {
         @PathVariable Long roomId) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                feedQueryService.getFeedInfo(memberDetails.getMember(),roomId)));
+                feedQueryService.getFeedInfo(memberDetails.member(),roomId)));
     }
 }

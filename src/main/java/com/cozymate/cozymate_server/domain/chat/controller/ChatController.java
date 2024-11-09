@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.chat.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto;
 import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatSuccessResponseDto;
@@ -40,7 +40,7 @@ public class ChatController {
         @AuthenticationPrincipal
         MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            chatCommandService.createChat(chatRequestDto, memberDetails.getMember(),
+            chatCommandService.createChat(chatRequestDto, memberDetails.member(),
                 recipientId)));
     }
 
@@ -56,6 +56,6 @@ public class ChatController {
         @PathVariable Long chatRoomId) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                chatQueryService.getChatList(memberDetails.getMember(), chatRoomId)));
+                chatQueryService.getChatList(memberDetails.member(), chatRoomId)));
     }
 }

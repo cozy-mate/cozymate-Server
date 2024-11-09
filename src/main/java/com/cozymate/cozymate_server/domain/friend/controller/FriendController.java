@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.friend.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendRequestDTO;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.FriendLikeResponseDTO;
 import com.cozymate.cozymate_server.domain.friend.dto.FriendResponseDTO.FriendSummaryResponseDTO;
@@ -50,7 +50,7 @@ public class FriendController {
 
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                friendCommandService.requestFriend(senderDetails.getMember(), sendFriendRequestDTO)));
+                friendCommandService.requestFriend(senderDetails.member(), sendFriendRequestDTO)));
     }
 
     @Deprecated
@@ -70,7 +70,7 @@ public class FriendController {
 
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                friendCommandService.acceptFriendRequest(receiverDetails.getMember(), sendFriendRequestDTO)));
+                friendCommandService.acceptFriendRequest(receiverDetails.member(), sendFriendRequestDTO)));
     }
 
     @Deprecated
@@ -90,7 +90,7 @@ public class FriendController {
 
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                friendCommandService.denyFriendRequest(receiverDetails.getMember(), sendFriendRequestDTO)));
+                friendCommandService.denyFriendRequest(receiverDetails.member(), sendFriendRequestDTO)));
     }
 
     @Deprecated
@@ -110,7 +110,7 @@ public class FriendController {
         @RequestBody @Valid FriendRequestDTO sendFriendRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                friendCommandService.toggleLikeFriend(likerDetails.getMember(), sendFriendRequestDTO)));
+                friendCommandService.toggleLikeFriend(likerDetails.member(), sendFriendRequestDTO)));
     }
 
     @Deprecated
@@ -127,7 +127,7 @@ public class FriendController {
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                friendQueryService.getFriendList(memberDetails.getMember())
+                friendQueryService.getFriendList(memberDetails.member())
             ));
     }
 
@@ -149,7 +149,7 @@ public class FriendController {
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long memberId) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                friendQueryService.getFriendStatus(memberDetails.getMember(), memberId)
+                friendQueryService.getFriendStatus(memberDetails.member(), memberId)
             ));
     }
 }

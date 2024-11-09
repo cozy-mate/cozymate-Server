@@ -39,7 +39,7 @@ public class TodoResponseDto {
     @Getter
     public static class TodoIdResponseDto {
 
-            private Long id;
+        private Long id;
     }
 
 }

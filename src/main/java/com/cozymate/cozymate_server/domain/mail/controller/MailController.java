@@ -1,11 +1,13 @@
 package com.cozymate.cozymate_server.domain.mail.controller;
 
 
-import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.mail.dto.MailRequest;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.mail.dto.request.MailSendRequestDTO;
+import com.cozymate.cozymate_server.domain.mail.dto.request.VerifyRequestDTO;
+import com.cozymate.cozymate_server.domain.mail.dto.response.VerifyResponseDTO;
 import com.cozymate.cozymate_server.domain.mail.service.MailService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +30,7 @@ public class MailController {
                     + "universityId : 1 <br>")
     public ResponseEntity<Void> sendUniversityAuthenticationCode(
             @AuthenticationPrincipal MemberDetails memberDetails,
-            @RequestBody MailRequest.SendDTO sendDTO
+            @RequestBody MailSendRequestDTO sendDTO
     ) {
         mailService.sendUniversityAuthenticationCode(memberDetails, sendDTO);
         return ResponseEntity.ok().build();
@@ -41,9 +43,9 @@ public class MailController {
                     + " universityId : 1 <br>"
                     + "response :"
                     + " 토큰")
-    public ResponseEntity<ApiResponse<AuthResponseDTO.TokenResponseDTO>> verifyMemberUniversity(
+    public ResponseEntity<ApiResponse<VerifyResponseDTO>> verifyMemberUniversity(
             @AuthenticationPrincipal MemberDetails memberDetails,
-            @RequestBody MailRequest.VerifyDTO verifyDTO
+            @RequestBody VerifyRequestDTO verifyDTO
 
             ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(mailService.verifyMemberUniversity(memberDetails,verifyDTO)));

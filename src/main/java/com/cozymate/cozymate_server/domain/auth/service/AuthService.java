@@ -1,10 +1,10 @@
 package com.cozymate.cozymate_server.domain.auth.service;
 
 import com.cozymate.cozymate_server.domain.auth.Token;
-import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
+import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.repository.TokenRepository;
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.auth.userDetails.TemporaryMember;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.TemporaryMember;
 import com.cozymate.cozymate_server.domain.auth.utils.AuthConverter;
 import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
 import com.cozymate.cozymate_server.domain.member.service.MemberQueryService;
@@ -33,7 +33,7 @@ public class AuthService implements UserDetailsService {
     private final MemberQueryService memberQueryService;
     private final TokenRepository tokenRepository;
 
-    public AuthResponseDTO.TokenResponseDTO reissue(String refreshToken) {
+    public TokenResponseDTO reissue(String refreshToken) {
         String clientId = jwtUtil.extractUserName(refreshToken);
 
         findTokenByValue(refreshToken);
@@ -44,7 +44,7 @@ public class AuthService implements UserDetailsService {
     // 회원가입을 하려는 경우
     // 임시 토큰을 만들어서 token response dto 만들어 반환
     // 바디에 임시 토큰값 있음
-    public AuthResponseDTO.TokenResponseDTO generateTemporaryTokenDTO(String clientId) {
+    public TokenResponseDTO generateTemporaryTokenDTO(String clientId) {
         TemporaryMember temporaryMember = loadTemporaryMember(clientId);
 
         String temporaryToken = jwtUtil.generateTemporaryToken(temporaryMember);
@@ -57,7 +57,7 @@ public class AuthService implements UserDetailsService {
     // access token 과 refresh token을 만들어 token response dto 반환
     // 바디에 access token, refresh token 이 있음
     // refresh token은 db에 저장
-    public AuthResponseDTO.TokenResponseDTO generateMemberTokenDTO(MemberDetails memberDetails) {
+    public TokenResponseDTO generateMemberTokenDTO(MemberDetails memberDetails) {
         String accessToken = jwtUtil.generateAccessToken(memberDetails);
         String refreshToken = jwtUtil.generateRefreshToken(memberDetails);
 

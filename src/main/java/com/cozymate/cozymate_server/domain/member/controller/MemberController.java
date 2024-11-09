@@ -1,8 +1,10 @@
 package com.cozymate.cozymate_server.domain.member.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.member.dto.MemberRequestDTO;
-import com.cozymate.cozymate_server.domain.member.dto.MemberResponseDTO;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.member.dto.request.SignInRequestDTO;
+import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
+import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -41,17 +43,15 @@ public class MemberController {
     @SwaggerApiError({
             ErrorStatus._MEMBER_BINDING_FAIL,
     })
-    ResponseEntity<ApiResponse<MemberResponseDTO.SignInResponseDTO>> signIn(
-            @RequestBody @Valid MemberRequestDTO.SignInRequestDTO signInRequestDTO,
+    ResponseEntity<ApiResponse<SignInResponseDTO>> signIn(
+            @RequestBody @Valid SignInRequestDTO signInRequestDTO,
             BindingResult bindingResult) {
-
-        log.info("로그인 시도 : {}:{}", signInRequestDTO.getClientId(), signInRequestDTO.getSocialType());
 
         if (bindingResult.hasErrors()) {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
         }
 
-        MemberResponseDTO.SignInResponseDTO signInResponseDTO = memberCommandService.signIn(signInRequestDTO);
+        SignInResponseDTO signInResponseDTO = memberCommandService.signIn(signInRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
     }
@@ -76,9 +76,9 @@ public class MemberController {
     @SwaggerApiError({
             ErrorStatus._MEMBER_BINDING_FAIL
     })
-    ResponseEntity<ApiResponse<MemberResponseDTO.SignInResponseDTO>> signUp(
+    ResponseEntity<ApiResponse<SignInResponseDTO>> signUp(
             @RequestAttribute("client_id") String clientId,
-            @RequestBody @Valid MemberRequestDTO.SignUpRequestDTO signUpRequestDTO,
+            @RequestBody @Valid SignUpRequestDTO signUpRequestDTO,
             BindingResult bindingResult
     ) {
         log.info("enter MemberController : [post] /member/sign-up");
@@ -87,7 +87,7 @@ public class MemberController {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
         }
 
-        MemberResponseDTO.SignInResponseDTO signInResponseDTO = memberCommandService.signUp(clientId, signUpRequestDTO);
+        SignInResponseDTO signInResponseDTO = memberCommandService.signUp(clientId, signUpRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
     }
@@ -100,12 +100,13 @@ public class MemberController {
             ErrorStatus._MEMBER_BINDING_FAIL,
             ErrorStatus._MEMBER_NOT_FOUND
     })
-    ResponseEntity<ApiResponse<MemberResponseDTO.MemberInfoDTO>> getMemberInfo(
+    ResponseEntity<ApiResponse<MemberDetailResponseDTO>> getMemberInfo(
             @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        MemberResponseDTO.MemberInfoDTO memberInfoDTO = memberCommandService.getMemberInfo(memberDetails);
+        MemberDetailResponseDTO memberDetailResponseDTO = memberCommandService.getMemberDetailInfo(memberDetails);
 
-        return ResponseEntity.ok(ApiResponse.onSuccess(memberInfoDTO));
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(memberDetailResponseDTO));
     }
 
 

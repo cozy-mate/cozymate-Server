@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberblock.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberblock.dto.MemberBlockRequestDto;
 import com.cozymate.cozymate_server.domain.memberblock.dto.MemberBlockResponseDto;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockCommandService;
@@ -39,7 +39,7 @@ public class MemberBlockController {
     public ResponseEntity<ApiResponse<String>> saveMemberBlock(
         @RequestBody MemberBlockRequestDto requestDto,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        memberBlockCommandService.saveMemberBlock(requestDto, memberDetails.getMember());
+        memberBlockCommandService.saveMemberBlock(requestDto, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("차단 완료"));
     }
 
@@ -48,7 +48,7 @@ public class MemberBlockController {
     public ResponseEntity<ApiResponse<List<MemberBlockResponseDto>>> getMemberBlockList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            memberBlockQueryService.getMemberBlockList(memberDetails.getMember())));
+            memberBlockQueryService.getMemberBlockList(memberDetails.member())));
     }
 
     @DeleteMapping("/{memberId}")
@@ -60,7 +60,7 @@ public class MemberBlockController {
     public ResponseEntity<ApiResponse<String>> deleteMemberBlock(@PathVariable Long memberId,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberBlockCommandService.deleteMemberBlock(memberId, memberDetails.getMember());
+        memberBlockCommandService.deleteMemberBlock(memberId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("차단 해제 완료"));
     }
 }

@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.report.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.report.service.ReportCommandService;
 import com.cozymate.cozymate_server.domain.report.dto.ReportRequestDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -43,7 +43,7 @@ public class ReportController {
     public ResponseEntity<ApiResponse<String>> saveReport(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid @RequestBody ReportRequestDto reportRequestDto) {
-        reportCommandService.saveReport(memberDetails.getMember(), reportRequestDto);
+        reportCommandService.saveReport(memberDetails.member(), reportRequestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("신고 완료"));
     }
 }

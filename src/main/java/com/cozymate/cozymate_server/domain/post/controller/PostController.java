@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.post.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.post.dto.PostCreateDTO;
 import com.cozymate.cozymate_server.domain.post.dto.PostSummaryDTO;
 import com.cozymate.cozymate_server.domain.post.dto.PostUpdateDTO;
@@ -52,7 +52,7 @@ public class PostController {
         @Valid @RequestBody PostCreateDTO postCreateDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                postCommandService.createPost(memberDetails.getMember(), postCreateDTO)));
+                postCommandService.createPost(memberDetails.member(), postCreateDTO)));
     }
 
     @Operation(
@@ -70,7 +70,7 @@ public class PostController {
         @Valid @RequestBody PostUpdateDTO postUpdateDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                postCommandService.updatePost(memberDetails.getMember(), postUpdateDTO)));
+                postCommandService.updatePost(memberDetails.member(), postUpdateDTO)));
     }
 
     @Operation(
@@ -88,7 +88,7 @@ public class PostController {
         @PathVariable Long postId) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                postQueryService.getPost(memberDetails.getMember(), roomId, postId)));
+                postQueryService.getPost(memberDetails.member(), roomId, postId)));
     }
 
     @Operation(
@@ -104,7 +104,7 @@ public class PostController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
         @PathVariable Long postId) {
-        postCommandService.deletePost(memberDetails.getMember(), roomId, postId);
+        postCommandService.deletePost(memberDetails.member(), roomId, postId);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 true));
@@ -126,7 +126,7 @@ public class PostController {
         Pageable pageable = PageRequest.of(page, 10);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                postQueryService.getPosts(memberDetails.getMember(),roomId,pageable)));
+                postQueryService.getPosts(memberDetails.member(),roomId,pageable)));
     }
 
 

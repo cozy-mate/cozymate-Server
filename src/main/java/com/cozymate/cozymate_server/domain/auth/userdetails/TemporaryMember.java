@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.auth.userDetails;
+package com.cozymate.cozymate_server.domain.auth.userdetails;
 
 import java.util.ArrayList;
 import java.util.Collection;

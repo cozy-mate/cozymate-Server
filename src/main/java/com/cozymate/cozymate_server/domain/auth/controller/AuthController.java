@@ -1,8 +1,8 @@
 package com.cozymate.cozymate_server.domain.auth.controller;
 
 
-import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO;
-import com.cozymate.cozymate_server.domain.auth.dto.AuthResponseDTO.TokenResponseDTO;
+
+import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 
@@ -29,7 +29,7 @@ public class AuthController {
     ResponseEntity<ApiResponse<TokenResponseDTO>> reissue(
             @RequestAttribute("refresh") String refreshToken
     ) {
-        AuthResponseDTO.TokenResponseDTO tokenResponseDTO = authService.reissue(refreshToken);
+        TokenResponseDTO tokenResponseDTO = authService.reissue(refreshToken);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(tokenResponseDTO));
     }

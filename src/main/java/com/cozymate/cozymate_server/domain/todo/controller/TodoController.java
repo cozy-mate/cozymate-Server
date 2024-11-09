@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.todo.controller;
 
 
-import com.cozymate.cozymate_server.domain.auth.userDetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.CreateTodoRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoRequestDto.UpdateTodoContentRequestDto;
 import com.cozymate.cozymate_server.domain.todo.dto.TodoResponseDto.TodoIdResponseDto;
@@ -50,7 +50,7 @@ public class TodoController {
     ) {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            todoCommandService.createTodo(memberDetails.getMember(), roomId, requestDto)
+            todoCommandService.createTodo(memberDetails.member(), roomId, requestDto)
         ));
 
     }
@@ -69,7 +69,7 @@ public class TodoController {
             timePoint = LocalDate.now();
         }
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            todoQueryService.getTodo(memberDetails.getMember(), roomId, timePoint)
+            todoQueryService.getTodo(memberDetails.member(), roomId, timePoint)
         ));
     }
 
@@ -81,7 +81,7 @@ public class TodoController {
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long todoId
     ) {
-        todoCommandService.deleteTodo(memberDetails.getMember(), roomId, todoId);
+        todoCommandService.deleteTodo(memberDetails.member(), roomId, todoId);
         return ResponseEntity.ok(ApiResponse.onSuccess("삭제되었습니다."));
     }
 
@@ -94,7 +94,7 @@ public class TodoController {
         @PathVariable @Positive Long todoId,
         @RequestParam @Parameter(example = "true") boolean completed
     ) {
-        todoCommandService.updateTodoCompleteState(memberDetails.getMember(), roomId, todoId,
+        todoCommandService.updateTodoCompleteState(memberDetails.member(), roomId, todoId,
             completed);
         return ResponseEntity.ok(ApiResponse.onSuccess("완료되었습니다."));
     }
@@ -108,7 +108,7 @@ public class TodoController {
         @PathVariable @Positive Long todoId,
         @Valid @RequestBody UpdateTodoContentRequestDto requestDto
     ) {
-        todoCommandService.updateTodoContent(memberDetails.getMember(), roomId, todoId,
+        todoCommandService.updateTodoContent(memberDetails.member(), roomId, todoId,
             requestDto);
         return ResponseEntity.ok(ApiResponse.onSuccess("수정되었습니다."));
     }
