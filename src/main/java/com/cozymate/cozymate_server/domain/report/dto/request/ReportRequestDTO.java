@@ -1,30 +1,23 @@
-package com.cozymate.cozymate_server.domain.report.dto;
+package com.cozymate.cozymate_server.domain.report.dto.request;
 
-import com.cozymate.cozymate_server.global.utils.EnumValid;
 import com.cozymate.cozymate_server.domain.report.enums.ReportReason;
 import com.cozymate.cozymate_server.domain.report.enums.ReportSource;
+import com.cozymate.cozymate_server.global.utils.EnumValid;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.AssertTrue;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class ReportRequestDto {
-
-    private Long reportedMemberId;
+public record ReportRequestDTO(
+    Long memberId,
     @EnumValid(enumClass = ReportSource.class)
-    private String reportSource;
+    String source,
     @EnumValid(enumClass = ReportReason.class)
-    private String reportReason;
-    private String content;
-
+    String reason,
+    String content
+) {
     @AssertTrue(message = "기타 사유의 경우 신고 내용을 입력해야 합니다.")
     @JsonIgnore
     public boolean isContentValid() {
-        if (reportReason != null && reportReason.equals("OTHER")) {
+        if (reason != null && reason.equals("OTHER")) {
             return content != null && !content.trim().isEmpty();
         }
         return true;
