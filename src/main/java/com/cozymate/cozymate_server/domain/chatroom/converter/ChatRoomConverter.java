@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.chatroom.converter;
 
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomIdResponse;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomSimpleDto;
+import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomResponseDTO;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.util.Optional;
 
@@ -16,10 +16,10 @@ public class ChatRoomConverter {
             .build();
     }
 
-    public static ChatRoomResponseDto toResponseDto(String nickName, String content,
+    public static ChatRoomResponseDTO toChatRoomResponseDTO(String nickname, String content,
         Long chatRoomId, Integer persona, Long memberId) {
-        return ChatRoomResponseDto.builder()
-            .nickName(nickName)
+        return ChatRoomResponseDTO.builder()
+            .nickname(nickname)
             .lastContent(content)
             .chatRoomId(chatRoomId)
             .persona(persona)
@@ -27,14 +27,14 @@ public class ChatRoomConverter {
             .build();
     }
 
-    public static ChatRoomIdResponse toChatRoomIdResponse(Long chatRoomId) {
-        return ChatRoomIdResponse.builder()
+    public static ChatRoomIdResponseDTO toChatRoomIdResponseDTO(Long chatRoomId) {
+        return ChatRoomIdResponseDTO.builder()
             .chatRoomId(chatRoomId)
             .build();
     }
 
-    public static ChatRoomSimpleDto toChatRoomSimpleDto(Optional<ChatRoom> chatRoom, Member recipient) {
-        return ChatRoomSimpleDto.builder()
+    public static ChatRoomSimpleDTO toChatRoomSimpleDTO(Optional<ChatRoom> chatRoom, Member recipient) {
+        return ChatRoomSimpleDTO.builder()
             .chatRoom(chatRoom)
             .recipient(recipient)
             .build();

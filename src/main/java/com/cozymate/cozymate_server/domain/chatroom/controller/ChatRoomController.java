@@ -3,9 +3,9 @@ package com.cozymate.cozymate_server.domain.chatroom.controller;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomIdResponse;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomSimpleDto;
+import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.service.ChatRoomCommandService;
 import com.cozymate.cozymate_server.domain.chatroom.service.ChatRoomQueryService;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -48,7 +48,7 @@ public class ChatRoomController {
 
     @GetMapping
     @Operation(summary = "[베로] 쪽지방 목록 조회", description = "")
-    public ResponseEntity<ApiResponse<List<ChatRoomResponseDto>>> getChatRoomList(
+    public ResponseEntity<ApiResponse<List<ChatRoomResponseDTO>>> getChatRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberDetails.member())));
@@ -59,18 +59,18 @@ public class ChatRoomController {
     @SwaggerApiError(
         ErrorStatus._MEMBER_NOT_FOUND
     )
-    public ResponseEntity<ApiResponse<ChatRoomIdResponse>> getChatRoom(
+    public ResponseEntity<ApiResponse<ChatRoomIdResponseDTO>> getChatRoom(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long recipientId) {
         Member member = memberDetails.member();
 
-        ChatRoomSimpleDto simpleDto = chatRoomQueryService.getChatRoom(member, recipientId);
-        Optional<ChatRoom> chatRoom = simpleDto.getChatRoom();
+        ChatRoomSimpleDTO simpleDTO = chatRoomQueryService.getChatRoom(member, recipientId);
+        Optional<ChatRoom> chatRoom = simpleDTO.chatRoom();
         if (chatRoom.isPresent()) {
             return ResponseEntity.ok(ApiResponse.onSuccess(
-                ChatRoomConverter.toChatRoomIdResponse(chatRoom.get().getId())));
+                ChatRoomConverter.toChatRoomIdResponseDTO(chatRoom.get().getId())));
         }
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            chatRoomCommandService.saveChatRoom(member, simpleDto.getRecipient())));
+            chatRoomCommandService.saveChatRoom(member, simpleDTO.recipient())));
     }
 }
