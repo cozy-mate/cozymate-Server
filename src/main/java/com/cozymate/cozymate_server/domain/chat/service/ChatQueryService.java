@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.chat.service;
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.converter.ChatConverter;
 import com.cozymate.cozymate_server.domain.chat.dto.response.ChatContentResponseDTO;
-import com.cozymate.cozymate_server.domain.chat.dto.response.ChatResponseDTO;
+import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
@@ -26,7 +26,7 @@ public class ChatQueryService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberBlockUtil memberBlockUtil;
 
-    public ChatResponseDTO getChatList(Member member, Long chatRoomId) {
+    public ChatListResponseDTO getChatList(Member member, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
 

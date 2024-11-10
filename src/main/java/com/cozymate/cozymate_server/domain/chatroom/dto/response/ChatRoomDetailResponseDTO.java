@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.chatroom.dto.response;
 import lombok.Builder;
 
 @Builder
-public record ChatRoomResponseDTO(
+public record ChatRoomDetailResponseDTO(
     Integer persona,
     String nickname,
     String lastContent,

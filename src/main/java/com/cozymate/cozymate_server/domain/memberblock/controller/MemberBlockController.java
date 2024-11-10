@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberblock.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.memberblock.dto.request.MemberBlockRequestDTO;
 import com.cozymate.cozymate_server.domain.memberblock.dto.response.MemberBlockResponseDTO;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockCommandService;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockQueryService;
@@ -17,29 +16,27 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/block/member")
+@RequestMapping("/block/members")
 public class MemberBlockController {
 
     private final MemberBlockCommandService memberBlockCommandService;
     private final MemberBlockQueryService memberBlockQueryService;
 
-    @PostMapping
-    @Operation(summary = "[베로] 멤버 차단", description = "body에 차단할 멤버 id")
+    @PostMapping("/{memberId}")
+    @Operation(summary = "[베로] 멤버 차단", description = "membreId: 차단할 사용자 pk")
     @SwaggerApiError({
         ErrorStatus._CANNOT_BLOCK_REQUEST_SELF,
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ALREADY_BLOCKED_MEMBER
     })
-    public ResponseEntity<ApiResponse<String>> saveMemberBlock(
-        @RequestBody MemberBlockRequestDTO requestDTO,
+    public ResponseEntity<ApiResponse<String>> saveMemberBlock(@PathVariable Long memberId,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        memberBlockCommandService.saveMemberBlock(requestDTO, memberDetails.member());
+        memberBlockCommandService.saveMemberBlock(memberId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("차단 완료"));
     }
 

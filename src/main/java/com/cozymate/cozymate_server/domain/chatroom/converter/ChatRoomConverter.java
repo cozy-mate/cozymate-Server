@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.chatroom.converter;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
-import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomResponseDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.util.Optional;
 
@@ -16,9 +16,9 @@ public class ChatRoomConverter {
             .build();
     }
 
-    public static ChatRoomResponseDTO toChatRoomResponseDTO(String nickname, String content,
+    public static ChatRoomDetailResponseDTO toChatRoomDetailResponseDTO(String nickname, String content,
         Long chatRoomId, Integer persona, Long memberId) {
-        return ChatRoomResponseDTO.builder()
+        return ChatRoomDetailResponseDTO.builder()
             .nickname(nickname)
             .lastContent(content)
             .chatRoomId(chatRoomId)

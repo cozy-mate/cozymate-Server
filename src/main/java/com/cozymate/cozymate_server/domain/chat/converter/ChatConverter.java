@@ -2,8 +2,7 @@ package com.cozymate.cozymate_server.domain.chat.converter;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.dto.response.ChatContentResponseDTO;
-import com.cozymate.cozymate_server.domain.chat.dto.response.ChatResponseDTO;
-import com.cozymate.cozymate_server.domain.chat.dto.response.ChatSuccessResponseDTO;
+import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.time.LocalDateTime;
@@ -32,17 +31,11 @@ public class ChatConverter {
             .build();
     }
 
-    public static ChatResponseDTO toChatResponseDTO(Long recipientId,
+    public static ChatListResponseDTO toChatResponseDTO(Long recipientId,
         List<ChatContentResponseDTO> chatContentResponseDTOList) {
-        return ChatResponseDTO.builder()
+        return ChatListResponseDTO.builder()
             .memberId(recipientId)
             .content(chatContentResponseDTOList)
-            .build();
-    }
-
-    public static ChatSuccessResponseDTO toChatSuccessResponseDTO(Long chatRoomId) {
-        return ChatSuccessResponseDTO.builder()
-            .chatRoomId(chatRoomId)
             .build();
     }
 }

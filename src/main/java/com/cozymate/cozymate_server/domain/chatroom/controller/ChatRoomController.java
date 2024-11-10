@@ -5,7 +5,7 @@ import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
-import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomResponseDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.service.ChatRoomCommandService;
 import com.cozymate.cozymate_server.domain.chatroom.service.ChatRoomQueryService;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -48,7 +48,7 @@ public class ChatRoomController {
 
     @GetMapping
     @Operation(summary = "[베로] 쪽지방 목록 조회", description = "")
-    public ResponseEntity<ApiResponse<List<ChatRoomResponseDTO>>> getChatRoomList(
+    public ResponseEntity<ApiResponse<List<ChatRoomDetailResponseDTO>>> getChatRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberDetails.member())));

@@ -4,7 +4,6 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberblock.MemberBlock;
 import com.cozymate.cozymate_server.domain.memberblock.converter.MemberBlockConverter;
-import com.cozymate.cozymate_server.domain.memberblock.dto.request.MemberBlockRequestDTO;
 import com.cozymate.cozymate_server.domain.memberblock.repository.MemberBlockRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -20,9 +19,7 @@ public class MemberBlockCommandService {
     private final MemberBlockRepository memberBlockRepository;
     private final MemberRepository memberRepository;
 
-    public void saveMemberBlock(MemberBlockRequestDTO memberBlockRequestDTO, Member member) {
-        Long blockedMemberId = memberBlockRequestDTO.memberId();
-
+    public void saveMemberBlock(Long blockedMemberId, Member member) {
         checkBlockSelf(blockedMemberId, member.getId());
         checkDuplicatedBlock(blockedMemberId, member.getId());
 

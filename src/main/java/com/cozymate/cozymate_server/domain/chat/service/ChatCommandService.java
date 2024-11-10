@@ -1,10 +1,10 @@
 package com.cozymate.cozymate_server.domain.chat.service;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
-import com.cozymate.cozymate_server.domain.chat.dto.request.ChatRequestDTO;
-import com.cozymate.cozymate_server.domain.chat.dto.response.ChatSuccessResponseDTO;
+import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
@@ -28,7 +28,7 @@ public class ChatCommandService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberBlockUtil memberBlockUtil;
 
-    public ChatSuccessResponseDTO createChat(ChatRequestDTO chatRequestDTO, Member sender, Long recipientId) {
+    public ChatRoomIdResponseDTO createChat(CreateChatRequestDTO createChatRequestDTO, Member sender, Long recipientId) {
         Member recipient = memberRepository.findById(recipientId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHAT_NOT_FOUND_RECIPIENT));
 
@@ -38,15 +38,15 @@ public class ChatCommandService {
             recipient);
 
         if (findChatRoom.isPresent()) {
-            saveChat(findChatRoom.get(), sender, chatRequestDTO.content());
+            saveChat(findChatRoom.get(), sender, createChatRequestDTO.content());
 
-            return ChatConverter.toChatSuccessResponseDTO(findChatRoom.get().getId());
+            return ChatRoomConverter.toChatRoomIdResponseDTO(findChatRoom.get().getId());
         } else {
             ChatRoom chatRoom = ChatRoomConverter.toEntity(sender, recipient);
             chatRoomRepository.save(chatRoom);
-            saveChat(chatRoom, sender, chatRequestDTO.content());
+            saveChat(chatRoom, sender, createChatRequestDTO.content());
 
-            return ChatConverter.toChatSuccessResponseDTO(chatRoom.getId());
+            return ChatRoomConverter.toChatRoomIdResponseDTO(chatRoom.getId());
         }
     }
 
