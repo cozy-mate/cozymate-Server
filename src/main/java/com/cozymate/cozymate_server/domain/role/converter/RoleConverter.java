@@ -4,7 +4,7 @@ import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleListResponseDTO;
-import com.cozymate.cozymate_server.domain.role.dto.response.RoleSimpleResponseDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +45,8 @@ public class RoleConverter {
         return dayList;
     }
 
-    public static RoleSimpleResponseDTO toRoleSimpleResponseDTOWithEntity(Role role) {
-        return RoleSimpleResponseDTO.builder()
+    public static RoleIdResponseDTO toRoleSimpleResponseDTOWithEntity(Role role) {
+        return RoleIdResponseDTO.builder()
             .roleId(role.getId())
             .build();
     }

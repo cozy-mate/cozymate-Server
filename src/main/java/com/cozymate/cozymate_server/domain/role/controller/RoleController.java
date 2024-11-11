@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.role.controller;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleListResponseDTO;
-import com.cozymate.cozymate_server.domain.role.dto.response.RoleSimpleResponseDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.service.RoleCommandService;
 import com.cozymate.cozymate_server.domain.role.service.RoleQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -45,7 +45,7 @@ public class RoleController {
     @PostMapping("/{roomId}/roles")
     @Operation(summary = "[무빗] 특정 방에 role 생성", description = "본인의 룸메라면 Role을 할당할 수 있습니다.")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
-    public ResponseEntity<ApiResponse<RoleSimpleResponseDTO>> createRole(
+    public ResponseEntity<ApiResponse<RoleIdResponseDTO>> createRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @RequestBody @Valid CreateRoleRequestDTO requestDto

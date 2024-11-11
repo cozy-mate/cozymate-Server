@@ -48,6 +48,7 @@ public class Todo extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Role role = null;
 
+    @Column(nullable = false, length = 35)
     private String content;
 
     private LocalDate timePoint;

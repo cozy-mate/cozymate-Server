@@ -36,6 +36,7 @@ public class Role extends BaseTimeEntity {
     @Column(columnDefinition = "json")
     private List<Long> assignedMateIdList; // 롤에 할당된 사람
 
+    @Column(nullable = false, length = 25)
     private String content;
 
     private int repeatDays = 0;

@@ -2,7 +2,7 @@ package com.cozymate.cozymate_server.domain.rule.converter;
 
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.rule.Rule;
-import com.cozymate.cozymate_server.domain.rule.dto.response.CreateRuleResponseDTO;
+import com.cozymate.cozymate_server.domain.rule.dto.response.RuleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.dto.response.RuleDetailResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,8 +19,8 @@ public class RuleConverter {
             .build();
     }
 
-    public static CreateRuleResponseDTO toCreateRuleResponseDTOFromEntity(Rule rule) {
-        return CreateRuleResponseDTO.builder()
+    public static RuleIdResponseDTO toCreateRuleResponseDTOFromEntity(Rule rule) {
+        return RuleIdResponseDTO.builder()
             .ruleId(rule.getId())
             .build();
     }
