@@ -28,7 +28,7 @@ public class MemberBlockController {
     private final MemberBlockQueryService memberBlockQueryService;
 
     @PostMapping("/{memberId}")
-    @Operation(summary = "[베로] 멤버 차단", description = "membreId: 차단할 사용자 pk")
+    @Operation(summary = "[베로] 멤버 차단", description = "memberId: 차단할 사용자 pk")
     @SwaggerApiError({
         ErrorStatus._CANNOT_BLOCK_REQUEST_SELF,
         ErrorStatus._MEMBER_NOT_FOUND,
