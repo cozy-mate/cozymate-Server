@@ -6,7 +6,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.role.converter.RoleConverter;
 import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO;
-import com.cozymate.cozymate_server.domain.role.dto.response.RoleSimpleResponseDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -31,7 +31,7 @@ public class RoleCommandService {
      * @param roomId     방 Id
      * @param requestDto Role 생성 요청 DTO
      */
-    public RoleSimpleResponseDTO createRole(Member member, Long roomId, CreateRoleRequestDTO requestDto) {
+    public RoleIdResponseDTO createRole(Member member, Long roomId, CreateRoleRequestDTO requestDto) {
         // 해당 방의 mate가 맞는지 확인
         Mate mate = getMate(member.getId(), roomId);
 

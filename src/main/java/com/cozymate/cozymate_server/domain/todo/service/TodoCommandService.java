@@ -6,7 +6,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO;
-import com.cozymate.cozymate_server.domain.todo.dto.response.TodoSimpleResponseDTO;
+import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -41,7 +41,7 @@ public class TodoCommandService {
      * @param requestDto 생성할 투두 정보
      * @return 생성된 투두 Id
      */
-    public TodoSimpleResponseDTO createTodo(Member member, Long roomId, CreateTodoRequestDTO requestDto
+    public TodoIdResponseDTO createTodo(Member member, Long roomId, CreateTodoRequestDTO requestDto
     ) {
         // 사용자의 mate 정보 조회
         Mate mate = getMate(member.getId(), roomId);

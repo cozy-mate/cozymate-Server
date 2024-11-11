@@ -9,7 +9,7 @@ import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateListResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateResponseDTO;
-import com.cozymate.cozymate_server.domain.todo.dto.response.TodoSimpleResponseDTO;
+import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import java.time.LocalDate;
 import java.util.List;
@@ -62,7 +62,7 @@ public class TodoConverter {
             .build();
     }
 
-    public static TodoSimpleResponseDTO toTodoSimpleResponseDTO(Todo todo) {
-        return TodoSimpleResponseDTO.builder().todoId(todo.getId()).build();
+    public static TodoIdResponseDTO toTodoSimpleResponseDTO(Todo todo) {
+        return TodoIdResponseDTO.builder().todoId(todo.getId()).build();
     }
 }
