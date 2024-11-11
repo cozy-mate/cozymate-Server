@@ -18,10 +18,10 @@ import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PrivateRoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PublicRoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.RoomUpdateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
+import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
+import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;
+import com.cozymate.cozymate_server.domain.room.dto.request.RoomUpdateRequestDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
@@ -65,7 +65,7 @@ public class RoomCommandService {
     private final RoomHashtagCommandService roomHashtagCommandService;
 
 
-    public RoomCreateResponse createPrivateRoom(PrivateRoomCreateRequest request, Member member) {
+    public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request, Member member) {
         Member creator = memberRepository.findById(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -88,7 +88,7 @@ public class RoomCommandService {
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }
 
-    public RoomCreateResponse createPublicRoom(PublicRoomCreateRequest request, Member member) {
+    public RoomDetailResponseDTO createPublicRoom(PublicRoomCreateRequestDTO request, Member member) {
         Member creator = memberRepository.findById(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -101,7 +101,7 @@ public class RoomCommandService {
         Room room = RoomConverter.toPublicRoom(request, inviteCode);
 
         // 해시태그 저장 과정
-        roomHashtagCommandService.createRoomHashtag(room, request.getHashtags());
+        roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
@@ -256,7 +256,7 @@ public class RoomCommandService {
         }
     }
 
-    public RoomCreateResponse updateRoom(Long roomId, Long memberId, RoomUpdateRequest request){
+    public RoomDetailResponseDTO updateRoom(Long roomId, Long memberId, RoomUpdateRequestDTO request){
 
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -275,9 +275,9 @@ public class RoomCommandService {
 
         if (room.getRoomType()==RoomType.PUBLIC) {
             roomHashtagCommandService.deleteRoomHashtags(room);
-            roomHashtagCommandService.updateRoomHashtags(room, request.getHashtags());
+            roomHashtagCommandService.updateRoomHashtags(room, request.hashtagList());
         }
-        room.updateRoom(request.getName(), request.getProfileImage());
+        room.updateRoom(request.name(), request.persona());
         roomRepository.save(room);
 
         return roomQueryService.getRoomById(roomId, memberId);
@@ -291,7 +291,7 @@ public class RoomCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         // 방장이 속한 방의 정보
-        Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).getRoomId())
+        Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).roomId())
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), inviterId, EntryStatus.JOINED)
@@ -393,7 +393,7 @@ public class RoomCommandService {
         memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).getRoomId())
+        Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).roomId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), inviterId, EntryStatus.JOINED)
@@ -474,7 +474,7 @@ public class RoomCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         // 방장이 속한 방의 정보
-        Room room = roomRepository.findById(roomQueryService.getExistRoom(managerId).getRoomId())
+        Room room = roomRepository.findById(roomQueryService.getExistRoom(managerId).roomId())
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), managerId, EntryStatus.JOINED)

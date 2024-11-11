@@ -1,8 +1,5 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
-import com.cozymate.cozymate_server.domain.friend.Friend;
-import com.cozymate.cozymate_server.domain.friend.FriendRepository;
-import com.cozymate.cozymate_server.domain.friend.enums.FriendStatus;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -14,14 +11,11 @@ import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepos
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
-import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
-import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
-import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.InvitedRoomResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomListResponse;
+import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailListReponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomListResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomSimpleResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
@@ -45,12 +39,11 @@ public class RoomQueryService {
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
-    private final FriendRepository friendRepository;
     private final RoomHashtagRepository roomHashtagRepository;
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatRepository memberStatRepository;
 
-    public RoomCreateResponse getRoomById(Long roomId, Long memberId) {
+    public RoomDetailResponseDTO getRoomById(Long roomId, Long memberId) {
 
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
@@ -75,28 +68,29 @@ public class RoomQueryService {
 
         Integer roomEquality = getCalculateRoomEquality(equalityMap);
 
-        List<CozymateInfoResponse> mates = joinedMates.stream()
+        List<MateDetailListReponseDTO> mates = joinedMates.stream()
             .map(mate -> {
                 Integer mateEquality = equalityMap.get(mate.getMember().getId());
-                return RoomConverter.toCozymateInfoResponse(mate, mateEquality);
+                return RoomConverter.toMateDetailListResponse(mate, mateEquality);
             }).toList();
 
         // MemberStat이 null일 때 제외했음.
         List<MemberStat> mateMemberStats = mates.stream()
-            .map(mate -> memberStatRepository.findByMemberId(mate.getMemberId()))
+            .map(mate -> memberStatRepository.findByMemberId(mate.memberId()))
             .flatMap(Optional::stream)
             .toList();
 
         //해시태그 가져오기
         List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(roomId);
 
-        return new RoomCreateResponse(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),
+        return RoomConverter.toRoomDetailResponseDTOWithParams(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),
             mates.isEmpty() ? new ArrayList<>() : mates,
             creatingMate.getMember().getId(),
+            creatingMate.getMember().getNickname(),
             isRoomManager,
             room.getMaxMateNum(),
             room.getNumOfArrival(),
-            room.getRoomType(),
+            room.getRoomType().toString(),
             hashtags,
             roomEquality,
             MemberStatConverter.toMemberStatDifferenceResponseDTO(mateMemberStats)
@@ -104,7 +98,7 @@ public class RoomQueryService {
         );
     }
 
-    public RoomJoinResponse getRoomByInviteCode(String inviteCode, Long memberId) {
+    public RoomDetailResponseDTO getRoomByInviteCode(String inviteCode, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -117,59 +111,14 @@ public class RoomQueryService {
         Member manager = memberRepository.findById(managerMate.getMember().getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        return RoomConverter.toRoomJoinResponse(room, manager);
-    }
-
-    public List<CozymateResponse> getCozymateList(Long roomId, Long memberId) {
-        roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
-        );
-
-        List<Friend> friendList = friendRepository.findBySenderIdOrReceiverId(memberId, memberId)
-            .stream()
-            .filter(friendRequest -> friendRequest.getStatus().equals(FriendStatus.ACCEPT))
-            .toList();
-
-        if (friendList.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return friendList.stream()
-            .filter(friend -> {
-                Long friendMemberId = friend.getSender().getId().equals(memberId) ?
-                    friend.getReceiver().getId() :
-                    friend.getSender().getId();
-
-                // 이미 참여한 방이 있는 cozymate는 제외
-                return !mateRepository.existsByMemberIdAndRoomStatuses(friendMemberId,
-                    RoomStatus.ENABLE, RoomStatus.WAITING);
-            })
-            .map(friend -> friend.getSender().getId().equals(memberId) ?
-                RoomConverter.toCozymateResponse(friend.getReceiver()) :
-                RoomConverter.toCozymateResponse(friend.getSender()))
-            .toList();
-    }
-
-    public InviteRequest getInvitation(Long memberId) {
-        memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
-        );
-        Mate mate = mateRepository.findByMemberIdAndEntryStatus(memberId, EntryStatus.PENDING)
-            .orElseThrow(()-> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
-        Room room = roomRepository.findById(mate.getRoom().getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        return RoomConverter.toInviteRequest(room, mate);
+        return getRoomById(room.getId(), manager.getId());
     }
 
     public Boolean isValidRoomName(String roomName) {
         return !roomRepository.existsByName(roomName);
     }
 
-    public RoomExistResponse getExistRoom(Long memberId) {
+    public RoomSimpleResponseDTO getExistRoom(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
@@ -178,10 +127,9 @@ public class RoomQueryService {
             return RoomConverter.toRoomExistResponse(mate.get().getRoom());
         }
         return RoomConverter.toRoomExistResponse(null);
-
     }
 
-    public RoomExistResponse getExistRoom(Long otherMemberId, Long memberId) {
+    public RoomSimpleResponseDTO getExistRoom(Long otherMemberId, Long memberId) {
         memberRepository.findById(otherMemberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -212,7 +160,7 @@ public class RoomQueryService {
 
     }
 
-    public List<CozymateInfoResponse> getInvitedMemberList(Long roomId, Long memberId) {
+    public List<MateDetailListReponseDTO> getInvitedMemberList(Long roomId, Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -230,12 +178,12 @@ public class RoomQueryService {
         return invitedMates.stream()
             .map(mate -> {
                 Integer mateEquality = equalityMap.get(mate.getMember().getId());
-                return RoomConverter.toCozymateInfoResponse(mate, mateEquality);
+                return RoomConverter.toMateDetailListResponse(mate, mateEquality);
             }).toList();
 
     }
 
-    public List<RoomListResponse> getRequestedRoomList(Long memberId) {
+    public List<RoomListResponseDTO> getRequestedRoomList(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -256,7 +204,7 @@ public class RoomQueryService {
             .toList();
     }
 
-    public InvitedRoomResponse getInvitedRoomList(Long memberId) {
+    public InvitedRoomResponseDTO getInvitedRoomList(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -267,7 +215,7 @@ public class RoomQueryService {
             .map(Mate::getRoom)
             .toList();
 
-        List<RoomListResponse> rooms = invitedRooms.stream()
+        List<RoomListResponseDTO> rooms = invitedRooms.stream()
             .map(room -> {
                 List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
@@ -278,9 +226,6 @@ public class RoomQueryService {
             })
             .toList();
 
-        return InvitedRoomResponse.builder()
-            .requestCount(invitedCount)
-            .roomList(rooms)
-            .build();
+        return new InvitedRoomResponseDTO(invitedCount, rooms);
     }
 }

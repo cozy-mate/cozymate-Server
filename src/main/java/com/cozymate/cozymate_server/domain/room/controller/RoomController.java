@@ -1,17 +1,15 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
 
-import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
-import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.RoomUpdateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.InvitedRoomResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomCreateResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomListResponse;
+import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
+import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;
+import com.cozymate.cozymate_server.domain.room.dto.request.RoomUpdateRequestDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailListReponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomListResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomSimpleResponseDTO;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -48,9 +46,9 @@ public class RoomController {
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_ALREADY_EXISTS
     })
-    public ResponseEntity<ApiResponse<RoomCreateResponse>> createRoom(@Valid @RequestBody RoomRequestDto.PrivateRoomCreateRequest request,
+    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> createRoom(@Valid @RequestBody PrivateRoomCreateRequestDTO request,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomCreateResponse response = roomCommandService.createPrivateRoom(request, memberDetails.member());
+        RoomDetailResponseDTO response = roomCommandService.createPrivateRoom(request, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -61,10 +59,10 @@ public class RoomController {
         ErrorStatus._ROOM_ALREADY_EXISTS,
         ErrorStatus._DUPLICATE_HASHTAGS
     })
-    public ResponseEntity<ApiResponse<RoomCreateResponse>> createPublicRoom(
-        @Valid @RequestBody RoomRequestDto.PublicRoomCreateRequest request,
+    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> createPublicRoom(
+        @Valid @RequestBody PublicRoomCreateRequestDTO request,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomCreateResponse response = roomCommandService.createPublicRoom(request, memberDetails.member());
+        RoomDetailResponseDTO response = roomCommandService.createPublicRoom(request, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -75,9 +73,9 @@ public class RoomController {
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MATE
     })
-    public ResponseEntity<ApiResponse<RoomCreateResponse>> getRoom(@PathVariable Long roomId,
+    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> getRoom(@PathVariable Long roomId,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomCreateResponse response = roomQueryService.getRoomById(roomId, memberDetails.member().getId());
+        RoomDetailResponseDTO response = roomQueryService.getRoomById(roomId, memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -110,16 +108,16 @@ public class RoomController {
     }
 
     @GetMapping("/join")
-    @Operation(summary = "[바니] 초대코드로 방 정보 조회 기능", description = "초대코드를 입력하면 방 정보를 조회합니다.")
+    @Operation(summary = "[바니] 초대코드로 방 정보 조회 기능", description = "초대코드를 입력하면 방 정보를 조회합니다. 여기서 isRoomManager는 무시부탁합니다")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER
     })
-    public ResponseEntity<ApiResponse<RoomJoinResponse>> getRoomInfo(@RequestParam String inviteCode,
+    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> getRoomInfo(@RequestParam String inviteCode,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomJoinResponse roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode, memberDetails.member().getId());
+        RoomDetailResponseDTO roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode, memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(roomJoinResponse));
     }
 
@@ -145,17 +143,6 @@ public class RoomController {
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(isValid));
     }
 
-    @GetMapping("/{roomId}/available-friends")
-    @Deprecated
-    @Operation(summary = "[바니] 방에 초대할 코지메이트 목록 조회", description = "로그인한 멤버의 코지메이트 목록을 불러옵니다.")
-    @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
-        ErrorStatus._ROOM_NOT_FOUND
-    })
-    public ResponseEntity<ApiResponse<List<CozymateResponse>>> getCozymateList(
-        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getCozymateList(roomId, memberDetails.member().getId())));
-    }
 
     @PostMapping("/invite/{inviteeId}")
     @Operation(summary = "[바니] 방장 -> 내방으로 초대하기", description = "방장이 속해있는 roomId에 선택한 코지메이트를 초대합니다.")
@@ -174,19 +161,6 @@ public class RoomController {
         @PathVariable Long inviteeId, @AuthenticationPrincipal MemberDetails inviterDetails) {
         roomCommandService.sendInvitation(inviteeId, inviterDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
-    }
-
-    @GetMapping ("/request-invites")
-    @Deprecated
-    @Operation(summary = "[바니] 방 초대 요청 조회", description = "해당 사용자가 수신한 초대 요청을 조회합니다.")
-    @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
-        ErrorStatus._INVITATION_NOT_FOUND,
-        ErrorStatus._ROOM_NOT_FOUND
-    })
-    public ResponseEntity<ApiResponse<InviteRequest>> getRequestInvite(@AuthenticationPrincipal MemberDetails inviteeDetails) {
-        InviteRequest inviteRequest = roomQueryService.getInvitation(inviteeDetails.member().getId());
-        return ResponseEntity.ok(ApiResponse.onSuccess(inviteRequest));
     }
 
     @PostMapping("/{roomId}/invite-request")
@@ -209,8 +183,8 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<RoomExistResponse>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomExistResponse response = roomQueryService.getExistRoom(memberDetails.member().getId());
+    public ResponseEntity<ApiResponse<RoomSimpleResponseDTO>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
+        RoomSimpleResponseDTO response = roomQueryService.getExistRoom(memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -219,9 +193,9 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<RoomExistResponse>> getExistRoom(
+    public ResponseEntity<ApiResponse<RoomSimpleResponseDTO>> getExistRoom(
         @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomExistResponse response = roomQueryService.getExistRoom(memberId, memberDetails.member().getId());
+        RoomSimpleResponseDTO response = roomQueryService.getExistRoom(memberId, memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -233,10 +207,10 @@ public class RoomController {
         ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._NOT_ROOM_MANAGER
     })
-    public ResponseEntity<ApiResponse<RoomCreateResponse>> updateRoom(@PathVariable Long roomId,
+    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> updateRoom(@PathVariable Long roomId,
         @AuthenticationPrincipal MemberDetails memberDetails,
-        @Valid @RequestBody RoomUpdateRequest request) {
-        RoomCreateResponse response = roomCommandService.updateRoom(roomId, memberDetails.member().getId(), request);
+        @Valid @RequestBody RoomUpdateRequestDTO request) {
+        RoomDetailResponseDTO response = roomCommandService.updateRoom(roomId, memberDetails.member().getId(), request);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -329,7 +303,7 @@ public class RoomController {
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MATE
     })
-    public ResponseEntity<ApiResponse<List<CozymateInfoResponse>>> getInvitedMemberList(
+    public ResponseEntity<ApiResponse<List<MateDetailListReponseDTO>>> getInvitedMemberList(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedMemberList(roomId, memberDetails.member().getId())));
     }
@@ -339,7 +313,7 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<List<RoomListResponse>>> getRequestedRoomList(
+    public ResponseEntity<ApiResponse<List<RoomListResponseDTO>>> getRequestedRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getRequestedRoomList(memberDetails.member().getId())));
     }
@@ -349,7 +323,7 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<InvitedRoomResponse>> getInvitedRoomList(
+    public ResponseEntity<ApiResponse<InvitedRoomResponseDTO>> getInvitedRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedRoomList(memberDetails.member().getId())));
     }
