@@ -91,6 +91,11 @@ jobs:
       - name: Deploy to EC2 (Release Branch)
         if: github.ref == 'refs/heads/release'
         uses: appleboy/ssh-action@master
+        env:
+          ECR_URI: ${{ secrets.ECR_URI }}
+          GITHUB_SHA: ${{ github.sha }}
+          SPRING_PROFILES: dev
+          COMPOSE: "/home/ubuntu/docker-compose.yml"
         with:
           host: ${{ secrets.RELEASE_EC2_HOST }}
           username: ubuntu
@@ -101,12 +106,17 @@ jobs:
             sudo docker images -q | xargs -r docker rmi || true
             sudo docker system prune -af
             aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker run --name cozymate-dev-server -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
+            sudo docker-compose -f $COMPOSE up -d
 
       # Deploy to EC2 (Main Branch)
       - name: Deploy to EC2 (Main Branch)
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@master
+        env:
+          ECR_URI: ${{ secrets.ECR_URI }}
+          GITHUB_SHA: ${{ github.sha }}
+          SPRING_PROFILES: prod
+          COMPOSE: "/home/ubuntu/docker-compose.yml"
         with:
           host: ${{ secrets.MAIN_EC2_HOST }}
           username: ubuntu
@@ -117,4 +127,4 @@ jobs:
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
             aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker run --name cozymate-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
+            sudo docker-compose -f $COMPOSE up -d
