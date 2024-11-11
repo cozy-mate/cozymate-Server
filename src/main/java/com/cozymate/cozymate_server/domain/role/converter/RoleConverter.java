@@ -2,9 +2,10 @@ package com.cozymate.cozymate_server.domain.role.converter;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
+import com.cozymate.cozymate_server.domain.role.dto.MateIdNameDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.role.dto.response.RoleListResponseDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleListResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +56,16 @@ public class RoleConverter {
         Map<Long, String> mateNameMap) {
         return RoleDetailResponseDTO.builder()
             .roleId(role.getId())
-            .mateNameList(role.getAssignedMateIdList().stream()
-                .map(mateNameMap::get).filter(Objects::nonNull).toList())
+            .mateList(role.getAssignedMateIdList().stream()
+                .map(id -> {
+                    if (mateNameMap.containsKey(id)) {
+                        return MateIdNameDTO.builder()
+                            .mateId(id)
+                            .nickname(mateNameMap.get(id))
+                            .build();
+                    }
+                    return null;
+                }).filter(Objects::nonNull).toList())
             .content(role.getContent())
             .repeatDayList(
                 convertBitmaskToDayList(role.getRepeatDays()).stream()

@@ -7,7 +7,7 @@ import lombok.Builder;
 @Builder
 public record TodoMateListResponseDTO(
     MemberDetailResponseDTO memberDetail,
-    List<TodoDetailResponseDTO> mateTodoList
+    List<TodoDetailResponseDTO> todoList
 ) {
 
 }
