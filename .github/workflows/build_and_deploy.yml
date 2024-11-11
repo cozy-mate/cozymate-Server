@@ -91,17 +91,24 @@ jobs:
       - name: Deploy to EC2 (Release Branch)
         if: github.ref == 'refs/heads/release'
         uses: appleboy/ssh-action@master
+        env:
+          ENV_FILE: "/home/ubuntu/.env"
+          COMPOSE: "/home/ubuntu/docker-compose.yml"
         with:
           host: ${{ secrets.RELEASE_EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.RELEASE_SSH_KEY }}
           script: |
+            echo "ECR_URI=${{ secrets.ECR_URI }}" > /home/ubuntu/.env
+            echo "GITHUB_SHA=${{ github.sha }}" >> /home/ubuntu/.env
+            echo "SPRING_PROFILES=dev" >> /home/ubuntu/.env
+            
             sudo docker stop $(sudo docker ps -a -q) || true
             sudo docker rm $(sudo docker ps -a -q) || true
             sudo docker images -q | xargs -r docker rmi || true
             sudo docker system prune -af
             aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker run --name cozymate-dev-server -d -e SPRING_PROFILE=dev -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
+            sudo -E  docker-compose up -d
 
       # Deploy to EC2 (Main Branch)
       - name: Deploy to EC2 (Main Branch)
@@ -112,9 +119,13 @@ jobs:
           username: ubuntu
           key: ${{ secrets.MAIN_SSH_KEY }}
           script: |
+            echo "ECR_URI=${{ secrets.ECR_URI }}" > /home/ubuntu/.env
+            echo "GITHUB_SHA=${{ github.sha }}" >> /home/ubuntu/.env
+            echo "SPRING_PROFILES=prod" >> /home/ubuntu/.env
+            
             sudo docker stop $(sudo docker ps -a -q) | true
             sudo docker rm $(sudo docker ps -a -q) | true
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
             aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker run --name cozymate-prod-server -d -e SPRING_PROFILE=prod -e TZ=Asia/Seoul -e SERVER=true -p 8080:8080 ${{ secrets.ECR_URI }}:${{ github.sha }}
+            sudo -E  docker-compose up -d
