@@ -6,7 +6,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.rule.Rule;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
 import com.cozymate.cozymate_server.domain.rule.dto.request.CreateRuleRequestDTO;
-import com.cozymate.cozymate_server.domain.rule.dto.response.CreateRuleResponseDTO;
+import com.cozymate.cozymate_server.domain.rule.dto.response.RuleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -32,7 +32,7 @@ public class RuleCommandService {
      * @param roomId     규칙을 생성하려는 방
      * @param requestDto 규칙 내용 return 생성된 규칙의 id
      */
-    public CreateRuleResponseDTO createRule(
+    public RuleIdResponseDTO createRule(
         Member member, Long roomId, CreateRuleRequestDTO requestDto) {
         // Mate 조회
         Mate mate = findMateByMemberIdAndRoomId(member, roomId);

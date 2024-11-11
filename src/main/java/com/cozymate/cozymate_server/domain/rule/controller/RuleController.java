@@ -2,7 +2,7 @@ package com.cozymate.cozymate_server.domain.rule.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.rule.dto.request.CreateRuleRequestDTO;
-import com.cozymate.cozymate_server.domain.rule.dto.response.CreateRuleResponseDTO;
+import com.cozymate.cozymate_server.domain.rule.dto.response.RuleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.dto.response.RuleDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.service.RuleCommandService;
 import com.cozymate.cozymate_server.domain.rule.service.RuleQueryService;
@@ -48,7 +48,7 @@ public class RuleController {
         summary = "[무빗] 특정 방의 Rule 생성",
         description = "rule 내용은 필수, memo는 선택입니다.")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._RULE_OVER_MAX})
-    public ResponseEntity<ApiResponse<CreateRuleResponseDTO>> createRule(
+    public ResponseEntity<ApiResponse<RuleIdResponseDTO>> createRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @RequestBody @Valid CreateRuleRequestDTO requestDto
