@@ -92,39 +92,40 @@ jobs:
         if: github.ref == 'refs/heads/release'
         uses: appleboy/ssh-action@master
         env:
-          ECR_URI: ${{ secrets.ECR_URI }}
-          GITHUB_SHA: ${{ github.sha }}
-          SPRING_PROFILES: dev
+          ENV_FILE: "/home/ubuntu/.env"
           COMPOSE: "/home/ubuntu/docker-compose.yml"
         with:
           host: ${{ secrets.RELEASE_EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.RELEASE_SSH_KEY }}
           script: |
+            echo "ECR_URI=${{ secrets.ECR_URI }}" > /home/ubuntu/.env
+            echo "GITHUB_SHA=${{ github.sha }}" >> /home/ubuntu/.env
+            echo "SPRING_PROFILES=dev" >> /home/ubuntu/.env
+            
             sudo docker stop $(sudo docker ps -a -q) || true
             sudo docker rm $(sudo docker ps -a -q) || true
             sudo docker images -q | xargs -r docker rmi || true
             sudo docker system prune -af
             aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker-compose -f "$COMPOSE" up -d
+            sudo -E  docker-compose up -d
 
       # Deploy to EC2 (Main Branch)
       - name: Deploy to EC2 (Main Branch)
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@master
-        env:
-          ECR_URI: ${{ secrets.ECR_URI }}
-          GITHUB_SHA: ${{ github.sha }}
-          SPRING_PROFILES: prod
-          COMPOSE: "/home/ubuntu/docker-compose.yml"
         with:
           host: ${{ secrets.MAIN_EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.MAIN_SSH_KEY }}
           script: |
+            echo "ECR_URI=${{ secrets.ECR_URI }}" > /home/ubuntu/.env
+            echo "GITHUB_SHA=${{ github.sha }}" >> /home/ubuntu/.env
+            echo "SPRING_PROFILES=prod" >> /home/ubuntu/.env
+            
             sudo docker stop $(sudo docker ps -a -q) | true
             sudo docker rm $(sudo docker ps -a -q) | true
             sudo docker images -q | xargs -r docker rmi
             sudo docker system prune -af
             aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ secrets.ECR_URI }} && sudo docker pull ${{ secrets.ECR_URI }}:${{ github.sha }}
-            sudo docker-compose -f "$COMPOSE" up -d
+            sudo -E  docker-compose up -d
