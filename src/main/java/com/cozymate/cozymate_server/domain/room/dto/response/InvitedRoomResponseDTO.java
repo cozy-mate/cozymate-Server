@@ -3,5 +3,5 @@ import java.util.List;
 
 public record InvitedRoomResponseDTO(
     Integer requestCount,
-    List<RoomListResponseDTO> roomList
+    List<RoomDetailResponseDTO> roomList
 ) {}

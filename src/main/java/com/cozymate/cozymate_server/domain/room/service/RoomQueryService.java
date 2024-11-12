@@ -12,10 +12,9 @@ import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStat
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailListReponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.RoomListResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.RoomSimpleResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
@@ -68,7 +67,7 @@ public class RoomQueryService {
 
         Integer roomEquality = getCalculateRoomEquality(equalityMap);
 
-        List<MateDetailListReponseDTO> mates = joinedMates.stream()
+        List<MateDetailResponseDTO> mates = joinedMates.stream()
             .map(mate -> {
                 Integer mateEquality = equalityMap.get(mate.getMember().getId());
                 return RoomConverter.toMateDetailListResponse(mate, mateEquality);
@@ -118,7 +117,7 @@ public class RoomQueryService {
         return !roomRepository.existsByName(roomName);
     }
 
-    public RoomSimpleResponseDTO getExistRoom(Long memberId) {
+    public RoomIdResponseDTO getExistRoom(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
@@ -129,7 +128,7 @@ public class RoomQueryService {
         return RoomConverter.toRoomExistResponse(null);
     }
 
-    public RoomSimpleResponseDTO getExistRoom(Long otherMemberId, Long memberId) {
+    public RoomIdResponseDTO getExistRoom(Long otherMemberId, Long memberId) {
         memberRepository.findById(otherMemberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -160,7 +159,7 @@ public class RoomQueryService {
 
     }
 
-    public List<MateDetailListReponseDTO> getInvitedMemberList(Long roomId, Long memberId) {
+    public List<MateDetailResponseDTO> getInvitedMemberList(Long roomId, Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -183,7 +182,7 @@ public class RoomQueryService {
 
     }
 
-    public List<RoomListResponseDTO> getRequestedRoomList(Long memberId) {
+    public List<RoomDetailResponseDTO> getRequestedRoomList(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -199,7 +198,27 @@ public class RoomQueryService {
                     joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
                 Integer roomEquality = getCalculateRoomEquality(equalityMap);
                 List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
-                return RoomConverter.toRoomListResponse(room, roomEquality, hashtags);
+                return RoomConverter.toRoomDetailResponseDTOWithParams(
+                    room.getId(),
+                    room.getName(),
+                    room.getInviteCode(),
+                    room.getProfileImage(),
+                    joinedMates.stream()
+                        .map(mate -> RoomConverter.toMateDetailListResponse(mate, equalityMap.get(mate.getMember().getId())))
+                        .toList(),
+                    getManagerMemberId(room),
+                    getManagerNickname(room),
+                    false,
+                    room.getMaxMateNum(),
+                    room.getNumOfArrival(),
+                    room.getRoomType().toString(),
+                    hashtags,
+                    roomEquality,
+                    MemberStatConverter.toMemberStatDifferenceResponseDTO(joinedMates.stream()
+                        .map(mate -> memberStatRepository.findByMemberId(mate.getMember().getId()))
+                        .flatMap(Optional::stream)
+                        .toList())
+                    );
             })
             .toList();
     }
@@ -215,17 +234,50 @@ public class RoomQueryService {
             .map(Mate::getRoom)
             .toList();
 
-        List<RoomListResponseDTO> rooms = invitedRooms.stream()
+        List<RoomDetailResponseDTO> rooms = invitedRooms.stream()
             .map(room -> {
                 List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
                     joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
                 Integer roomEquality = getCalculateRoomEquality(equalityMap);
                 List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
-                return RoomConverter.toRoomListResponse(room, roomEquality, hashtags);
+                return RoomConverter.toRoomDetailResponseDTOWithParams(
+                    room.getId(),
+                    room.getName(),
+                    room.getInviteCode(),
+                    room.getProfileImage(),
+                    joinedMates.stream()
+                        .map(mate -> RoomConverter.toMateDetailListResponse(mate, equalityMap.get(mate.getMember().getId())))
+                        .toList(),
+                    getManagerMemberId(room),
+                    getManagerNickname(room),
+                    false,
+                    room.getMaxMateNum(),
+                    room.getNumOfArrival(),
+                    room.getRoomType().toString(),
+                    hashtags,
+                    roomEquality,
+                    MemberStatConverter.toMemberStatDifferenceResponseDTO(joinedMates.stream()
+                        .map(mate -> memberStatRepository.findByMemberId(mate.getMember().getId()))
+                        .flatMap(Optional::stream)
+                        .toList())
+                );
             })
             .toList();
 
         return new InvitedRoomResponseDTO(invitedCount, rooms);
     }
+
+    public Long getManagerMemberId(Room room) {
+        Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        return managerMate.getMember().getId();
+    }
+
+    public String getManagerNickname(Room room) {
+        Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        return managerMate.getMember().getNickname();
+    }
+
 }

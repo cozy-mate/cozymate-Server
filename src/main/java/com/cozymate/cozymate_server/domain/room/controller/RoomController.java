@@ -6,10 +6,9 @@ import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateReq
 import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.request.RoomUpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailListReponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.RoomListResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.RoomSimpleResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -46,7 +45,7 @@ public class RoomController {
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_ALREADY_EXISTS
     })
-    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> createRoom(@Valid @RequestBody PrivateRoomCreateRequestDTO request,
+    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> createPrivateRoom(@Valid @RequestBody PrivateRoomCreateRequestDTO request,
         @AuthenticationPrincipal MemberDetails memberDetails) {
         RoomDetailResponseDTO response = roomCommandService.createPrivateRoom(request, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
@@ -183,8 +182,8 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<RoomSimpleResponseDTO>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomSimpleResponseDTO response = roomQueryService.getExistRoom(memberDetails.member().getId());
+    public ResponseEntity<ApiResponse<RoomIdResponseDTO>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
+        RoomIdResponseDTO response = roomQueryService.getExistRoom(memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -193,9 +192,9 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<RoomSimpleResponseDTO>> getExistRoom(
+    public ResponseEntity<ApiResponse<RoomIdResponseDTO>> getExistRoom(
         @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomSimpleResponseDTO response = roomQueryService.getExistRoom(memberId, memberDetails.member().getId());
+        RoomIdResponseDTO response = roomQueryService.getExistRoom(memberId, memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
@@ -303,7 +302,7 @@ public class RoomController {
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MATE
     })
-    public ResponseEntity<ApiResponse<List<MateDetailListReponseDTO>>> getInvitedMemberList(
+    public ResponseEntity<ApiResponse<List<MateDetailResponseDTO>>> getInvitedMemberList(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedMemberList(roomId, memberDetails.member().getId())));
     }
@@ -313,7 +312,7 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<List<RoomListResponseDTO>>> getRequestedRoomList(
+    public ResponseEntity<ApiResponse<List<RoomDetailResponseDTO>>> getRequestedRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getRequestedRoomList(memberDetails.member().getId())));
     }

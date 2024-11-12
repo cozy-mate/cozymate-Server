@@ -8,7 +8,7 @@ public record RoomDetailResponseDTO(
     String name,
     String inviteCode,
     Integer persona,
-    List<MateDetailListReponseDTO> mateDetailList,
+    List<MateDetailResponseDTO> mateDetailList,
     Long managerMemberId,
     String managerNickname,
     Boolean isRoomManager,

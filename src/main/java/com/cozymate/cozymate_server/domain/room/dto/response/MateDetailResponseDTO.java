@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.dto.response;
 
-public record MateDetailListReponseDTO(
+public record MateDetailResponseDTO(
     Long memberId,
     Long mateId,
     String nickname,

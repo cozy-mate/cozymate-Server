@@ -5,10 +5,9 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceRe
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailListReponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.RoomListResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.RoomSimpleResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import java.util.List;
@@ -39,8 +38,8 @@ public class RoomConverter {
             .build();
     }
 
-    public static MateDetailListReponseDTO toMateDetailListResponse(Mate mate, Integer mateEquality) {
-        return new MateDetailListReponseDTO(
+    public static MateDetailResponseDTO toMateDetailListResponse(Mate mate, Integer mateEquality) {
+        return new MateDetailResponseDTO(
             mate.getMember().getId(),
             mate.getId(),
             mate.getMember().getNickname(),
@@ -49,8 +48,8 @@ public class RoomConverter {
         );
     }
 
-    public static RoomSimpleResponseDTO toRoomExistResponse(Room room) {
-        return new RoomSimpleResponseDTO(room != null ? room.getId() : 0L);
+    public static RoomIdResponseDTO toRoomExistResponse(Room room) {
+        return new RoomIdResponseDTO(room != null ? room.getId() : 0L);
     }
 
     public static RoomDetailResponseDTO toRoomDetailResponseDTOWithParams(
@@ -58,7 +57,7 @@ public class RoomConverter {
         String name,
         String inviteCode,
         Integer persona,
-        List<MateDetailListReponseDTO> mateDetailList,
+        List<MateDetailResponseDTO> mateDetailList,
         Long managerMemberId,
         String managerNickname,
         Boolean isRoomManager,
@@ -87,13 +86,13 @@ public class RoomConverter {
         );
     }
 
-    public static RoomListResponseDTO toRoomListResponse(Room room, Integer roomEquality, List<String> hashtagList) {
-        return new RoomListResponseDTO(
-            room.getId(),
-            room.getName(),
-            roomEquality,
-            hashtagList,
-            room.getNumOfArrival()
-        );
-    }
+//    public static RoomDetailResponseDTO toRoomListResponse(Room room, Integer roomEquality, List<String> hashtagList) {
+//        return new RoomDetailResponseDTO(
+//            room.getId(),
+//            room.getName(),
+//            roomEquality,
+//            hashtagList,
+//            room.getNumOfArrival()
+//        );
+//    }
 }
