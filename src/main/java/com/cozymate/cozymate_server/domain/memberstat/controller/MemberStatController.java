@@ -113,7 +113,7 @@ public class MemberStatController {
             + "성격, 잠버릇은 다중 선택으로, 문자열 배열을 리턴합니다.\n\n"
             + "멤버 정보는 memberDetail, 멤버 스탯 정보는 memberStatDetail 객체로 리턴합니다."
             + "일치율과 roomId를 추가로 리턴합니다."
-            + "일치율은 본인을 호출할 경우, 0을 리턴합니다."
+            + "일치율은 본인을 호출할 경우, 또는 없는 사람을 호출할 경우 null을 리턴합니다."
     )
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,

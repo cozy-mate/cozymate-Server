@@ -49,8 +49,6 @@ public class MemberStatQueryService {
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-    private static final Integer EQUALITY_ZERO = 0;
-
     public MemberStatDetailWithMemberDetailResponseDTO getMemberStat(Member member) {
 
         MemberStat memberStat = memberStatRepository.findByMemberId(member.getId())
