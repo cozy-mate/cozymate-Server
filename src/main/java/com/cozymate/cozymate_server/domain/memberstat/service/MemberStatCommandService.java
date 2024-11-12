@@ -3,11 +3,9 @@ package com.cozymate.cozymate_server.domain.memberstat.service;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatCommandRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.request.CreateMemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityCommandService;
-import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +23,15 @@ public class MemberStatCommandService {
     private final MemberStatEqualityCommandService memberStatEqualityCommandService;
 
     public Long createMemberStat(
-        Member member, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        Member member, CreateMemberStatRequestDTO createMemberStatRequestDTO) {
 
-        // 멤버 상세정보가 이미 존재하는 경우
-        if (memberStatRepository.findByMemberId(member.getId()).isPresent()) {
+        if (memberStatRepository.existsByMemberId(member.getId())) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_EXISTS);
         }
 
         MemberStat saveMemberStat = memberStatRepository.save(
             MemberStatConverter.toEntity(
-                null, member, null, memberStatCommandRequestDTO
+                member, createMemberStatRequestDTO
             )
         );
 
@@ -42,24 +39,24 @@ public class MemberStatCommandService {
             saveMemberStat
         );
 
-        return saveMemberStat.getId();
+        return saveMemberStat.getMember().getId();
     }
 
     public Long modifyMemberStat(
-        Member member, MemberStatCommandRequestDTO memberStatCommandRequestDTO) {
+        Member member, CreateMemberStatRequestDTO createMemberStatRequestDTO) {
 
         MemberStat updatedMemberStat = memberStatRepository.findByMemberId(member.getId())
             .orElseThrow(
                 () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
             );
 
-        updatedMemberStat.update(member,  memberStatCommandRequestDTO);
+        updatedMemberStat.update(member,  createMemberStatRequestDTO);
 
         memberStatEqualityCommandService.updateMemberStatEqualities(
             updatedMemberStat
         );
 
-        return updatedMemberStat.getId();
+        return updatedMemberStat.getMember().getId();
 
     }
 

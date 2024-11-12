@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.converter;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;
@@ -66,7 +66,7 @@ public class RoomConverter {
         String roomType,
         List<String> hashtagList,
         Integer equality,
-        MemberStatDifferenceResponseDTO difference
+        MemberStatDifferenceListResponseDTO difference
     ) {
         return new RoomDetailResponseDTO(
             roomId,
