@@ -7,7 +7,7 @@ import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.Favo
 import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.PreferenceStatsMatchCount;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
 import java.util.List;
 

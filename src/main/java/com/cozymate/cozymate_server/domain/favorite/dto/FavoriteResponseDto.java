@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.favorite.dto;
 
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPreferenceResponseDTO;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;

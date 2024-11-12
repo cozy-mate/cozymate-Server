@@ -8,24 +8,21 @@ import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatPageResponseDto;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatRequestDTO.MemberStatSeenListDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatEqualityResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatPreferenceResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatQueryResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatRandomListResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatResponseDTO.MemberStatSearchResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailAndRoomIdAndEqualityResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPageResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPreferenceResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatRandomListDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
-import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
-import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -54,26 +51,21 @@ public class MemberStatQueryService {
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-    private static final Long ROOM_NOT_EXISTS = 0L;
-    private static final Integer NUM_OF_ROOMMATE_NOT_DETERMINED = 0;
+    private static final Integer EQUALITY_ZERO = 0;
 
-    private final MemberStatPreferenceCommandService memberStatPreferenceCommandService;
-
-    public MemberStatQueryResponseDTO getMemberStat(Member member) {
-
-        Integer birthYear = member.getBirthDay().getYear();
+    public MemberStatDetailWithMemberDetailDTO getMemberStat(Member member) {
 
         MemberStat memberStat = memberStatRepository.findByMemberId(member.getId())
             .orElseThrow(
                 () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
             );
 
-        return MemberStatConverter.toDto(
-            memberStat, memberStat.getMember()
+        return MemberStatConverter.toMemberStatDetailWithMemberDetailDTO(
+            memberStat
         );
     }
 
-    public MemberStatDetailResponseDTO getMemberStatWithId(Member viewer, Long memberId) {
+    public MemberStatDetailAndRoomIdAndEqualityResponseDTO getMemberStatWithId(Member viewer, Long memberId) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
@@ -83,24 +75,23 @@ public class MemberStatQueryService {
             () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
         );
 
+        // 본인은 일치율 0으로 처리
+        Integer equality = EQUALITY_ZERO;
 
-        Integer equality = memberStatEqualityQueryService.getSingleEquality(
-            memberId,
-            viewer.getId()
-        );
-
-
+        if(!viewer.getId().equals(memberId)){
+            equality = memberStatEqualityQueryService.getSingleEquality(
+                memberId,
+                viewer.getId()
+            );
+        }
 
         Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
             memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
 
-        return MemberStatConverter.toDetailDto(
+        return MemberStatConverter.toMemberStatDetailAndRoomIdAndEqualityResponseDTO(
             memberStat,
-            member,
             equality,
-            mate.isPresent() ?
-                mate.get().getRoom().getId()
-                : ROOM_NOT_EXISTS
+            mate.isPresent() ? mate.get().getRoom().getId() : 0
         );
     }
 
@@ -113,20 +104,10 @@ public class MemberStatQueryService {
         return memberStat.getNumOfRoommate();
     }
 
-    public MemberStatPageResponseDto<List<?>> getMemberStatList(Member member,
-        List<String> filterList, Pageable pageable, boolean needsDetail, boolean needsPreferences) {
-
-        if (needsDetail && needsPreferences) {
-            throw new GeneralException(
-                ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST);
-        }
+    public MemberStatPageResponseDTO<List<?>> getMemberStatList(Member member,
+        List<String> filterList, Pageable pageable) {
 
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
-
-        // List<MemberStat> -> Map<Member,MemberStat>으로 변경,
-        // LazyFetch로 인해서 N+1 문제 발생해, 쿼리를 한번에 처리하기로 결정.
-//        Map<Member, MemberStat> filteredResult = memberStatRepository.getFilteredMemberStat(filterList,
-//            criteriaMemberStat);
 
         Page<Map<MemberStat, Integer>> filteredResult = memberStatRepository.getFilteredMemberStat(
             criteriaMemberStat,
@@ -138,35 +119,12 @@ public class MemberStatQueryService {
             return createEmptyPageResponse(pageable);
         }
 
-        //N+1 문제 발생, 해결 위해 MAP을 활용한 방식 적용
-        //Filtering 시 Member와 MemberStat을 join을 하기 때문에, Member를 Select하는 것을 추가한다고
-        // 자원 소모의차이가 크지 않을 것이라고 생각했음.
-
-//        Map<Long,Integer> memberStatEqualities = memberStatEqualityQueryService.getEquality(
-//            criteriaMemberStat.getMember().getId(),
-//            filteredResult.stream().map(memberStat -> memberStat.getMember().getId()).toList()
-//        );
-
-        // 이 부분 이후는 DB 안 건들고, Application 내에서 계산.
-        // 쿼리는 필터링은 한번,
-        // 일치율 조회 한번으로 줄이고(N+1 Problem -> 조회 1회), 응답속도를 비약적으로 개선함.
-        if (needsDetail) {
-            return toPageResponseDto(createDetailedResponse(filteredResult));
-        } else if (needsPreferences) {
-            return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,member));
-        }
-        return toPageResponseDto(createEqualityResponse(filteredResult));
-
+        return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,criteriaMemberStat.getMember()));
 
     }
 
-    public MemberStatPageResponseDto<List<?>> getSearchedAndFilteredMemberStatList(Member member,
-        HashMap<String, List<?>> filterMap, Pageable pageable, boolean needsDetail, boolean needsPreferences) {
-
-        if (needsDetail && needsPreferences) {
-            throw new GeneralException(
-                ErrorStatus._MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST);
-        }
+    public MemberStatPageResponseDTO<List<?>> getSearchedAndFilteredMemberStatList(Member member,
+        HashMap<String, List<?>> filterMap, Pageable pageable) {
 
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
@@ -178,14 +136,7 @@ public class MemberStatQueryService {
             return createEmptyPageResponse(pageable);
         }
 
-        if (needsDetail) {
-            return toPageResponseDto(createDetailedResponse(filteredResult));
-        } else if (needsPreferences) {
-            return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,member));
-        }
-        return toPageResponseDto(createEqualityResponse(filteredResult));
-
-
+        return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,criteriaMemberStat.getMember()));
     }
 
     public Integer getNumOfSearchedAndFilteredMemberStatList(Member member,
@@ -201,22 +152,7 @@ public class MemberStatQueryService {
 
     }
 
-    private Page<MemberStatEqualityDetailResponseDTO> createDetailedResponse(
-        Page<Map<MemberStat, Integer>> filteredResult) {
-        return filteredResult.map(
-            memberStatIntegerMap -> {
-                Map.Entry<MemberStat, Integer> entry = memberStatIntegerMap.entrySet().iterator()
-                    .next();
-                MemberStat memberStat = entry.getKey();
-                Integer equality = entry.getValue();
-                return MemberStatConverter.toEqualityDetailDto(
-                    memberStat,
-                    equality);
-            }
-        );
-    }
-
-    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member) {
+    public MemberStatRandomListDTO getRandomMemberStatWithPreferences(Member member) {
 
         // 상세정보가 있다면 불러올 수 없는 API
         if(memberStatRepository.existsByMemberId(member.getId())){
@@ -246,18 +182,19 @@ public class MemberStatQueryService {
                 return MemberStatConverter.toPreferenceResponseDTO(
                     stat,
                     preferences,
-                    null
+                    0
                 );
             })
             .toList();
 
-        return MemberStatConverter.toRandomListResponseDTO(
+        return MemberStatConverter.toMemberStatRandomListDTO(
             preferenceResponseList);
 
     }
 
     public Page<MemberStatPreferenceResponseDTO> createMemberStatPreferenceResponse(
         Page<Map<MemberStat, Integer>> filteredResult, Member criteriaMember) {
+
         return filteredResult.map(
             memberStatIntegerMap ->{
                 Map.Entry<MemberStat, Integer> entry = memberStatIntegerMap.entrySet().iterator()
@@ -277,40 +214,26 @@ public class MemberStatQueryService {
         );
     }
 
-    private Page<MemberStatEqualityResponseDTO> createEqualityResponse(
-        Page<Map<MemberStat, Integer>> filteredResult) {
-
-        return filteredResult.map(
-            memberStatIntegerMap -> {
-                Map.Entry<MemberStat, Integer> entry = memberStatIntegerMap.entrySet().iterator()
-                    .next();
-                MemberStat memberStat = entry.getKey();
-                Integer equality = entry.getValue();
-                return MemberStatConverter.toEqualityDto(memberStat, equality);
-            }
-        );
-    }
-
     public List<MemberStatSearchResponseDTO> getMemberSearchResponse(String subString, Member searchingMember) {
 
         // 가독성을 위해 분리해 봄
         Integer numOfRoomMateOfSearchingMember = searchingMember.getMemberStat().getNumOfRoommate();
         Long universityId = searchingMember.getUniversity().getId();
         Gender gender = searchingMember.getGender();
-        String dormitoryNames = searchingMember.getMemberStat().getDormitoryNames();
+        String dormitoryName = searchingMember.getMemberStat().getDormitoryName();
         Long searchingMemberId = searchingMember.getId();
 
         //memberStat이 존재할 때
         if(memberStatRepository.existsByMemberId(searchingMemberId)){
             List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
-                subString, universityId, gender, numOfRoomMateOfSearchingMember, dormitoryNames, searchingMemberId
+                subString, universityId, gender, numOfRoomMateOfSearchingMember, dormitoryName, searchingMemberId
             );
             return memberList.stream()
                 .map(member -> {
                     Integer equality = memberStatEqualityQueryService.getSingleEquality(searchingMember.getId(), member.getId());
                     return MemberStatConverter.toMemberStatSearchResponseDTO(member, equality);
                 })
-                .sorted(Comparator.comparing(MemberStatSearchResponseDTO::getEquality).reversed()) // equality 기준으로 내림차순 정렬
+                .sorted(Comparator.comparing(MemberStatSearchResponseDTO::equality).reversed()) // equality 기준으로 내림차순 정렬
                 .toList();
         }
 
@@ -319,22 +242,21 @@ public class MemberStatQueryService {
             subString, universityId, gender,searchingMemberId
         );
         return memberList.stream()
-            .map(member-> MemberStatConverter.toMemberStatSearchResponseDTO(member, null))
+            .map(member-> MemberStatConverter.toMemberStatSearchResponseDTO(member, 0))
             .toList();
     }
-
 
     private MemberStat getCriteriaMemberStat(Member member) {
         return memberStatRepository.findByMemberId(member.getId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
     }
 
-    private MemberStatPageResponseDto<List<?>> createEmptyPageResponse(Pageable pageable) {
-        return new MemberStatPageResponseDto<>(pageable.getPageNumber(), false, Collections.emptyList());
+    private MemberStatPageResponseDTO<List<?>> createEmptyPageResponse(Pageable pageable) {
+        return new MemberStatPageResponseDTO<>(pageable.getPageNumber(), false, Collections.emptyList());
     }
 
-    private MemberStatPageResponseDto<List<?>> toPageResponseDto(Page<?> page) {
-        return new MemberStatPageResponseDto<>(
+    private MemberStatPageResponseDTO<List<?>> toPageResponseDto(Page<?> page) {
+        return new MemberStatPageResponseDTO<>(
             page.getNumber(),
             page.hasNext(),
             page.getContent()

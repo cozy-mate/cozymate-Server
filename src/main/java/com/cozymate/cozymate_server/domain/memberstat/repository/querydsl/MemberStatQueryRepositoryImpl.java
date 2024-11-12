@@ -47,21 +47,21 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .where(initDefaultQuery(criteriaMemberStat));
     }
 
-    @Override
-    public Map<Member, MemberStat> getFilteredMemberStat(List<String> filterList,
-        MemberStat criteriaMemberStat) {
-        // Tuple로 MemberStat과 Member를 함께 조회
-        List<Tuple> results = createBaseQuery(criteriaMemberStat)
-            .where(applyFilters(filterList, criteriaMemberStat))
-            .fetch();
-
-        // 결과를 Map<Member, MemberStat>으로 변환
-        return results.stream()
-            .collect(Collectors.toMap(
-                tuple -> tuple.get(member),         // key: Member
-                tuple -> tuple.get(memberStat)      // value: MemberStat
-            ));
-    }
+//    @Override
+//    public Map<Member, MemberStat> getFilteredMemberStat(List<String> filterList,
+//        MemberStat criteriaMemberStat) {
+//        // Tuple로 MemberStat과 Member를 함께 조회
+//        List<Tuple> results = createBaseQuery(criteriaMemberStat)
+//            .where(applyFilters(filterList, criteriaMemberStat))
+//            .fetch();
+//
+//        // 결과를 Map<Member, MemberStat>으로 변환
+//        return results.stream()
+//            .collect(Collectors.toMap(
+//                tuple -> tuple.get(member),         // key: Member
+//                tuple -> tuple.get(memberStat)      // value: MemberStat
+//            ));
+//    }
 
     @Override
     public Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
@@ -88,7 +88,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .and(memberStat.id.ne(criteriaMemberStat.getId()))
             .and(member.gender.eq(criteriaMember.getGender()))
             .and(member.university.id.eq(criteriaMember.getUniversity().getId()))
-            .and(memberStat.dormitoryNames.eq(criteriaMemberStat.getDormitoryNames()));
+            .and(memberStat.dormitoryName.eq(criteriaMemberStat.getDormitoryName()));
 
         // '미정'인 경우 인실 조건을 무시, 그렇지 않으면 인실 조건 추가
         if (!criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)) {
@@ -316,7 +316,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return switch (key) {
             case "acceptance" -> memberStat.acceptance;
             case "admissionYear" -> memberStat.admissionYear;
-            case "major" -> memberStat.major;
+            case "majorName" -> memberStat.member.majorName;
             case "wakeUpTime" -> memberStat.wakeUpTime;
             case "sleepingTime" -> memberStat.sleepingTime;
             case "turnOffTime" -> memberStat.turnOffTime;
@@ -339,7 +339,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "drinkingFrequency" -> memberStat.drinkingFrequency;
             case "mbti" -> memberStat.mbti;
             case "birthYear" -> member.birthDay;
-            case "dormitoryNames" -> memberStat.dormitoryNames;
+            case "dormitoryName" -> memberStat.dormitoryName;
             default ->
                 throw new GeneralException(ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID);
         };
@@ -350,7 +350,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return switch (key) {
             case "acceptance" -> criteriaMemberStat.getAcceptance();
             case "admissionYear" -> criteriaMemberStat.getAdmissionYear();
-            case "major" -> criteriaMemberStat.getMajor();
+            case "majorName" -> criteriaMemberStat.getMember().getMajorName();
             case "wakeUpTime" -> criteriaMemberStat.getWakeUpTime();
             case "sleepingTime" -> criteriaMemberStat.getSleepingTime();
             case "turnOffTime" -> criteriaMemberStat.getTurnOffTime();
@@ -373,7 +373,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "drinkingFrequency" -> criteriaMemberStat.getDrinkingFrequency();
             case "mbti" -> criteriaMemberStat.getMbti();
             case "birthYear" -> criteriaMemberStat.getMember().getBirthDay();
-            case "dormitoryNames" -> criteriaMemberStat.getDormitoryNames();
+            case "dormitoryName" -> criteriaMemberStat.getDormitoryName();
             default -> null;
         };
     }
