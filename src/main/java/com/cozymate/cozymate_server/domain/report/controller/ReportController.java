@@ -1,8 +1,8 @@
 package com.cozymate.cozymate_server.domain.report.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.report.dto.request.ReportRequestDTO;
 import com.cozymate.cozymate_server.domain.report.service.ReportCommandService;
-import com.cozymate.cozymate_server.domain.report.dto.ReportRequestDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
@@ -26,14 +26,14 @@ public class ReportController {
     @PostMapping
     @Operation(
         summary = "[베로] 신고하기",
-        description = "reportedMemberId : 신고 대상 사용자 pk\n\n"
-            + "ReportSource :  MEMBER_STAT(사용자 상세에서의 신고) , CHAT(쪽지에서의 신고)\n\n"
-            + "ReportReason : "
+        description = "memberId : 신고 대상 사용자 pk\n\n"
+            + "source :  MEMBER_STAT(사용자 상세에서의 신고) , CHAT(쪽지에서의 신고)\n\n"
+            + "reason : "
             + "OBSCENITY(음란성/선정성), "
             + "INSULT(욕설/인신공격), "
             + "COMMERCIAL(영리목적/홍보성), "
             + "OTHER(기타)\n\n"
-            + "content(신고 내용) : ReportReason이 OTHER(기타 사유)인 경우만 필요"
+            + "content(신고 내용) : reason이 OTHER(기타 사유)인 경우만 필요"
     )
     @SwaggerApiError({
         ErrorStatus._REPORT_MEMBER_NOT_FOUND,
@@ -42,8 +42,8 @@ public class ReportController {
     })
     public ResponseEntity<ApiResponse<String>> saveReport(
         @AuthenticationPrincipal MemberDetails memberDetails,
-        @Valid @RequestBody ReportRequestDto reportRequestDto) {
-        reportCommandService.saveReport(memberDetails.member(), reportRequestDto);
+        @Valid @RequestBody ReportRequestDTO reportRequestDTO) {
+        reportCommandService.saveReport(memberDetails.member(), reportRequestDTO);
         return ResponseEntity.ok(ApiResponse.onSuccess("신고 완료"));
     }
 }

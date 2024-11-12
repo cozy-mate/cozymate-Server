@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.notificationlog.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogResponseDto;
+import com.cozymate.cozymate_server.domain.notificationlog.dto.response.NotificationLogResponseDTO;
 import com.cozymate.cozymate_server.domain.notificationlog.service.NotificationLogQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +24,7 @@ public class NotificationLogController {
 
     @GetMapping
     @Operation(summary = "[베로] 알림 내역 조회", description = "")
-    public ResponseEntity<ApiResponse<List<NotificationLogResponseDto>>> getNotificationLog(
+    public ResponseEntity<ApiResponse<List<NotificationLogResponseDTO>>> getNotificationLog(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             notificationLogQueryService.getNotificationLogList(memberDetails.member())));

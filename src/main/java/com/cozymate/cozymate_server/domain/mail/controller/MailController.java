@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MailController {
     private final MailService mailService;
 
-    @PostMapping("/")
+    @PostMapping("")
     @Operation(summary = "[말즈] 메일 보내기 API",
             description = "request body :  <br>"
                     + "mailAddress : 12345@inha.edu <br>"
@@ -36,7 +36,7 @@ public class MailController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/verify/")
+    @PostMapping("/verify")
     @Operation(summary = "[말즈] 메일 인증 API",
             description = "request body :  <br>"
                     + " code : a1B2c3 <br>"

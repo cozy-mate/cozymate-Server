@@ -4,7 +4,6 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberblock.MemberBlock;
 import com.cozymate.cozymate_server.domain.memberblock.converter.MemberBlockConverter;
-import com.cozymate.cozymate_server.domain.memberblock.dto.MemberBlockRequestDto;
 import com.cozymate.cozymate_server.domain.memberblock.repository.MemberBlockRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -20,11 +19,11 @@ public class MemberBlockCommandService {
     private final MemberBlockRepository memberBlockRepository;
     private final MemberRepository memberRepository;
 
-    public void saveMemberBlock(MemberBlockRequestDto requestDto, Member member) {
-        checkBlockSelf(requestDto.getBlockedMemberId(), member.getId());
-        checkDuplicatedBlock(requestDto, member);
+    public void saveMemberBlock(Long blockedMemberId, Member member) {
+        checkBlockSelf(blockedMemberId, member.getId());
+        checkDuplicatedBlock(blockedMemberId, member.getId());
 
-        Member blockedMember = memberRepository.findById(requestDto.getBlockedMemberId())
+        Member blockedMember = memberRepository.findById(blockedMemberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         MemberBlock memberBlock = MemberBlockConverter.toEntity(member, blockedMember);
@@ -48,9 +47,9 @@ public class MemberBlockCommandService {
         }
     }
 
-    private void checkDuplicatedBlock(MemberBlockRequestDto requestDto, Member member) {
-        boolean alreadyBlocked = memberBlockRepository.existsByMemberIdAndBlockedMemberId(member.getId(),
-            requestDto.getBlockedMemberId());
+    private void checkDuplicatedBlock(Long blockedMemberId, Long memberId) {
+        boolean alreadyBlocked = memberBlockRepository.existsByMemberIdAndBlockedMemberId(memberId,
+            blockedMemberId);
 
         if (alreadyBlocked) {
             throw new GeneralException(ErrorStatus._ALREADY_BLOCKED_MEMBER);

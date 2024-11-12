@@ -1,14 +1,14 @@
 package com.cozymate.cozymate_server.domain.notificationlog.converter;
 
-import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogResponseDto;
+import com.cozymate.cozymate_server.domain.notificationlog.dto.response.NotificationLogResponseDTO;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class NotificationLogConverter {
 
-    public static NotificationLogResponseDto toResponseDto(String content, LocalDateTime createdAt,
-        String category, Long targetId) {
+    public static NotificationLogResponseDTO toNotificationLogResponseDTO(String content,
+        LocalDateTime createdAt, String category, Long targetId) {
         Duration duration = Duration.between(createdAt, LocalDateTime.now());
         long minutes = duration.toMinutes();
         long hours = duration.toHours();
@@ -25,7 +25,7 @@ public class NotificationLogConverter {
             formattedCreatedAt = createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
 
-        return NotificationLogResponseDto.builder()
+        return NotificationLogResponseDTO.builder()
             .content(content)
             .createdAt(formattedCreatedAt)
             .category(category)
