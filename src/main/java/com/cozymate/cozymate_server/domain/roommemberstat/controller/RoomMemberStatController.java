@@ -1,8 +1,8 @@
-package com.cozymate.cozymate_server.domain.room.controller;
+package com.cozymate.cozymate_server.domain.roommemberstat.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomMemberStatDetailListDTO;
-import com.cozymate.cozymate_server.domain.room.service.RoomMemberStatService;
+import com.cozymate.cozymate_server.domain.roommemberstat.service.RoomMemberStatService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
@@ -24,11 +24,10 @@ public class RoomMemberStatController {
     @GetMapping("/{roomId}/memberStat/{memberStatKey}")
     @Operation(summary = "[포비] 방에 속해 있는 메이트 멤버 상세정보 조회",
         description = "방의 멤버 상세정보 조회하기\n"+
-            "사용 가능한 Key는 다음과 같습니다 (총 25개):\n\n" +
+            "사용 가능한 Key는 다음과 같습니다 (총 23개):\n\n" +
             "- **birthYear**\n" +
             "- **acceptance**\n" +
             "- **admissionYear** \n" +
-            "- **dormitoryName** \n" +
             "- **majorName** \n" +
             "- **wakeUpTime** \n" +
             "- **sleepingTime** \n" +
@@ -61,7 +60,10 @@ public class RoomMemberStatController {
             "```\n\n"
         + "")
     @SwaggerApiError({
-        ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS
+        ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._PRIVATE_ROOM,
+
     })
     public ResponseEntity<ApiResponse<RoomMemberStatDetailListDTO>> get(
         @AuthenticationPrincipal MemberDetails memberDetails,

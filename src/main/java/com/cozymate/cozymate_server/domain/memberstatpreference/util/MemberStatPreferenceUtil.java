@@ -10,8 +10,9 @@ public class MemberStatPreferenceUtil {
     private static final Set<String> validPreferences = new HashSet<>(Arrays.asList(
         "birthYear", "admissionYear", "majorName", "acceptance",
         "wakeUpTime", "sleepingTime", "turnOffTime", "smoking",
-        "sleepingHabit", "airConditioningIntensity", "heatingIntensity", "lifePattern", "intimacy",
-        "canShare", "isPlayGame", "isPhoneCall", "studying", "intake", "cleanSensitivity",
+        "sleepingHabit", "airConditioningIntensity", "heatingIntensity", "lifePattern",
+        "intimacy", "canShare", "isPlayGame", "isPhoneCall",
+        "studying", "intake", "cleanSensitivity",
         "noiseSensitivity", "cleaningFrequency", "drinkingFrequency", "personality",
         "mbti"
     ));

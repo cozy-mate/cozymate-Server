@@ -1,15 +1,14 @@
-package com.cozymate.cozymate_server.domain.room.service;
+package com.cozymate.cozymate_server.domain.roommemberstat.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.room.Room;
-import com.cozymate.cozymate_server.domain.room.converter.RoomMemberStatDetailConverter;
+import com.cozymate.cozymate_server.domain.roommemberstat.converter.RoomMemberStatDetailConverter;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomMemberStatDetailDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomMemberStatDetailListDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;

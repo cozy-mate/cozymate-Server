@@ -9,11 +9,10 @@ import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailAndRoomIdAndEqualityResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPageResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPreferenceResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatRandomListDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
@@ -22,7 +21,6 @@ import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberSt
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -53,7 +51,7 @@ public class MemberStatQueryService {
 
     private static final Integer EQUALITY_ZERO = 0;
 
-    public MemberStatDetailWithMemberDetailDTO getMemberStat(Member member) {
+    public MemberStatDetailWithMemberDetailResponseDTO getMemberStat(Member member) {
 
         MemberStat memberStat = memberStatRepository.findByMemberId(member.getId())
             .orElseThrow(
@@ -152,7 +150,7 @@ public class MemberStatQueryService {
 
     }
 
-    public MemberStatRandomListDTO getRandomMemberStatWithPreferences(Member member) {
+    public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member) {
 
         // 상세정보가 있다면 불러올 수 없는 API
         if(memberStatRepository.existsByMemberId(member.getId())){

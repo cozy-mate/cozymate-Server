@@ -10,82 +10,81 @@ import java.util.List;
 
 
 public record CreateMemberStatRequestDTO(
-    @NotBlank
-    @Size(min = 2, max = 2)
+    @NotBlank(message = "학번은 필수입니다.")
+    @Size(min = 2, max = 2, message = "학번은 2글자입니다.")
     String admissionYear,
     @NotNull
     @Min(0)
     @Max(6)
     Integer numOfRoommate,
-    @NotEmpty
+    @NotEmpty(message = "기숙사 이름은 필수입니다.")
     String dormitoryName,
-    @NotEmpty
+    @NotEmpty(message = "합격여부는 필수입니다.")
     String acceptance,
-    @NotBlank
+    @NotBlank(message = "기상시간(오전, 오후)는 필수입니다.")
     @Size(min= 2, max = 2)
     String wakeUpMeridian,
-    @NotNull
+    @NotNull(message = "기상시간은 필수입니다.")
     @Min(1)
     @Max(12)
     Integer wakeUpTime,
-    @NotBlank
+    @NotBlank(message = "수면시간(오전, 오후)는 필수입니다.")
     @Size(min = 2, max = 2)
     String sleepingMeridian,
-    @NotNull
+    @NotNull(message = "수면시간은 필수입니다.")
     @Min(1)
     @Max(12)
     Integer sleepingTime,
-    @NotBlank
+    @NotBlank(message = "소등시간(오전, 오후)는 필수입니다.")
     @Size(min = 2, max = 2)
     String turnOffMeridian,
-    @NotNull
+    @NotNull(message = "소등시간은 필수입니다.")
     @Min(1)
     @Max(12)
     Integer turnOffTime,
-    @NotEmpty
-    String smokingState,
-    @NotEmpty
+    @NotEmpty(message = "흡연여부는 필수입니다.")
+    String smoking,
+    @NotEmpty(message = "잠버릇은 필수입니다.")
     List<String> sleepingHabit,
-    @NotNull
+    @NotNull(message = "에어컨강도는 필수입니다.")
     @Min(0)
     @Max(3)
     Integer airConditioningIntensity,
-    @NotNull
+    @NotNull(message = "히터강도는 필수입니다.")
     @Min(0)
     @Max(3)
     Integer heatingIntensity,
-    @NotEmpty
+    @NotEmpty(message = "생활패턴은 필수입니다.")
     String lifePattern,
-    @NotEmpty
+    @NotEmpty(message = "친밀도는 필수입니다.")
     String intimacy,
-    @NotEmpty
+    @NotEmpty(message = "물건공유는 필수입니다.")
     String canShare,
-    @NotEmpty
+    @NotEmpty(message = "게임여부는 필수입니다.")
     String isPlayGame,
-    @NotEmpty
+    @NotEmpty(message = "전화여부는 필수입니다.")
     String isPhoneCall,
-    @NotEmpty
+    @NotEmpty(message = "공부여부는 필수입니다.")
     String studying,
-    @NotEmpty
+    @NotEmpty(message = "섭취여부는 필수입니다.")
     String intake,
-    @NotNull
+    @NotNull(message = "청결예민도는 필수입니다.")
     @Min(1)
     @Max(5)
     Integer cleanSensitivity,
-    @NotNull
+    @NotNull(message = "소음예민도는 필수입니다.")
     @Min(1)
     @Max(5)
     Integer noiseSensitivity,
-    @NotEmpty
+    @NotEmpty(message = "청소빈도는 필수입니다.")
     String cleaningFrequency,
-    @NotEmpty
+    @NotEmpty(message = "음주빈도는 필수입니다.")
     String drinkingFrequency,
-    @NotEmpty
+    @NotEmpty(message = "성격은 필수입니다.")
     List<String> personality,
-    @NotBlank
+    @NotBlank(message = "mbti는 필수입니다.")
     @Size(max = 4, min = 4)
     String mbti,
-    @NotEmpty
     String selfIntroduction
 ) {
 

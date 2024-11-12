@@ -96,7 +96,7 @@ public class MemberStat extends BaseTimeEntity {
             createMemberStatRequestDTO.sleepingTime());
         this.turnOffTime = TimeUtil.convertTime(createMemberStatRequestDTO.turnOffMeridian(),
             createMemberStatRequestDTO.turnOffTime());
-        this.smoking = createMemberStatRequestDTO.smokingState();
+        this.smoking = createMemberStatRequestDTO.smoking();
         this.sleepingHabit = MemberStatUtil.toSortedString(createMemberStatRequestDTO.sleepingHabit());
         this.airConditioningIntensity = createMemberStatRequestDTO.airConditioningIntensity();
         this.heatingIntensity = createMemberStatRequestDTO.heatingIntensity();

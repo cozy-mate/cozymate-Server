@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record MemberStatRandomListDTO(
+public record MemberStatRandomListResponseDTO(
     List<MemberStatPreferenceResponseDTO> memberList
 ) {
 

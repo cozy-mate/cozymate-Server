@@ -8,12 +8,12 @@ import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuilder;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailAndRoomIdAndEqualityResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.request.CreateMemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPreferenceResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatRandomListDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class MemberStatConverter {
 
@@ -42,7 +41,7 @@ public class MemberStatConverter {
                 createMemberStatRequestDTO.sleepingTime()))
             .turnOffTime(TimeUtil.convertTime(createMemberStatRequestDTO.turnOffMeridian(),
                 createMemberStatRequestDTO.turnOffTime()))
-            .smoking(createMemberStatRequestDTO.smokingState())
+            .smoking(createMemberStatRequestDTO.smoking())
             .sleepingHabit(
                 MemberStatUtil.toSortedString(createMemberStatRequestDTO.sleepingHabit()))
             .airConditioningIntensity(createMemberStatRequestDTO.airConditioningIntensity())
@@ -80,7 +79,7 @@ public class MemberStatConverter {
             .sleepingTime(TimeUtil.convertToTime(memberStat.getSleepingTime()))
             .turnOffMeridian(TimeUtil.convertToMeridian(memberStat.getTurnOffTime()))
             .turnOffTime(TimeUtil.convertToTime(memberStat.getTurnOffTime()))
-            .smokingState(memberStat.getSmoking())
+            .smoking(memberStat.getSmoking())
             .sleepingHabit(MemberStatUtil.fromStringToList(memberStat.getSleepingHabit()))
             .airConditioningIntensity(memberStat.getAirConditioningIntensity())
             .heatingIntensity(memberStat.getHeatingIntensity())
@@ -112,8 +111,8 @@ public class MemberStatConverter {
             .build();
     }
 
-    public static MemberStatDetailWithMemberDetailDTO toMemberStatDetailWithMemberDetailDTO(MemberStat memberStat){
-        return MemberStatDetailWithMemberDetailDTO.builder()
+    public static MemberStatDetailWithMemberDetailResponseDTO toMemberStatDetailWithMemberDetailDTO(MemberStat memberStat){
+        return MemberStatDetailWithMemberDetailResponseDTO.builder()
             .memberDetail(MemberConverter.toMemberDetailResponseDTOFromEntity(memberStat.getMember()))
             .memberStatDetail(MemberStatConverter.toMemberStatDetailDTOFromEntity(memberStat))
             .build();
@@ -193,10 +192,10 @@ public class MemberStatConverter {
             .build();
     }
 
-    public static MemberStatRandomListDTO toMemberStatRandomListDTO(
+    public static MemberStatRandomListResponseDTO toMemberStatRandomListDTO(
         List<MemberStatPreferenceResponseDTO> memberList
     ) {
-        return MemberStatRandomListDTO.builder()
+        return MemberStatRandomListResponseDTO.builder()
             .memberList(memberList)
             .build();
     }

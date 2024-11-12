@@ -4,7 +4,7 @@ import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailRespo
 import lombok.Builder;
 
 @Builder
-public record MemberStatDetailWithMemberDetailDTO(
+public record MemberStatDetailWithMemberDetailResponseDTO(
     MemberDetailResponseDTO memberDetail,
     MemberStatDetailResponseDTO memberStatDetail
 ) {

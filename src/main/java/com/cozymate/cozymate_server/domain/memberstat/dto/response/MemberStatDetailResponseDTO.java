@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.memberstat.dto.response;
 
-import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import java.util.List;
 import lombok.Builder;
 
@@ -16,7 +15,7 @@ public record MemberStatDetailResponseDTO(
     Integer sleepingTime,
     String turnOffMeridian,
     Integer turnOffTime,
-    String smokingState,
+    String smoking,
     List<String> sleepingHabit,
     Integer airConditioningIntensity,
     Integer heatingIntensity,

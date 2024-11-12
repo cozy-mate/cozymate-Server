@@ -3,9 +3,9 @@ package com.cozymate.cozymate_server.domain.memberstat.controller;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberstat.dto.request.CreateMemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailAndRoomIdAndEqualityResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPageResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatRandomListDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.domain.memberstat.service.MemberStatQueryService;
@@ -98,7 +98,7 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_NOT_EXISTS
     })
     @GetMapping("")
-    public ResponseEntity<ApiResponse<MemberStatDetailWithMemberDetailDTO>> getMemberStat(
+    public ResponseEntity<ApiResponse<MemberStatDetailWithMemberDetailResponseDTO>> getMemberStat(
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         return ResponseEntity.ok(
@@ -155,13 +155,11 @@ public class MemberStatController {
         summary = "[포비] 사용자 상세정보 완전 일치 필터링 및 일치율 조회",
         description = "사용자의 토큰을 넣어 사용합니다." +
             "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
-            + "사용 가능한 필터명(25개):\n"
+            + "사용 가능한 필터명(24개):\n"
             + "- birthYear: 출생년도\n"
-            + "- acceptance : 합격여부\n"
             + "- admissionYear : 학번\n"
-            + "- dormitoryNames: 기숙사 이름\n"
             + "- majorName : 학과\n"
-            + "- numOfRoommate : 신청실\n"
+            + "- acceptance : 합격여부\n"
             + "- wakeUpTime : 기상시간\n"
             + "- sleepingTime : 취침시간\n"
             + "- turnOffTime : 소등시간\n"
@@ -181,7 +179,8 @@ public class MemberStatController {
             + "- cleaningFrequency : 청소 빈도\n"
             + "- drinkingFrequency : 음주 빈도\n"
             + "- personality : 성격\n"
-            + "- mbti : mbti\n\n" +
+            + "- mbti : mbti\n"
+            + "- numOfRoommate : 신청실(Optional)\n\n" +
             "memberList는는 아래 object를 배열로 갖고 있습니다.\n" +
             "```json\n" +
             "{\n" +
@@ -225,10 +224,9 @@ public class MemberStatController {
             "```\n\n" +
             "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 25개):\n\n" +
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
-            "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
-            "- **dormitoryName** (기숙사 이름): `[String]` 예) `[\"1기숙사\"]`\n" +
             "- **majorName** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
+            "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
             "- **turnOffTime** (소등시간) : `[Integer]` 예) `[22]`\n" +
@@ -249,7 +247,8 @@ public class MemberStatController {
             "- **cleaningFrequency** (청소 빈도) : `[String]` 예) `[\"주1회\", \"월2회\"]`\n" +
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`\n" +
             "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
-            "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n\n"
+            "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n" +
+            "- **numOfRoommate : 신청실(Optional)\n\n"
 
     )
     @SwaggerApiError({
@@ -286,10 +285,9 @@ public class MemberStatController {
             "```\n\n" +
             "사용 가능한 Key 목록과 데이터 형식은 다음과 같습니다 (총 25개):\n\n" +
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
-            "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
-            "- **dormitoryName** (기숙사 이름): `[String]` 예) `[\"1기숙사\"]`\n" +
             "- **majorName** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
+            "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
             "- **turnOffTime** (소등시간) : `[Integer]` 예) `[22]`\n" +
@@ -310,7 +308,8 @@ public class MemberStatController {
             "- **cleaningFrequency** (청소 빈도) : `[String]` 예) `[\"주1회\", \"월2회\"]`\n" +
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`\n" +
             "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
-            "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n\n" +
+            "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n" +
+            "- **numOfRoommate : 신청실(Optional)\n\n" +
             "memberList는 아래 object를 배열로 갖고 있습니다.\n" +
             "```json\n" +
             "{\n" +
@@ -343,56 +342,56 @@ public class MemberStatController {
     }
 
 
-    @Deprecated(since = "2024-10-15, 상세정보 검색 기능 Update로 더 이상 사용하지 않음")
-    @Operation(
-        summary = "[포비] 사용자 상세정보 필터링, 일치율 조회(상세 정보 포함)",
-        description = "사용자의 토큰을 넣어 사용합니다."
-            + "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
-            + "사용 가능한 필터명(20개):\n"
-            + "- acceptance : 합격여부\n"
-            + "- admissionYear :  학번\n"
-            + "- major : 전공\n"
-            + "- dormitoryNames: 기숙사 이름\n"
-            + "- numOfRoommate : 신청실\n"
-            + "- wakeUpTime : 기상시간\n"
-            + "- sleepingTime : 취침시간\n"
-            + "- turnOffTime : 소등시간\n"
-            + "- smoking : 흡연여부\n"
-            + "- sleepingHabit : 잠버릇\n"
-            + "- airConditioningIntensity : 에어컨 강도\n"
-            + "- heatingIntensity : 히터 강도\n"
-            + "- lifePattern : 생활패턴\n"
-            + "- intimacy : 친밀도\n"
-            + "- canShare : 물건공유\n"
-            + "- isPlayGame : 게임여부\n"
-            + "- isPhoneCall : 전화여부\n"
-            + "- studying : 공부여부\n"
-            + "- intake : 섭취여부\n"
-            + "- cleanSensitivity : 청결예민도\n"
-            + "- noiseSensitivity : 소음예민도\n"
-            + "- cleaningFrequency : 청소예민도\n"
-            + "- drinkingFrequency : 음주 빈도\n"
-            + "- personality : 성격\n"
-            + "- mbti : mbti"
-    )
-    @SwaggerApiError({
-        ErrorStatus._MEMBERSTAT_NOT_EXISTS,
-        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
-    })
-    @GetMapping("/filter/details")
-    public ResponseEntity<ApiResponse<MemberStatPageResponseDTO<List<?>>>> getFilteredMemberListWithMemberDetails(
-        @AuthenticationPrincipal MemberDetails memberDetails,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(required = false) List<String> filterList) {
-
-        Pageable pageable = PageRequest.of(page, 5);
-
-        return ResponseEntity.ok(
-            ApiResponse.onSuccess(
-                memberStatQueryService.getMemberStatList(
-                    memberDetails.member(), filterList, pageable)
-            ));
-    }
+//    @Deprecated(since = "2024-10-15, 상세정보 검색 기능 Update로 더 이상 사용하지 않음")
+//    @Operation(
+//        summary = "[포비] 사용자 상세정보 필터링, 일치율 조회(상세 정보 포함)",
+//        description = "사용자의 토큰을 넣어 사용합니다."
+//            + "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
+//            + "사용 가능한 필터명(20개):\n"
+//            + "- acceptance : 합격여부\n"
+//            + "- admissionYear :  학번\n"
+//            + "- major : 전공\n"
+//            + "- dormitoryNames: 기숙사 이름\n"
+//            + "- numOfRoommate : 신청실\n"
+//            + "- wakeUpTime : 기상시간\n"
+//            + "- sleepingTime : 취침시간\n"
+//            + "- turnOffTime : 소등시간\n"
+//            + "- smoking : 흡연여부\n"
+//            + "- sleepingHabit : 잠버릇\n"
+//            + "- airConditioningIntensity : 에어컨 강도\n"
+//            + "- heatingIntensity : 히터 강도\n"
+//            + "- lifePattern : 생활패턴\n"
+//            + "- intimacy : 친밀도\n"
+//            + "- canShare : 물건공유\n"
+//            + "- isPlayGame : 게임여부\n"
+//            + "- isPhoneCall : 전화여부\n"
+//            + "- studying : 공부여부\n"
+//            + "- intake : 섭취여부\n"
+//            + "- cleanSensitivity : 청결예민도\n"
+//            + "- noiseSensitivity : 소음예민도\n"
+//            + "- cleaningFrequency : 청소예민도\n"
+//            + "- drinkingFrequency : 음주 빈도\n"
+//            + "- personality : 성격\n"
+//            + "- mbti : mbti"
+//    )
+//    @SwaggerApiError({
+//        ErrorStatus._MEMBERSTAT_NOT_EXISTS,
+//        ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID
+//    })
+//    @GetMapping("/filter/details")
+//    public ResponseEntity<ApiResponse<MemberStatPageResponseDTO<List<?>>>> getFilteredMemberListWithMemberDetails(
+//        @AuthenticationPrincipal MemberDetails memberDetails,
+//        @RequestParam(defaultValue = "0") int page,
+//        @RequestParam(required = false) List<String> filterList) {
+//
+//        Pageable pageable = PageRequest.of(page, 5);
+//
+//        return ResponseEntity.ok(
+//            ApiResponse.onSuccess(
+//                memberStatQueryService.getMemberStatList(
+//                    memberDetails.member(), filterList, pageable)
+//            ));
+//    }
 
     @Operation(
         summary = "[포비] 사용자 상세정보 삭제(관리자용)",
@@ -433,7 +432,7 @@ public class MemberStatController {
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_EXISTS
     })
-    public ResponseEntity<ApiResponse<MemberStatRandomListDTO>> getRandomMemberStatPreference(
+    public ResponseEntity<ApiResponse<MemberStatRandomListResponseDTO>> getRandomMemberStatPreference(
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         return ResponseEntity.ok(
