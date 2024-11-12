@@ -73,15 +73,10 @@ public class MemberStatQueryService {
             () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
         );
 
-        // 본인은 일치율 0으로 처리
-        Integer equality = EQUALITY_ZERO;
-
-        if(!viewer.getId().equals(memberId)){
-            equality = memberStatEqualityQueryService.getSingleEquality(
+        Integer equality = memberStatEqualityQueryService.getSingleEquality(
                 memberId,
                 viewer.getId()
             );
-        }
 
         Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
             memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
