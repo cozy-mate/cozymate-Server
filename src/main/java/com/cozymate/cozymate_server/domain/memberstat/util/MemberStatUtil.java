@@ -62,8 +62,9 @@ public class MemberStatUtil {
      public static Map<String, BiFunction<Member,MemberStat,Object>> createFieldGetters() {
         Map<String, BiFunction<Member,MemberStat,Object>> fieldGetters = new HashMap<>();
          fieldGetters.put("admissionYear", (member, memberStat) -> memberStat.getAdmissionYear());
-         fieldGetters.put("numOfRoommate", (member, memberStat) -> memberStat.getNumOfRoommate());
-         fieldGetters.put("dormitoryName", (member, memberStat) -> memberStat.getDormitoryName());
+         // 기숙사 정보는 Room 조회시 사용하지 않아 제외
+//         fieldGetters.put("numOfRoommate", (member, memberStat) -> memberStat.getNumOfRoommate());
+//         fieldGetters.put("dormitoryName", (member, memberStat) -> memberStat.getDormitoryName());
          fieldGetters.put("acceptance", (member, memberStat) -> memberStat.getAcceptance());
          fieldGetters.put("wakeUpTime", (member, memberStat) -> memberStat.getWakeUpTime());
          fieldGetters.put("sleepingTime", (member, memberStat) -> memberStat.getSleepingTime());

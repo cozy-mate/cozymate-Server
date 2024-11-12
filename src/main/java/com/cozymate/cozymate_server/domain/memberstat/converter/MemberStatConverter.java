@@ -170,6 +170,19 @@ public class MemberStatConverter {
             .build();
     }
 
+    public static DifferenceStatus toDifferenceStatus(List<MemberStat> memberStatList, String key) {
+        if(memberStatList.isEmpty()) {
+            return DifferenceStatus.WHITE;
+        }
+        if(memberStatList.size() == 1) {
+            return DifferenceStatus.WHITE;
+        }
+        Map<String, BiFunction<Member,MemberStat, Object>> fieldGetters = createFieldGetters();
+
+        return compareField(memberStatList, fieldGetters.get(key));
+
+    }
+
     public static MemberStatPreferenceResponseDTO toPreferenceResponseDTO(MemberStat stat,
         Map<String, Object> preferences, Integer equality) {
 

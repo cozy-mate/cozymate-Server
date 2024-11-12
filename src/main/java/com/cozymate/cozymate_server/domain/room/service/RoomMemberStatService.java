@@ -4,6 +4,9 @@ import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
+import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomMemberStatDetailConverter;
@@ -44,6 +47,13 @@ public class RoomMemberStatService {
             .map(Mate::getMember)
             .toList();
 
+        DifferenceStatus color = MemberStatConverter.toDifferenceStatus(
+            joinedMemberList.stream().map(
+            Member::getMemberStat)
+            .toList(),
+            memberStatAttribute
+        );
+
         List<RoomMemberStatDetailDTO> roomMemberStat = joinedMemberList.stream().map(
             joinedMember -> {
                 Map<String, Object> statMap = new HashMap<>();
@@ -57,7 +67,7 @@ public class RoomMemberStatService {
             }
         ).toList();
 
-        return RoomMemberStatDetailConverter.toRoomMemberStatDetailListDTO(roomMemberStat);
+        return RoomMemberStatDetailConverter.toRoomMemberStatDetailListDTO(roomMemberStat,color);
     }
 
     }
