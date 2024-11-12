@@ -33,13 +33,10 @@ public class MemberStatEqualityQueryService {
     }
 
     public Integer getSingleEquality(Long memberAId, Long memberBId) {
-        MemberStatEquality memberStatEquality = memberStatEqualityRepository.findMemberStatEqualitiesByMemberAIdAndMemberBId(
-            memberAId, memberBId
-        ).orElseThrow(
-            () ->  new GeneralException(ErrorStatus._MEMBERSTAT_EQUALITY_NOT_FOUND)
-        );
 
-        return memberStatEquality.getEquality();
+        return memberStatEqualityRepository.findMemberStatEqualitiesByMemberAIdAndMemberBId(
+            memberAId, memberBId
+        ).map(MemberStatEquality::getEquality).orElse(null);
     }
 
 
