@@ -2,7 +2,6 @@ package com.cozymate.cozymate_server.domain.favorite.service;
 
 import com.cozymate.cozymate_server.domain.favorite.Favorite;
 import com.cozymate.cozymate_server.domain.favorite.converter.FavoriteConverter;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteRequestDto;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -23,18 +22,22 @@ public class FavoriteCommandService {
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
 
-    public void saveFavorite(Member member, FavoriteRequestDto favoriteRequestDto) {
-        Long targetId = favoriteRequestDto.getTargetId();
-        FavoriteType favoriteType = FavoriteType.valueOf(favoriteRequestDto.getFavoriteType());
-
-        if (favoriteType.equals(FavoriteType.MEMBER)) {
-            checkSelfFavorite(member, favoriteRequestDto);
+    public void saveMemberFavorite(Member member, Long favoriteMemberId) {
+        if (favoriteMemberId.equals(member.getId())) {
+            throw new GeneralException(ErrorStatus._FAVORITE_CANNOT_REQUEST_SELF);
         }
 
-        checkTargetExists(favoriteType, targetId);
-        checkDuplicateFavorite(member, targetId, favoriteType);
+        checkTargetExists(FavoriteType.MEMBER, favoriteMemberId);
+        checkDuplicateFavorite(member, favoriteMemberId, FavoriteType.MEMBER);
 
-        favoriteRepository.save(FavoriteConverter.toEntity(member, targetId, favoriteType));
+        favoriteRepository.save(FavoriteConverter.toEntity(member, favoriteMemberId, FavoriteType.MEMBER));
+    }
+
+    public void saveRoomFavorite(Member member, Long roomId) {
+        checkTargetExists(FavoriteType.ROOM, roomId);
+        checkDuplicateFavorite(member, roomId, FavoriteType.ROOM);
+
+        favoriteRepository.save(FavoriteConverter.toEntity(member, roomId, FavoriteType.ROOM));
     }
 
     public void deleteFavorite(Member member, Long favoriteId) {
@@ -47,12 +50,6 @@ public class FavoriteCommandService {
         };
 
         favoriteRepository.delete(favorite);
-    }
-
-    private static void checkSelfFavorite(Member member, FavoriteRequestDto favoriteRequestDto) {
-        if (favoriteRequestDto.getTargetId().equals(member.getId())) {
-            throw new GeneralException(ErrorStatus._FAVORITE_CANNOT_REQUEST_SELF);
-        }
     }
 
     private void checkTargetExists(FavoriteType favoriteType, Long targetId) {

@@ -1,9 +1,8 @@
 package com.cozymate.cozymate_server.domain.chat.converter;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatContentResponseDto;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatSuccessResponseDto;
+import com.cozymate.cozymate_server.domain.chat.dto.response.ChatContentResponseDTO;
+import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.time.LocalDateTime;
@@ -20,29 +19,23 @@ public class ChatConverter {
             .build();
     }
 
-    public static ChatContentResponseDto toChatContentResponseDto(String nickname, String content,
+    public static ChatContentResponseDTO toChatContentResponseDTO(String nickname, String content,
         LocalDateTime createdAt) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd | HH:mm");
         String formattedDateTime = createdAt.format(formatter);
 
-        return ChatContentResponseDto.builder()
+        return ChatContentResponseDTO.builder()
             .nickname(nickname)
             .content(content)
-            .dateTime(formattedDateTime)
+            .datetime(formattedDateTime)
             .build();
     }
 
-    public static ChatResponseDto toChatResponseDto(Long recipientId,
-        List<ChatContentResponseDto> chatContentResponseDtoList) {
-        return ChatResponseDto.builder()
-            .recipientId(recipientId)
-            .chatContents(chatContentResponseDtoList)
-            .build();
-    }
-
-    public static ChatSuccessResponseDto toChatSuccessResponseDto(Long chatRoomId) {
-        return ChatSuccessResponseDto.builder()
-            .chatRoomId(chatRoomId)
+    public static ChatListResponseDTO toChatResponseDTO(Long recipientId,
+        List<ChatContentResponseDTO> chatContentResponseDTOList) {
+        return ChatListResponseDTO.builder()
+            .memberId(recipientId)
+            .content(chatContentResponseDTOList)
             .build();
     }
 }

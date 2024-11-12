@@ -1,8 +1,7 @@
 package com.cozymate.cozymate_server.domain.memberblock.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.memberblock.dto.MemberBlockRequestDto;
-import com.cozymate.cozymate_server.domain.memberblock.dto.MemberBlockResponseDto;
+import com.cozymate.cozymate_server.domain.memberblock.dto.response.MemberBlockResponseDTO;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockCommandService;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -17,35 +16,33 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/block/member")
+@RequestMapping("/block/members")
 public class MemberBlockController {
 
     private final MemberBlockCommandService memberBlockCommandService;
     private final MemberBlockQueryService memberBlockQueryService;
 
-    @PostMapping
-    @Operation(summary = "[베로] 멤버 차단", description = "body에 차단할 멤버 id")
+    @PostMapping("/{memberId}")
+    @Operation(summary = "[베로] 멤버 차단", description = "memberId: 차단할 사용자 pk")
     @SwaggerApiError({
         ErrorStatus._CANNOT_BLOCK_REQUEST_SELF,
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ALREADY_BLOCKED_MEMBER
     })
-    public ResponseEntity<ApiResponse<String>> saveMemberBlock(
-        @RequestBody MemberBlockRequestDto requestDto,
+    public ResponseEntity<ApiResponse<String>> saveMemberBlock(@PathVariable Long memberId,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        memberBlockCommandService.saveMemberBlock(requestDto, memberDetails.member());
+        memberBlockCommandService.saveMemberBlock(memberId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("차단 완료"));
     }
 
     @GetMapping
     @Operation(summary = "[베로] 멤버 차단 목록 조회", description = "")
-    public ResponseEntity<ApiResponse<List<MemberBlockResponseDto>>> getMemberBlockList(
+    public ResponseEntity<ApiResponse<List<MemberBlockResponseDTO>>> getMemberBlockList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             memberBlockQueryService.getMemberBlockList(memberDetails.member())));

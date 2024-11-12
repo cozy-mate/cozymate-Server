@@ -3,10 +3,10 @@ package com.cozymate.cozymate_server.domain.chatroom.service;
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto.ChatRoomSimpleDto;
+import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
-import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomResponseDto;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberblock.util.MemberBlockUtil;
@@ -32,7 +32,7 @@ public class ChatRoomQueryService {
     private final MemberRepository memberRepository;
     private final MemberBlockUtil memberBlockUtil;
 
-    public List<ChatRoomResponseDto> getChatRoomList(Member member) {
+    public List<ChatRoomDetailResponseDTO> getChatRoomList(Member member) {
         List<ChatRoom> findChatRoomList = chatRoomRepository.findAllByMember(member);
 
         if (findChatRoomList.isEmpty()) {
@@ -50,18 +50,18 @@ public class ChatRoomQueryService {
             })
             .toList();
 
-        List<ChatRoomResponseDto> chatRoomResponseDtoList = chatRoomList.stream()
+        List<ChatRoomDetailResponseDTO> chatRoomDetailResponseDTOList = chatRoomList.stream()
             .map(chatRoom -> {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
-                return toChatRoomResponseDto(chatRoom, member, chat);
+                return toChatRoomDetailResponseDTO(chatRoom, member, chat);
             })
             .toList();
 
-        return memberBlockUtil.filterBlockedMember(chatRoomResponseDtoList, member,
-            ChatRoomResponseDto::getMemberId);
+        return memberBlockUtil.filterBlockedMember(chatRoomDetailResponseDTOList, member,
+            ChatRoomDetailResponseDTO::memberId);
     }
 
-    public ChatRoomSimpleDto getChatRoom(Member member, Long recipientId) {
+    public ChatRoomSimpleDTO getChatRoom(Member member, Long recipientId) {
         Member recipient = memberRepository.findById(recipientId)
             .orElseThrow(
                 () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
@@ -70,7 +70,7 @@ public class ChatRoomQueryService {
         Optional<ChatRoom> findChatRoom = chatRoomRepository.findByMemberAAndMemberB(member,
             recipient);
 
-        return ChatRoomConverter.toChatRoomSimpleDto(findChatRoom, recipient);
+        return ChatRoomConverter.toChatRoomSimpleDTO(findChatRoom, recipient);
     }
 
     private Chat getLatestChatByChatRoom(ChatRoom chatRoom) {
@@ -83,9 +83,9 @@ public class ChatRoomQueryService {
             chatRoom.getMemberALastDeleteAt() : chatRoom.getMemberBLastDeleteAt();
     }
 
-    private ChatRoomResponseDto toChatRoomResponseDto(ChatRoom chatRoom, Member member,
+    private ChatRoomDetailResponseDTO toChatRoomDetailResponseDTO(ChatRoom chatRoom, Member member,
         Chat chat) {
-        return ChatRoomConverter.toResponseDto(
+        return ChatRoomConverter.toChatRoomDetailResponseDTO(
             member.getNickname().equals(chatRoom.getMemberA().getNickname()) ?
                 chatRoom.getMemberB().getNickname() : chatRoom.getMemberA().getNickname(),
             chat.getContent(),

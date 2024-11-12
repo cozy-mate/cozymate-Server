@@ -4,10 +4,10 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.report.Report;
 import com.cozymate.cozymate_server.domain.report.converter.ReportConverter;
+import com.cozymate.cozymate_server.domain.report.dto.request.ReportRequestDTO;
 import com.cozymate.cozymate_server.domain.report.enums.ReportReason;
 import com.cozymate.cozymate_server.domain.report.enums.ReportSource;
 import com.cozymate.cozymate_server.domain.report.repository.ReportRepository;
-import com.cozymate.cozymate_server.domain.report.dto.ReportRequestDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +22,12 @@ public class ReportCommandService {
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
 
-    public void saveReport(Member member, ReportRequestDto requestDto) {
-        checkReportSelf(member, requestDto.getReportedMemberId());
-        checkMemberExists(requestDto.getReportedMemberId());
-        checkDuplicateReport(member, requestDto);
+    public void saveReport(Member member, ReportRequestDTO requestDTO) {
+        checkReportSelf(member, requestDTO.memberId());
+        checkMemberExists(requestDTO.memberId());
+        checkDuplicateReport(member, requestDTO);
 
-        Report report = ReportConverter.toEntity(member, requestDto);
+        Report report = ReportConverter.toEntity(member, requestDTO);
         reportRepository.save(report);
     }
 
@@ -45,11 +45,11 @@ public class ReportCommandService {
         }
     }
 
-    private void checkDuplicateReport(Member member, ReportRequestDto requestDto) {
+    private void checkDuplicateReport(Member member, ReportRequestDTO requestDTO) {
         boolean isAlreadyReported = reportRepository.existsByReporterAndReportedMemberIdAndReportReasonAndReportSource(
-            member, requestDto.getReportedMemberId(),
-            ReportReason.valueOf(requestDto.getReportReason()),
-            ReportSource.valueOf(requestDto.getReportSource()));
+            member, requestDTO.memberId(),
+            ReportReason.valueOf(requestDTO.reason()),
+            ReportSource.valueOf(requestDTO.source()));
 
         if (isAlreadyReported) {
             throw new GeneralException(ErrorStatus._REPORT_DUPLICATE);

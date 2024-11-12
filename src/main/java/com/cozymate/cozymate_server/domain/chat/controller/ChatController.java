@@ -1,11 +1,11 @@
 package com.cozymate.cozymate_server.domain.chat.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatRequestDto;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto;
-import com.cozymate.cozymate_server.domain.chat.dto.ChatResponseDto.ChatSuccessResponseDto;
+import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO;
+import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO;
 import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;
 import com.cozymate.cozymate_server.domain.chat.service.ChatQueryService;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
@@ -35,12 +35,12 @@ public class ChatController {
             ErrorStatus._CHAT_NOT_FOUND_RECIPIENT,
             ErrorStatus._REQUEST_TO_BLOCKED_MEMBER
     })
-    public ResponseEntity<ApiResponse<ChatSuccessResponseDto>> createChat(
-        @Valid @RequestBody ChatRequestDto chatRequestDto, @PathVariable Long recipientId,
+    public ResponseEntity<ApiResponse<ChatRoomIdResponseDTO>> createChat(
+        @Valid @RequestBody CreateChatRequestDTO createChatRequestDTO, @PathVariable Long recipientId,
         @AuthenticationPrincipal
         MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            chatCommandService.createChat(chatRequestDto, memberDetails.member(),
+            chatCommandService.createChat(createChatRequestDTO, memberDetails.member(),
                 recipientId)));
     }
 
@@ -51,7 +51,7 @@ public class ChatController {
         ErrorStatus._CHATROOM_MEMBER_MISMATCH,
         ErrorStatus._REQUEST_TO_BLOCKED_MEMBER
     })
-    public ResponseEntity<ApiResponse<ChatResponseDto>> getChatList(
+    public ResponseEntity<ApiResponse<ChatListResponseDTO>> getChatList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long chatRoomId) {
         return ResponseEntity.ok(

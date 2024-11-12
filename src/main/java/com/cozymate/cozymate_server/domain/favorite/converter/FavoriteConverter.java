@@ -1,10 +1,9 @@
 package com.cozymate.cozymate_server.domain.favorite.converter;
 
 import com.cozymate.cozymate_server.domain.favorite.Favorite;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteMemberResponse;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.FavoriteRoomResponse;
-import com.cozymate.cozymate_server.domain.favorite.dto.FavoriteResponseDto.PreferenceStatsMatchCount;
+import com.cozymate.cozymate_server.domain.favorite.dto.response.FavoriteMemberResponseDTO;
+import com.cozymate.cozymate_server.domain.favorite.dto.response.FavoriteRoomResponseDTO;
+import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPreferenceResponseDTO;
@@ -21,29 +20,25 @@ public class FavoriteConverter {
             .build();
     }
 
-    public static FavoriteMemberResponse toFavoriteMemberResponse(Long favoriteId,
+    public static FavoriteMemberResponseDTO toFavoriteMemberResponseDTO(Long favoriteId,
         MemberStatPreferenceResponseDTO memberStatPreferenceResponseDTO) {
-        return FavoriteMemberResponse.builder()
-            .favoriteResponseDto(FavoriteResponseDto.builder()
-                .favoriteId(favoriteId)
-                .build())
-            .memberStatPreferenceResponseDTO(memberStatPreferenceResponseDTO)
+        return FavoriteMemberResponseDTO.builder()
+            .favoriteId(favoriteId)
+            .memberStatPreferenceDetail(memberStatPreferenceResponseDTO)
             .build();
     }
 
-    public static FavoriteRoomResponse toFavoriteRoomResponse(Long favoriteId, Room room,
-        Integer roomEquality, List<PreferenceStatsMatchCount> preferenceStatsMatchCountList,
+    public static FavoriteRoomResponseDTO toFavoriteRoomResponseDTO(Long favoriteId, Room room,
+        Integer roomEquality, List<PreferenceMatchCountDTO> preferenceStatsMatchCountList,
         List<String> roomHashTags, Integer currentMateNum) {
-        return FavoriteRoomResponse.builder()
-            .favoriteResponseDto(FavoriteResponseDto.builder()
-                .favoriteId(favoriteId)
-                .build())
+        return FavoriteRoomResponseDTO.builder()
+            .favoriteId(favoriteId)
             .roomId(room.getId())
             .equality(roomEquality)
             .name(room.getName())
-            .preferenceStatsMatchCountList(preferenceStatsMatchCountList)
+            .preferenceMatchCountList(preferenceStatsMatchCountList)
             .hashtagList(roomHashTags)
-            .MaxMateNum(room.getMaxMateNum())
+            .maxMateNum(room.getMaxMateNum())
             .currentMateNum(currentMateNum)
             .build();
     }

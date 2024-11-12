@@ -38,6 +38,7 @@ public class TodoConverter {
             .todoId(todo.getId())
             .content(todo.getContent())
             .completed(todo.isAssigneeCompleted(mateId))
+            .mateIdList(todo.getAssignedMateIdList())
             .todoType(todoType) // Todo의 type에서 가공된 값임
             .build();
     }
@@ -58,7 +59,7 @@ public class TodoConverter {
 
         return TodoMateListResponseDTO.builder()
             .memberDetail(MemberConverter.toMemberDetailResponseDTOFromEntity(member))
-            .mateTodoList(mateTodoList)
+            .todoList(mateTodoList)
             .build();
     }
 
