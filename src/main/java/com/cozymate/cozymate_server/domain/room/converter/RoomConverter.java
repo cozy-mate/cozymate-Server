@@ -1,28 +1,24 @@
 package com.cozymate.cozymate_server.domain.room.converter;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
-import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.memberstat.dto.MemberStatDifferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
-import com.cozymate.cozymate_server.domain.room.dto.CozymateInfoResponse;
-import com.cozymate.cozymate_server.domain.room.dto.CozymateResponse;
-import com.cozymate.cozymate_server.domain.room.dto.InviteRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PrivateRoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRequestDto.PublicRoomCreateRequest;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomExistResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomJoinResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomResponseDto.RoomListResponse;
+import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
+import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import java.util.List;
 
 public class RoomConverter {
 
-    public static Room toPrivateRoom(PrivateRoomCreateRequest request, String inviteCode) {
+    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode) {
         return Room.builder()
-            .name(request.getName())
-            .profileImage(request.getProfileImage())
-            .maxMateNum(request.getMaxMateNum())
+            .name(request.name())
+            .profileImage(request.persona())
+            .maxMateNum(request.maxMateNum())
             .inviteCode(inviteCode)
             .status(RoomStatus.ENABLE)
             .roomType(RoomType.PRIVATE)
@@ -30,11 +26,11 @@ public class RoomConverter {
             .build();
     }
 
-    public static Room toPublicRoom(PublicRoomCreateRequest request, String inviteCode) {
+    public static Room toPublicRoom(PublicRoomCreateRequestDTO request, String inviteCode) {
         return Room.builder()
-            .name(request.getName())
-            .profileImage(request.getProfileImage())
-            .maxMateNum(request.getMaxMateNum())
+            .name(request.name())
+            .profileImage(request.persona())
+            .maxMateNum(request.maxMateNum())
             .inviteCode(inviteCode)
             .status(RoomStatus.WAITING)
             .roomType(RoomType.PUBLIC)
@@ -42,89 +38,61 @@ public class RoomConverter {
             .build();
     }
 
-
-    public static RoomJoinResponse toRoomJoinResponse(Room room, Member manager) {
-        return RoomJoinResponse.builder()
-            .roomId(room.getId())
-            .name(room.getName())
-            .managerName(manager.getNickname())
-            .maxMateNum(room.getMaxMateNum())
-            .build();
-    }
-
-    public static CozymateResponse toCozymateResponse(Member member) {
-        return CozymateResponse.builder()
-            .memberId(member.getId())
-            .nickname(member.getNickname())
-            .build();
-    }
-
-    public static CozymateInfoResponse toCozymateInfoResponse(Mate mate, Integer mateEquality) {
-        return CozymateInfoResponse.builder()
-            .memberId(mate.getMember().getId())
-            .mateId(mate.getId())
-            .nickname(mate.getMember().getNickname())
-            .persona(mate.getMember().getPersona())
-            .mateEquality(mateEquality)
-            .build();
-    }
-
-    public static InviteRequest toInviteRequest(Room room, Mate mate) {
-        return InviteRequest.builder()
-            .roomId(room.getId())
-            .managerNickname(mate.getMember().getNickname())
-            .roomName(room.getName())
-            .build();
-    }
-
-    public static RoomExistResponse toRoomExistResponse(Room room) {
-        if (room != null) {
-            return RoomExistResponse.builder()
-                .roomId(room.getId())
-                .build();
-        } else {
-            return RoomExistResponse.builder()
-                .roomId(0L) // 방이 없는 경우 roomId를 0으로 설정
-                .build();
-        }
-    }
-
-    // 이런식으로 엔티티를 DTO로 만들 땐 From Entity로 이름을 붙여주시고요, WithParams로 파라미터로 만드는 Converter도 만들어주면 좋습니다.
-    public static RoomDetailResponseDTO toRoomDetailResponseDTOFromEntity(Room room) {
-        return toRoomDetailResponseDTOWithParams(
-            room.getId(),
-            room.getName(),
-            room.getInviteCode(),
-            room.getProfileImage(),
-            room.getMaxMateNum(),
-            room.getNumOfArrival(),
-            room.getRoomType().toString(),
-            List.of()
+    public static MateDetailResponseDTO toMateDetailListResponse(Mate mate, Integer mateEquality) {
+        return new MateDetailResponseDTO(
+            mate.getMember().getId(),
+            mate.getId(),
+            mate.getMember().getNickname(),
+            mate.getMember().getPersona(),
+            mateEquality
         );
     }
 
-    public static RoomDetailResponseDTO toRoomDetailResponseDTOWithParams(Long roomId, String name,
-        String inviteCode, Integer persona, Integer maxMateNum, Integer arrivalMateNum,
-        String roomType, List<String> hashtags) {
-        return RoomDetailResponseDTO.builder()
-            .roomId(roomId)
-            .name(name)
-            .inviteCode(inviteCode)
-            .persona(persona)
-            .maxMateNum(maxMateNum)
-            .arrivalMateNum(arrivalMateNum)
-            .roomType(roomType)
-            .hashtags(hashtags)
-            .build();
+    public static RoomIdResponseDTO toRoomExistResponse(Room room) {
+        return new RoomIdResponseDTO(room != null ? room.getId() : 0L);
     }
 
-    public static RoomListResponse toRoomListResponse(Room room, Integer roomEquality, List<String> hashtags) {
-        return RoomListResponse.builder()
-            .roomId(room.getId())
-            .name(room.getName())
-            .roomEquality(roomEquality)
-            .hashtags(hashtags)
-            .numOfArrival(room.getNumOfArrival())
-            .build();
+    public static RoomDetailResponseDTO toRoomDetailResponseDTOWithParams(
+        Long roomId,
+        String name,
+        String inviteCode,
+        Integer persona,
+        List<MateDetailResponseDTO> mateDetailList,
+        Long managerMemberId,
+        String managerNickname,
+        Boolean isRoomManager,
+        Integer maxMateNum,
+        Integer arrivalMateNum,
+        String roomType,
+        List<String> hashtagList,
+        Integer equality,
+        MemberStatDifferenceResponseDTO difference
+    ) {
+        return new RoomDetailResponseDTO(
+            roomId,
+            name,
+            inviteCode,
+            persona,
+            mateDetailList,
+            managerMemberId,
+            managerNickname,
+            isRoomManager,
+            maxMateNum,
+            arrivalMateNum,
+            roomType,
+            hashtagList,
+            equality,
+            difference
+        );
     }
+
+//    public static RoomDetailResponseDTO toRoomListResponse(Room room, Integer roomEquality, List<String> hashtagList) {
+//        return new RoomDetailResponseDTO(
+//            room.getId(),
+//            room.getName(),
+//            roomEquality,
+//            hashtagList,
+//            room.getNumOfArrival()
+//        );
+//    }
 }
