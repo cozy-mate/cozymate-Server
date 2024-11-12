@@ -69,7 +69,7 @@ public class MemberStatUtil {
          fieldGetters.put("wakeUpTime", (member, memberStat) -> memberStat.getWakeUpTime());
          fieldGetters.put("sleepingTime", (member, memberStat) -> memberStat.getSleepingTime());
          fieldGetters.put("turnOffTime", (member, memberStat) -> memberStat.getTurnOffTime());
-         fieldGetters.put("smokingState", (member, memberStat) -> memberStat.getSmoking());
+         fieldGetters.put("smoking", (member, memberStat) -> memberStat.getSmoking());
          fieldGetters.put("sleepingHabit", (member, memberStat) -> memberStat.getSleepingHabit());
          fieldGetters.put("airConditioningIntensity", (member, memberStat) -> memberStat.getAirConditioningIntensity());
          fieldGetters.put("heatingIntensity", (member, memberStat) -> memberStat.getHeatingIntensity());
