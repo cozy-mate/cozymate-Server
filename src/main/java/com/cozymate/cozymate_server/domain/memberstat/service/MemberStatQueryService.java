@@ -49,8 +49,6 @@ public class MemberStatQueryService {
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-    private static final Integer EQUALITY_ZERO = 0;
-
     public MemberStatDetailWithMemberDetailResponseDTO getMemberStat(Member member) {
 
         MemberStat memberStat = memberStatRepository.findByMemberId(member.getId())
@@ -73,15 +71,10 @@ public class MemberStatQueryService {
             () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
         );
 
-        // 본인은 일치율 0으로 처리
-        Integer equality = EQUALITY_ZERO;
-
-        if(!viewer.getId().equals(memberId)){
-            equality = memberStatEqualityQueryService.getSingleEquality(
+        Integer equality = memberStatEqualityQueryService.getSingleEquality(
                 memberId,
                 viewer.getId()
             );
-        }
 
         Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
             memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
@@ -215,16 +208,14 @@ public class MemberStatQueryService {
     public List<MemberStatSearchResponseDTO> getMemberSearchResponse(String subString, Member searchingMember) {
 
         // 가독성을 위해 분리해 봄
-        Integer numOfRoomMateOfSearchingMember = searchingMember.getMemberStat().getNumOfRoommate();
         Long universityId = searchingMember.getUniversity().getId();
         Gender gender = searchingMember.getGender();
-        String dormitoryName = searchingMember.getMemberStat().getDormitoryName();
         Long searchingMemberId = searchingMember.getId();
 
         //memberStat이 존재할 때
         if(memberStatRepository.existsByMemberId(searchingMemberId)){
             List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
-                subString, universityId, gender, numOfRoomMateOfSearchingMember, dormitoryName, searchingMemberId
+                subString, universityId, gender, searchingMember.getMemberStat().getNumOfRoommate(), searchingMember.getMemberStat().getDormitoryName(), searchingMemberId
             );
             return memberList.stream()
                 .map(member -> {
@@ -240,7 +231,7 @@ public class MemberStatQueryService {
             subString, universityId, gender,searchingMemberId
         );
         return memberList.stream()
-            .map(member-> MemberStatConverter.toMemberStatSearchResponseDTO(member, 0))
+            .map(member-> MemberStatConverter.toMemberStatSearchResponseDTO(member, null))
             .toList();
     }
 
