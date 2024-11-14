@@ -318,4 +318,15 @@ public class RoomQueryService {
         return managerMate.getMember().getMemberStat().getDormitoryName();
     }
 
+    public Boolean getPendingStatus(Long roomId, Long memberId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        roomRepository.findById(roomId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        Optional<Mate> pendingMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.PENDING);
+
+        return pendingMate.isPresent();
+    }
 }
