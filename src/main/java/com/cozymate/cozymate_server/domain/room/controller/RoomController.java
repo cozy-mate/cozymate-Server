@@ -327,6 +327,15 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedRoomList(memberDetails.member().getId())));
     }
 
+    @GetMapping("/pending-mates")
+    @Operation(summary = "[바니] 방장에게 보이는 방 참여 요청 목록 조회", description = "방장에게 도착한 방 참여 요청을 조회합니다.")
+    @SwaggerApiError({
+
+    })
+    public ResponseEntity<ApiResponse<List<MateDetailResponseDTO>>> getPendingMemberList(
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getPendingMemberList(memberDetails.member().getId())));
+    }
 
     @PatchMapping("/{roomId}/to-public")
     @Operation(summary = "[바니] 공개방으로 전환", description = "roomId에 해당하는 방을 공개방으로 전환합니다.")
