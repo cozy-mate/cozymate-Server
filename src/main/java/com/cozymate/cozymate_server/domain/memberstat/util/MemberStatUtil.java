@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MemberStatUtil {
@@ -104,11 +103,11 @@ public class MemberStatUtil {
     }
 
     public static Map<String, Object> getMemberStatFields(MemberStat memberStat, List<String> fieldNames) {
-        return fieldNames.stream()
-            .collect(Collectors.toMap(
-                fieldName -> fieldName, // Map의 키로 사용할 필드 이름
-                fieldName -> getMemberStatField(memberStat, fieldName) // Map의 값으로 사용할 필드 값
-            ));
+        Map<String, Object> result = new HashMap<>();
+        fieldNames.forEach(fieldName ->
+            result.put(fieldName, getMemberStatField(memberStat, fieldName))
+        );
+        return result;
     }
 
     // 학번 Response 위해 필요한 Util
