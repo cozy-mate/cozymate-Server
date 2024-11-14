@@ -327,7 +327,7 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedRoomList(memberDetails.member().getId())));
     }
 
-    @GetMapping("/pending-mates")
+    @GetMapping("/pending-members")
     @Operation(summary = "[바니] 방장에게 보이는 방 참여 요청 목록 조회", description = "방장에게 도착한 방 참여 요청을 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
