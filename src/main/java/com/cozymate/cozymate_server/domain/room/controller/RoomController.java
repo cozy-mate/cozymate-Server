@@ -330,7 +330,11 @@ public class RoomController {
     @GetMapping("/pending-mates")
     @Operation(summary = "[바니] 방장에게 보이는 방 참여 요청 목록 조회", description = "방장에게 도착한 방 참여 요청을 조회합니다.")
     @SwaggerApiError({
-
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MATE,
+        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MANAGER
     })
     public ResponseEntity<ApiResponse<List<MateDetailResponseDTO>>> getPendingMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
