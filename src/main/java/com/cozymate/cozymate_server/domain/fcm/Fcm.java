@@ -33,5 +33,6 @@ public class Fcm extends BaseTimeEntity {
 
     public void updateToken(String token) {
         this.token = token;
+        this.isValid = true;
     }
 }
