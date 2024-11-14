@@ -356,4 +356,16 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess("공개방 전환 완료"));
     }
 
+    @GetMapping("/{roomId}/pending-status")
+    @Operation(summary = "[바니] 사용자가 해당 방에 참여 요청을 했는지 여부 조회", description = "로그인한 사용자가 roomId에 해당하는 방에 참여 요청을 했는지 여부를 조회합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<Boolean>> getPendingStatus(
+        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        Boolean response = roomQueryService.getPendingStatus(roomId, memberDetails.member().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
 }
