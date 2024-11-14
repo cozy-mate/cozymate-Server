@@ -63,6 +63,7 @@ public class RoomConverter {
         Boolean isRoomManager,
         Integer maxMateNum,
         Integer arrivalMateNum,
+        String dormitoryName,
         String roomType,
         List<String> hashtagList,
         Integer equality,
@@ -79,20 +80,11 @@ public class RoomConverter {
             isRoomManager,
             maxMateNum,
             arrivalMateNum,
+            dormitoryName,
             roomType,
             hashtagList,
             equality,
             difference
         );
     }
-
-//    public static RoomDetailResponseDTO toRoomListResponse(Room room, Integer roomEquality, List<String> hashtagList) {
-//        return new RoomDetailResponseDTO(
-//            room.getId(),
-//            room.getName(),
-//            roomEquality,
-//            hashtagList,
-//            room.getNumOfArrival()
-//        );
-//    }
 }

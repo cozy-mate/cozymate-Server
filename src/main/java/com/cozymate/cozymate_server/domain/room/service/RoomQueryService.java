@@ -89,11 +89,11 @@ public class RoomQueryService {
             isRoomManager,
             room.getMaxMateNum(),
             room.getNumOfArrival(),
+            getDormitoryName(room),
             room.getRoomType().toString(),
             hashtags,
             roomEquality,
             MemberStatConverter.toMemberStatDifferenceResponseDTO(mateMemberStats)
-            // Todo: 기숙사 정보 추가
         );
     }
 
@@ -241,6 +241,7 @@ public class RoomQueryService {
                     false,
                     room.getMaxMateNum(),
                     room.getNumOfArrival(),
+                    getDormitoryName(room),
                     room.getRoomType().toString(),
                     hashtags,
                     roomEquality,
@@ -248,7 +249,7 @@ public class RoomQueryService {
                         .map(mate -> memberStatRepository.findByMemberId(mate.getMember().getId()))
                         .flatMap(Optional::stream)
                         .toList())
-                    );
+                );
             })
             .toList();
     }
@@ -284,6 +285,7 @@ public class RoomQueryService {
                     false,
                     room.getMaxMateNum(),
                     room.getNumOfArrival(),
+                    getDormitoryName(room),
                     room.getRoomType().toString(),
                     hashtags,
                     roomEquality,
@@ -308,6 +310,12 @@ public class RoomQueryService {
         Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
         return managerMate.getMember().getNickname();
+    }
+
+    public String getDormitoryName(Room room) {
+        Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        return managerMate.getMember().getMemberStat().getDormitoryName();
     }
 
 }
