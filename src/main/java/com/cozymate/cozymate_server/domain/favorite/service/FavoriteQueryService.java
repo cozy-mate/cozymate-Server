@@ -165,9 +165,7 @@ public class FavoriteQueryService {
         List<Integer> roomEquality = equalityMap.values().stream()
             .toList();
 
-        return (int) Math.round(roomEquality.stream()
-            .mapToInt(Integer::intValue)
-            .average()
-            .orElse((Integer)null));
+        int sum = roomEquality.stream().mapToInt(Integer::intValue).sum();
+        return roomEquality.isEmpty() ? null : (int) Math.round((double) sum / roomEquality.size());
     }
 }

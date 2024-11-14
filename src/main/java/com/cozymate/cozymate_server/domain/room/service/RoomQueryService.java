@@ -147,12 +147,8 @@ public class RoomQueryService {
     public Integer getCalculateRoomEquality(Map<Long, Integer> equalityMap){
         List<Integer> roomEquality = equalityMap.values().stream()
             .toList();
-
-        return (int) Math.round(roomEquality.stream()
-            .mapToInt(Integer::intValue)
-            .average()
-            // primitive double이라 casting 해줘야 함
-            .orElse((Integer)null));
+        int sum = roomEquality.stream().mapToInt(Integer::intValue).sum();
+        return roomEquality.isEmpty() ? null : (int) Math.round((double) sum / roomEquality.size());
 
     }
 
