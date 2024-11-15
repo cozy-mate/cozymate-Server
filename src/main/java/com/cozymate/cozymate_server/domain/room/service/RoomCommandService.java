@@ -151,7 +151,7 @@ public class RoomCommandService {
         }
 
         // Room의 Mate들을 찾아온다
-        List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room);
+        List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room, EntryStatus.JOINED);
 
         List<Member> memberList = findRoomMates.stream()
             .map(Mate::getMember)
@@ -219,7 +219,7 @@ public class RoomCommandService {
         }
 
         // Room의 Mate들을 찾아온다
-        List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room);
+        List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room, EntryStatus.JOINED);
 
         List<Member> memberList = findRoomMates.stream()
             .map(Mate::getMember)
