@@ -128,61 +128,36 @@ public class FavoriteQueryService {
 
         // 로그인 사용자의 member stat
         MemberStat memberStat = member.getMemberStat();
-        List<FavoriteRoomResponseDTO> favoriteRoomResponseList = null;
 
-        if (Objects.nonNull(memberStat)) {
-            favoriteRoomResponseList = responseRoomList.stream()
-                .map(room -> {
-                    List<Mate> mates = roomIdMatesMap.get(room.getId());
+        List<FavoriteRoomResponseDTO> favoriteRoomResponseList = responseRoomList.stream()
+            .map(room -> {
+                List<Mate> mates = roomIdMatesMap.get(room.getId());
 
-                    // 로그인 사용자를 기준으로 방의 메이트들과의 선호 스텟별 일치 횟수를 계산
-                    List<PreferenceMatchCountDTO> preferenceStatsMatchCountList = getPreferenceStatsMatchCounts(
-                        member, criteriaPreferenceList, mates, memberStat);
+                // 선호 스탯 일치 횟수 계산
+                List<PreferenceMatchCountDTO> preferenceStatsMatchCountList =
+                    Objects.nonNull(memberStat)
+                        ? getPreferenceStatsMatchCounts(member, criteriaPreferenceList, mates, memberStat)
+                        : getPreferenceStatsMatchCountsWithoutMemberStat(criteriaPreferenceList);
 
-                    // 로그인 사용자와 mate들의 멤버 스텟 "일치율"을 계산
-                    Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
-                        member.getId(), mates.stream().map(mate -> mate.getMember().getId())
-                            .collect(Collectors.toList()));
+                // 로그인 사용자와 mate들의 멤버 스탯 "일치율" 계산
+                Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
+                    member.getId(), mates.stream()
+                        .map(mate -> mate.getMember().getId())
+                        .collect(Collectors.toList()));
 
-                    // 로그인 사용자와 방 일치율 계산
-                    Integer roomEquality = getCalculateRoomEquality(member.getId(), equalityMap);
+                // 로그인 사용자와 방 일치율 계산
+                Integer roomEquality = getCalculateRoomEquality(member.getId(), equalityMap);
 
-                    // 방 해시태그 조회
-                    List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(
-                        room.getId());
+                // 방 해시태그 조회
+                List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
 
-                    return FavoriteConverter.toFavoriteRoomResponseDTO(
-                        roomIdFavoriteIdMap.get(room.getId()), room, roomEquality,
-                        preferenceStatsMatchCountList, roomHashTags, mates.size()
-                    );
-                })
-                .toList();
-        } else {
-            favoriteRoomResponseList = responseRoomList.stream()
-                .map(room -> {
-                    List<Mate> mates = roomIdMatesMap.get(room.getId());
+                return FavoriteConverter.toFavoriteRoomResponseDTO(
+                    roomIdFavoriteIdMap.get(room.getId()), room, roomEquality,
+                    preferenceStatsMatchCountList, roomHashTags, mates.size()
+                );
+            })
+            .toList();
 
-                    // 선호 스탯 일치 전부 0처리
-                    List<PreferenceMatchCountDTO> preferenceStatsMatchCountList = getPreferenceStatsMatchCountsWithoutMemberStat(
-                        criteriaPreferenceList);
-
-                    // 방 일치율 null
-                    Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
-                        member.getId(), mates.stream().map(mate -> mate.getMember().getId())
-                            .collect(Collectors.toList()));
-                    Integer roomEquality = getCalculateRoomEquality(member.getId(), equalityMap);
-
-                    // 방 해시태그 조회
-                    List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(
-                        room.getId());
-
-                    return FavoriteConverter.toFavoriteRoomResponseDTO(
-                        roomIdFavoriteIdMap.get(room.getId()), room, roomEquality,
-                        preferenceStatsMatchCountList, roomHashTags, mates.size()
-                    );
-                })
-                .toList();
-        }
 
         // 조회 조건에 맞지 않는 방 찜 삭제 처리
         deleteFavoriteRoom(existFavoriteRoomList, findFavoriteRoomIdList, partitionedRoomStatusMap,
