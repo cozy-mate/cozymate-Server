@@ -325,8 +325,7 @@ public class RoomQueryService {
         roomRepository.findById(roomId).orElseThrow(
             () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Optional<Mate> pendingMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.PENDING);
-
-        return pendingMate.isPresent();
+        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.PENDING);
     }
+
 }
