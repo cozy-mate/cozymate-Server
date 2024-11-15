@@ -1,5 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
+import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -41,6 +43,7 @@ public class RoomQueryService {
     private final RoomHashtagRepository roomHashtagRepository;
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatRepository memberStatRepository;
+    private final FavoriteRepository favoriteRepository;
 
     public RoomDetailResponseDTO getRoomById(Long roomId, Long memberId) {
 
@@ -87,6 +90,7 @@ public class RoomQueryService {
             creatingMate.getMember().getId(),
             creatingMate.getMember().getNickname(),
             isRoomManager,
+            isFavoritedRoom(memberId, roomId),
             room.getMaxMateNum(),
             room.getNumOfArrival(),
             getDormitoryName(room),
@@ -232,6 +236,7 @@ public class RoomQueryService {
                     getManagerMemberId(room),
                     getManagerNickname(room),
                     false,
+                    isFavoritedRoom(memberId, room.getId()),
                     room.getMaxMateNum(),
                     room.getNumOfArrival(),
                     getDormitoryName(room),
@@ -276,6 +281,7 @@ public class RoomQueryService {
                     getManagerMemberId(room),
                     getManagerNickname(room),
                     false,
+                    isFavoritedRoom(memberId, room.getId()),
                     room.getMaxMateNum(),
                     room.getNumOfArrival(),
                     getDormitoryName(room),
@@ -319,6 +325,14 @@ public class RoomQueryService {
             () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.PENDING);
+    }
+
+    public Boolean isFavoritedRoom(Long memberId, Long roomId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        roomRepository.findById(roomId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        return favoriteRepository.existsByMemberAndTargetIdAndFavoriteType(member, roomId, FavoriteType.ROOM);
     }
 
 }
