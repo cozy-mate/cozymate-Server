@@ -43,7 +43,7 @@ public class InquiryController {
     }
 
     @GetMapping
-    @Operation(summary = "[베로] 문의 내역 조회", description = "")
+    @Operation(summary = "[베로] 문의 내역 목록 조회", description = "")
     public ResponseEntity<ApiResponse<List<InquiryDetailResponseDTO>>> getInquiryList(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(
@@ -57,6 +57,7 @@ public class InquiryController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(inquiryQueryService.getInquiryRecord(memberDetails.member())));
     }
+
     @PutMapping("/{inquiryId}")
     @Operation(summary = "[베로] 답변 완료로 변경 (관리자용)", description = "")
     @SwaggerApiError(
