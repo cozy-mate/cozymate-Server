@@ -49,6 +49,9 @@ public class MemberStatQueryService {
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
+    private static final Integer NO_EQUALITY = null;
+    private static final Integer NO_ROOMMATE = 0;
+
     public MemberStatDetailWithMemberDetailResponseDTO getMemberStat(Member member) {
 
         MemberStat memberStat = memberStatRepository.findByMemberId(member.getId())
@@ -82,7 +85,7 @@ public class MemberStatQueryService {
         return MemberStatConverter.toMemberStatDetailAndRoomIdAndEqualityResponseDTO(
             memberStat,
             equality,
-            mate.isPresent() ? mate.get().getRoom().getId() : 0
+            mate.isPresent() ? mate.get().getRoom().getId() : NO_ROOMMATE
         );
     }
 
@@ -173,7 +176,7 @@ public class MemberStatQueryService {
                 return MemberStatConverter.toPreferenceResponseDTO(
                     stat,
                     preferences,
-                    0
+                    NO_EQUALITY
                 );
             })
             .toList();
@@ -215,7 +218,12 @@ public class MemberStatQueryService {
         //memberStat이 존재할 때
         if(memberStatRepository.existsByMemberId(searchingMemberId)){
             List<Member> memberList = memberRepository.findMembersWithMatchingCriteria(
-                subString, universityId, gender, searchingMember.getMemberStat().getNumOfRoommate(), searchingMember.getMemberStat().getDormitoryName(), searchingMemberId
+                subString,
+                universityId,
+                gender,
+                searchingMember.getMemberStat().getNumOfRoommate(),
+                searchingMember.getMemberStat().getDormitoryName(),
+                searchingMemberId
             );
             return memberList.stream()
                 .map(member -> {
@@ -231,7 +239,7 @@ public class MemberStatQueryService {
             subString, universityId, gender,searchingMemberId
         );
         return memberList.stream()
-            .map(member-> MemberStatConverter.toMemberStatSearchResponseDTO(member, null))
+            .map(member-> MemberStatConverter.toMemberStatSearchResponseDTO(member, NO_EQUALITY))
             .toList();
     }
 

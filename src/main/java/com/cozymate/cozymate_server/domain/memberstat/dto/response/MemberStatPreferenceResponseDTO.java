@@ -7,7 +7,7 @@ import lombok.Builder;
 @Builder
 public record MemberStatPreferenceResponseDTO(
     MemberDetailResponseDTO memberDetail,
-    int equality,
+    Integer equality,
     Map<String,Object> preferenceStats
 ) {
 

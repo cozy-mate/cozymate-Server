@@ -20,6 +20,8 @@ public class MemberStatEqualityQueryService {
 
     private final MemberStatEqualityRepository memberStatEqualityRepository;
 
+    private static final Integer NO_EQUALITY = null;
+
     public Map<Long, Integer> getEquality(Long memberAId, List<Long> memberIdList) {
 
         List<MemberStatEquality> memberStatEqualityList = memberStatEqualityRepository.findByMemberAIdAndMemberBIdIn(
@@ -36,7 +38,7 @@ public class MemberStatEqualityQueryService {
 
         return memberStatEqualityRepository.findMemberStatEqualitiesByMemberAIdAndMemberBId(
             memberAId, memberBId
-        ).map(MemberStatEquality::getEquality).orElse(null);
+        ).map(MemberStatEquality::getEquality).orElse(NO_EQUALITY);
     }
 
 

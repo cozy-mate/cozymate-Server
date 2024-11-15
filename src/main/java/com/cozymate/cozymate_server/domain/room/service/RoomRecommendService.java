@@ -20,6 +20,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +47,10 @@ public class RoomRecommendService {
         Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, member,
             roomMateMap);
 
+        // null을 가장 후순위로 처리
         List<Pair<Long, Integer>> sortedRoomList = roomEqualityMap.entrySet().stream()
             .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
-            .sorted((pair1, pair2) -> pair2.getRight().compareTo(pair1.getRight())) // 직접 람다식으로 비교
+            .sorted(Comparator.comparing(Pair::getRight, Comparator.nullsLast(Comparator.reverseOrder()))) // 직접 람다식으로 비교
             .limit(size)
             .toList();
 
@@ -82,8 +84,8 @@ public class RoomRecommendService {
                     member.getId(), memberList.stream().map(Member::getId).toList()).stream()
                 .map(MemberStatEquality::getEquality)
                 .toList();
-            int averageEquality = equalityList.isEmpty() ? 0
-                : equalityList.stream().reduce(Integer::sum).orElse(0) / equalityList.size();
+            Integer averageEquality = equalityList.isEmpty() ? null
+                : equalityList.stream().reduce(Integer::sum).orElse(null) / equalityList.size();
             roomEqualityMap.put(room.getId(), averageEquality);
         }
         return roomEqualityMap;

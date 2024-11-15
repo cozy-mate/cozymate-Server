@@ -100,7 +100,7 @@ public class FavoriteQueryService {
         List<Room> notEnableFavoriteRoomList = partitionedRoomsMap.get(false);
 
         Map<Long, List<Mate>> roomIdMatesMap = notEnableFavoriteRoomList.stream().collect(
-            Collectors.toMap(Room::getId, room -> mateRepository.findFetchMemberByRoom(room)));
+            Collectors.toMap(Room::getId, mateRepository::findFetchMemberByRoom));
 
         List<String> criteriaPreferenceList = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
@@ -162,17 +162,10 @@ public class FavoriteQueryService {
     }
 
     private Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap) {
-        List<Integer> roomEquality = equalityMap.entrySet().stream()
-            .map(Map.Entry::getValue)
-            .collect(Collectors.toList());
+        List<Integer> roomEquality = equalityMap.values().stream()
+            .toList();
 
-        if (roomEquality.isEmpty()) {
-            return 0;
-        }
-
-        return (int) Math.round(roomEquality.stream()
-            .mapToInt(Integer::intValue)
-            .average()
-            .orElse(0));
+        int sum = roomEquality.stream().mapToInt(Integer::intValue).sum();
+        return roomEquality.isEmpty() ? null : (int) Math.round((double) sum / roomEquality.size());
     }
 }
