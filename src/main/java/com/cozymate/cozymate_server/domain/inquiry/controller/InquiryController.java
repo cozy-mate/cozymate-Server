@@ -51,7 +51,7 @@ public class InquiryController {
     }
 
     @GetMapping("/exist")
-    @Operation(summary = "[베로] 문의한 내역 존재 여부 조회", description = "true/유, false/무")
+    @Operation(summary = "[베로] 문의 내역 존재 여부 조회", description = "true/유, false/무")
     public ResponseEntity<ApiResponse<Boolean>> existInquiryRecord(
         @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(
