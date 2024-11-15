@@ -153,7 +153,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "FAVORITE401", "찜을 찾을 수 없습니다."),
     _FAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "FAVORITE402", "해당 찜에 대한 권한이 없습니다."),
     _FAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "FAVORITE403", "자신에 대한 찜 관련 요청을 할 수 없습니다."),
-    ;
+
+    // INQUIRY 관련
+    _INQUIRY_EMAIL_FORMAT_INVALID(HttpStatus.BAD_REQUEST, "INQUIRY400", "이메일 형식이 올바르지 않습니다."),
+    _INQUIRY_NOT_FOUND(HttpStatus.BAD_REQUEST, "INQUIRY401", "해당 문의 내역이 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
