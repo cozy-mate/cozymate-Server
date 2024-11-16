@@ -20,10 +20,15 @@ public class MdcLoggingInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
         Object handler) throws Exception {
 
+        if(request.getHeader("Authorization") == null) {
+            return true;
+        }
+
         setMdc(request);
 
-        log.info("[ REQUEST] rid {} | ip {} | method {} | uri {} | param {} | path {}",
+        log.info("[ REQUEST] rid {} | token {} | ip {} | method {} | uri {} | param {} | path {}",
             MDC.get(MdcKey.REQUEST_ID.name()),
+            request.getHeader("Authorization").split(" ")[1].split("\\.")[1],
             MDC.get(MdcKey.REQUEST_IP.name()),
             MDC.get(MdcKey.REQUEST_METHOD.name()),
             MDC.get(MdcKey.REQUEST_URI.name()),
