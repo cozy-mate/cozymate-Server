@@ -20,7 +20,7 @@ public class InquiryConverter {
 
     public static InquiryDetailResponseDTO toInquiryDetailResponseDTO(Inquiry inquiry) {
         return InquiryDetailResponseDTO.builder()
-            .id(inquiry.getId())
+            .inquiryId(inquiry.getId())
             .persona(inquiry.getMember().getPersona())
             .nickname(inquiry.getMember().getNickname())
             .content(inquiry.getContent())
