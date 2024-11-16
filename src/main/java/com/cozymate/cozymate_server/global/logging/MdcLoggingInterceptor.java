@@ -72,7 +72,7 @@ public class MdcLoggingInterceptor implements HandlerInterceptor {
         MDC.put(MdcKey.REQUEST_TIME.name(), LocalDateTime.now().toString());
         MDC.put(MdcKey.START_TIME_MILLIS.name(), String.valueOf(System.currentTimeMillis()));
         MDC.put(MdcKey.REQEUST_AGENT.name(), extractAgent(request.getHeader("User-Agent")));
-        MDC.put(MdcKey.REQUEST_METHOD.name(), "0");
+        MDC.put(MdcKey.QUERY_COUNT.name(), "0");
     }
 
     private String extractAgent(String agent) {
