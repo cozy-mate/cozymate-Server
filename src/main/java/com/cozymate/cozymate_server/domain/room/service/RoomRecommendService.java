@@ -14,6 +14,7 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomRecommendConverter;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponseList;
+import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -39,10 +40,13 @@ public class RoomRecommendService {
     private final MemberStatEqualityRepository memberStatEqualityRepository;
     private final MemberStatPreferenceRepository memberStatPreferenceRepository;
 
-    // TODO: 대규모 리팩토링 필요
-    public RoomRecommendationResponseList getRecommendationList(Member member, int size) {
+    // TODO: page, sortType 파라미터 반영해서 로직 수정
+    public RoomRecommendationResponseList getRecommendationList(Member member, int size, int page,
+        RoomSortType sortType) {
 
+        // 공개된 방 찾기 +  TODO: 대학, 성별, 시기 필터링
         List<Room> roomList = roomRepository.findAllByRoomType(RoomType.PUBLIC);
+
         Map<Long, List<Mate>> roomMateMap = groupMatesByRoom(mateRepository.findAll());
         Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, member,
             roomMateMap);
