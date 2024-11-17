@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatch
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +39,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class FavoriteQueryService {
 
     private final FavoriteRepository favoriteRepository;
-    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final RoomHashtagRepository roomHashtagRepository;
+
+    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
     public List<FavoriteMemberResponseDTO> getFavoriteMemberList(Member member) {
@@ -55,17 +58,18 @@ public class FavoriteQueryService {
         Map<Long, Long> memberIdFavoriteIdMap = favoriteList.stream()
             .collect(Collectors.toMap(Favorite::getTargetId, Favorite::getId));
 
-        List<Long> favoriteMemberIdList = new ArrayList<>(memberIdFavoriteIdMap.keySet());
+        List<Long> findFavoriteMemberIdList = new ArrayList<>(memberIdFavoriteIdMap.keySet());
 
-        List<Member> favoriteMemberList = memberRepository.findAllById(favoriteMemberIdList);
+        List<Member> existFavoriteMemberList = memberRepository.findAllById(findFavoriteMemberIdList);
 
         Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(member.getId(),
-            favoriteMemberIdList);
+            existFavoriteMemberList.stream().map(Member::getId).toList());
 
         List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
 
-        List<FavoriteMemberResponseDTO> favoriteMemberResponseDTOList = favoriteMemberList.stream()
+        List<FavoriteMemberResponseDTO> favoriteMemberResponseDTOList = existFavoriteMemberList.stream()
+            .filter(favoriteMember -> Objects.nonNull(favoriteMember.getMemberStat()))
             .map(favoriteMember -> {
                 Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(
                     favoriteMember.getMemberStat(), criteriaPreferences);
@@ -75,6 +79,9 @@ public class FavoriteQueryService {
                     MemberStatConverter.toPreferenceResponseDTO(favoriteMember.getMemberStat(),
                         preferences, equalityMap.get(favoriteMember.getId())));
             }).toList();
+
+        // 탈퇴한 회원이 있다면 삭제 처리
+        deleteFavoriteMember(findFavoriteMemberIdList, existFavoriteMemberList);
 
         return favoriteMemberResponseDTOList;
     }
@@ -90,38 +97,60 @@ public class FavoriteQueryService {
         Map<Long, Long> roomIdFavoriteIdMap = favoriteList.stream()
             .collect(Collectors.toMap(Favorite::getTargetId, Favorite::getId));
 
-        List<Long> favoriteRoomIdList = new ArrayList<>(roomIdFavoriteIdMap.keySet());
+        List<Long> findFavoriteRoomIdList = new ArrayList<>(roomIdFavoriteIdMap.keySet());
 
-        List<Room> findFavoriteRoomList = roomRepository.findAllById(favoriteRoomIdList);
-        Map<Boolean, List<Room>> partitionedRoomsMap = findFavoriteRoomList.stream()
-            .collect(Collectors.partitioningBy(room -> room.getStatus().equals(RoomStatus.ENABLE)));
+        List<Room> existFavoriteRoomList = roomRepository.findAllById(findFavoriteRoomIdList);
 
-        List<Room> enableFavoriteRoomList = partitionedRoomsMap.get(true);
-        List<Room> notEnableFavoriteRoomList = partitionedRoomsMap.get(false);
+        // 방 상태가 disable과 그 외로 분리
+        Map<Boolean, List<Room>> partitionedRoomStatusMap = existFavoriteRoomList.stream()
+            .collect(
+                Collectors.partitioningBy(room -> !room.getStatus().equals(RoomStatus.DISABLE)));
 
-        Map<Long, List<Mate>> roomIdMatesMap = notEnableFavoriteRoomList.stream().collect(
-            Collectors.toMap(Room::getId, mateRepository::findFetchMemberByRoom));
+        // 방 상태가 disable이 아닌 방 리스트
+        List<Room> nonDisableFavoriteRoomList = partitionedRoomStatusMap.get(true);
 
+        // 방 상태가 disable이 아닌 방 리스트에서 방 인원이 꽉찬 방과 아닌 방으로 분리
+        Map<Boolean, List<Room>> partitionedMateNumMap = nonDisableFavoriteRoomList.stream()
+            .collect(
+                Collectors.partitioningBy(room -> room.getNumOfArrival() != room.getMaxMateNum()));
+
+        // 방이 꽉 차지 않은 방 리스트
+        List<Room> responseRoomList = partitionedMateNumMap.get(true);
+
+        // <방 id, 해당 방의 mate 리스트>
+        Map<Long, List<Mate>> roomIdMatesMap = responseRoomList.stream().collect(
+            Collectors.toMap(Room::getId,
+                room -> mateRepository.findFetchMemberByRoom(room, EntryStatus.JOINED)));
+
+        // 로그인 사용자의 선호 스탯 4가지를 리스트로 가져온다
         List<String> criteriaPreferenceList = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
 
+        // 로그인 사용자의 member stat
         MemberStat memberStat = member.getMemberStat();
 
-        List<FavoriteRoomResponseDTO> favoriteRoomResponseList = notEnableFavoriteRoomList.stream()
+        List<FavoriteRoomResponseDTO> favoriteRoomResponseList = responseRoomList.stream()
             .map(room -> {
                 List<Mate> mates = roomIdMatesMap.get(room.getId());
 
-                List<PreferenceMatchCountDTO> preferenceStatsMatchCountList = getPreferenceStatsMatchCounts(
-                    member, criteriaPreferenceList, mates, memberStat);
+                // 선호 스탯 일치 횟수 계산
+                List<PreferenceMatchCountDTO> preferenceStatsMatchCountList =
+                    Objects.nonNull(memberStat)
+                        ? getPreferenceStatsMatchCounts(member, criteriaPreferenceList, mates, memberStat)
+                        : getPreferenceStatsMatchCountsWithoutMemberStat(criteriaPreferenceList);
 
+                // 로그인 사용자와 mate들의 멤버 스탯 "일치율" 계산
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
-                    member.getId(), mates.stream().map(mate -> mate.getMember().getId())
-                        .collect(Collectors.toList()));
+                    member.getId(), mates.stream()
+                        .map(mate -> mate.getMember().getId())
+                        .toList()
+                );
 
+                // 로그인 사용자와 방 일치율 계산
                 Integer roomEquality = getCalculateRoomEquality(member.getId(), equalityMap);
 
-                List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(
-                    room.getId());
+                // 방 해시태그 조회
+                List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
 
                 return FavoriteConverter.toFavoriteRoomResponseDTO(
                     roomIdFavoriteIdMap.get(room.getId()), room, roomEquality,
@@ -130,13 +159,10 @@ public class FavoriteQueryService {
             })
             .toList();
 
-        // 활성화된 방이 존재한다면 찜에서 삭제
-        if (!enableFavoriteRoomList.isEmpty()) {
-            List<Long> roomIds = enableFavoriteRoomList.stream()
-                .map(Room::getId)
-                .toList();
-            favoriteRepository.deleteAllByTargetIdsAndFavoriteType(roomIds, FavoriteType.ROOM);
-        }
+
+        // 조회 조건에 맞지 않는 방 찜 삭제 처리
+        deleteFavoriteRoom(existFavoriteRoomList, findFavoriteRoomIdList, partitionedRoomStatusMap,
+            partitionedMateNumMap);
 
         return favoriteRoomResponseList;
     }
@@ -161,11 +187,71 @@ public class FavoriteQueryService {
         return preferenceMatchCountDTOList;
     }
 
+    private List<PreferenceMatchCountDTO> getPreferenceStatsMatchCountsWithoutMemberStat(
+        List<String> criteriaPreferenceList) {
+        return criteriaPreferenceList.stream()
+            .map(preference -> {
+                return PreferenceMatchCountDTO.builder()
+                    .preferenceName(preference)
+                    .count(0)
+                    .build();
+            }).toList();
+    }
+
     private Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap) {
         List<Integer> roomEquality = equalityMap.values().stream()
             .toList();
 
         int sum = roomEquality.stream().mapToInt(Integer::intValue).sum();
         return roomEquality.isEmpty() ? null : (int) Math.round((double) sum / roomEquality.size());
+    }
+
+    private void deleteFavoriteMember(List<Long> findFavoriteMemberIdList, List<Member> existFavoriteMemberList) {
+        Set<Long> existMemberIdSet = existFavoriteMemberList.stream()
+            .map(Member::getId)
+            .collect(Collectors.toSet());
+
+        List<Long> deletedMemberIdList = findFavoriteMemberIdList.stream()
+            .filter(id -> !existMemberIdSet.contains(id))
+            .toList();
+
+        favoriteRepository.deleteAllByTargetIdsAndFavoriteType(deletedMemberIdList,
+            FavoriteType.MEMBER);
+    }
+
+    private void deleteFavoriteRoom(List<Room> existFavoriteRoomList, List<Long> findFavoriteRoomIdList,
+        Map<Boolean, List<Room>> partitionedRoomStatusMap,
+        Map<Boolean, List<Room>> partitionedMateNumMap) {
+        // 찜한 방id 에서 실제 조회된 방들의 id
+        Set<Long> existRoomIdSet = existFavoriteRoomList.stream()
+            .map(Room::getId)
+            .collect(Collectors.toSet());
+
+        // 방이 조회 되지 않은 targetId(roomId)를 가지는 레코드 삭제를 위한 리스트 추출 (찜에서 삭제할거임)
+        List<Long> deletedRoomIdList = findFavoriteRoomIdList.stream()
+            .filter(id -> !existRoomIdSet.contains(id))
+            .collect(Collectors.toList());
+
+        // 방 status가 disable인 방 리스트, 존재한다면 방이 있다면 deletedRoomIdList에 추가
+        List<Room> disableFavoriteRoomList = partitionedRoomStatusMap.get(false);
+        if (!disableFavoriteRoomList.isEmpty()) {
+            deletedRoomIdList.addAll(disableFavoriteRoomList.stream()
+                .map(Room::getId)
+                .toList());
+        }
+
+        // 인원이 가득 찬 방 리스트, 존재한다면 deletedRoomIdList에 추가
+        List<Room> fullRoomList = partitionedMateNumMap.get(false);
+        if (!fullRoomList.isEmpty()) {
+            deletedRoomIdList.addAll(fullRoomList.stream()
+                .map(Room::getId)
+                .toList());
+        }
+
+        // deletedRoomIdList에 들어 있는 targetId(roomId)에 해당하는 방 찜 삭제 처리
+        if (!deletedRoomIdList.isEmpty()) {
+            favoriteRepository.deleteAllByTargetIdsAndFavoriteType(deletedRoomIdList,
+                FavoriteType.ROOM);
+        }
     }
 }
