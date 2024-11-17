@@ -153,6 +153,11 @@ public enum ErrorStatus implements BaseErrorCode {
     _FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "FAVORITE401", "찜을 찾을 수 없습니다."),
     _FAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "FAVORITE402", "해당 찜에 대한 권한이 없습니다."),
     _FAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "FAVORITE403", "자신에 대한 찜 관련 요청을 할 수 없습니다."),
+    _FAVORITE_CANNOT_PRIVATE_ROOM(HttpStatus.BAD_REQUEST, "FAVORITE404", "비공개 방은 찜을 할 수 없습니다."),
+    _FAVORITE_CANNOT_FULL_ROOM(HttpStatus.BAD_REQUEST, "FAVORITE405", "인원이 가득 찬 방은 찜을 할 수 없습니다."),
+    _FAVORITE_CANNOT_DISABLE_ROOM(HttpStatus.BAD_REQUEST, "FAVORITE406", "삭제된 방은 찜을 할 수 없습니다."),
+    _FAVORITE_CANNOT_MEMBER_WITHOUT_MEMBERSTAT(HttpStatus.BAD_REQUEST, "FAVORITE407", "멤버 상세정보가 없는 멤버는 찜할 수 없습니다."),
+
     ;
 
     private final HttpStatus httpStatus;

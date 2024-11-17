@@ -60,8 +60,8 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     List<Mate> findByRoom(Room room);
 
-    @Query("select m from Mate m join fetch m.member where m.room = :room")
-    List<Mate> findFetchMemberByRoom(@Param("room") Room room);
+    @Query("select m from Mate m join fetch m.member where m.room = :room and m.entryStatus = :entryStatus")
+    List<Mate> findFetchMemberByRoom(@Param("room") Room room, @Param("entryStatus") EntryStatus entryStatus);
 
     Optional<Mate> findByMember(Member member);
 

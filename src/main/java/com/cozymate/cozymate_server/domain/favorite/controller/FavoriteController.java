@@ -35,6 +35,7 @@ public class FavoriteController {
     @SwaggerApiError({
         ErrorStatus._FAVORITE_CANNOT_REQUEST_SELF,
         ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._FAVORITE_CANNOT_MEMBER_WITHOUT_MEMBERSTAT,
         ErrorStatus._FAVORITE_ALREADY_EXISTS
     })
     public ResponseEntity<ApiResponse<String>> saveMemberFavorite(
@@ -47,7 +48,10 @@ public class FavoriteController {
     @Operation(summary = "[베로] 방 찜하기", description = "roomId: 찜할 방 pk")
     @SwaggerApiError({
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._FAVORITE_ALREADY_EXISTS
+        ErrorStatus._FAVORITE_CANNOT_PRIVATE_ROOM,
+        ErrorStatus._FAVORITE_CANNOT_FULL_ROOM,
+        ErrorStatus._FAVORITE_CANNOT_DISABLE_ROOM,
+        ErrorStatus._FAVORITE_ALREADY_EXISTS,
     })
     public ResponseEntity<ApiResponse<String>> saveRoomFavorite(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long roomId) {

@@ -20,7 +20,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Modifying(clearAutomatically = true)
-    @Query("delete from Favorite f where f.targetId in :roomIds and f.favoriteType = :favoriteType")
-    void deleteAllByTargetIdsAndFavoriteType(@Param("roomIds") List<Long> roomIds,
+    @Query("delete from Favorite f where f.targetId in :targetIds and f.favoriteType = :favoriteType")
+    void deleteAllByTargetIdsAndFavoriteType(@Param("targetIds") List<Long> targetIds,
         @Param("favoriteType") FavoriteType favoriteType);
 }
