@@ -15,9 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,7 +58,7 @@ public class InquiryController {
             ApiResponse.onSuccess(inquiryQueryService.getInquiryRecord(memberDetails.member())));
     }
 
-    @PutMapping("/{inquiryId}")
+    @PatchMapping("/{inquiryId}")
     @Operation(summary = "[베로] 답변 완료로 변경 (관리자용)", description = "")
     @SwaggerApiError(
         ErrorStatus._INQUIRY_NOT_FOUND
