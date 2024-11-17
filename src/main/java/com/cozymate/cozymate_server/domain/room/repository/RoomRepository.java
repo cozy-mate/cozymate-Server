@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.repository;
 
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
+import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
@@ -19,4 +20,34 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     List<Room> findAllByRoomType(@Param("roomType") RoomType roomType);
 
+    @Query("SELECT r FROM Room r " +
+        "JOIN FETCH Mate m ON r.id = m.room.id AND m.isRoomManager = true " +
+        "JOIN m.member member " +
+        "JOIN member.memberStat ms " +
+        "WHERE r.roomType = 'PUBLIC' " +
+        "AND r.status <> 'DISABLE' " +
+        "AND r.maxMateNum > r.numOfArrival " +
+        "AND member.university.id = :universityId " +
+        "AND member.gender = :gender " +
+        "AND (:numOfRoomMate = 0 OR r.maxMateNum = :numOfRoomMate) " +
+        "AND ms.dormitoryName = :dormitoryName " +
+        "AND r.name LIKE %:keyword% ")
+    List<Room> findMatchingPublicRooms(
+        String keyword,
+        Long universityId,
+        Gender gender,
+        Integer numOfRoomMate,
+        String dormitoryName
+    );
+
+    @Query("SELECT r FROM Room r " +
+        "JOIN FETCH Mate m ON r.id = m.room.id AND m.isRoomManager = true " +
+        "JOIN m.member member " +
+        "WHERE r.roomType = 'PUBLIC' " +
+        "AND r.status <> 'DISABLE' " +
+        "AND r.maxMateNum > r.numOfArrival " +
+        "AND member.university.id = :universityId " +
+        "AND member.gender = :gender " +
+        "AND r.name LIKE %:keyword% ")
+    List<Room> findMatchingPublicRooms(String keyword, Long universityId, Gender gender);
 }
