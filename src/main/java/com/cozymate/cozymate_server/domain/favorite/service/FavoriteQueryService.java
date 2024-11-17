@@ -143,7 +143,8 @@ public class FavoriteQueryService {
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
                     member.getId(), mates.stream()
                         .map(mate -> mate.getMember().getId())
-                        .collect(Collectors.toList()));
+                        .toList()
+                );
 
                 // 로그인 사용자와 방 일치율 계산
                 Integer roomEquality = getCalculateRoomEquality(member.getId(), equalityMap);
