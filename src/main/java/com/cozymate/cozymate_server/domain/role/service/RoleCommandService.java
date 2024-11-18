@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.role.converter.RoleConverter;
+import com.cozymate.cozymate_server.domain.role.dto.MateIdNameDTO;
 import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
@@ -15,10 +16,12 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Validated
 public class RoleCommandService {
 
     private final RoleRepository roleRepository;
@@ -31,15 +34,18 @@ public class RoleCommandService {
      * @param roomId     방 Id
      * @param requestDto Role 생성 요청 DTO
      */
-    public RoleIdResponseDTO createRole(Member member, Long roomId, CreateRoleRequestDTO requestDto) {
+    public RoleIdResponseDTO createRole(Member member, Long roomId,
+        CreateRoleRequestDTO requestDto) {
         // 해당 방의 mate가 맞는지 확인
         Mate mate = getMate(member.getId(), roomId);
 
         // TODO role max 개수 제한 추가
         int repeatDayBitmast = getDayBitmask(requestDto.repeatDayList());
 
+        List<Long> mateIdList = getMateIdListInMateIdNameList(requestDto.mateIdNameList());
+
         Role role = roleRepository.save(
-            RoleConverter.toEntity(mate, requestDto.mateIdList(), requestDto.content(),
+            RoleConverter.toEntity(mate, mateIdList, requestDto.content(),
                 repeatDayBitmast));
         return RoleConverter.toRoleSimpleResponseDTOWithEntity(role);
     }
@@ -73,8 +79,10 @@ public class RoleCommandService {
 
         checkUpdatePermission(role, mate);
 
+        List<Long> mateIdList = getMateIdListInMateIdNameList(requestDto.mateIdNameList());
+
         // role 수정
-        role.updateEntity(requestDto.mateIdList(), requestDto.content(),
+        role.updateEntity(mateIdList, requestDto.content(),
             getDayBitmask(requestDto.repeatDayList()));
     }
 
@@ -116,12 +124,18 @@ public class RoleCommandService {
     /**
      * Role 수정 가능한지 권한 확인
      *
-     * @param role
-     * @param mate
+     * @param role 수정할 Role
+     * @param mate  Mate
      */
     private void checkUpdatePermission(Role role, Mate mate) {
         if (!role.getAssignedMateIdList().contains(mate.getId())) {
             throw new GeneralException(ErrorStatus._ROLE_NOT_VALID);
         }
+    }
+
+    private List<Long> getMateIdListInMateIdNameList(List<MateIdNameDTO> mateIdNameList) {
+        return mateIdNameList.stream()
+            .map(MateIdNameDTO::mateId)
+            .toList();
     }
 }
