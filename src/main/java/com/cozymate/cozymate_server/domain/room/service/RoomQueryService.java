@@ -18,6 +18,7 @@ import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponse
 import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
@@ -337,7 +338,7 @@ public class RoomQueryService {
         return favoriteRepository.existsByMemberAndTargetIdAndFavoriteType(member, roomId, FavoriteType.ROOM);
     }
 
-    public List<RoomDetailResponseDTO> searchRooms(String keyword, Long memberId) {
+    public List<RoomSearchResponseDTO> searchRooms(String keyword, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -360,33 +361,12 @@ public class RoomQueryService {
                         member.getId(),
                         joinedMates.stream().map(mate -> mate.getMember().getId()).toList()
                     );
-                    Integer roomEquality = getCalculateRoomEquality(equalityMap);
-                    List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
-                    return RoomConverter.toRoomDetailResponseDTOWithParams(
-                        room.getId(),
-                        room.getName(),
-                        room.getInviteCode(),
-                        room.getProfileImage(),
-                        joinedMates.stream()
-                            .map(mate -> RoomConverter.toMateDetailListResponse(mate, equalityMap.get(mate.getMember().getId())))
-                            .toList(),
-                        getManagerMemberId(room),
-                        getManagerNickname(room),
-                        false,
-                        isFavoritedRoom(member.getId(), room.getId()),
-                        room.getMaxMateNum(),
-                        room.getNumOfArrival(),
-                        getDormitoryName(room),
-                        room.getRoomType().toString(),
-                        hashtags,
-                        roomEquality,
-                        MemberStatConverter.toMemberStatDifferenceResponseDTO(joinedMates.stream()
-                            .map(mate -> memberStatRepository.findByMemberId(mate.getMember().getId()))
-                            .flatMap(Optional::stream)
-                            .toList())
+                    return RoomConverter.toRoomSearchResponseDTO(
+                        room,
+                        getCalculateRoomEquality(equalityMap)
                     );
                 })
-                .sorted(Comparator.comparing(RoomDetailResponseDTO::equality, Comparator.nullsLast(Comparator.reverseOrder())))
+                .sorted(Comparator.comparing(RoomSearchResponseDTO::equality, Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
         }
 
@@ -399,40 +379,17 @@ public class RoomQueryService {
 
         return roomList.stream()
             .map(room -> {
-                List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(),
-                    EntryStatus.JOINED);
+                List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
                     member.getId(),
                     joinedMates.stream().map(mate -> mate.getMember().getId()).toList()
                 );
-                Integer roomEquality = getCalculateRoomEquality(equalityMap);
-                List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
-                return RoomConverter.toRoomDetailResponseDTOWithParams(
-                    room.getId(),
-                    room.getName(),
-                    room.getInviteCode(),
-                    room.getProfileImage(),
-                    joinedMates.stream()
-                        .map(mate -> RoomConverter.toMateDetailListResponse(mate,
-                            equalityMap.get(mate.getMember().getId())))
-                        .toList(),
-                    getManagerMemberId(room),
-                    getManagerNickname(room),
-                    false,
-                    isFavoritedRoom(member.getId(), room.getId()),
-                    room.getMaxMateNum(),
-                    room.getNumOfArrival(),
-                    getDormitoryName(room),
-                    room.getRoomType().toString(),
-                    hashtags,
-                    roomEquality,
-                    MemberStatConverter.toMemberStatDifferenceResponseDTO(joinedMates.stream()
-                        .map(mate -> memberStatRepository.findByMemberId(mate.getMember().getId()))
-                        .flatMap(Optional::stream)
-                        .toList())
+                return RoomConverter.toRoomSearchResponseDTO(
+                    room,
+                    getCalculateRoomEquality(equalityMap)
                 );
             })
-            .sorted(Comparator.comparing(RoomDetailResponseDTO::name))
+            .sorted(Comparator.comparing(RoomSearchResponseDTO::name))
             .toList();
     }
 
