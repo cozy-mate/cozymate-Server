@@ -1,8 +1,11 @@
 package com.cozymate.cozymate_server.global.response.exception;
 
+import com.cozymate.cozymate_server.global.logging.enums.MdcKey;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.ErrorReasonDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import io.sentry.Sentry;
+import io.sentry.SentryLevel;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -10,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -64,7 +68,17 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     // 모든 Exception 클래스 타입의 예외 처리
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
-        e.printStackTrace();
+
+        log.error("[   ERROR] rid {} | msg {} | loc {}", MDC.get(MdcKey.REQUEST_ID.name()), e.getMessage(), e.getStackTrace()[0]);
+        Sentry.withScope(scope -> {
+            scope.setTag("handled", "no");
+            scope.setTag("status_code",
+                ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus().toString());
+            scope.setExtra("location", e.getStackTrace()[0].toString());
+            scope.setExtra("message", e.getMessage());
+            scope.setLevel(SentryLevel.FATAL);
+            Sentry.captureException(e);
+        });
 
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR,
             HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(), request,
@@ -75,6 +89,21 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = GeneralException.class)
     public ResponseEntity onThrowException(GeneralException generalException,
         HttpServletRequest request) {
+
+        Sentry.withScope(scope -> {
+            GeneralException newGeneralException = new GeneralException(
+                generalException.getErrorReasonHttpStatus().getMessage(), // 메시지
+                generalException.getCode() // 코드
+            );
+
+            scope.setTag("handled", "yes");
+            scope.setTag("status_code", generalException.getErrorReasonHttpStatus().getCode());
+            scope.setExtra("message", generalException.getErrorReasonHttpStatus().getMessage());
+            scope.setLevel(SentryLevel.INFO);
+
+            Sentry.captureException(newGeneralException);
+        });
+
         ErrorReasonDto errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
         return handleExceptionInternal(generalException, errorReasonHttpStatus, null, request);
     }
