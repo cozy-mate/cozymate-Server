@@ -63,21 +63,21 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 //            ));
 //    }
 
-    @Override
-    public Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
-        MemberStat criteriaMemberStat) {
-        // Tuple로 MemberStat과 Member를 함께 조회
-        List<Tuple> results = createBaseQuery(criteriaMemberStat)
-            .where(applyFilters(filterMap, criteriaMemberStat))
-            .fetch();
-
-        // 결과를 Map<Member, MemberStat>으로 변환
-        return results.stream()
-            .collect(Collectors.toMap(
-                tuple -> tuple.get(member),         // key: Member
-                tuple -> tuple.get(memberStat)      // value: MemberStat
-            ));
-    }
+//    @Override
+//    public Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
+//        MemberStat criteriaMemberStat) {
+//        // Tuple로 MemberStat과 Member를 함께 조회
+//        List<Tuple> results = createBaseQuery(criteriaMemberStat)
+//            .where(applyFilters(filterMap, criteriaMemberStat))
+//            .fetch();
+//
+//        // 결과를 Map<Member, MemberStat>으로 변환
+//        return results.stream()
+//            .collect(Collectors.toMap(
+//                tuple -> tuple.get(member),         // key: Member
+//                tuple -> tuple.get(memberStat)      // value: MemberStat
+//            ));
+//    }
 
 
     private BooleanBuilder initDefaultQuery(MemberStat criteriaMemberStat) {
@@ -117,8 +117,14 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return builder;
     }
 
+    @Override
     public Page<Map<MemberStat, Integer>> getFilteredMemberStat(MemberStat criteriaMemberStat,
         List<String> filterList, Pageable pageable) {
+
+        long totalCount = createBaseQuery(criteriaMemberStat)
+            .where(applyFilters(filterList, criteriaMemberStat))
+            .fetch()
+            .size();
 
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
             .where(applyFilters(filterList, criteriaMemberStat))
@@ -138,11 +144,18 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             })
             .collect(Collectors.toList());
 
-        return new PageImpl<>(resultList, pageable, results.size());
+        return new PageImpl<>(resultList, pageable, totalCount);
     }
 
+    @Override
     public Page<Map<MemberStat, Integer>> getAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
         HashMap<String, List<?>> filterMap, Pageable pageable) {
+
+
+        long totalCount = createBaseQuery(criteriaMemberStat)
+            .where(applyFilters(filterMap, criteriaMemberStat))
+            .fetch()
+            .size();
 
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
             .where(applyFilters(filterMap, criteriaMemberStat))
@@ -162,9 +175,16 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             })
             .collect(Collectors.toList());
 
-        return new PageImpl<>(resultList, pageable, results.size());
+        return new PageImpl<>(resultList, pageable, totalCount);
     }
 
+    @Override
+    public int countAdvancedFilteredMemberStat(MemberStat criteriaMemberStat, HashMap<String, List<?>> filterMap) {
+        return createBaseQuery(criteriaMemberStat)
+            .where(applyFilters(filterMap, criteriaMemberStat))
+            .fetch()
+            .size();
+    }
 
     // 상세 검색 필터링 (key : value) 필터링
     private BooleanBuilder applyFilters(HashMap<String, List<?>> filterMap,

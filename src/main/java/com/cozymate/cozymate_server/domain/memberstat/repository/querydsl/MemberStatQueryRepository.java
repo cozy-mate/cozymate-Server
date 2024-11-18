@@ -13,11 +13,13 @@ public interface MemberStatQueryRepository {
 //    Map<Member, MemberStat> getFilteredMemberStat(List<String> filterList,
 //        MemberStat criteriaMemberStat);
 
-    Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
-        MemberStat criteriaMemberStat);
+//    Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
+//        MemberStat criteriaMemberStat);
 
     Page<Map<MemberStat,Integer>> getFilteredMemberStat(MemberStat criteriaMemberStat, List<String> filterList, Pageable pageable);
 
     Page<Map<MemberStat, Integer>> getAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
         HashMap<String, List<?>> filterMap, Pageable pageable);
+
+    int countAdvancedFilteredMemberStat(MemberStat criteriaMemberStat, HashMap<String, List<?>> filterMap);
 }

@@ -138,11 +138,9 @@ public class MemberStatQueryService {
 
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
-        Map<Member, MemberStat> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(
-            filterMap,
-            criteriaMemberStat);
-
-        return filteredResult.size();
+        return memberStatRepository.countAdvancedFilteredMemberStat(
+            criteriaMemberStat,filterMap
+        );
 
     }
 
