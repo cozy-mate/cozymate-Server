@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.auth.utils;
 
 import com.cozymate.cozymate_server.domain.auth.enums.TokenType;
+import com.cozymate.cozymate_server.global.logging.enums.MdcKey;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 
 import jakarta.servlet.FilterChain;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -77,6 +79,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             // JWT에서 user name 추출하고, 사용자 세부 정보를 로드
             String userName = jwtUtil.extractUserName(jwt);
+            MDC.put(MdcKey.USER_ID.name(), userName);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
 
             // 임시 토큰일 경우, 접근을 제한할 URL 목록에 대한 접근 여부 확인

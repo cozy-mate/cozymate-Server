@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Slf4j
 @RestControllerAdvice(annotations = {RestController.class})
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
-
 
     // Bean Validation 제약 조건 위반 시 발생하는 예외를 처리
     @ExceptionHandler
@@ -69,14 +69,18 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
 
-        log.error("[   ERROR] rid {} | msg {} | loc {}", MDC.get(MdcKey.REQUEST_ID.name()), e.getMessage(), e.getStackTrace()[0]);
+        log.error("[   ERROR] rid {} | msg {} | loc {}", MDC.get(MdcKey.REQUEST_ID.name()),
+            e.getMessage(), e.getStackTrace()[0]);
         Sentry.withScope(scope -> {
             scope.setTag("handled", "no");
             scope.setTag("status_code",
                 ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus().toString());
+            scope.setTag("user_id", MDC.get(MdcKey.USER_ID.name()));
             scope.setExtra("location", e.getStackTrace()[0].toString());
             scope.setExtra("message", e.getMessage());
             scope.setLevel(SentryLevel.FATAL);
+            scope.setFingerprint(List.of("cozymate", "FATAL", MDC.get(MdcKey.USER_ID.name()),
+                MDC.get(MdcKey.REQUEST_ID.name())));
             Sentry.captureException(e);
         });
 
@@ -98,8 +102,11 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
             scope.setTag("handled", "yes");
             scope.setTag("status_code", generalException.getErrorReasonHttpStatus().getCode());
+            scope.setTag("user_id", MDC.get(MdcKey.USER_ID.name()));
             scope.setExtra("message", generalException.getErrorReasonHttpStatus().getMessage());
-            scope.setLevel(SentryLevel.INFO);
+            scope.setLevel(SentryLevel.WARNING);
+            scope.setFingerprint(List.of("cozymate", "WARN", MDC.get(MdcKey.USER_ID.name()),
+                generalException.getErrorReasonHttpStatus().getCode()));
 
             Sentry.captureException(newGeneralException);
         });

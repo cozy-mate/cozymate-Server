@@ -28,7 +28,7 @@ public class MdcLoggingInterceptor implements HandlerInterceptor {
 
         log.info("[ REQUEST] rid {} | token {} | ip {} | method {} | uri {} | param {} | path {}",
             MDC.get(MdcKey.REQUEST_ID.name()),
-            request.getHeader("Authorization").split(" ")[1].split("\\.")[1],
+            MDC.get(MdcKey.USER_ID.name()),
             MDC.get(MdcKey.REQUEST_IP.name()),
             MDC.get(MdcKey.REQUEST_METHOD.name()),
             MDC.get(MdcKey.REQUEST_URI.name()),

@@ -9,5 +9,6 @@ public enum MdcKey {
     REQUEST_TIME,
     START_TIME_MILLIS,
     REQEUST_AGENT,
-    QUERY_COUNT
+    QUERY_COUNT,
+    USER_ID
 }
