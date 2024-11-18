@@ -43,7 +43,7 @@ public class RoleController {
      * @param requestDto    role 데이터
      */
     @PostMapping("/{roomId}/roles")
-    @Operation(summary = "[무빗] 특정 방에 role 생성", description = "본인의 룸메라면 Role을 할당할 수 있습니다.")
+    @Operation(summary = "[무빗] 특정 방에 role 생성", description = "본인의 룸메라면 Role을 할당할 수 있습니다. mateIdNameList의 객체에서 Id값만 사용합니다. name은 안채워줘도 되긴 함")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
     public ResponseEntity<ApiResponse<RoleIdResponseDTO>> createRole(
         @AuthenticationPrincipal MemberDetails memberDetails,
