@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,7 +104,7 @@ public class MemberStatQueryService {
 
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
-        Page<Map<MemberStat, Integer>> filteredResult = memberStatRepository.getFilteredMemberStat(
+        Slice<Map<MemberStat, Integer>> filteredResult = memberStatRepository.getFilteredMemberStat(
             criteriaMemberStat,
             filterList,
             pageable
@@ -122,7 +123,7 @@ public class MemberStatQueryService {
 
         MemberStat criteriaMemberStat = getCriteriaMemberStat(member);
 
-        Page<Map<MemberStat, Integer>> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(
+        Slice<Map<MemberStat, Integer>> filteredResult = memberStatRepository.getAdvancedFilteredMemberStat(
             criteriaMemberStat, filterMap,
             pageable);
 
@@ -184,8 +185,8 @@ public class MemberStatQueryService {
 
     }
 
-    public Page<MemberStatPreferenceResponseDTO> createMemberStatPreferenceResponse(
-        Page<Map<MemberStat, Integer>> filteredResult, Member criteriaMember) {
+    public Slice<MemberStatPreferenceResponseDTO> createMemberStatPreferenceResponse(
+        Slice<Map<MemberStat, Integer>> filteredResult, Member criteriaMember) {
 
         return filteredResult.map(
             memberStatIntegerMap ->{
@@ -250,7 +251,7 @@ public class MemberStatQueryService {
         return new MemberStatPageResponseDTO<>(pageable.getPageNumber(), false, Collections.emptyList());
     }
 
-    private MemberStatPageResponseDTO<List<?>> toPageResponseDto(Page<?> page) {
+    private MemberStatPageResponseDTO<List<?>> toPageResponseDto(Slice<?> page) {
         return new MemberStatPageResponseDTO<>(
             page.getNumber(),
             page.hasNext(),
