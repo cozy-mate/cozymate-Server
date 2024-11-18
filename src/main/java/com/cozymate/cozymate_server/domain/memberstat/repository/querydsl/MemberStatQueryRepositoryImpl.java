@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
@@ -63,21 +65,21 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 //            ));
 //    }
 
-    @Override
-    public Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
-        MemberStat criteriaMemberStat) {
-        // Tuple로 MemberStat과 Member를 함께 조회
-        List<Tuple> results = createBaseQuery(criteriaMemberStat)
-            .where(applyFilters(filterMap, criteriaMemberStat))
-            .fetch();
-
-        // 결과를 Map<Member, MemberStat>으로 변환
-        return results.stream()
-            .collect(Collectors.toMap(
-                tuple -> tuple.get(member),         // key: Member
-                tuple -> tuple.get(memberStat)      // value: MemberStat
-            ));
-    }
+//    @Override
+//    public Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
+//        MemberStat criteriaMemberStat) {
+//        // Tuple로 MemberStat과 Member를 함께 조회
+//        List<Tuple> results = createBaseQuery(criteriaMemberStat)
+//            .where(applyFilters(filterMap, criteriaMemberStat))
+//            .fetch();
+//
+//        // 결과를 Map<Member, MemberStat>으로 변환
+//        return results.stream()
+//            .collect(Collectors.toMap(
+//                tuple -> tuple.get(member),         // key: Member
+//                tuple -> tuple.get(memberStat)      // value: MemberStat
+//            ));
+//    }
 
 
     private BooleanBuilder initDefaultQuery(MemberStat criteriaMemberStat) {
@@ -117,15 +119,25 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return builder;
     }
 
-    public Page<Map<MemberStat, Integer>> getFilteredMemberStat(MemberStat criteriaMemberStat,
+    @Override
+    public Slice<Map<MemberStat, Integer>> getFilteredMemberStat(MemberStat criteriaMemberStat,
         List<String> filterList, Pageable pageable) {
 
+        // pageSize + 1만큼 데이터를 조회하여 다음 페이지 여부 확인
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
             .where(applyFilters(filterList, criteriaMemberStat))
             .orderBy(memberStatEquality.equality.desc()) // equality 기준으로 정렬
             .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
+            .limit(pageable.getPageSize() + 1) // 다음 페이지 확인을 위해 추가 데이터 조회
             .fetch();
+
+        // results 크기를 기준으로 hasNext 계산
+        boolean hasNext = results.size() > pageable.getPageSize();
+
+        // 결과 리스트에서 초과된 요소를 제거하여 현재 페이지 데이터만 유지
+        if (hasNext) {
+            results.remove(results.size() - 1);
+        }
 
         // 결과를 Map<MemberStat, Integer> 형식으로 변환
         List<Map<MemberStat, Integer>> resultList = results.stream()
@@ -138,18 +150,28 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             })
             .collect(Collectors.toList());
 
-        return new PageImpl<>(resultList, pageable, results.size());
+        return new SliceImpl<>(resultList, pageable, hasNext);
     }
 
-    public Page<Map<MemberStat, Integer>> getAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
+    @Override
+    public Slice<Map<MemberStat, Integer>> getAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
         HashMap<String, List<?>> filterMap, Pageable pageable) {
 
+        // pageSize + 1만큼 데이터를 조회하여 다음 페이지 여부 확인
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
             .where(applyFilters(filterMap, criteriaMemberStat))
             .orderBy(memberStatEquality.equality.desc()) // equality 기준으로 정렬
             .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
+            .limit(pageable.getPageSize() + 1) // 다음 페이지 확인을 위해 추가 데이터 조회
             .fetch();
+
+        // results 크기를 기준으로 hasNext 계산
+        boolean hasNext = results.size() > pageable.getPageSize();
+
+        // 결과 리스트에서 초과된 요소를 제거하여 현재 페이지 데이터만 유지
+        if (hasNext) {
+            results.remove(results.size() - 1);
+        }
 
         // 결과를 Map<MemberStat, Integer> 형식으로 변환
         List<Map<MemberStat, Integer>> resultList = results.stream()
@@ -162,9 +184,16 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             })
             .collect(Collectors.toList());
 
-        return new PageImpl<>(resultList, pageable, results.size());
+        return new SliceImpl<>(resultList, pageable, hasNext);
     }
 
+    @Override
+    public int countAdvancedFilteredMemberStat(MemberStat criteriaMemberStat, HashMap<String, List<?>> filterMap) {
+        return createBaseQuery(criteriaMemberStat)
+            .where(applyFilters(filterMap, criteriaMemberStat))
+            .fetch()
+            .size();
+    }
 
     // 상세 검색 필터링 (key : value) 필터링
     private BooleanBuilder applyFilters(HashMap<String, List<?>> filterMap,
