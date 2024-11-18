@@ -1,14 +1,14 @@
 package com.cozymate.cozymate_server.global.common;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
 
-@Getter
-@AllArgsConstructor
-public class PageResponseDto<T> {
+@Builder
+public record PageResponseDto<T>(
 
-    private int page;
-    private boolean hasNext;
-    private T result;
+    int page,
+    boolean hasNext,
+    T result
+
+) {
 
 }

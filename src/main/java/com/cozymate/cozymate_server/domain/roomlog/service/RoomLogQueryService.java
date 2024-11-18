@@ -46,9 +46,11 @@ public class RoomLogQueryService {
             .map(RoomLogConverter::toRoomLogDetailResponseDto)
             .toList();
 
-        return new PageResponseDto<>(pageable.getPageNumber(), roomLogSlice.hasNext(),
-            roomLogResponseList);
-
+        return PageResponseDto.<List<RoomLogDetailResponseDto>>builder()
+            .page(pageable.getPageNumber())
+            .hasNext(roomLogSlice.hasNext())
+            .result(roomLogResponseList)
+            .build();
     }
 
 }
