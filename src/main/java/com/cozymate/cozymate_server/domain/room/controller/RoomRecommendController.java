@@ -2,7 +2,9 @@ package com.cozymate.cozymate_server.domain.room.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponseList;
+import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
 import com.cozymate.cozymate_server.domain.room.service.RoomRecommendService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
@@ -29,11 +31,14 @@ public class RoomRecommendController {
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS
     })
-    public ResponseEntity<ApiResponse<RoomRecommendationResponseList>> getRoomList(
+    public ResponseEntity<ApiResponse<PageResponseDto<RoomRecommendationResponseList>>> getRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails,
-        @RequestParam @Positive @Max(10) int size
+        @RequestParam @Positive @Max(10) int size,
+        @RequestParam int page,
+        @RequestParam(defaultValue = "AVERAGE_RATE") RoomSortType sortType
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            roomRecommendService.getRecommendationList(memberDetails.member(), size)));
+            roomRecommendService.getRecommendationList(memberDetails.member(), size, page,
+                sortType)));
     }
 }
