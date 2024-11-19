@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponse
 import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -366,6 +367,16 @@ public class RoomController {
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
         Boolean response = roomQueryService.getPendingStatus(roomId, memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "[바니] 방 검색", description = "공개방을 검색합니다. 라이프 스타일 없는 경우 가나다순, 있는 경우 평균 일치율 순으로 정렬됩니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<List<RoomSearchResponseDTO>>> searchRooms(
+        @RequestParam String keyword, @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.searchRooms(keyword, memberDetails.member().getId())));
     }
 
 }
