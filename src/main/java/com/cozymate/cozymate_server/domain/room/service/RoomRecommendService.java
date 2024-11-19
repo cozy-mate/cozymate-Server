@@ -15,6 +15,7 @@ import com.cozymate.cozymate_server.domain.room.converter.RoomRecommendConverter
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponse;
 import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponseList;
 import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
+import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
@@ -48,7 +49,10 @@ public class RoomRecommendService {
         RoomSortType sortType) {
 
         // 공개된 방 찾기 +  TODO: 대학, 성별, 시기 필터링
-        List<Room> roomList = roomRepository.findAllByRoomType(RoomType.PUBLIC);
+        List<Room> roomList = roomRepository.findAllByRoomTypeAndStatusNot(RoomType.PUBLIC, RoomStatus.DISABLE)
+            .stream()
+            .filter(room -> room.getMaxMateNum() - room.getNumOfArrival() > 0)
+            .toList();
 
         Map<Long, Room> roomMap = roomList.stream()
             .collect(Collectors.toMap(Room::getId, room -> room));
