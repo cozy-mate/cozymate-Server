@@ -35,7 +35,7 @@ public class RoomRecommendController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam @Positive @Max(10) int size,
         @RequestParam int page,
-        @RequestParam RoomSortType sortType
+        @RequestParam(defaultValue = "AVERAGE_RATE") RoomSortType sortType
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             roomRecommendService.getRecommendationList(memberDetails.member(), size, page,

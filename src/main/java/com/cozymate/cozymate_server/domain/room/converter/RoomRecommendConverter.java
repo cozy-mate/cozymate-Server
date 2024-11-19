@@ -24,6 +24,20 @@ public class RoomRecommendConverter {
             .build();
     }
 
+    public static RoomRecommendationResponse toRoomRecommendationResponseWhenNoMemberStat(Room room) {
+        return RoomRecommendationResponse.builder()
+            .roomId(room.getId())
+            .name(room.getName())
+            .hashtags(room.getRoomHashtags().stream()
+                .map(roomHashtag -> roomHashtag.getHashtag().getHashtag())
+                .toList())
+            .equality(null)
+            .maxMateNum(room.getMaxMateNum())
+            .numOfArrival(room.getNumOfArrival())
+            .equalMemberStatNum(null)
+            .build();
+    }
+
     public static RoomRecommendationResponseList toRoomRecommendationResponseList(
         List<RoomRecommendationResponse> roomRecommendationResponseList) {
         return RoomRecommendationResponseList.builder()

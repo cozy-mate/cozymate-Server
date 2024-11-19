@@ -45,14 +45,33 @@ public class RoomRecommendService {
     private final MemberStatPreferenceRepository memberStatPreferenceRepository;
 
     // TODO: page, sortType 파라미터 반영해서 로직 수정
-    public PageResponseDto<RoomRecommendationResponseList> getRecommendationList(Member member, int size, int page,
+    public PageResponseDto<RoomRecommendationResponseList> getRecommendationList(Member member,
+        int size, int page,
         RoomSortType sortType) {
 
         // 공개된 방 찾기 +  TODO: 대학, 성별, 시기 필터링
-        List<Room> roomList = roomRepository.findAllByRoomTypeAndStatusNot(RoomType.PUBLIC, RoomStatus.DISABLE)
+        List<Room> roomList = roomRepository.findAllByRoomTypeAndStatusNot(RoomType.PUBLIC,
+                RoomStatus.DISABLE)
             .stream()
             .filter(room -> room.getMaxMateNum() - room.getNumOfArrival() > 0)
             .toList();
+
+        if (memberStatRepository.findByMemberId(member.getId()).isEmpty()) {
+            RoomRecommendConverter.toRoomRecommendationResponseList(roomList.stream()
+                .map(RoomRecommendConverter::toRoomRecommendationResponseWhenNoMemberStat)
+                .skip((long) page * size)
+                .limit(size)
+                .toList());
+            return PageResponseDto.<RoomRecommendationResponseList>builder()
+                .page(page)
+                .hasNext(roomList.size() > (page + 1) * size)
+                .result(RoomRecommendConverter.toRoomRecommendationResponseList(roomList.stream()
+                    .map(RoomRecommendConverter::toRoomRecommendationResponseWhenNoMemberStat)
+                    .skip((long) page * size)
+                    .limit(size)
+                    .toList()))
+                .build();
+        }
 
         Map<Long, Room> roomMap = roomList.stream()
             .collect(Collectors.toMap(Room::getId, room -> room));
@@ -64,7 +83,7 @@ public class RoomRecommendService {
         // null을 가장 후순위로 처리
         List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
             roomMap,
-            sortType, page, size+1);
+            sortType, page, size + 1);
         boolean hasNext = sortedRoomList.size() > size;
 
         MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(
