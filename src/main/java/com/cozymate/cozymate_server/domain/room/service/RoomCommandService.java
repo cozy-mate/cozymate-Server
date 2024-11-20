@@ -460,9 +460,6 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        // 여기서 mate 두개 조회되서 에러 발생
-//        Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId);
-
         Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberIdAndNotEntryStatus(
             roomId, memberId, EntryStatus.EXITED);
         checkEntryStatus(existingMate);
@@ -471,7 +468,6 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
-        // 여기서 기존 mate exit가 있는 상태에서 mate가 한개 더 만들어짐
         Mate mate = MateConverter.toPending(room, member, false);
         mateRepository.save(mate);
 
