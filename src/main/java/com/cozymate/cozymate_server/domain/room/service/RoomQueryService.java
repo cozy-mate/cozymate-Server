@@ -393,4 +393,13 @@ public class RoomQueryService {
             .toList();
     }
 
+    public boolean checkInvitationStatus(Member viewer, List<Mate> mates) {
+        return mates.stream()
+            .filter(m -> m.getEntryStatus().equals(EntryStatus.PENDING))
+            .anyMatch(m -> mateRepository.findByMember(viewer)
+                .filter(viewerMate ->
+                    viewerMate.isRoomManager() &&
+                        viewerMate.getRoom().equals(m.getRoom()))
+                .isPresent());
+    }
 }

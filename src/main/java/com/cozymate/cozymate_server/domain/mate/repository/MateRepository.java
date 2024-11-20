@@ -23,6 +23,11 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Optional<Mate> findByRoomIdAndMemberId(Long roomId, Long memberId);
 
+    @Query("select m from Mate m where m.room.id = :roomId and m.member.id = :memberId and m.entryStatus <> :entryStatus")
+    Optional<Mate> findByRoomIdAndMemberIdAndNotEntryStatus(@Param("roomId") Long roomId,
+        @Param("memberId") Long memberId, @Param("entryStatus") EntryStatus entryStatus);
+
+
     @Query("SELECT COUNT(m) FROM Mate m WHERE m.room.id = :roomId AND m.entryStatus = 'JOINED'")
     long countActiveMatesByRoomId(@Param("roomId") Long roomId);
 
@@ -34,7 +39,8 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Optional<Mate> findByMemberIdAndRoomId(Long MemberId, Long RoomId);
 
-    Optional<Mate> findByRoomIdAndMemberIdAndEntryStatus(Long roomId, Long memberId, EntryStatus status);
+    Optional<Mate> findByRoomIdAndMemberIdAndEntryStatus(Long roomId, Long memberId,
+        EntryStatus status);
 
     boolean existsByRoomIdAndMemberIdAndEntryStatus(Long roomId, Long memberId, EntryStatus status);
 
@@ -50,18 +56,23 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     Optional<Mate> findByMemberIdAndEntryStatusAndRoomStatusIn(Long memberId,
         EntryStatus entryStatus, List<RoomStatus> roomStatuses);
 
+    List<Mate> findByMemberIdAndEntryStatusInAndRoomStatusIn(Long memberId,
+        List<EntryStatus> entryStatuses, List<RoomStatus> roomStatuses);
+
     List<Mate> findAllByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
 
     List<Mate> findAllByMemberBirthDayAndEntryStatus(LocalDate birthday, EntryStatus entryStatus);
 
     // MemberBirthDay의 Localdate 값에서 Month와 Day가 같은 Member들을 찾는다.
     @Query("SELECT m FROM Mate m WHERE MONTH(m.member.birthDay) = :month AND DAY(m.member.birthDay) = :day AND m.entryStatus = :entryStatus")
-    List<Mate> findAllByMemberBirthDayMonthAndDayAndEntryStatus(@Param("month") int month, @Param("day") int day, @Param("entryStatus") EntryStatus entryStatus);
+    List<Mate> findAllByMemberBirthDayMonthAndDayAndEntryStatus(@Param("month") int month,
+        @Param("day") int day, @Param("entryStatus") EntryStatus entryStatus);
 
     List<Mate> findByRoom(Room room);
 
     @Query("select m from Mate m join fetch m.member where m.room = :room and m.entryStatus = :entryStatus")
-    List<Mate> findFetchMemberByRoom(@Param("room") Room room, @Param("entryStatus") EntryStatus entryStatus);
+    List<Mate> findFetchMemberByRoom(@Param("room") Room room,
+        @Param("entryStatus") EntryStatus entryStatus);
 
     Optional<Mate> findByMember(Member member);
 
@@ -76,6 +87,10 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
 
     Integer countByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
+
+    @Query("select m from Mate m join fetch m.member where m.room = :room and m.isRoomManager = :isRoomManager")
+    Optional<Mate> findFetchByRoomAndIsRoomManager(@Param("room") Room room,
+        @Param("isRoomManager") boolean isRoomManager);
 
     List<Mate> findAllByEntryStatus(EntryStatus entryStatus);
 }
