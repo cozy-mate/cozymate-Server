@@ -35,7 +35,7 @@ public class S3Controller {
     @Operation(summary = "[무빗] s3 이미지 업로드", description = "S3에 이미지를 업로드하는 기능입니다. 여러개의 파일을 동시에 업로드 가능합니다.")
     public ResponseEntity<S3UploadResponseDto> uploadFiles(
         @Parameter(
-            description = "multipart/form-result 형식의 이미지 리스트를 input으로 받습니다. 이때 key 값은 multipartFile 입니다.",
+            description = "multipart/form-data 형식의 이미지 리스트를 input으로 받습니다. 이때 key 값은 multipartFile 입니다.",
             content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
         )
         @RequestPart(value = "files") List<MultipartFile> files) {
