@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.favorite.Favorite;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,9 +19,13 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
     List<Favorite> findByMemberAndFavoriteType(Member member, FavoriteType favoriteType);
 
+    Optional<Favorite> findByMemberAndTargetIdAndFavoriteType(Member member, Long targetId,
+        FavoriteType favoriteType);
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Modifying(clearAutomatically = true)
     @Query("delete from Favorite f where f.targetId in :targetIds and f.favoriteType = :favoriteType")
     void deleteAllByTargetIdsAndFavoriteType(@Param("targetIds") List<Long> targetIds,
         @Param("favoriteType") FavoriteType favoriteType);
+
 }
