@@ -402,4 +402,27 @@ public class RoomQueryService {
                         viewerMate.getRoom().equals(m.getRoom()))
                 .isPresent());
     }
+
+    public Boolean getInvitedStatus(Long memberId, Long managerId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        memberRepository.findById(managerId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(getExistRoom(managerId).roomId())
+            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), managerId, EntryStatus.JOINED)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        // 방장인지 검증
+        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        if (!manager.getMember().getId().equals(managerId)) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
+
+        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId, EntryStatus.INVITED);
+    }
 }

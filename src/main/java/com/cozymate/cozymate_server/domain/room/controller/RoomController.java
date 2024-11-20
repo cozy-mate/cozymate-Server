@@ -379,4 +379,14 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.searchRooms(keyword, memberDetails.member().getId())));
     }
 
+    @GetMapping("/invited-status/{memberId}")
+    @Operation(summary = "[바니] 방장이 사용자한테 방 참여 요청을 보냈는지 여부 조회", description = "방장이 memberId에게 방 참여 요청을 보냈는지 여부를 조회합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<Boolean>> getInvitedStatus(
+        @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedStatus(memberId, memberDetails.member().getId())));
+    }
+
 }
