@@ -22,7 +22,6 @@ import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
-import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -100,7 +99,8 @@ public class MemberStatQueryService {
             .map(mate -> mate.getRoom().getId())
             .orElse(NO_ROOMMATE);
 
-        boolean hasRequestedRoomEntry = roomQueryService.checkInvitationStatus(viewer, mateList);
+        boolean hasRequestedRoomEntry = roomId.equals(NO_ROOMMATE)
+            && roomQueryService.checkInvitationStatus(viewer, mateList);
 
         Long favoriteId = favoriteRepository.findByMemberAndTargetIdAndFavoriteType(viewer, memberId, FavoriteType.MEMBER)
             .map(Favorite::getId)

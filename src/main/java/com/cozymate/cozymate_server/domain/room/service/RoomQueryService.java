@@ -395,12 +395,7 @@ public class RoomQueryService {
 
     public boolean checkInvitationStatus(Member viewer, List<Mate> mates) {
         return mates.stream()
-            .filter(m -> {
-                if (m.getEntryStatus().equals(EntryStatus.JOINED)) {
-                    return false;
-                }
-                return m.getEntryStatus().equals(EntryStatus.PENDING);
-            })
+            .filter(m -> m.getEntryStatus().equals(EntryStatus.PENDING))
             .anyMatch(m -> mateRepository.findByMember(viewer)
                 .filter(viewerMate ->
                     viewerMate.isRoomManager() &&
