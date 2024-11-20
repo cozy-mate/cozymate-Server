@@ -102,12 +102,16 @@ public class MemberStatConverter {
 
     public static MemberStatDetailAndRoomIdAndEqualityResponseDTO toMemberStatDetailAndRoomIdAndEqualityResponseDTO(MemberStat memberStat,
         Integer equality,
-        Long roomId) {
+        Long roomId,
+        Boolean hasRequestedRoomEntry,
+        Long favoriteId) {
         return MemberStatDetailAndRoomIdAndEqualityResponseDTO.builder()
             .memberDetail(MemberConverter.toMemberDetailResponseDTOFromEntity(memberStat.getMember()))
             .memberStatDetail(MemberStatConverter.toMemberStatDetailDTOFromEntity(memberStat))
             .equality(equality)
             .roomId(roomId)
+            .hasRequestedRoomEntry(hasRequestedRoomEntry)
+            .favoriteId(favoriteId)
             .build();
     }
 

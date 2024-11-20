@@ -1,5 +1,8 @@
 package com.cozymate.cozymate_server.domain.memberstat.service;
 
+import com.cozymate.cozymate_server.domain.favorite.Favorite;
+import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
+import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -19,6 +22,7 @@ import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
+import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Collections;
@@ -26,11 +30,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -50,8 +52,13 @@ public class MemberStatQueryService {
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
+
     private static final Integer NO_EQUALITY = null;
-    private static final Integer NO_ROOMMATE = 0;
+    private static final Long NO_ROOMMATE = 0L;
+    private static final Long NOT_FAVORITE = 0L;
+
+    private final FavoriteRepository favoriteRepository;
+    private final RoomQueryService roomQueryService;
 
     public MemberStatDetailWithMemberDetailResponseDTO getMemberStat(Member member) {
 
@@ -80,13 +87,31 @@ public class MemberStatQueryService {
                 viewer.getId()
             );
 
-        Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
-            memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
+        List<Mate> mateList = mateRepository.findByMemberIdAndEntryStatusInAndRoomStatusIn(
+            memberId,
+            List.of(EntryStatus.PENDING, EntryStatus.JOINED),
+            List.of(RoomStatus.ENABLE, RoomStatus.WAITING)
+        );
+
+        Long roomId = mateList.stream()
+            .filter(mate -> mate.getEntryStatus().equals(EntryStatus.JOINED))
+            .findFirst()
+            .map(mate -> mate.getRoom().getId())
+            .orElse(NO_ROOMMATE);
+
+        boolean hasRequestedRoomEntry = roomId.equals(NO_ROOMMATE)
+            && roomQueryService.checkInvitationStatus(viewer, mateList);
+
+        Long favoriteId = favoriteRepository.findByMemberAndTargetIdAndFavoriteType(viewer, memberId, FavoriteType.MEMBER)
+            .map(Favorite::getId)
+            .orElse(NOT_FAVORITE);
 
         return MemberStatConverter.toMemberStatDetailAndRoomIdAndEqualityResponseDTO(
             memberStat,
             equality,
-            mate.isPresent() ? mate.get().getRoom().getId() : NO_ROOMMATE
+            roomId,
+            hasRequestedRoomEntry,
+            favoriteId
         );
     }
 

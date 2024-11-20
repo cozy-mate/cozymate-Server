@@ -8,7 +8,10 @@ public record MemberStatDetailAndRoomIdAndEqualityResponseDTO(
     MemberDetailResponseDTO memberDetail,
     MemberStatDetailResponseDTO memberStatDetail,
     Integer equality,
-    Long roomId
+    Long roomId,
+    Boolean hasRequestedRoomEntry,
+    Long favoriteId
+
 ) {
 
 }

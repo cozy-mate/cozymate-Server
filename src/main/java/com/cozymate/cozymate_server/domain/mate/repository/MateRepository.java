@@ -56,6 +56,9 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     Optional<Mate> findByMemberIdAndEntryStatusAndRoomStatusIn(Long memberId,
         EntryStatus entryStatus, List<RoomStatus> roomStatuses);
 
+    List<Mate> findByMemberIdAndEntryStatusInAndRoomStatusIn(Long memberId,
+        List<EntryStatus> entryStatuses, List<RoomStatus> roomStatuses);
+
     List<Mate> findAllByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
 
     List<Mate> findAllByMemberBirthDayAndEntryStatus(LocalDate birthday, EntryStatus entryStatus);
