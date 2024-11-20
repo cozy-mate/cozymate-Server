@@ -147,7 +147,7 @@ public class RoomRecommendService {
                 Map<String, Object> memberPreference = MemberStatUtil.getMemberStatFields(
                     memberStat,
                     preferenceList);
-                if (myPreference.get(preference) == memberPreference.get(preference)) {
+                if (myPreference.get(preference).equals(memberPreference.get(preference))) {
                     preferenceMap.merge(preference, 1, Integer::sum);
                 }
             });
