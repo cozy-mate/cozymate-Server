@@ -12,8 +12,12 @@ import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -116,6 +120,58 @@ public class MemberController {
     @Deprecated
     public void signOut() {
     }
+
+
+    @PostMapping("/update-nickname")
+    @Operation(summary = "[말즈] 사용자 닉네임 수정",
+            description = " ")
+    ResponseEntity<ApiResponse<Boolean>> updateNickname(
+            @RequestParam String nickname,
+            @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        memberCommandService.updateNickname(memberDetails.member(), nickname);
+        return ResponseEntity.ok(ApiResponse.onSuccess(true));
+    }
+
+    @PostMapping("/update-persona")
+    @Operation(summary = "[말즈] 사용자 프로필 이미지 수정",
+            description = " ")
+    ResponseEntity<ApiResponse<Boolean>> updatePersona(
+            @RequestParam
+            @Max(value = 16)
+            @Min(value = 1)
+            Integer persona,
+            @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        memberCommandService.updatePersona(memberDetails.member(),persona);
+        return ResponseEntity.ok(ApiResponse.onSuccess(true));
+    }
+
+    @PostMapping("/update-birthday")
+    @Operation(summary = "[말즈] 사용자 생일 수정",
+            description = " ")
+    ResponseEntity<ApiResponse<Boolean>> updateBirthday(
+            @RequestParam
+            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+            LocalDate localDate,
+            @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        memberCommandService.updateBirthday(memberDetails.member(),localDate);
+        return ResponseEntity.ok(ApiResponse.onSuccess(true));
+    }
+
+    @PostMapping("/update-majorName")
+    @Operation(summary = "[말즈] 사용자 학과 수정",
+            description = " ")
+    ResponseEntity<ApiResponse<Boolean>> updateMajorName(
+            @RequestParam String majorName,
+            @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        memberCommandService.updateMajor(memberDetails.member(),majorName);
+        return ResponseEntity.ok(ApiResponse.onSuccess(true));
+    }
+
+
 
     @Operation(summary = "[말즈] 회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
     @DeleteMapping("/withdraw")

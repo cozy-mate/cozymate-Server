@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.auth.utils.ClientIdMaker;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
@@ -16,6 +17,7 @@ import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -112,13 +114,33 @@ public class MemberCommandService {
         return authService.generateMemberTokenDTO(memberDetails);
     }
 
+    @Transactional
+    public void updateNickname(Member member, String nickname) {
+        memberQueryService.isValidNickName(nickname);
+        member.updateNickname(nickname);
+    }
+
+    @Transactional
+    public void updatePersona(Member member, Integer persona) {
+        member.updatePersona(persona);
+    }
+
+    @Transactional
+    public void updateBirthday(Member member, LocalDate birthday){
+        member.updateBirthday(birthday);
+    }
+
+    @Transactional
+    public void updateMajor(Member member,String majorName){
+        member.updateMajor(majorName);
+    }
+
+
     /**
      * 사용자 회원탈퇴 메서드
      *
      * @param memberDetails 사용자 세부 정보
      */
-
-
     public void withdraw(MemberDetails memberDetails) {
         // 리프레시 토큰 삭제 및 회원 삭제
         authService.deleteRefreshToken(memberDetails.getUsername());

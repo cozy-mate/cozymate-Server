@@ -9,6 +9,7 @@ public record MemberDetailResponseDTO(
     String gender,
     String birthday,
     String universityName,
+    Long universityId,
     String majorName,
     Integer persona
 ) {
