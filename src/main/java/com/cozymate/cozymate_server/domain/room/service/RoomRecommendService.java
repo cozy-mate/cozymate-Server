@@ -9,12 +9,10 @@ import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepos
 import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.MemberStatEquality;
 import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberStatEqualityRepository;
-import com.cozymate.cozymate_server.domain.memberstatpreference.MemberStatPreference;
-import com.cozymate.cozymate_server.domain.memberstatpreference.repository.MemberStatPreferenceRepository;
+import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomRecommendConverter;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponse;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponseList;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomRecommendationResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
@@ -23,12 +21,12 @@ import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
@@ -43,46 +41,25 @@ public class RoomRecommendService {
     private final MateRepository mateRepository;
     private final MemberStatRepository memberStatRepository;
     private final MemberStatEqualityRepository memberStatEqualityRepository;
-    private final MemberStatPreferenceRepository memberStatPreferenceRepository;
+    private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-    public PageResponseDto<RoomRecommendationResponseList> getRecommendationList(Member member,
-        int size, int page,
-        RoomSortType sortType) {
+    public PageResponseDto<List<RoomRecommendationResponseDTO>> getRecommendationList(Member member,
+        int size, int page, RoomSortType sortType) {
 
-        // 공개된 방 찾기 +  TODO: 대학, 성별, 시기 필터링
-        List<Room> roomList = roomRepository.findAllByRoomTypeAndStatusNot(RoomType.PUBLIC,
-                RoomStatus.DISABLE)
-            .stream()
-            .filter(room -> room.getMaxMateNum() - room.getNumOfArrival() > 0)
-            .toList();
+        // 사용자의 preference 데이터는 무조건 있어야함
+        List<String> memberPreferenceList = memberStatPreferenceQueryService.getPreferencesToList(
+            member.getId());
 
-        MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(
-                member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS));
+        // TODO: 대학, 성별, 시기 필터링
+        // 모든 방을 가져옴 (Public 방 중에서, Disble 상태가 아니며, 인원이 꽉 차지 않은 방)
+        List<Room> roomList = roomRepository.findAllRoomListCanDisplay(RoomType.PUBLIC,
+            RoomStatus.DISABLE);
+        // MemberStat을 가져오되, 없으면 무작위로 방 추천을 진행
+        Optional<MemberStat> memberStat = memberStatRepository.findByMemberId(member.getId());
 
-        List<String> preferenceList = Arrays.asList(
-            memberStatPreference.getSelectedPreferences().split(","));
-
-        // 사용자의 MemberStat이 없을 경우 무작위 방 추천을 해준다.
-        if (memberStatRepository.findByMemberId(member.getId()).isEmpty()) {
-
-            Map<String, Integer> preferenceMap = new HashMap<>();
-            preferenceList.forEach(preference -> preferenceMap.put(preference, null));
-
-            RoomRecommendationResponseList roomRecommendationResponseList =
-                RoomRecommendConverter.toRoomRecommendationResponseList(roomList.stream()
-                    .map(
-                        room -> RoomRecommendConverter.toRoomRecommendationResponseWhenNoMemberStat(
-                            room, preferenceMap
-                        ))
-                    .skip((long) page * size)
-                    .limit(size)
-                    .toList());
-            return PageResponseDto.<RoomRecommendationResponseList>builder()
-                .page(page)
-                .hasNext(roomList.size() > (page + 1) * size)
-                .result(roomRecommendationResponseList)
-                .build();
+        if (memberStat.isEmpty()) {
+            return getRoomRecommendationResponseListWhenNoMemberStat(size, page,
+                memberPreferenceList, roomList);
         }
 
         Map<Long, Room> roomMap = roomList.stream()
@@ -99,16 +76,13 @@ public class RoomRecommendService {
             roomMap, sortType, page, size + 1);
         boolean hasNext = sortedRoomList.size() > size;
 
-        List<RoomRecommendationResponse> buildRoomRecommendationResponses = buildRoomRecommendationResponses(
-            member, sortedRoomList, roomMateMap, roomList, preferenceList);
+        List<RoomRecommendationResponseDTO> roomRecommendationResponseDTOList = buildRoomRecommendationResponses(
+            member, sortedRoomList, roomMateMap, roomList, memberPreferenceList);
 
-        RoomRecommendationResponseList roomRecommendationResponseList = RoomRecommendConverter.toRoomRecommendationResponseList(
-            buildRoomRecommendationResponses);
-
-        return PageResponseDto.<RoomRecommendationResponseList>builder()
+        return PageResponseDto.<List<RoomRecommendationResponseDTO>>builder()
             .page(page)
             .hasNext(hasNext)
-            .result(roomRecommendationResponseList)
+            .result(roomRecommendationResponseDTOList)
             .build();
 
     }
@@ -131,7 +105,7 @@ public class RoomRecommendService {
         return roomEqualityMap;
     }
 
-    private List<RoomRecommendationResponse> buildRoomRecommendationResponses(
+    private List<RoomRecommendationResponseDTO> buildRoomRecommendationResponses(
         Member member, List<Pair<Long, Integer>> sortedRoomList, Map<Long, List<Mate>> roomMateMap,
         List<Room> roomList, List<String> preferenceList) {
 
@@ -144,7 +118,7 @@ public class RoomRecommendService {
             .toList();
     }
 
-    private RoomRecommendationResponse createRoomRecommendationResponse(
+    private RoomRecommendationResponseDTO createRoomRecommendationResponse(
         Member member, Pair<Long, Integer> pair, Room room, Map<Long, List<Mate>> roomMateMap,
         List<String> preferenceList) {
 
@@ -211,7 +185,26 @@ public class RoomRecommendService {
                     .limit(size)
                     .toList();
         };
+    }
 
+    private PageResponseDto<List<RoomRecommendationResponseDTO>> getRoomRecommendationResponseListWhenNoMemberStat(
+        int size, int page, List<String> memberPreferenceList, List<Room> roomList) {
+        Map<String, Integer> preferenceMap = new HashMap<>();
+        memberPreferenceList.forEach(preference -> preferenceMap.put(preference, null));
 
+        List<RoomRecommendationResponseDTO> responseList =
+            roomList.stream()
+                .map(
+                    room -> RoomRecommendConverter.toRoomRecommendationResponseWhenNoMemberStat(
+                        room, preferenceMap
+                    ))
+                .skip((long) page * size)
+                .limit(size)
+                .toList();
+        return PageResponseDto.<List<RoomRecommendationResponseDTO>>builder()
+            .page(page)
+            .hasNext(roomList.size() > (page + 1) * size)
+            .result(responseList)
+            .build();
     }
 }
