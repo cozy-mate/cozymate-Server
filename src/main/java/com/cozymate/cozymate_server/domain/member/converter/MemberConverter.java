@@ -78,6 +78,7 @@ public class MemberConverter {
                 .gender(gender.toString())
                 .birthday(birthday.toString())
                 .universityName(universityName)
+                .universityId(universityId)
                 .majorName(majorName)
                 .persona(persona)
                 .build();

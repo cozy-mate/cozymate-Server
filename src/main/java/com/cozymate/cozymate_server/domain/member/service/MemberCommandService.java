@@ -76,7 +76,7 @@ public class MemberCommandService {
      * @return 로그인 결과를 담은 DTO
      */
     public SignInResponseDTO signUp(String clientId,
-                                                      SignUpRequestDTO signUpRequestDTO) {
+                                    SignUpRequestDTO signUpRequestDTO) {
 
         if (memberQueryService.isPresent(clientId)) { // 사용자 중복 검증
             throw new GeneralException(ErrorStatus._MEMBER_EXISTING);
@@ -84,8 +84,7 @@ public class MemberCommandService {
         University memberUniversity = universityRepository.findById(signUpRequestDTO.universityId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
-
-        memberRepository.save(MemberConverter.toMember(clientId, signUpRequestDTO,memberUniversity));
+        memberRepository.save(MemberConverter.toMember(clientId, signUpRequestDTO, memberUniversity));
         log.info(clientId);
 
         // 기존 회원으로 로그인 처리
@@ -104,7 +103,7 @@ public class MemberCommandService {
 
     @Transactional
     public TokenResponseDTO verifyMemberUniversity(MemberDetails memberDetails, Long universityId,
-                                                                   String majorName) {
+                                                   String majorName) {
         University memberUniversity = universityRepository.findById(universityId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
@@ -116,22 +115,32 @@ public class MemberCommandService {
 
     @Transactional
     public void updateNickname(Member member, String nickname) {
-        memberQueryService.isValidNickName(nickname);
+        member  = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        if (!checkNickname(nickname)) {
+            throw new GeneralException(ErrorStatus._NICKNAME_EXISTING);
+        }
         member.updateNickname(nickname);
     }
 
     @Transactional
     public void updatePersona(Member member, Integer persona) {
+        member  = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         member.updatePersona(persona);
     }
 
     @Transactional
-    public void updateBirthday(Member member, LocalDate birthday){
+    public void updateBirthday(Member member, LocalDate birthday) {
+        member  = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         member.updateBirthday(birthday);
     }
 
     @Transactional
-    public void updateMajor(Member member,String majorName){
+    public void updateMajor(Member member, String majorName) {
+        member  = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         member.updateMajor(majorName);
     }
 
@@ -158,7 +167,8 @@ public class MemberCommandService {
         MemberDetails memberDetails = authService.loadMember(clientId);
 
         // 사용자 정보를 DTO로 변환
-        MemberDetailResponseDTO memberDetailResponseDTO = MemberConverter.toMemberDetailResponseDTOFromEntity(memberDetails.member());
+        MemberDetailResponseDTO memberDetailResponseDTO = MemberConverter.toMemberDetailResponseDTOFromEntity(
+                memberDetails.member());
 
         // 인증 토큰 생성 및 DTO로 변환
         TokenResponseDTO tokenResponseDTO = authService.generateMemberTokenDTO(memberDetails);

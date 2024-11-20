@@ -26,6 +26,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBER_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "MEMBER403", "메일 인증을 완료해주세요"),
     _MEMBER_EXISTING(HttpStatus.BAD_REQUEST, "MEMBER402", "이미 존재하는 사용자 입니다"),
 
+    _NICKNAME_EXISTING(HttpStatus.BAD_REQUEST, "MEMBER404", "이미 존재하는 닉네임 입니다"),
+
     _INVALID_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, "SOCIAL400", "제공하지 않는 소셜 타입입니다."),
     _INVALID_GENDER(HttpStatus.BAD_REQUEST, "GENDER400", "제공하지 않는 성별입니다."),
 
