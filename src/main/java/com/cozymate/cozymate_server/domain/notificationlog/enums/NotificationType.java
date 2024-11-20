@@ -203,6 +203,19 @@ public enum NotificationType {
                 + "님이 방 참여 요청을 수락했어요";
         }
     },
+
+    /**
+     * ex) xx님이 방 참여 요청을 보냈어요
+     * xx가 방장에게 방 참여 요청을 보낸 경우 방장이 받는 알림
+     * OneTargetReverse
+     */
+    ARRIVE_ROOM_JOIN_REQUEST(NotificationCategory.ROOM_JOIN_REQUEST) {
+        @Override
+        public String generateContent(FcmPushContentDto fcmPushContentDto) {
+            return fcmPushContentDto.getMember().getNickname()
+                + "님이 방 참여 요청을 보냈어요";
+        }
+    }
     ;
 
     private NotificationCategory category;

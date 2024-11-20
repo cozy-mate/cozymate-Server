@@ -35,17 +35,4 @@ public class FcmController {
         fcmCommandService.createFcm(memberDetails.member(), fcmRequestDTO);
         return ResponseEntity.ok(ApiResponse.onSuccess("fcm토큰 및 기기 고유 값 저장 완료"));
     }
-
-
-    private final MemberRepository memberRepository;
-    private final FcmPushService fcmPushService;
-
-    @GetMapping("/test/send")
-    public ResponseEntity<ApiResponse<String>> sendTest() {
-        Member member = memberRepository.findById(7L).get();
-
-        fcmPushService.sendNotification(OneTargetDto.create(member, NotificationType.SELECT_COZY_MATE));
-
-        return ResponseEntity.ok(ApiResponse.onSuccess(member.getNickname() + "에게 알림 전송"));
-    }
 }

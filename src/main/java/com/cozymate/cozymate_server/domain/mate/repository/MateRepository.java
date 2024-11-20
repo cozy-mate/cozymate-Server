@@ -23,6 +23,11 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Optional<Mate> findByRoomIdAndMemberId(Long roomId, Long memberId);
 
+    @Query("select m from Mate m where m.room.id = :roomId and m.member.id = :memberId and m.entryStatus <> :entryStatus")
+    Optional<Mate> findByRoomIdAndMemberIdAndNotEntryStatus(@Param("roomId") Long roomId,
+        @Param("memberId") Long memberId, @Param("entryStatus") EntryStatus entryStatus);
+
+
     @Query("SELECT COUNT(m) FROM Mate m WHERE m.room.id = :roomId AND m.entryStatus = 'JOINED'")
     long countActiveMatesByRoomId(@Param("roomId") Long roomId);
 
@@ -85,4 +90,7 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Integer countByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
 
+    @Query("select m from Mate m join fetch m.member where m.room = :room and m.isRoomManager = :isRoomManager")
+    Optional<Mate> findFetchByRoomAndIsRoomManager(@Param("room") Room room,
+        @Param("isRoomManager") boolean isRoomManager);
 }

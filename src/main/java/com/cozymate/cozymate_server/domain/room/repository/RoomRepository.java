@@ -18,7 +18,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     boolean existsByMemberIdAndStatuses(@Param("memberId") Long memberId, @Param("status1") RoomStatus status1, @Param("status2") RoomStatus status2, @Param("status3") EntryStatus status3);
     Optional<Room> findByInviteCode(String inviteCode);
 
-    List<Room> findAllByRoomType(@Param("roomType") RoomType roomType);
+    List<Room> findAllByRoomTypeAndStatusNot(RoomType roomType, RoomStatus status);
 
     @Query("SELECT r FROM Room r " +
         "JOIN FETCH Mate m ON r.id = m.room.id AND m.isRoomManager = true " +
