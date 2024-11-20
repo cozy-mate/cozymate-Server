@@ -54,29 +54,33 @@ public class RoomRecommendService {
         // 모든 방을 가져옴 (Public 방 중에서, Disble 상태가 아니며, 인원이 꽉 차지 않은 방)
         List<Room> roomList = roomRepository.findAllRoomListCanDisplay(RoomType.PUBLIC,
             RoomStatus.DISABLE);
+
         // MemberStat을 가져오되, 없으면 무작위로 방 추천을 진행
         Optional<MemberStat> memberStat = memberStatRepository.findByMemberId(member.getId());
-
         if (memberStat.isEmpty()) {
             return getRoomRecommendationResponseListWhenNoMemberStat(size, page,
                 memberPreferenceList, roomList);
         }
 
+        // roomId와 room으로 구성됨
         Map<Long, Room> roomMap = roomList.stream()
             .collect(Collectors.toMap(Room::getId, room -> room));
 
+        // roomId에 해당하는 MateList로 구성됨
         Map<Long, List<Mate>> roomMateMap = mateRepository.findAllByEntryStatus(EntryStatus.JOINED)
             .stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
 
+        // roomId와 member의 일치율로 구성됨
         Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, member,
             roomMateMap);
 
         // null을 가장 후순위로 처리
         List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
-            roomMap, sortType, page, size + 1);
+            roomMap, sortType, page, size);
         boolean hasNext = sortedRoomList.size() > size;
+        sortedRoomList = sortedRoomList.stream().limit(size).toList();
 
-        List<RoomRecommendationResponseDTO> roomRecommendationResponseDTOList = buildRoomRecommendationResponses(
+        List<RoomRecommendationResponseDTO> roomRecommendationResponseDTOList = buildRoomRecommendationResponseList(
             member, sortedRoomList, roomMateMap, roomList, memberPreferenceList);
 
         return PageResponseDto.<List<RoomRecommendationResponseDTO>>builder()
@@ -90,7 +94,8 @@ public class RoomRecommendService {
     private Map<Long, Integer> calculateRoomEqualityMap(List<Room> roomList, Member member,
         Map<Long, List<Mate>> roomMateMap) {
         Map<Long, Integer> roomEqualityMap = new HashMap<>();
-        for (Room room : roomList) {
+
+        roomList.forEach(room -> {
             List<Member> memberList = roomMateMap.get(room.getId()).stream()
                 .map(Mate::getMember)
                 .toList();
@@ -98,14 +103,16 @@ public class RoomRecommendService {
                     member.getId(), memberList.stream().map(Member::getId).toList()).stream()
                 .map(MemberStatEquality::getEquality)
                 .toList();
+            // TODO: null 처리 필요
             Integer averageEquality = equalityList.isEmpty() ? null
                 : equalityList.stream().reduce(Integer::sum).orElse(null) / equalityList.size();
             roomEqualityMap.put(room.getId(), averageEquality);
-        }
+        });
+
         return roomEqualityMap;
     }
 
-    private List<RoomRecommendationResponseDTO> buildRoomRecommendationResponses(
+    private List<RoomRecommendationResponseDTO> buildRoomRecommendationResponseList(
         Member member, List<Pair<Long, Integer>> sortedRoomList, Map<Long, List<Mate>> roomMateMap,
         List<Room> roomList, List<String> preferenceList) {
 
@@ -152,6 +159,7 @@ public class RoomRecommendService {
     private List<Pair<Long, Integer>> getSortedRoomListBySortType(
         Map<Long, Integer> roomEqualityMap, Map<Long, Room> roomMap, RoomSortType sortType,
         int page, int size) {
+        int sizeForCheckNextPage = size + 1;
         return switch (sortType) {
             case LATEST -> // 최신순으로 정렬한 후, 동일한 일자면 일치율로 정렬
                 roomEqualityMap.entrySet().stream()
@@ -160,7 +168,7 @@ public class RoomRecommendService {
                         pair -> roomMap.get(pair.getLeft()).getCreatedAt(),
                         Comparator.nullsLast(Comparator.reverseOrder()))) // 직접 람다식으로 비교
                     .skip((long) page * size)
-                    .limit(size)
+                    .limit(sizeForCheckNextPage)
                     .toList();
             case AVERAGE_RATE -> // 일치율순으로 정렬
                 roomEqualityMap.entrySet().stream()
@@ -168,7 +176,7 @@ public class RoomRecommendService {
                     .sorted(Comparator.comparing(Pair::getRight,
                         Comparator.nullsLast(Comparator.reverseOrder()))) // 직접 람다식으로 비교
                     .skip((long) page * size)
-                    .limit(size)
+                    .limit(sizeForCheckNextPage)
                     .toList();
             case CLOSING_SOON -> // 인원이 적게 남은 순으로 정렬한 후, 동일한 값이면 일치율로 정렬
                 roomEqualityMap.entrySet().stream()
@@ -182,7 +190,7 @@ public class RoomRecommendService {
                             pair.getLeft()).getNumOfArrival(),
                         Comparator.naturalOrder())) // 추가 정렬 기준
                     .skip((long) page * size)
-                    .limit(size)
+                    .limit(sizeForCheckNextPage)
                     .toList();
         };
     }
