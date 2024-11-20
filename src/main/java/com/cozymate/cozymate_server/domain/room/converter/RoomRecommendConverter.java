@@ -24,7 +24,8 @@ public class RoomRecommendConverter {
             .build();
     }
 
-    public static RoomRecommendationResponse toRoomRecommendationResponseWhenNoMemberStat(Room room) {
+    public static RoomRecommendationResponse toRoomRecommendationResponseWhenNoMemberStat(Room room,
+        Map<String, Integer> preferenceMap) {
         return RoomRecommendationResponse.builder()
             .roomId(room.getId())
             .name(room.getName())
@@ -34,7 +35,7 @@ public class RoomRecommendConverter {
             .equality(null)
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(room.getNumOfArrival())
-            .equalMemberStatNum(null)
+            .equalMemberStatNum(preferenceMap)
             .build();
     }
 

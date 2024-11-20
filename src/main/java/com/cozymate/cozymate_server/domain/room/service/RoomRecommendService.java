@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
@@ -44,7 +45,6 @@ public class RoomRecommendService {
     private final MemberStatEqualityRepository memberStatEqualityRepository;
     private final MemberStatPreferenceRepository memberStatPreferenceRepository;
 
-    // TODO: page, sortType 파라미터 반영해서 로직 수정
     public PageResponseDto<RoomRecommendationResponseList> getRecommendationList(Member member,
         int size, int page,
         RoomSortType sortType) {
@@ -56,41 +56,48 @@ public class RoomRecommendService {
             .filter(room -> room.getMaxMateNum() - room.getNumOfArrival() > 0)
             .toList();
 
+        MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(
+                member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS));
+
+        List<String> preferenceList = Arrays.asList(
+            memberStatPreference.getSelectedPreferences().split(","));
+
+        // 사용자의 MemberStat이 없을 경우 무작위 방 추천을 해준다.
         if (memberStatRepository.findByMemberId(member.getId()).isEmpty()) {
-            RoomRecommendConverter.toRoomRecommendationResponseList(roomList.stream()
-                .map(RoomRecommendConverter::toRoomRecommendationResponseWhenNoMemberStat)
-                .skip((long) page * size)
-                .limit(size)
-                .toList());
+
+            Map<String, Integer> preferenceMap = new HashMap<>();
+            preferenceList.forEach(preference -> preferenceMap.put(preference, null));
+
+            RoomRecommendationResponseList roomRecommendationResponseList =
+                RoomRecommendConverter.toRoomRecommendationResponseList(roomList.stream()
+                    .map(
+                        room -> RoomRecommendConverter.toRoomRecommendationResponseWhenNoMemberStat(
+                            room, preferenceMap
+                        ))
+                    .skip((long) page * size)
+                    .limit(size)
+                    .toList());
             return PageResponseDto.<RoomRecommendationResponseList>builder()
                 .page(page)
                 .hasNext(roomList.size() > (page + 1) * size)
-                .result(RoomRecommendConverter.toRoomRecommendationResponseList(roomList.stream()
-                    .map(RoomRecommendConverter::toRoomRecommendationResponseWhenNoMemberStat)
-                    .skip((long) page * size)
-                    .limit(size)
-                    .toList()))
+                .result(roomRecommendationResponseList)
                 .build();
         }
 
         Map<Long, Room> roomMap = roomList.stream()
             .collect(Collectors.toMap(Room::getId, room -> room));
 
-        Map<Long, List<Mate>> roomMateMap = groupMatesByRoom(mateRepository.findAll());
+        Map<Long, List<Mate>> roomMateMap = mateRepository.findAllByEntryStatus(EntryStatus.JOINED)
+            .stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
+
         Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, member,
             roomMateMap);
 
         // null을 가장 후순위로 처리
         List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
-            roomMap,
-            sortType, page, size + 1);
+            roomMap, sortType, page, size + 1);
         boolean hasNext = sortedRoomList.size() > size;
-
-        MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(
-                member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS));
-        List<String> preferenceList = Arrays.asList(
-            memberStatPreference.getSelectedPreferences().split(","));
 
         List<RoomRecommendationResponse> buildRoomRecommendationResponses = buildRoomRecommendationResponses(
             member, sortedRoomList, roomMateMap, roomList, preferenceList);
@@ -104,11 +111,6 @@ public class RoomRecommendService {
             .result(roomRecommendationResponseList)
             .build();
 
-    }
-
-
-    private Map<Long, List<Mate>> groupMatesByRoom(List<Mate> mateList) {
-        return mateList.stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
     }
 
     private Map<Long, Integer> calculateRoomEqualityMap(List<Room> roomList, Member member,
@@ -180,7 +182,6 @@ public class RoomRecommendService {
             case LATEST -> // 최신순으로 정렬한 후, 동일한 일자면 일치율로 정렬
                 roomEqualityMap.entrySet().stream()
                     .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
-                    //.filter(pair -> pair.getRight() != null && roomMap.containsKey(pair.getRight()))
                     .sorted(Comparator.comparing(
                         pair -> roomMap.get(pair.getLeft()).getCreatedAt(),
                         Comparator.nullsLast(Comparator.reverseOrder()))) // 직접 람다식으로 비교
@@ -209,7 +210,6 @@ public class RoomRecommendService {
                     .skip((long) page * size)
                     .limit(size)
                     .toList();
-            default -> throw new GeneralException(ErrorStatus._INVALID_SORT_TYPE);
         };
 
 

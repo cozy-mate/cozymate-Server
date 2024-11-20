@@ -71,11 +71,11 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     @Query("select m.id from Mate m where m.member.id in :memberIds")
     Set<Long> findMateIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
 
-    List<Mate> findByIdIn(List<Long> memberIdList);
-
     void deleteByRoomIdAndMemberId(Long roomId, Long memberId);
 
     List<Mate> findByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
 
     Integer countByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
+
+    List<Mate> findAllByEntryStatus(EntryStatus entryStatus);
 }
