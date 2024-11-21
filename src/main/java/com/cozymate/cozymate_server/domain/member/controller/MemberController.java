@@ -12,7 +12,6 @@ import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -21,6 +20,7 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -43,8 +43,8 @@ public class MemberController {
 
     @PostMapping("/sign-in")
     @Operation(summary = "[말즈] 로그인",
-        description = "request Body : \"client_id\": \"123123\",\n"
-            + "         *     \"social_type\": \"KAKAO\",\n")
+        description = "request Body : \"client_id\": \"123123\"<br>"
+            + "         *     \"social_type\": \"KAKAO\"<br>")
     @SwaggerApiError({
         ErrorStatus._MEMBER_BINDING_FAIL,
     })
@@ -74,10 +74,10 @@ public class MemberController {
     @PostMapping("/sign-up")
     @Operation(summary = "[말즈] 회원가입",
         description = "request Header : Bearer 임시토큰"
-            + "request Body : \"name\": \"John Doe\",\n"
-            + "         *     \"nickName\": \"johnny\",\n"
-            + "         *     \"gender\": \"MALE\",\n"
-            + "         *     \"birthday\": \"1990-01-01\"\n"
+            + "request Body : \"name\": \"John Doe\",<br>"
+            + "         *     \"nickName\": \"johnny\",<br>"
+            + "         *     \"gender\": \"MALE\",<br>"
+            + "         *     \"birthday\": \"1990-01-01\"<br>"
             + "         *     \"persona\" : 1")
     @SwaggerApiError({
         ErrorStatus._MEMBER_BINDING_FAIL
@@ -155,7 +155,7 @@ public class MemberController {
         description = "사용자의 생일을 수정합니다.<br>날짜는 'yyyy-MM-dd' 형식으로 전달되어야 합니다.<br>예시: `localDate=2000-01-01`")
     ResponseEntity<ApiResponse<Boolean>> updateBirthday(
         @RequestParam
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate localDate,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
