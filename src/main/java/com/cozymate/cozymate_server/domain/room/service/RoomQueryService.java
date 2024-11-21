@@ -183,15 +183,9 @@ public class RoomQueryService {
     }
 
     public List<MateDetailResponseDTO> getPendingMemberList(Long managerId) {
-        memberRepository.findById(managerId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         // 방장이 속한 방의 정보
         Room room = roomRepository.findById(getExistRoom(managerId).roomId())
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), managerId, EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장인지 검증
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
@@ -407,14 +401,8 @@ public class RoomQueryService {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        memberRepository.findById(managerId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Room room = roomRepository.findById(getExistRoom(managerId).roomId())
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), managerId, EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장인지 검증
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)

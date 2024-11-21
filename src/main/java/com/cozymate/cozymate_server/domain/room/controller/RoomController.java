@@ -149,7 +149,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER,
         ErrorStatus._ROOM_FULL,
@@ -235,7 +234,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER,
         ErrorStatus._INVITATION_NOT_FOUND
@@ -282,7 +280,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER,
         ErrorStatus._ROOM_ALREADY_EXISTS,
@@ -333,7 +330,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER
     })
@@ -384,7 +380,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER
     })

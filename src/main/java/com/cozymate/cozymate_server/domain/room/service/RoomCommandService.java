@@ -284,19 +284,12 @@ public class RoomCommandService {
     }
 
     public void sendInvitation(Long inviteeId, Long inviterId) {
-        Member inviterMember = memberRepository.findById(inviterId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         // 방장이 속한 방의 정보
         Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).roomId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), inviterId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 초대한 사용자가 방장인지 검증
         Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
@@ -332,7 +325,7 @@ public class RoomCommandService {
 
         // 푸시 알림 코드
         eventPublisher.publishEvent(
-            HostAndMemberAndRoomTargetDto.create(inviterMember, NotificationType.SEND_ROOM_INVITE,
+            HostAndMemberAndRoomTargetDto.create(inviter.getMember(), NotificationType.SEND_ROOM_INVITE,
                 inviteeMember, NotificationType.ARRIVE_ROOM_INVITE, room));
     }
 
@@ -420,18 +413,12 @@ public class RoomCommandService {
     }
 
     public void cancelInvitation(Long inviteeId, Long inviterId) {
-        memberRepository.findById(inviterId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).roomId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), inviterId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 초대한 사용자가 방장인지 검증
         Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
@@ -514,19 +501,12 @@ public class RoomCommandService {
     }
 
     public void respondToJoinRequest(Long requesterId, boolean accept, Long managerId) {
-        Member managerMember = memberRepository.findById(managerId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Member requestMember = memberRepository.findById(requesterId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         // 방장이 속한 방의 정보
         Room room = roomRepository.findById(roomQueryService.getExistRoom(managerId).roomId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), managerId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장인지 검증
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
@@ -561,7 +541,7 @@ public class RoomCommandService {
 
         // 푸시 알림 코드
         if (accept) {
-            eventPublisher.publishEvent(HostAndMemberAndRoomTargetDto.create(managerMember,
+            eventPublisher.publishEvent(HostAndMemberAndRoomTargetDto.create(manager.getMember(),
                 NotificationType.SELF_ACCEPT_ROOM_JOIN, requestMember,
                 NotificationType.ACCEPT_ROOM_JOIN, room));
 
@@ -577,7 +557,7 @@ public class RoomCommandService {
                 GroupRoomNameWithOutMeTargetDto.create(requestMember, memberList, room,
                     NotificationType.ROOM_IN));
         } else {
-            eventPublisher.publishEvent(HostAndMemberAndRoomTargetDto.create(managerMember,
+            eventPublisher.publishEvent(HostAndMemberAndRoomTargetDto.create(manager.getMember(),
                 NotificationType.SELF_REJECT_ROOM_JOIN, requestMember,
                 NotificationType.REJECT_ROOM_JOIN, room));
         }
