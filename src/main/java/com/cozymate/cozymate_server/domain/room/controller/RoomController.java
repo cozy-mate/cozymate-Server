@@ -149,7 +149,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER,
         ErrorStatus._ROOM_FULL,
@@ -235,7 +234,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER,
         ErrorStatus._INVITATION_NOT_FOUND
@@ -282,7 +280,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER,
         ErrorStatus._ROOM_ALREADY_EXISTS,
@@ -333,7 +330,6 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._NOT_ROOM_MATE,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER
     })
@@ -377,6 +373,19 @@ public class RoomController {
     public ResponseEntity<ApiResponse<List<RoomSearchResponseDTO>>> searchRooms(
         @RequestParam String keyword, @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.searchRooms(keyword, memberDetails.member().getId())));
+    }
+
+    @GetMapping("/invited-status/{memberId}")
+    @Operation(summary = "[바니] 방장이 사용자한테 방 참여 요청을 보냈는지 여부 조회", description = "방장이 memberId에게 방 참여 요청을 보냈는지 여부를 조회합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MANAGER
+    })
+    public ResponseEntity<ApiResponse<Boolean>> getInvitedStatus(
+        @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedStatus(memberId, memberDetails.member().getId())));
     }
 
 }
