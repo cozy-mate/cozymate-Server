@@ -43,8 +43,8 @@ public class MemberController {
 
     @PostMapping("/sign-in")
     @Operation(summary = "[말즈] 로그인",
-        description = "request Body : \"client_id\": \"123123\"<br>"
-            + "         *     \"social_type\": \"KAKAO\"<br>")
+        description = "`request Body : \"client_id\": \"123123\"`<br>"
+            + "         *     `\"social_type\": \"KAKAO\"`<br>")
     @SwaggerApiError({
         ErrorStatus._MEMBER_BINDING_FAIL,
     })
@@ -73,12 +73,12 @@ public class MemberController {
 
     @PostMapping("/sign-up")
     @Operation(summary = "[말즈] 회원가입",
-        description = "request Header : Bearer 임시토큰"
-            + "request Body : \"name\": \"John Doe\",<br>"
-            + "         *     \"nickName\": \"johnny\",<br>"
-            + "         *     \"gender\": \"MALE\",<br>"
-            + "         *     \"birthday\": \"1990-01-01\"<br>"
-            + "         *     \"persona\" : 1")
+        description = "`request Header : Bearer 임시토큰` <br>"
+            + "`request Body : \"name\": \"John Doe\",`<br>"
+            + "         *     `\"nickName\": \"johnny\",`<br>"
+            + "         *     `\"gender\": \"MALE\",`<br>"
+            + "         *     `\"birthday\": \"1990-01-01\"`<br>"
+            + "         *     `\"persona\" : 1`")
     @SwaggerApiError({
         ErrorStatus._MEMBER_BINDING_FAIL
     })
@@ -102,7 +102,7 @@ public class MemberController {
 
     @GetMapping("/member-info")
     @Operation(summary = "[말즈] 사용자 정보 조회",
-        description = "request Header : Bearer access토큰")
+        description = "`request Header : Bearer access토큰`")
     @SwaggerApiError({
         ErrorStatus._MEMBER_BINDING_FAIL,
         ErrorStatus._MEMBER_NOT_FOUND
@@ -127,7 +127,7 @@ public class MemberController {
 
     @PostMapping("/update-nickname")
     @Operation(summary = "[말즈] 사용자 닉네임 수정",
-        description = "사용자의 닉네임을 수정합니다.<br>예시: `nickname=happy_user`")
+        description = "사용자의 닉네임을 수정합니다.<br>예시: `nickname=말즈`")
     ResponseEntity<ApiResponse<Boolean>> updateNickname(
         @RequestParam String nickname,
         @AuthenticationPrincipal MemberDetails memberDetails
@@ -165,7 +165,7 @@ public class MemberController {
 
     @PostMapping("/update-majorName")
     @Operation(summary = "[말즈] 사용자 학과 수정",
-        description = "사용자의 학과명을 수정합니다.<br>학과명은 문자열 형식으로 전달됩니다.<br>예시: `majorName=Computer Science`")
+        description = "사용자의 학과명을 수정합니다.<br>학과명은 문자열 형식으로 전달됩니다.<br>예시: `majorName=컴퓨터공학과`")
     ResponseEntity<ApiResponse<Boolean>> updateMajorName(
         @RequestParam String majorName,
         @AuthenticationPrincipal MemberDetails memberDetails
