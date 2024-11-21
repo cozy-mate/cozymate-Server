@@ -11,13 +11,7 @@ import lombok.Getter;
 
 
 /**
- * {
- *     "nickname": "말즈",
- *     "gender": "MALE",
- *     "birthday": "2000-01-20",
- *     "persona" : 1,
- *     "university : 1
- * }
+ * { "nickname": "말즈", "gender": "MALE", "birthday": "2000-01-20", "persona" : 1, "university : 1 }
  */
 
 @Builder
@@ -39,5 +33,6 @@ public record SignUpRequestDTO(
     @NotNull
     Long universityId
 ) {
+
 }
 

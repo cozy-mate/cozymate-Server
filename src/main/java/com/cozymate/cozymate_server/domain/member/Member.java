@@ -78,4 +78,18 @@ public class Member extends BaseTimeEntity {
         this.university = university;
         this.majorName = majorName;
     }
+
+    public void updatePersona(Integer persona) {
+        this.persona = persona;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    public void updateBirthday(LocalDate birthDay) {
+        this.birthDay = birthDay;
+    }
+    public void updateMajor(String majorName) {
+        this.majorName = majorName;
+    }
 }

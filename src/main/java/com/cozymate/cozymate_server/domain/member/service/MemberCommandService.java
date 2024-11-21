@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.auth.utils.ClientIdMaker;
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
@@ -16,6 +17,7 @@ import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class MemberCommandService {
+
     // 의존성 주입
     private final AuthService authService;
     private final MemberQueryService memberQueryService;
@@ -55,7 +58,7 @@ public class MemberCommandService {
 
         String clientId = ClientIdMaker.makeClientId(signInRequestDTO.clientId(), socialType);
 
-        log.info(clientId);
+        log.debug("사용자 로그인 : {}",clientId);
         // 사용자가 기존 회원인지 확인하고, 로그인 처리
         if (memberQueryService.isPresent(clientId)) {
             return signInByExistingMember(clientId);
@@ -74,17 +77,16 @@ public class MemberCommandService {
      * @return 로그인 결과를 담은 DTO
      */
     public SignInResponseDTO signUp(String clientId,
-                                                      SignUpRequestDTO signUpRequestDTO) {
+        SignUpRequestDTO signUpRequestDTO) {
 
         if (memberQueryService.isPresent(clientId)) { // 사용자 중복 검증
             throw new GeneralException(ErrorStatus._MEMBER_EXISTING);
         }
         University memberUniversity = universityRepository.findById(signUpRequestDTO.universityId())
-                .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
-
-        memberRepository.save(MemberConverter.toMember(clientId, signUpRequestDTO,memberUniversity));
-        log.info(clientId);
+        memberRepository.save(
+            MemberConverter.toMember(clientId, signUpRequestDTO, memberUniversity));
 
         // 기존 회원으로 로그인 처리
         return signInByExistingMember(clientId);
@@ -102,9 +104,9 @@ public class MemberCommandService {
 
     @Transactional
     public TokenResponseDTO verifyMemberUniversity(MemberDetails memberDetails, Long universityId,
-                                                                   String majorName) {
+        String majorName) {
         University memberUniversity = universityRepository.findById(universityId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
         memberDetails.member().verifyMemberUniversity(memberUniversity, majorName);
         memberRepository.save(memberDetails.member());
@@ -112,13 +114,43 @@ public class MemberCommandService {
         return authService.generateMemberTokenDTO(memberDetails);
     }
 
+    @Transactional
+    public void updateNickname(Member member, String nickname) {
+        member = memberRepository.findById(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        if (!checkNickname(nickname)) {
+            throw new GeneralException(ErrorStatus._NICKNAME_EXISTING);
+        }
+        member.updateNickname(nickname);
+    }
+
+    @Transactional
+    public void updatePersona(Member member, Integer persona) {
+        member = memberRepository.findById(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        member.updatePersona(persona);
+    }
+
+    @Transactional
+    public void updateBirthday(Member member, LocalDate birthday) {
+        member = memberRepository.findById(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        member.updateBirthday(birthday);
+    }
+
+    @Transactional
+    public void updateMajor(Member member, String majorName) {
+        member = memberRepository.findById(member.getId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        member.updateMajor(majorName);
+    }
+
+
     /**
      * 사용자 회원탈퇴 메서드
      *
      * @param memberDetails 사용자 세부 정보
      */
-
-
     public void withdraw(MemberDetails memberDetails) {
         // 리프레시 토큰 삭제 및 회원 삭제
         authService.deleteRefreshToken(memberDetails.getUsername());
@@ -136,7 +168,8 @@ public class MemberCommandService {
         MemberDetails memberDetails = authService.loadMember(clientId);
 
         // 사용자 정보를 DTO로 변환
-        MemberDetailResponseDTO memberDetailResponseDTO = MemberConverter.toMemberDetailResponseDTOFromEntity(memberDetails.member());
+        MemberDetailResponseDTO memberDetailResponseDTO = MemberConverter.toMemberDetailResponseDTOFromEntity(
+            memberDetails.member());
 
         // 인증 토큰 생성 및 DTO로 변환
         TokenResponseDTO tokenResponseDTO = authService.generateMemberTokenDTO(memberDetails);
