@@ -38,18 +38,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequestMapping("/members")
 public class MemberController {
+
     private final MemberCommandService memberCommandService;
 
     @PostMapping("/sign-in")
     @Operation(summary = "[말즈] 로그인",
-            description = "request Body : \"client_id\": \"123123\",\n"
-                    + "         *     \"social_type\": \"KAKAO\",\n")
+        description = "request Body : \"client_id\": \"123123\",\n"
+            + "         *     \"social_type\": \"KAKAO\",\n")
     @SwaggerApiError({
-            ErrorStatus._MEMBER_BINDING_FAIL,
+        ErrorStatus._MEMBER_BINDING_FAIL,
     })
     ResponseEntity<ApiResponse<SignInResponseDTO>> signIn(
-            @RequestBody @Valid SignInRequestDTO signInRequestDTO,
-            BindingResult bindingResult) {
+        @RequestBody @Valid SignInRequestDTO signInRequestDTO,
+        BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
@@ -62,28 +63,29 @@ public class MemberController {
 
     @GetMapping("/check-nickname")
     @Operation(summary = "[말즈] 닉네임 유효성 검증",
-            description = "false : 사용 불가, true : 사용 가능")
+        description = "false : 사용 불가, true : 사용 가능")
     ResponseEntity<ApiResponse<Boolean>> checkNickname(@RequestParam String nickname) {
         Boolean isValid = memberCommandService.checkNickname(nickname);
 
-        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus()).body(ApiResponse.onSuccess(isValid));
+        return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
+            .body(ApiResponse.onSuccess(isValid));
     }
 
     @PostMapping("/sign-up")
     @Operation(summary = "[말즈] 회원가입",
-            description = "request Header : Bearer 임시토큰"
-                    + "request Body : \"name\": \"John Doe\",\n"
-                    + "         *     \"nickName\": \"johnny\",\n"
-                    + "         *     \"gender\": \"MALE\",\n"
-                    + "         *     \"birthday\": \"1990-01-01\"\n"
-                    + "         *     \"persona\" : 1")
+        description = "request Header : Bearer 임시토큰"
+            + "request Body : \"name\": \"John Doe\",\n"
+            + "         *     \"nickName\": \"johnny\",\n"
+            + "         *     \"gender\": \"MALE\",\n"
+            + "         *     \"birthday\": \"1990-01-01\"\n"
+            + "         *     \"persona\" : 1")
     @SwaggerApiError({
-            ErrorStatus._MEMBER_BINDING_FAIL
+        ErrorStatus._MEMBER_BINDING_FAIL
     })
     ResponseEntity<ApiResponse<SignInResponseDTO>> signUp(
-            @RequestAttribute("client_id") String clientId,
-            @RequestBody @Valid SignUpRequestDTO signUpRequestDTO,
-            BindingResult bindingResult
+        @RequestAttribute("client_id") String clientId,
+        @RequestBody @Valid SignUpRequestDTO signUpRequestDTO,
+        BindingResult bindingResult
     ) {
         log.info("enter MemberController : [post] /member/sign-up");
 
@@ -91,7 +93,8 @@ public class MemberController {
             throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
         }
 
-        SignInResponseDTO signInResponseDTO = memberCommandService.signUp(clientId, signUpRequestDTO);
+        SignInResponseDTO signInResponseDTO = memberCommandService.signUp(clientId,
+            signUpRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
     }
@@ -99,16 +102,16 @@ public class MemberController {
 
     @GetMapping("/member-info")
     @Operation(summary = "[말즈] 사용자 정보 조회",
-            description = "request Header : Bearer access토큰")
+        description = "request Header : Bearer access토큰")
     @SwaggerApiError({
-            ErrorStatus._MEMBER_BINDING_FAIL,
-            ErrorStatus._MEMBER_NOT_FOUND
+        ErrorStatus._MEMBER_BINDING_FAIL,
+        ErrorStatus._MEMBER_NOT_FOUND
     })
     ResponseEntity<ApiResponse<MemberDetailResponseDTO>> getMemberInfo(
-            @AuthenticationPrincipal MemberDetails memberDetails
+        @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        MemberDetailResponseDTO memberDetailResponseDTO = memberCommandService.getMemberDetailInfo(memberDetails);
-
+        MemberDetailResponseDTO memberDetailResponseDTO = memberCommandService.getMemberDetailInfo(
+            memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(memberDetailResponseDTO));
     }
@@ -116,7 +119,7 @@ public class MemberController {
 
     @GetMapping("/sign-out")
     @Operation(summary = "[말즈] 로그아웃",
-            description = "사용자를 로그아웃 시킵니다. 스웨거에서는 동작하지 않습니다!")
+        description = "사용자를 로그아웃 시킵니다. 스웨거에서는 동작하지 않습니다!")
     @Deprecated
     public void signOut() {
     }
@@ -124,10 +127,10 @@ public class MemberController {
 
     @PostMapping("/update-nickname")
     @Operation(summary = "[말즈] 사용자 닉네임 수정",
-            description = " ")
+        description = "사용자의 닉네임을 수정합니다.<br>예시: `nickname=happy_user`")
     ResponseEntity<ApiResponse<Boolean>> updateNickname(
-            @RequestParam String nickname,
-            @AuthenticationPrincipal MemberDetails memberDetails
+        @RequestParam String nickname,
+        @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         memberCommandService.updateNickname(memberDetails.member(), nickname);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
@@ -135,53 +138,51 @@ public class MemberController {
 
     @PostMapping("/update-persona")
     @Operation(summary = "[말즈] 사용자 프로필 이미지 수정",
-            description = " ")
+        description = "사용자의 프로필 이미지를 수정합니다.<br>1~16 사이의 정수값을 전달하며, 이 값은 사전에 정의된 이미지 ID를 나타냅니다.<br>예시: `persona=3`")
     ResponseEntity<ApiResponse<Boolean>> updatePersona(
-            @RequestParam
-            @Max(value = 16)
-            @Min(value = 1)
-            Integer persona,
-            @AuthenticationPrincipal MemberDetails memberDetails
+        @RequestParam
+        @Max(value = 16)
+        @Min(value = 1)
+        Integer persona,
+        @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberCommandService.updatePersona(memberDetails.member(),persona);
+        memberCommandService.updatePersona(memberDetails.member(), persona);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
 
     @PostMapping("/update-birthday")
     @Operation(summary = "[말즈] 사용자 생일 수정",
-            description = " ")
+        description = "사용자의 생일을 수정합니다.<br>날짜는 'yyyy-MM-dd' 형식으로 전달되어야 합니다.<br>예시: `localDate=2000-01-01`")
     ResponseEntity<ApiResponse<Boolean>> updateBirthday(
-            @RequestParam
-            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-            LocalDate localDate,
-            @AuthenticationPrincipal MemberDetails memberDetails
+        @RequestParam
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+        LocalDate localDate,
+        @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberCommandService.updateBirthday(memberDetails.member(),localDate);
+        memberCommandService.updateBirthday(memberDetails.member(), localDate);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
 
     @PostMapping("/update-majorName")
     @Operation(summary = "[말즈] 사용자 학과 수정",
-            description = " ")
+        description = "사용자의 학과명을 수정합니다.<br>학과명은 문자열 형식으로 전달됩니다.<br>예시: `majorName=Computer Science`")
     ResponseEntity<ApiResponse<Boolean>> updateMajorName(
-            @RequestParam String majorName,
-            @AuthenticationPrincipal MemberDetails memberDetails
+        @RequestParam String majorName,
+        @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberCommandService.updateMajor(memberDetails.member(),majorName);
+        memberCommandService.updateMajor(memberDetails.member(), majorName);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
-
 
 
     @Operation(summary = "[말즈] 회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
     @DeleteMapping("/withdraw")
     public ResponseEntity<ApiResponse<String>> withdraw(
-            @AuthenticationPrincipal MemberDetails memberDetails) {
+        @AuthenticationPrincipal MemberDetails memberDetails) {
         memberCommandService.withdraw(memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
-
 
 
 }
