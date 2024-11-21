@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.favorite.Favorite;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
@@ -324,12 +325,14 @@ public class RoomQueryService {
         return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.PENDING);
     }
 
-    public Boolean isFavoritedRoom(Long memberId, Long roomId) {
+    public Long isFavoritedRoom(Long memberId, Long roomId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         roomRepository.findById(roomId).orElseThrow(
             () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-        return favoriteRepository.existsByMemberAndTargetIdAndFavoriteType(member, roomId, FavoriteType.ROOM);
+        return favoriteRepository.findByMemberAndTargetIdAndFavoriteType(member, roomId, FavoriteType.ROOM)
+            .map(Favorite::getId)
+            .orElse(0L);
     }
 
     public List<RoomSearchResponseDTO> searchRooms(String keyword, Long memberId) {
