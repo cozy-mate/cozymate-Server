@@ -58,7 +58,7 @@ public class MemberCommandService {
 
         String clientId = ClientIdMaker.makeClientId(signInRequestDTO.clientId(), socialType);
 
-        log.info(clientId);
+        log.debug("사용자 로그인 : {}",clientId);
         // 사용자가 기존 회원인지 확인하고, 로그인 처리
         if (memberQueryService.isPresent(clientId)) {
             return signInByExistingMember(clientId);
@@ -87,7 +87,6 @@ public class MemberCommandService {
 
         memberRepository.save(
             MemberConverter.toMember(clientId, signUpRequestDTO, memberUniversity));
-        log.info(clientId);
 
         // 기존 회원으로 로그인 처리
         return signInByExistingMember(clientId);
