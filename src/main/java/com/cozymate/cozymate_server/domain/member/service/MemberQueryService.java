@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class MemberQueryService {
+
     private final MemberRepository memberRepository;
+
     @Transactional
     public Boolean isValidNickName(String nickname) {
         // todo: 금지 닉네임 로직 추가
@@ -24,7 +26,7 @@ public class MemberQueryService {
     @Transactional
     public Member findByClientId(String clientId) {
         return memberRepository.findByClientId(clientId).orElseThrow(
-                () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
         );
     }
 

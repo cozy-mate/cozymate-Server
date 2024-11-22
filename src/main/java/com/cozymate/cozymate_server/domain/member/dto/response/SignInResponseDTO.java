@@ -5,7 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record SignInResponseDTO(
-        TokenResponseDTO tokenResponseDTO,
-        MemberDetailResponseDTO memberDetailResponseDTO
+    TokenResponseDTO tokenResponseDTO,
+    MemberDetailResponseDTO memberDetailResponseDTO
 ) {
+
 }

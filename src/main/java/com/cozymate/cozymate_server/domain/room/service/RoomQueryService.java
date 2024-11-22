@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.favorite.Favorite;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
@@ -183,15 +184,9 @@ public class RoomQueryService {
     }
 
     public List<MateDetailResponseDTO> getPendingMemberList(Long managerId) {
-        memberRepository.findById(managerId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         // 방장이 속한 방의 정보
         Room room = roomRepository.findById(getExistRoom(managerId).roomId())
             .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), managerId, EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장인지 검증
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
@@ -330,12 +325,14 @@ public class RoomQueryService {
         return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.PENDING);
     }
 
-    public Boolean isFavoritedRoom(Long memberId, Long roomId) {
+    public Long isFavoritedRoom(Long memberId, Long roomId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         roomRepository.findById(roomId).orElseThrow(
             () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-        return favoriteRepository.existsByMemberAndTargetIdAndFavoriteType(member, roomId, FavoriteType.ROOM);
+        return favoriteRepository.findByMemberAndTargetIdAndFavoriteType(member, roomId, FavoriteType.ROOM)
+            .map(Favorite::getId)
+            .orElse(0L);
     }
 
     public List<RoomSearchResponseDTO> searchRooms(String keyword, Long memberId) {
@@ -393,4 +390,30 @@ public class RoomQueryService {
             .toList();
     }
 
+    public boolean checkInvitationStatus(Member viewer, List<Mate> mates) {
+        return mates.stream()
+            .filter(m -> m.getEntryStatus().equals(EntryStatus.PENDING))
+            .anyMatch(m -> mateRepository.findByMember(viewer)
+                .filter(viewerMate ->
+                    viewerMate.isRoomManager() &&
+                        viewerMate.getRoom().equals(m.getRoom()))
+                .isPresent());
+    }
+
+    public Boolean getInvitedStatus(Long memberId, Long managerId) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(getExistRoom(managerId).roomId())
+            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        // 방장인지 검증
+        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
+        if (!manager.getMember().getId().equals(managerId)) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
+
+        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId, EntryStatus.INVITED);
+    }
 }

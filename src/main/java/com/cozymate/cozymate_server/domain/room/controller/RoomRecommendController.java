@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.room.dto.RoomRecommendResponseDto.RoomRecommendationResponseList;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomRecommendationResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
 import com.cozymate.cozymate_server.domain.room.service.RoomRecommendService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +32,7 @@ public class RoomRecommendController {
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS
     })
-    public ResponseEntity<ApiResponse<PageResponseDto<RoomRecommendationResponseList>>> getRoomList(
+    public ResponseEntity<ApiResponse<PageResponseDto<List<RoomRecommendationResponseDTO>>>> getRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam @Positive @Max(10) int size,
         @RequestParam int page,
