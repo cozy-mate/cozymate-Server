@@ -12,7 +12,7 @@ public record RoomDetailResponseDTO(
     Long managerMemberId,
     String managerNickname,
     Boolean isRoomManager,
-    Boolean isFavorited,
+    Long favoriteId,
     Integer maxMateNum,
     Integer arrivalMateNum,
     String dormitoryName,
