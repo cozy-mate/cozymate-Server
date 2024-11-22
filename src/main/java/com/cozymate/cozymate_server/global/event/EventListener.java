@@ -4,7 +4,6 @@ import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupRoomNam
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.HostAndMemberAndRoomTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetReverseWithRoomName;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.TopicTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
@@ -52,10 +51,5 @@ public class EventListener {
     @TransactionalEventListener
     public void sendNotification(HostAndMemberAndRoomTargetDto hostAndMemberAndRoomTargetDto) {
         fcmPushService.sendNotification(hostAndMemberAndRoomTargetDto);
-    }
-
-    @TransactionalEventListener
-    public void sendNotification(TopicTargetDto topicTargetDto) {
-        fcmPushService.sendNotification(topicTargetDto);
     }
 }

@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.fcm.dto.MessageResult;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.MulticastMessage;
 import com.google.firebase.messaging.Notification;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,8 +88,9 @@ public class MessageUtil {
         return getMessageResult(fcmList, content);
     }
 
-    public Message createMessage(String content, String topic) {
+    public MulticastMessage createMessage(List<String> fcmTokenValueList, String content) {
         HashMap<String, String> messageMap = new HashMap<>();
+
         messageMap.put("title", NOTIFICATION_TITLE);
         messageMap.put("body", content);
 
@@ -97,13 +99,11 @@ public class MessageUtil {
             .setBody(content)
             .build();
 
-        Message message = Message.builder()
+        return MulticastMessage.builder()
             .putAllData(messageMap)
-            .setTopic(topic)
             .setNotification(notification)
+            .addAllTokens(fcmTokenValueList)
             .build();
-
-        return message;
     }
 
     private String getContent(Member member, NotificationType notificationType) {
@@ -124,7 +124,7 @@ public class MessageUtil {
         return notificationType.generateContent(FcmPushContentDto.create(member, room));
     }
 
-    private static MessageResult getMessageResult(List<Fcm> fcmList, String content) {
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()

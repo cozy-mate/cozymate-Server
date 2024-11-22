@@ -17,4 +17,6 @@ public interface FcmRepository extends JpaRepository<Fcm, String> {
     void updateValidByToken(@Param("token") String token);
 
     List<Fcm> findByMemberAndIsValidIsTrue(Member member);
+
+    List<Fcm> findAllByIsValidIsTrue();
 }
