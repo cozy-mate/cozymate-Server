@@ -14,9 +14,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class AsyncConfig implements AsyncConfigurer {
 
-    private static final int CORE_POOL_SIZE = 1;
+    private static final int CORE_POOL_SIZE = 2;
     private static final int MAX_POOL_SIZE = 3;
-    private static final int QUEUE_CAPACITY = 100;
+    private static final int QUEUE_CAPACITY = 200;
 
     @Override
     public Executor getAsyncExecutor() {
@@ -25,6 +25,9 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setMaxPoolSize(MAX_POOL_SIZE);
         executor.setQueueCapacity(QUEUE_CAPACITY);
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setKeepAliveSeconds(20);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(10);
         executor.setThreadNamePrefix("async-executor-");
         executor.setTaskDecorator(new MdcCopyTaskDecorator()); // TaskDecorator 설정
         executor.initialize();

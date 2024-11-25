@@ -226,24 +226,4 @@ public class FcmPushTargetDto {
                 memberNotificationType, room);
         }
     }
-
-    /**
-     * 공지사항에 대한 알림처럼 같은 내용을 다수에게 보낼 때 사용
-     * fcm topic 사용해서 푸시 알림 보낼때 사용합니다
-     */
-    @Getter
-    public static class TopicTargetDto {
-
-        private final String topic;
-        private final String content;
-
-        private TopicTargetDto(String topic, String content) {
-            this.topic = topic;
-            this.content = content;
-        }
-
-        public static TopicTargetDto create(String topic, String content) {
-            return new TopicTargetDto(topic, content);
-        }
-    }
 }
