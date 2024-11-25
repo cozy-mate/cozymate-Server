@@ -60,8 +60,6 @@ public class Room extends BaseTimeEntity {
 
     private int numOfArrival = 1;
 
-
-
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
     private Feed feed;
 
