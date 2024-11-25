@@ -36,6 +36,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -213,6 +214,12 @@ public class RoomCommandService {
         room.quit();
         roomRepository.save(room);
 
+        // 방장일 경우 가장 먼저 들어온 룸메이트에게 방장 위임
+        if (quittingMate.isRoomManager()) {
+            assignNewRoomManager(roomId, quittingMate);
+        }
+
+        // 방이 비었다면 방 삭제
         if (room.getNumOfArrival() == 0) {
             // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
             deleteRoomDatas(roomId);
@@ -230,6 +237,21 @@ public class RoomCommandService {
 
         eventPublisher.publishEvent(GroupRoomNameWithOutMeTargetDto.create(member, memberList, room,
             NotificationType.ROOM_OUT));
+    }
+
+    private void assignNewRoomManager(Long roomId, Mate quittingMate) {
+        quittingMate.setNotRoomManager();
+        mateRepository.save(quittingMate);
+        List<Mate> remainingMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED);
+
+        if (remainingMates.isEmpty()) {
+            return;
+        }
+        Mate newManager = remainingMates.stream()
+            .min(Comparator.comparing(Mate::getCreatedAt))
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND)); // 방장 없음 예외 처리
+        newManager.setRoomManager();
+        mateRepository.save(newManager);
     }
 
     private void deleteRoomDatas(Long roomId) {
