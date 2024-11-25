@@ -19,6 +19,8 @@ import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
 import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.report.repository.ReportRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
+import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 
@@ -50,6 +52,8 @@ public class MemberWithdrawService {
     private final RoleRepository roleRepository;
     private final TodoRepository todoRepository;
     private final RoomLogRepository roomLogRepository;
+
+    private final RoomCommandService roomCommandService;
 
 
     /**
@@ -95,7 +99,10 @@ public class MemberWithdrawService {
         log.debug("Fcm 토큰, 알림 내역 삭제 완료");
 
         mateRepository.findAllByMemberId(member.getId())
-            .forEach(this::deleteRelatedWithMate);
+            .forEach(mate -> {
+                deleteRelatedWithMate(mate);
+                roomCommandService.quitRoom(mate.getRoom().getId(), mate.getMember().getId());
+            });
 
         mateRepository.deleteAllByMemberId(member.getId());
 
@@ -111,12 +118,10 @@ public class MemberWithdrawService {
     private void handleChatAndChatRoom(Member member) {
         chatRepository.bulkDeleteSender(member);
 
-
         log.debug("쪽지 처리 완료");
 
         chatRoomRepository.bulkDeleteMemberA(member);
         chatRoomRepository.bulkDeleteMemberB(member);
-
 
         log.debug("쪽지방 처리 완료");
 
