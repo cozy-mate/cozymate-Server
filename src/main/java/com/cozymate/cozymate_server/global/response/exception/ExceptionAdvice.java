@@ -94,6 +94,10 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     public ResponseEntity onThrowException(GeneralException generalException,
         HttpServletRequest request) {
 
+        log.info("[   ERROR] rid {} | code {} | message {}", MDC.get(MdcKey.REQUEST_ID.name()),
+            generalException.getErrorReasonHttpStatus().getCode(),
+            generalException.getErrorReasonHttpStatus().getMessage());
+
         Sentry.withScope(scope -> {
             GeneralException newGeneralException = new GeneralException(
                 generalException.getErrorReasonHttpStatus().getMessage(), // 메시지
