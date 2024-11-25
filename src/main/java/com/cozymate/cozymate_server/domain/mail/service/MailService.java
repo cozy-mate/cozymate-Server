@@ -15,14 +15,19 @@ import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +53,7 @@ public class MailService {
         validateMailAddress(mailAddress, university.getMailPattern());
 
         MailAuthentication mailAuthentication = createAndSendMail(memberDetails.member().getId(),
-            mailAddress);
+            mailAddress, university.getName());
 
         mailRepository.save(mailAuthentication);
     }
@@ -96,20 +101,28 @@ public class MailService {
         mailAuthentication.verify();
     }
 
-    private MailAuthentication createAndSendMail(Long memberId, String mailAddress) {
-        SimpleMailMessage message = new SimpleMailMessage();
+    private MailAuthentication createAndSendMail(Long memberId, String mailAddress, String universityName) {
 
         String authenticationCode = Base64.getEncoder()
             .encodeToString(UUID.randomUUID().toString().getBytes())
             .substring(0, 6);
 
-        message.setTo(mailAddress);
-        message.setSubject("COZYMATE 대학교 메일인증");
-        message.setText("COZYMATE 대학교 메일인증 코드입니다 : " + authenticationCode);
-        mailSender.send(message);
+        String emailBody = makeMailBody(authenticationCode,universityName);
 
-        return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress,
-            authenticationCode, false);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(mailAddress);
+            helper.setSubject("cozymate 대학교 메일인증");
+            helper.setText(emailBody, true);
+            mailSender.send(message);
+
+            return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress,
+                authenticationCode, false);
+        }catch (MessagingException e){
+            throw new GeneralException(ErrorStatus._MAIL_SEND_FAIL);
+        }
     }
 
     private void validateMailAddress(String mailAddress, String mailPattern) {
@@ -121,6 +134,25 @@ public class MailService {
         }
         if (mailAuthentication.isPresent() && mailAuthentication.get().getIsVerified()) {
             throw new GeneralException(ErrorStatus._MAIL_ADDRESS_DUPLICATED);
+        }
+    }
+
+    private String makeMailBody(String authenticationCode, String universityName) {
+        try {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
+                "mail/mail_form.html");
+
+            if (inputStream == null) {
+                throw new GeneralException(ErrorStatus._CANNOT_FIND_MAIL_FORM);
+            }
+            String template = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+            template = template.replace("{{universityName}}", universityName)
+                .replace("{{authenticationCode}}", authenticationCode);
+
+            return template;
+        } catch (IOException e) {
+            throw new GeneralException(ErrorStatus._CANNOT_FIND_MAIL_FORM);
         }
     }
 
