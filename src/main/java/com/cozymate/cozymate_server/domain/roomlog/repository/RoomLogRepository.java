@@ -20,6 +20,6 @@ public interface RoomLogRepository extends JpaRepository<RoomLog, Long> {
 
     @Modifying
     @Query("UPDATE RoomLog rl SET rl.todo = null WHERE rl.todo = :todo")
-    void bulkUpdateTodo(@Param("todo") Todo todo);
+    void bulkDeleteTodo(@Param("todo") Todo todo);
 
 }

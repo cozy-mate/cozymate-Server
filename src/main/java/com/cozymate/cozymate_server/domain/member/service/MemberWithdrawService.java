@@ -85,7 +85,7 @@ public class MemberWithdrawService {
 
         handleChatAndChatRoom(member);
 
-        reportRepository.bulkUpdateReporterByMember(member);
+        reportRepository.bulkDeleteReporter(member);
 
         log.debug("신고내역 처리 완료");
 
@@ -109,13 +109,13 @@ public class MemberWithdrawService {
      * chatroom의 참여자가 모두 null이면 chatroom을 삭제한다.
      */
     private void handleChatAndChatRoom(Member member) {
-        chatRepository.bulkUpdateSenderByMember(member);
+        chatRepository.bulkDeleteSender(member);
 
 
         log.debug("쪽지 처리 완료");
 
-        chatRoomRepository.bulkUpdateMemberAByMember(member);
-        chatRoomRepository.bulkUpdateMemberBByMember(member);
+        chatRoomRepository.bulkDeleteMemberA(member);
+        chatRoomRepository.bulkDeleteMemberB(member);
 
 
         log.debug("쪽지방 처리 완료");
@@ -151,12 +151,15 @@ public class MemberWithdrawService {
         todoRepository.findAllByMateId(mate.getId()).forEach(todo -> {
             todo.removeAssignee(mate.getId());
 
-            roomLogRepository.bulkUpdateTodo(todo);
+            roomLogRepository.bulkDeleteTodo(todo);
 
             if (todo.isAssignedMateListEmpty()) {
                 todoRepository.delete(todo);
             }
         });
+
+        roleRepository.bulkDeleteMate(mate);
+        todoRepository.bulkDeleteMate(mate);
 
         log.debug("todo 삭제 완료");
         log.debug("mate 관련 엔티티 삭제 완료");

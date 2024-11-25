@@ -23,5 +23,5 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     @Modifying
     @Query("UPDATE Chat c SET c.sender = null WHERE c.sender = :member")
-    void bulkUpdateSenderByMember(@Param("member") Member member);
+    void bulkDeleteSender(@Param("member") Member member);
 }

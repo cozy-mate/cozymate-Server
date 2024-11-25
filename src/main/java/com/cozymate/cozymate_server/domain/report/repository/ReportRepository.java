@@ -21,5 +21,5 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     @Modifying
     @Query("UPDATE Report r SET r.reporter = null WHERE r.reporter = :member")
-    void bulkUpdateReporterByMember(@Param("member") Member member);
+    void bulkDeleteReporter(@Param("member") Member member);
 }

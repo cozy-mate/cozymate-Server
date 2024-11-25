@@ -25,9 +25,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     @Modifying
     @Query("UPDATE ChatRoom c SET c.memberA = null WHERE c.memberA = :member")
-    void bulkUpdateMemberAByMember(@Param("member") Member member);
+    void bulkDeleteMemberA(@Param("member") Member member);
 
     @Modifying
     @Query("UPDATE ChatRoom c SET c.memberB = null WHERE c.memberB = :member")
-    void bulkUpdateMemberBByMember(@Param("member") Member member);
+    void bulkDeleteMemberB(@Param("member") Member member);
 }
