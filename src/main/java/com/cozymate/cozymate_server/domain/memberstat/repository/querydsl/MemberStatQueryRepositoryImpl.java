@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -32,6 +32,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository {
 
+    private static final Logger log = LoggerFactory.getLogger(MemberStatQueryRepositoryImpl.class);
     private final JPAQueryFactory queryFactory;
     private static final Integer NUM_OF_ROOMMATE_NOT_DETERMINED = 0;
     private static final String PERSONALITY = "personality";
@@ -44,7 +45,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .from(memberStat)
             .join(memberStat.member, member)
             .leftJoin(memberStatEquality)
-            .on(memberStat.member.id.eq(memberStatEquality.memberBId)
+            .on(memberStatEquality.memberBId.eq(memberStat.member.id)
                 .and(memberStatEquality.memberAId.eq(criteriaMemberStat.getMember().getId())))
             .where(initDefaultQuery(criteriaMemberStat));
     }
@@ -126,11 +127,19 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         // pageSize + 1만큼 데이터를 조회하여 다음 페이지 여부 확인
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
             .where(applyFilters(filterList, criteriaMemberStat))
-            .orderBy(memberStatEquality.equality.desc()) // equality 기준으로 정렬
+            .orderBy(memberStatEquality.equality.desc(),
+                member.nickname.asc(),
+                memberStat.id.asc()) // equality 기준으로 정렬
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize() + 1) // 다음 페이지 확인을 위해 추가 데이터 조회
             .fetch();
-
+//        System.out.println("Offset: " + pageable.getOffset());
+//        System.out.println("Page Size: " + pageable.getPageSize());
+        results.forEach(tuple -> {
+            MemberStat stat = tuple.get(memberStat);
+            Integer equality = tuple.get(memberStatEquality.equality);
+            System.out.println("MemberStat: " + stat.getMember().getNickname() + ", Equality: " + equality);
+        });
         // results 크기를 기준으로 hasNext 계산
         boolean hasNext = results.size() > pageable.getPageSize();
 
@@ -160,7 +169,9 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         // pageSize + 1만큼 데이터를 조회하여 다음 페이지 여부 확인
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
             .where(applyFilters(filterMap, criteriaMemberStat))
-            .orderBy(memberStatEquality.equality.desc()) // equality 기준으로 정렬
+            .orderBy(memberStatEquality.equality.desc(),
+                member.nickname.asc(),
+                memberStat.id.asc()) // equality 기준으로 정렬
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize() + 1) // 다음 페이지 확인을 위해 추가 데이터 조회
             .fetch();
