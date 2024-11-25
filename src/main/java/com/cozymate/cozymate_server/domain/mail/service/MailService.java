@@ -67,13 +67,13 @@ public class MailService {
         return MailConverter.toVerifyResponseDTO(tokenResponseDTO);
     }
 
-    public Boolean isVerified(Member member) {
+    public String isVerified(Member member) {
         Optional<MailAuthentication> mailAuthentication = mailRepository.findById(member.getId());
 
-        if (mailAuthentication.isPresent() && mailAuthentication.get().getIsVerified()) {
-            return true;
+        if (mailAuthentication.isPresent() && Boolean.TRUE.equals(mailAuthentication.get().getIsVerified())) {
+            return mailAuthentication.get().getMailAddress();
         }
-        return false;
+        return "";
     }
 
     private void verifyAuthenticationCode(Member member, String requestCode) {

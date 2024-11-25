@@ -54,8 +54,8 @@ public class MailController {
     }
 
     @GetMapping("/verify")
-    @Operation(summary = "[무빗] 메일 인증 여부 반환", description = "메일인증을 받은적이 없거나, 받았는데 인증 확인이 안된 경우 false 반환, 메일 인증을 받고, 인증 확인이 된 경우 true 반환")
-    public ResponseEntity<ApiResponse<Boolean>> isVerified(
+    @Operation(summary = "[무빗] 메일 인증 여부 반환", description = "메일인증을 받은적이 없거나, 받았는데 인증 확인이 안된 경우 빈 문자열 반환, 메일 인증을 받고, 인증 확인이 된 경우 인증된 메일 주소 반환")
+    public ResponseEntity<ApiResponse<String>> isVerified(
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         return ResponseEntity.ok(
