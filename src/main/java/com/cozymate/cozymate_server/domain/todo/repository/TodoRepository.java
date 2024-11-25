@@ -25,4 +25,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo>findByTimePointAndRoleIsNotNull(LocalDate today);
 
 //    boolean existsByMateAndTimePointAndCompletedFalse(Mate mate, LocalDate timePoint);
+
+
+    List<Todo>findAllByMateId(Long mateId);
 }

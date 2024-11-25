@@ -93,4 +93,8 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
         @Param("isRoomManager") boolean isRoomManager);
 
     List<Mate> findAllByEntryStatus(EntryStatus entryStatus);
+
+    List<Mate> findAllByMemberId(Long memberId);
+
+    void deleteAllByMemberId(Long memberId);
 }

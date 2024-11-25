@@ -29,5 +29,6 @@ public interface MemberStatRepository extends
 
     List<MemberStat> findByMember_GenderAndMember_University_Id(Gender gender, Long universityId);
 
+    void deleteByMemberId(Long memberId);
 
 }
