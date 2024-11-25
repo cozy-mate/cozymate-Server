@@ -349,8 +349,20 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<String>> convertToPublicRoom(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        roomCommandService.convertToPublicRoom(roomId, memberDetails.member().getId());
+        roomCommandService.changeToPublicRoom(roomId, memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess("공개방 전환 완료"));
+    }
+
+    @PatchMapping("/{roomId}/to-private")
+    @Operation(summary = "[바니] 비공개방으로 전환", description = "roomId에 해당하는 방을 비공개방으로 전환합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+    })
+    public ResponseEntity<ApiResponse<String>> convertToPrivateRoom(
+        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        roomCommandService.changeToPrivateRoom(roomId, memberDetails.member().getId());
+        return ResponseEntity.ok(ApiResponse.onSuccess("비공개방 전환 완료"));
     }
 
     @GetMapping("/{roomId}/pending-status")

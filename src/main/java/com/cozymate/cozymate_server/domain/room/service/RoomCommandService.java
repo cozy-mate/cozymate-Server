@@ -175,12 +175,10 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        if (!manager.getMember().getId().equals(memberId)) {
+        if (!member.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
@@ -286,12 +284,10 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        if (!manager.getMember().getId().equals(memberId)) {
+        if (!member.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
@@ -585,15 +581,14 @@ public class RoomCommandService {
         }
     }
 
-    public void convertToPublicRoom(Long roomId, Long memberId) {
+    public void changeToPublicRoom(Long roomId, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
-                EntryStatus.JOINED)
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장이 아니면 예외 발생
@@ -605,7 +600,30 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._PUBLIC_ROOM);
         }
 
-        room.convertToPublicRoom();
+        room.changeToPublicRoom();
+        roomRepository.save(room);
+    }
+
+    public void changeToPrivateRoom(Long roomId, Long memberId) {
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+                EntryStatus.JOINED)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+
+        if (!member.isRoomManager()) {
+            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        }
+
+        if (room.getRoomType() != RoomType.PUBLIC) {
+            throw new GeneralException(ErrorStatus._PRIVATE_ROOM);
+        }
+
+        room.changeToPrivateRoom();
         roomRepository.save(room);
     }
 
