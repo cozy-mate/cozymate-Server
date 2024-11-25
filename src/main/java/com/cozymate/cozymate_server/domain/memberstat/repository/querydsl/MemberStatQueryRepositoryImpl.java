@@ -133,13 +133,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize() + 1) // 다음 페이지 확인을 위해 추가 데이터 조회
             .fetch();
-//        System.out.println("Offset: " + pageable.getOffset());
-//        System.out.println("Page Size: " + pageable.getPageSize());
-        results.forEach(tuple -> {
-            MemberStat stat = tuple.get(memberStat);
-            Integer equality = tuple.get(memberStatEquality.equality);
-            System.out.println("MemberStat: " + stat.getMember().getNickname() + ", Equality: " + equality);
-        });
+
         // results 크기를 기준으로 hasNext 계산
         boolean hasNext = results.size() > pageable.getPageSize();
 
