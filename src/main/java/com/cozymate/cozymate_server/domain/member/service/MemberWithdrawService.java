@@ -71,7 +71,7 @@ public class MemberWithdrawService {
      */
 
     private void deleteRelatedWithMember(Member member) {
-        log.debug("시작");
+        log.debug("사용자 관련 데이터 삭제 시작");
         tokenRepository.deleteById(member.getClientId());
         mailRepository.deleteById(member.getId());
 
