@@ -358,6 +358,9 @@ public class RoomController {
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MATE,
+        ErrorStatus._NOT_ROOM_MANAGER,
+        ErrorStatus._PRIVATE_ROOM,
     })
     public ResponseEntity<ApiResponse<String>> convertToPrivateRoom(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
