@@ -73,8 +73,7 @@ public class Room extends BaseTimeEntity {
 
     public void isRoomFull() {
         if (numOfArrival == maxMateNum) {
-            this.status = RoomStatus.ENABLE;
-            this.enabledAt = LocalDate.now();
+            enableRoom();
         }
     }
 
