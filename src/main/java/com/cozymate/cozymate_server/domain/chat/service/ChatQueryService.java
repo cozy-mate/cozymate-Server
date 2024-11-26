@@ -8,11 +8,11 @@ import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberblock.util.MemberBlockUtil;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,28 +24,43 @@ public class ChatQueryService {
 
     private final ChatRepository chatRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final MemberBlockUtil memberBlockUtil;
 
+    private static final String UNKNOWN_SENDER_NICKNAME = "(알수없음)";
+    private static final String SELF_INDICATOR = " (나)";
+
+    @Transactional
     public ChatListResponseDTO getChatList(Member member, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
 
-        if (!member.getId().equals(chatRoom.getMemberA().getId())
-            && !member.getId().equals(chatRoom.getMemberB().getId())) {
-            throw new GeneralException(ErrorStatus._CHATROOM_MEMBER_MISMATCH);
-        }
-
-        checkBlockedMember(member, chatRoom);
+        checkMemberMisMatch(member, chatRoom);
 
         List<Chat> filteredChatList = getFilteredChatList(chatRoom, member);
+
+        updateLastSeenAt(member, chatRoom);
 
         List<ChatContentResponseDTO> chatResponseDtoList = toChatResponseDTOList(filteredChatList,
             member);
 
-        Long recipientId = member.getId().equals(chatRoom.getMemberA().getId())
-            ? chatRoom.getMemberB().getId() : chatRoom.getMemberA().getId();
+        Long recipientId = null;
+        if (Objects.nonNull(chatRoom.getMemberA()) && Objects.nonNull(chatRoom.getMemberB())) {
+            recipientId = member.getId().equals(chatRoom.getMemberA().getId())
+                ? chatRoom.getMemberB().getId() : chatRoom.getMemberA().getId();
+        }
 
         return ChatConverter.toChatResponseDTO(recipientId, chatResponseDtoList);
+    }
+
+    private void checkMemberMisMatch(Member member, ChatRoom chatRoom) {
+        if (Objects.isNull(chatRoom.getMemberA())
+            && !member.getId().equals(chatRoom.getMemberB().getId())) {
+            throw new GeneralException(ErrorStatus._CHATROOM_MEMBER_MISMATCH);
+        }
+
+        if (Objects.isNull(chatRoom.getMemberB())
+            && !member.getId().equals(chatRoom.getMemberA().getId())) {
+            throw new GeneralException(ErrorStatus._CHATROOM_MEMBER_MISMATCH);
+        }
     }
 
     private List<Chat> getFilteredChatList(ChatRoom chatRoom, Member member) {
@@ -58,30 +73,57 @@ public class ChatQueryService {
     }
 
     private LocalDateTime getMemberLastDeleteAt(ChatRoom chatRoom, Member member) {
+        if (Objects.isNull(chatRoom.getMemberA())) {
+            return chatRoom.getMemberBLastDeleteAt();
+        }
+
+        if (Objects.isNull(chatRoom.getMemberB())) {
+            return chatRoom.getMemberALastDeleteAt();
+        }
+
         return chatRoom.getMemberA().getNickname().equals(member.getNickname())
             ? chatRoom.getMemberALastDeleteAt()
             : chatRoom.getMemberBLastDeleteAt();
     }
 
+    private void updateLastSeenAt(Member member, ChatRoom chatRoom) {
+        if (Objects.isNull(chatRoom.getMemberA())) {
+            chatRoom.updateMemberBLastSeenAt();
+            return;
+        }
+
+        if (Objects.isNull(chatRoom.getMemberB())) {
+            chatRoom.updateMemberALastSeenAt();
+            return;
+        }
+
+        if (chatRoom.getMemberA().getId().equals(member.getId())) {
+            chatRoom.updateMemberALastSeenAt();
+        } else {
+            chatRoom.updateMemberBLastSeenAt();
+        }
+    }
+
     private List<ChatContentResponseDTO> toChatResponseDTOList(List<Chat> chatList, Member member) {
         return chatList.stream()
             .map(chat -> {
-                String senderNickname = chat.getSender().getNickname();
-                String nickname = senderNickname.equals(member.getNickname())
-                    ? senderNickname + " (나)"
-                    : senderNickname;
-                return ChatConverter.toChatContentResponseDTO(nickname, chat.getContent(),
-                    chat.getCreatedAt());
+                Member sender = chat.getSender();
+
+                if (Objects.isNull(sender)) {
+                    String nickname = UNKNOWN_SENDER_NICKNAME;
+
+                    return ChatConverter.toChatContentResponseDTO(nickname, chat.getContent(),
+                        chat.getCreatedAt());
+                } else {
+                    String nickname = sender.getNickname();
+                    nickname = nickname.equals(member.getNickname())
+                        ? nickname + SELF_INDICATOR
+                        : nickname;
+
+                    return ChatConverter.toChatContentResponseDTO(nickname, chat.getContent(),
+                        chat.getCreatedAt());
+                }
             })
             .toList();
-    }
-
-    private void checkBlockedMember(Member member, ChatRoom chatRoom) {
-        Member otherMember = member.getId().equals(chatRoom.getMemberA())
-            ? chatRoom.getMemberB() : chatRoom.getMemberA();
-
-        if (memberBlockUtil.existsMemberBlock(member, otherMember.getId())) {
-            throw new GeneralException(ErrorStatus._REQUEST_TO_BLOCKED_MEMBER);
-        }
     }
 }
