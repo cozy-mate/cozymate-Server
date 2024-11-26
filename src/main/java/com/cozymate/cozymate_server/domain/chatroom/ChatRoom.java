@@ -36,11 +36,23 @@ public class ChatRoom extends BaseTimeEntity {
 
     private LocalDateTime memberBLastDeleteAt;
 
+    private LocalDateTime memberALastSeenAt;
+
+    private LocalDateTime memberBLastSeenAt;
+
     public void updateMemberALastDeleteAt() {
         this.memberALastDeleteAt = LocalDateTime.now();
     }
 
     public void updateMemberBLastDeleteAt() {
         this.memberBLastDeleteAt = LocalDateTime.now();
+    }
+
+    public void updateMemberALastSeenAt() {
+        this.memberALastSeenAt = LocalDateTime.now();
+    }
+
+    public void updateMemberBLastSeenAt() {
+        this.memberBLastSeenAt = LocalDateTime.now();
     }
 }

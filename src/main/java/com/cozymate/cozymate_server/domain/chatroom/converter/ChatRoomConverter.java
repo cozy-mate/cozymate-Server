@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.chatroom.converter;
 
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.CountChatRoomsWithNewChatDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -17,13 +18,14 @@ public class ChatRoomConverter {
     }
 
     public static ChatRoomDetailResponseDTO toChatRoomDetailResponseDTO(String nickname, String content,
-        Long chatRoomId, Integer persona, Long memberId) {
+        Long chatRoomId, Integer persona, Long memberId, boolean hasNewChat) {
         return ChatRoomDetailResponseDTO.builder()
             .nickname(nickname)
             .lastContent(content)
             .chatRoomId(chatRoomId)
             .persona(persona)
             .memberId(memberId)
+            .hasNewChat(hasNewChat)
             .build();
     }
 
@@ -37,6 +39,12 @@ public class ChatRoomConverter {
         return ChatRoomSimpleDTO.builder()
             .chatRoom(chatRoom)
             .recipient(recipient)
+            .build();
+    }
+
+    public static CountChatRoomsWithNewChatDTO toCountChatRoomsWithNewChatDTO(Integer hasNewChatCount) {
+        return CountChatRoomsWithNewChatDTO.builder()
+            .hasNewChatCount(hasNewChatCount)
             .build();
     }
 }
