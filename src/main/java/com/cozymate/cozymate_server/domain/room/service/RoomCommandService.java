@@ -80,6 +80,7 @@ public class RoomCommandService {
 
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPrivateRoom(request, inviteCode);
+        room.enableRoom();
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
@@ -249,7 +250,6 @@ public class RoomCommandService {
             .min(Comparator.comparing(Mate::getCreatedAt))
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND)); // 방장 없음 예외 처리
         newManager.setRoomManager();
-        mateRepository.save(newManager);
     }
 
     private void deleteRoomDatas(Long roomId) {
@@ -267,8 +267,8 @@ public class RoomCommandService {
             Feed feed = feedRepository.findByRoomId(roomId);
             List<Post> posts = postRepository.findByFeedId(feed.getId());
             for (Post post : posts) {
-                postCommentRepository.deleteByPostId(post.getId());
-                postImageRepository.deleteByPostId(post.getId());
+                postCommentRepository.deleteAllByPostId(post.getId());
+                postImageRepository.deleteAllByPostId(post.getId());
             }
             postRepository.deleteByFeedId(feed.getId());
             feedRepository.deleteByRoomId(roomId);
@@ -601,7 +601,6 @@ public class RoomCommandService {
         }
 
         room.changeToPublicRoom();
-        roomRepository.save(room);
     }
 
     public void changeToPrivateRoom(Long roomId, Long memberId) {
@@ -624,7 +623,6 @@ public class RoomCommandService {
         }
 
         room.changeToPrivateRoom();
-        roomRepository.save(room);
     }
 
     // 초대코드 생성 부분

@@ -89,6 +89,13 @@ public class Room extends BaseTimeEntity {
 
     public void changeToPrivateRoom() {
         this.roomType = RoomType.PRIVATE;
+        if (this.getStatus() != RoomStatus.ENABLE) {
+            enableRoom();
+        }
+    }
+
+    public void enableRoom() {
         this.status = RoomStatus.ENABLE;
+        this.enabledAt = LocalDate.now();
     }
 }
