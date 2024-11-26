@@ -138,6 +138,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _MAIL_AUTHENTICATION_CODE_INCORRECT(HttpStatus.BAD_REQUEST,"MAIL402","인증 코드가 올바르지 않습니다."),
     _MAIL_AUTHENTICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,"MAIL403","메일 인증코드가 만료되었습니다. 다시 받아주세요"),
     _INVALID_MAIL_ADDRESS_DOMAIN(HttpStatus.BAD_REQUEST,"MAIL404","메일 도메인이 올바르지 않습니다."),
+    _CANNOT_FIND_MAIL_FORM(HttpStatus.BAD_REQUEST,"MAIL500","메일 템플릿 리소스를 찾을 수 없습니다."),
+    _MAIL_SEND_FAIL(HttpStatus.BAD_REQUEST,"MAIL501","메일을 보내는 데 실패 했습니다."),
 
     // MemberBlock 관련
     _ALREADY_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK400", "이미 차단된 사용자입니다."),
