@@ -13,7 +13,7 @@ public record RoomUpdateRequestDTO(
     @Pattern(regexp = "^(?!\\s)[가-힣a-zA-Z0-9\\s]+(?<!\\s)$", message = "한글, 영어, 숫자 및 공백만 입력해주세요. 단, 공백은 처음이나 끝에 올 수 없습니다.")
     String name,
     @NotNull(message = "프로필 이미지 선택은 필수입니다.")
-    @Range(min=0, max=15)
+    @Range(min=1, max=16)
     Integer persona,
     @Size(min = 1, max = 3, message = "해시태그는 1개에서 3개까지 입력할 수 있습니다.")
     List<@NotBlank @Pattern(regexp = "^(?!_)[가-힣a-zA-Z0-9]+(_[가-힣a-zA-Z0-9]+)*(?<!_)$",

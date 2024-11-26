@@ -60,8 +60,6 @@ public class Room extends BaseTimeEntity {
 
     private int numOfArrival = 1;
 
-
-
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
     private Feed feed;
 
@@ -75,8 +73,7 @@ public class Room extends BaseTimeEntity {
 
     public void isRoomFull() {
         if (numOfArrival == maxMateNum) {
-            this.status = RoomStatus.ENABLE;
-            this.enabledAt = LocalDate.now();
+            enableRoom();
         }
     }
 
@@ -85,8 +82,19 @@ public class Room extends BaseTimeEntity {
         this.profileImage = newProfileImage;
     }
 
-    public void convertToPublicRoom() {
+    public void changeToPublicRoom() {
         this.roomType = RoomType.PUBLIC;
     }
 
+    public void changeToPrivateRoom() {
+        this.roomType = RoomType.PRIVATE;
+        if (this.getStatus() != RoomStatus.ENABLE) {
+            enableRoom();
+        }
+    }
+
+    public void enableRoom() {
+        this.status = RoomStatus.ENABLE;
+        this.enabledAt = LocalDate.now();
+    }
 }

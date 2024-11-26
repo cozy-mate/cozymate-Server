@@ -59,6 +59,14 @@ public class Mate extends BaseTimeEntity {
         setEntryStatus(EntryStatus.EXITED);
     }
 
+    public void setRoomManager() {
+        this.isRoomManager = true;
+    }
+
+    public void setNotRoomManager() {
+        this.isRoomManager = false;
+    }
+
     public void setNotExit() {
         this.isExit = false;
     }
