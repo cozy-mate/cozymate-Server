@@ -155,15 +155,15 @@ public class TodoQueryService {
     }
 
     /**
-     * todoType에 따라 self, other, group, role 순으로 정렬
+     * todoType에 따라 self, group, other, role 순으로 정렬
      */
     private List<TodoDetailResponseDTO> sortTodoDetailResponseDTOByTodoType(
         List<TodoDetailResponseDTO> list) {
         // Define the sorting priority for each todoType
         Map<String, Integer> priorityMap = Map.of(
             "self", 1,
-            "other", 2,
             "group", 3,
+            "other", 2,
             "role", 4
         );
 
