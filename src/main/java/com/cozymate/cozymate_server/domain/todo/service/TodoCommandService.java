@@ -95,6 +95,7 @@ public class TodoCommandService {
             allTodoCompleteNotification(mate);
             return;
         }
+
         // 미완료 상태로 바꾸는 경우
         todo.unmarkTodoComplete(mate.getId());
         roomLogCommandService.deleteRoomLogFromTodo(mate, todo);
@@ -232,6 +233,11 @@ public class TodoCommandService {
         }
     }
 
+    /**
+     * 투두 타입 분류, GROUP, SINGLE을 분류함
+     * @param todoIdList 투두 ID 리스트
+     * @return TodoType
+     */
     private TodoType classifyTodoType(List<Long> todoIdList) {
         // size가 1보다 크면 그룹투두
         if (todoIdList.size() > SINGLE_NUM) {
@@ -241,6 +247,11 @@ public class TodoCommandService {
         return TodoType.SINGLE_TODO;
     }
 
+    /**
+     * 할당자 리스트가 모두 호출한 사람과 같은 방에 있는지 확인
+     * @param mate 호출한 사람
+     * @param mateIdList 할당자 리스트
+     */
     private void checkMateIdListIsSameRoomWithMate(Mate mate, List<Long> mateIdList) {
         List<Mate> mateList = mateRepository.findByRoomId(mate.getRoom().getId());
         if (mateIdList.stream().anyMatch(
@@ -249,6 +260,10 @@ public class TodoCommandService {
         }
     }
 
+    /**
+     * 최대 할당자 수 체크
+     * @param mateIdList 할당자 리스트
+     */
     private void checkMaxAssignee(List<Long> mateIdList) {
         if (mateIdList.size() > MAX_ASSIGNEE) {
             throw new GeneralException(ErrorStatus._TODO_OVER_MAX);

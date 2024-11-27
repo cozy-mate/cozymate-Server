@@ -127,10 +127,16 @@ public class TodoQueryService {
         );
     }
 
+    /**
+     * 두 mate가 다른지 확인
+     *
+     * @param mate1 메이트 1
+     * @param mate2 메이트 2
+     * @return 다르면 true
+     */
     private boolean isNotSameMate(Mate mate1, Mate mate2) {
         return !mate1.getId().equals(mate2.getId());
     }
-
 
     /**
      * 여러명이 할당 - 그룹 투두 / 생성자, 할당자가 동일 - 내 투두 / 생성자, 할당자가 다름 - 남 투두 / 롤 투두 - 롤 투두
@@ -148,7 +154,9 @@ public class TodoQueryService {
         return "other";
     }
 
-    // todoType이 self, other, group, role 순으로 정렬
+    /**
+     * todoType에 따라 self, other, group, role 순으로 정렬
+     */
     private List<TodoDetailResponseDTO> sortTodoDetailResponseDTOByTodoType(
         List<TodoDetailResponseDTO> list) {
         // Define the sorting priority for each todoType
