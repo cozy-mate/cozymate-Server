@@ -111,6 +111,7 @@ public class TodoQueryService {
                 mateTodoMap.keySet().stream().toList())
             .stream().collect(Collectors.toMap(Mate::getId, Mate::getMember));
 
+        // TODO: remide할 size가 여러개면 ~~ 외 몇개로 수정
         mateTodoMap.forEach((mateId, todos) ->
             todos.forEach(todo ->
                 fcmPushService.sendNotification(

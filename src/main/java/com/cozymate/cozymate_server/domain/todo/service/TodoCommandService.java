@@ -1,10 +1,11 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
-import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
+import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
@@ -17,7 +18,6 @@ import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +33,7 @@ public class TodoCommandService {
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
     private final RoomLogCommandService roomLogCommandService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final FcmPushService fcmPushService;
 
 
     /**
@@ -90,9 +90,8 @@ public class TodoCommandService {
         if (completed) { // 완료 상태로 바꾸는 경우
             todo.markTodoComplete(mate.getId());
             roomLogCommandService.addRoomLogFromTodo(mate, todo);
-//            //모든 투두가 완료되었을 때 알림을 보냄
-//            // TODO: 바뀐 기획에 따라 로직 변경이 필요함, 추후 수정 예정
-//            allTodoCompleteNotification(todo, member);
+            //모든 투두가 완료되었을 때 알림을 보냄
+            allTodoCompleteNotification(mate);
             return;
         }
         // 미완료 상태로 바꾸는 경우
@@ -208,29 +207,24 @@ public class TodoCommandService {
         return todo.getRole() != null;
     }
 
-//    /**
-//     * TODO: 바뀐 기획으로 수정해야됨
-//     * 모든 투두가 완료되었을 때 알림을 보냄
-//     *
-//     * @param todo   투두
-//     * @param member 사용자
-//     */
-////    private void allTodoCompleteNotification(Todo todo, Member member) {
-////        boolean existsFalseTodo = todoRepository.existsByMateAndTimePointAndCompletedFalse(
-////            todo.getMate(), LocalDate.now());
-////
-////        if (!existsFalseTodo) {
-////            List<Mate> findRoomMates = mateRepository.findByRoom(todo.getRoom());
-////
-////            List<Member> memberList = findRoomMates.stream()
-////                .map(Mate::getMember)
-////                .filter(findMember -> !findMember.getId().equals(member.getId()))
-////                .toList();
-////
-////            eventPublisher.publishEvent(GroupWithOutMeTargetDto.create(member, memberList,
-////                NotificationType.COMPLETE_ALL_TODAY_TODO));
-////        }
-////    }
+    /**
+     * 모든 투두가 완료되었을 때 알림을 보냄
+     */
+    private void allTodoCompleteNotification(Mate mate) {
+        LocalDate now = LocalDate.now();
+        List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(mate.getRoom().getId(),
+            now);
+
+        // 모든 투두중 내가 할당되었는데, 완료되지 않은 투두가 있는지 확인
+        if (todoList.stream().filter(
+                todo -> todo.isAssigneeIn(mate.getId()) && !todo.isAssigneeCompleted(mate.getId()))
+            .findFirst().isEmpty()) {
+
+            // 없으면 FCM 발행 (모든 투두를 완료했음)
+            fcmPushService.sendNotification(OneTargetDto.create(mate.getMember(),
+                NotificationType.COMPLETE_ALL_TODAY_TODO));
+        }
+    }
 
     private TodoType classifyTodoType(List<Long> todoIdList) {
         // size가 1보다 크면 그룹투두

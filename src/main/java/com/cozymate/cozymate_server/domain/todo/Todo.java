@@ -115,6 +115,10 @@ public class Todo extends BaseTimeEntity {
                 != 0;
     }
 
+    public boolean isAssigneeIn(Long assigneeId) {
+        return this.assignedMateIdList.contains(assigneeId);
+    }
+
     // TodoType 변경
     public void updateTodoType(TodoType todoType) {
         this.todoType = todoType;
