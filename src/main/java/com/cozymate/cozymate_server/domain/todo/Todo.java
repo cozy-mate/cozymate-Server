@@ -54,7 +54,7 @@ public class Todo extends BaseTimeEntity {
 
     private LocalDate timePoint;
 
-    // Bitmasking 방식으로 사용 예정
+    // Bitmasking 방식으로 사용자별 완료 여부를 저장
     private Integer completeBitmask;
 
     @Convert(converter = TodoTypeConverter.class)
@@ -115,6 +115,7 @@ public class Todo extends BaseTimeEntity {
                 != 0;
     }
 
+    // 해당 메이트가 할당자인지 확인
     public boolean isAssigneeIn(Long assigneeId) {
         return this.assignedMateIdList.contains(assigneeId);
     }

@@ -19,6 +19,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,10 @@ public class TodoQueryService {
                     mateTodoList.get(mateId).add(todoDto);
                 });
         });
+
+        // todoType를 self, other, group, role 순으로 정렬
+        mateTodoList.forEach((mateId, todoListDto) ->
+            mateTodoList.put(mateId, sortTodoDetailResponseDTOByTodoType(todoListDto)));
 
         TodoMateListResponseDTO myTodoListResponseDto = TodoConverter.toTodoMateListResponseDTO(
             currentMate.getMember(), mateTodoList.get(currentMate.getId()));
@@ -130,8 +135,8 @@ public class TodoQueryService {
     /**
      * 여러명이 할당 - 그룹 투두 / 생성자, 할당자가 동일 - 내 투두 / 생성자, 할당자가 다름 - 남 투두 / 롤 투두 - 롤 투두
      *
-     * @param todo
-     * @return
+     * @param todo 투두
+     * @return 투두 타입
      */
     private String getTodoType(Todo todo) {
         if (todo.getTodoType() != TodoType.SINGLE_TODO) {
@@ -141,6 +146,24 @@ public class TodoQueryService {
             return "self";
         }
         return "other";
+    }
+
+    // todoType이 self, other, group, role 순으로 정렬
+    private List<TodoDetailResponseDTO> sortTodoDetailResponseDTOByTodoType(
+        List<TodoDetailResponseDTO> list) {
+        // Define the sorting priority for each todoType
+        Map<String, Integer> priorityMap = Map.of(
+            "self", 1,
+            "other", 2,
+            "group", 3,
+            "role", 4
+        );
+
+        // Sort based on the priority defined in the map
+        return list.stream()
+            .sorted(Comparator.comparingInt(
+                o -> priorityMap.getOrDefault(o.todoType(), Integer.MAX_VALUE)))
+            .toList();
     }
 
 
