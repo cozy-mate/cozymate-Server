@@ -1,9 +1,13 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
+import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoDetailResponseDTO;
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +34,8 @@ public class TodoQueryService {
 
     private final TodoRepository todoRepository;
     private final MateRepository mateRepository;
+    private final RoomLogCommandService roomLogCommandService;
+    private final FcmPushService fcmPushService;
 
     public TodoMateResponseDTO getTodo(Member member, Long roomId, LocalDate timePoint) {
 
@@ -66,6 +73,52 @@ public class TodoQueryService {
         return TodoConverter.toTodoMateResponseDTO(timePoint, myTodoListResponseDto,
             mateTodoResponseDto);
 
+    }
+
+    /**
+     * 매일 자정에 완료하지 않은 RoomLog에 대해서 알림 추가 (SCHEDULED)
+     */
+    public void addReminderRoleRoomLog() {
+        LocalDate today = LocalDate.now();
+        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
+        Map<Long, List<Todo>> mateTodoMap = todoList.stream()
+            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
+                .map(mateId -> Map.entry(mateId, todo)))
+            .collect(Collectors.groupingBy(
+                Map.Entry::getKey,
+                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+            ));
+
+        roomLogCommandService.addRoomLogRemindingRole(mateTodoMap);
+    }
+
+    /**
+     * 매일 자정에 완료하지 않은 Todo에 대한 알림 전송 (SCHEDULED)
+     */
+    public void sendReminderRoleNotification() {
+        LocalDate today = LocalDate.now();
+        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
+
+        Map<Long, List<Todo>> mateTodoMap = todoList.stream()
+            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
+                .map(mateId -> Map.entry(mateId, todo)))
+            .collect(Collectors.groupingBy(
+                Map.Entry::getKey,
+                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+            ));
+
+        Map<Long, Member> mateIdMemberMap = mateRepository.findAllByIdIn(
+                mateTodoMap.keySet().stream().toList())
+            .stream().collect(Collectors.toMap(Mate::getId, Mate::getMember));
+
+        mateTodoMap.forEach((mateId, todos) ->
+            todos.forEach(todo ->
+                fcmPushService.sendNotification(
+                    OneTargetDto.create(mateIdMemberMap.get(mateId),
+                        NotificationType.REMINDER_ROLE,
+                        todo.getContent())
+                ))
+        );
     }
 
     private boolean isNotSameMate(Mate mate1, Mate mate2) {

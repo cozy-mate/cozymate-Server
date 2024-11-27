@@ -10,8 +10,13 @@ import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
+import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
+import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
+import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +31,7 @@ public class RoleCommandService {
 
     private final RoleRepository roleRepository;
     private final MateRepository mateRepository;
+    private final TodoRepository todoRepository;
 
     /**
      * Role 생성
@@ -87,6 +93,23 @@ public class RoleCommandService {
     }
 
     /**
+     * 오늘 요일에 해당하는 Role을 Todo로 추가 (SCHEDULED)
+     */
+    public void addRoleToTodo() {
+        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
+        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
+        List<Role> roleList = roleRepository.findAll(); // TODO 페이징 반복 처리?
+        roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
+            .forEach(role ->
+                todoRepository.save(
+                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
+                        role.getAssignedMateIdList(), role.getContent(),
+                        LocalDate.now(), role, TodoType.ROLE_TODO)
+                )
+            );
+    }
+
+    /**
      * 요일 문자열 리스트를 비트마스크로 변환
      *
      * @param repeatDayStringList 요일 리스트
@@ -125,7 +148,7 @@ public class RoleCommandService {
      * Role 수정 가능한지 권한 확인
      *
      * @param role 수정할 Role
-     * @param mate  Mate
+     * @param mate Mate
      */
     private void checkUpdatePermission(Role role, Mate mate) {
         if (!role.getAssignedMateIdList().contains(mate.getId())) {

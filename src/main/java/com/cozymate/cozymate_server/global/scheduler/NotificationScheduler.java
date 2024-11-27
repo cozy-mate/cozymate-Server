@@ -7,17 +7,13 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
-import com.cozymate.cozymate_server.domain.role.Role;
-import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
-import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
+import com.cozymate.cozymate_server.domain.role.service.RoleCommandService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
-import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
-import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
-import java.time.DayOfWeek;
+import com.cozymate.cozymate_server.domain.todo.service.TodoQueryService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +38,8 @@ public class NotificationScheduler {
 
     private final RoomLogCommandService roomLogCommandService;
     private final RoomRepository roomRepository;
-    private final RoleRepository roleRepository;
+    private final TodoQueryService todoQueryService;
+    private final RoleCommandService roleCommandService;
 
     // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가) 작업 자정에 먼저하고 나서 시작하도록 30초로 설정
     @Scheduled(cron = "30 0 0 * * *")
@@ -63,55 +60,6 @@ public class NotificationScheduler {
             fcmPushService.sendNotification(
                 OneTargetDto.create(member, NotificationType.TODO_LIST, todoContents));
         });
-    }
-
-    /**
-     * Role 투두 잊지 않았는지 FCM 알림
-     */
-    @Scheduled(cron = "00 00 21 * * *")
-    public void sendReminderRoleNotification() {
-        LocalDate today = LocalDate.now();
-        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
-
-        Map<Long, List<Todo>> mateTodoMap = todoList.stream()
-            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
-                .map(mateId -> Map.entry(mateId, todo)))
-            .collect(Collectors.groupingBy(
-                Map.Entry::getKey,
-                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
-            ));
-
-        Map<Long, Member> mateIdMemberMap = mateRepository.findAllByIdIn(
-                mateTodoMap.keySet().stream().toList())
-            .stream().collect(Collectors.toMap(Mate::getId, Mate::getMember));
-
-        mateTodoMap.forEach((mateId, todos) ->
-            todos.forEach(todo ->
-                fcmPushService.sendNotification(
-                    OneTargetDto.create(mateIdMemberMap.get(mateId),
-                        NotificationType.REMINDER_ROLE,
-                        todo.getContent())
-                ))
-                );
-
-    }
-
-    /**
-     * 매일 자정에 완료하지 않은 RoomLog에 대해서 알림 추가
-     */
-    @Scheduled(cron = "0 0 0 * * *") // 매일 22시에 실행
-    public void addReminderRoleRoomLog() {
-        LocalDate today = LocalDate.now();
-        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
-        Map<Long, List<Todo>> mateTodoMap = todoList.stream()
-            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
-                .map(mateId -> Map.entry(mateId, todo)))
-            .collect(Collectors.groupingBy(
-                Map.Entry::getKey,
-                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
-            ));
-
-        roomLogCommandService.addRoomLogRemindingRole(mateTodoMap);
     }
 
     @Scheduled(cron = "0 0 12 L * ?")
@@ -147,19 +95,27 @@ public class NotificationScheduler {
         );
     }
 
-    // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
+    /**
+     * Role 투두 잊지 않았는지 FCM 알림
+     */
+    @Scheduled(cron = "00 00 21 * * *")
+    public void sendReminderRoleNotification() {
+        todoQueryService.sendReminderRoleNotification();
+    }
+
+    /**
+     * 매일 자정에 완료하지 않은 RoomLog에 대해서 알림 추가
+     */
+    @Scheduled(cron = "0 0 0 * * *") // 매일 22시에 실행
+    public void addReminderRoleRoomLog() {
+        todoQueryService.addReminderRoleRoomLog();
+    }
+
+    /**
+     * 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
+     */
     @Scheduled(cron = "0 0 0 * * *")
     public void addRoleToTodo() {
-        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
-        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
-        List<Role> roleList = roleRepository.findAll(); // TODO 페이징 반복 처리?
-        roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
-            .forEach(role ->
-                todoRepository.save(
-                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
-                        role.getAssignedMateIdList(), role.getContent(),
-                        LocalDate.now(), role, TodoType.ROLE_TODO)
-                )
-            );
+        roleCommandService.addRoleToTodo();
     }
 }
