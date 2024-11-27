@@ -65,30 +65,41 @@ public class NotificationScheduler {
         });
     }
 
-    // TODO: 변경된 TODO 기획에 맞춰서 수정해야함
-//    @Scheduled(cron = "0 0 21 * * *")
-//    public void sendReminderRoleNotification() {
-//        LocalDate today = LocalDate.now();
-//        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNullCompletedFalse(today);
-//
-//        Map<Member, Todo> todoMap = todoList.stream()
-//            .filter(todo -> !todo.isCompleted())
-//            .collect(Collectors.toMap(
-//                todo -> todo.getMate().getMember(),
-//                Function.identity(),
-//                (existingTodo, newTodo) -> newTodo.getId() > existingTodo.getId()
-//                    ? newTodo : existingTodo
-//            ));
-//
-//        todoMap.forEach((member, todo) ->
-//            fcmPushService.sendNotification(
-//                OneTargetDto.create(member, NotificationType.REMINDER_ROLE,
-//                    todo.getRole().getContent())
-//            ));
-//    }
+    /**
+     * Role 투두 잊지 않았는지 FCM 알림
+     */
+    @Scheduled(cron = "00 00 21 * * *")
+    public void sendReminderRoleNotification() {
+        LocalDate today = LocalDate.now();
+        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
 
-    // Role 로그 중 오늘 완료하지 못한 투두에 대한 알림 발송
-    @Scheduled(cron = "35 52 13 * * *") // 매일 22시에 실행
+        Map<Long, List<Todo>> mateTodoMap = todoList.stream()
+            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
+                .map(mateId -> Map.entry(mateId, todo)))
+            .collect(Collectors.groupingBy(
+                Map.Entry::getKey,
+                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+            ));
+
+        Map<Long, Member> mateIdMemberMap = mateRepository.findAllByIdIn(
+                mateTodoMap.keySet().stream().toList())
+            .stream().collect(Collectors.toMap(Mate::getId, Mate::getMember));
+
+        mateTodoMap.forEach((mateId, todos) ->
+            todos.forEach(todo ->
+                fcmPushService.sendNotification(
+                    OneTargetDto.create(mateIdMemberMap.get(mateId),
+                        NotificationType.REMINDER_ROLE,
+                        todo.getContent())
+                ))
+                );
+
+    }
+
+    /**
+     * 매일 자정에 완료하지 않은 RoomLog에 대해서 알림 추가
+     */
+    @Scheduled(cron = "0 0 0 * * *") // 매일 22시에 실행
     public void addReminderRoleRoomLog() {
         LocalDate today = LocalDate.now();
         List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
