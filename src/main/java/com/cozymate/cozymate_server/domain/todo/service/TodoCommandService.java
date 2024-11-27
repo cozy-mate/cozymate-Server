@@ -3,6 +3,9 @@ package com.cozymate.cozymate_server.domain.todo.service;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
+import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
+import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO;
@@ -29,7 +32,7 @@ public class TodoCommandService {
 
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
-    //    private final RoomLogCommandService roomLogCommandService;
+    private final RoomLogCommandService roomLogCommandService;
     private final ApplicationEventPublisher eventPublisher;
 
 
@@ -86,6 +89,7 @@ public class TodoCommandService {
 
         if (completed) { // 완료 상태로 바꾸는 경우
             todo.markTodoComplete(mate.getId());
+            roomLogCommandService.addRoomLogFromTodo(mate, todo);
 //            //모든 투두가 완료되었을 때 알림을 보냄
 //            // TODO: 바뀐 기획에 따라 로직 변경이 필요함, 추후 수정 예정
 //            allTodoCompleteNotification(todo, member);
@@ -93,6 +97,7 @@ public class TodoCommandService {
         }
         // 미완료 상태로 바꾸는 경우
         todo.unmarkTodoComplete(mate.getId());
+        roomLogCommandService.deleteRoomLogFromTodo(mate, todo);
     }
 
     /**

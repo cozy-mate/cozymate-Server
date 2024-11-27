@@ -87,11 +87,20 @@ public class NotificationScheduler {
 //            ));
 //    }
 
-    @Scheduled(cron = "00 00 00 * * *") // 매일 22시에 실행
+    // Role 로그 중 오늘 완료하지 못한 투두에 대한 알림 발송
+    @Scheduled(cron = "35 52 13 * * *") // 매일 22시에 실행
     public void addReminderRoleRoomLog() {
         LocalDate today = LocalDate.now();
         List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
-        todoList.forEach(roomLogCommandService::addRoomLogRemindingRole);
+        Map<Long, List<Todo>> mateTodoMap = todoList.stream()
+            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
+                .map(mateId -> Map.entry(mateId, todo)))
+            .collect(Collectors.groupingBy(
+                Map.Entry::getKey,
+                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+            ));
+
+        roomLogCommandService.addRoomLogRemindingRole(mateTodoMap);
     }
 
     @Scheduled(cron = "0 0 12 L * ?")
@@ -126,7 +135,7 @@ public class NotificationScheduler {
             roomLogCommandService.addRoomLogBirthday(mate, today)
         );
     }
-    
+
     // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
     @Scheduled(cron = "0 0 0 * * *")
     public void addRoleToTodo() {
