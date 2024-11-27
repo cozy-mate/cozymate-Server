@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -215,13 +215,16 @@ public class TodoCommandService {
         List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(mate.getRoom().getId(),
             now);
 
+        List<Mate> mateList = mateRepository.findByRoomId(mate.getRoom().getId());
+
         // 모든 투두중 내가 할당되었는데, 완료되지 않은 투두가 있는지 확인
         if (todoList.stream().filter(
                 todo -> todo.isAssigneeIn(mate.getId()) && !todo.isAssigneeCompleted(mate.getId()))
             .findFirst().isEmpty()) {
 
             // 없으면 FCM 발행 (모든 투두를 완료했음)
-            fcmPushService.sendNotification(OneTargetDto.create(mate.getMember(),
+            fcmPushService.sendNotification(GroupWithOutMeTargetDto.create(mate.getMember(),
+                mateList.stream().map(Mate::getMember).toList(),
                 NotificationType.COMPLETE_ALL_TODAY_TODO));
         }
     }
