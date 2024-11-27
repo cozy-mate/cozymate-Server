@@ -128,6 +128,9 @@ public class TodoCommandService {
             throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
         }
 
+        // 투두를 삭제하기 전 Todo를 NULL로 변경
+        roomLogCommandService.changeRoomLogTodoToNull(todo.getId());
+
         // 내 투두면 투두 자체를 삭제
         if (todo.getTodoType() == TodoType.SINGLE_TODO) {
             todoRepository.delete(todo);
@@ -268,6 +271,10 @@ public class TodoCommandService {
         if (mateIdList.size() > MAX_ASSIGNEE) {
             throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
         }
+    }
+
+    public void deleteTodoByRoleId(Long roleId) {
+        todoRepository.deleteAllByRoleId(roleId);
     }
 
 }

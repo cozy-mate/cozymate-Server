@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,6 +102,11 @@ public class RoomLogCommandService {
         String content = today.getMonthValue() + "월 " + today.getDayOfMonth() + "일은 "
             + mate.getMember().getNickname() + "님의 생일이에요! 모두 축하해주세요!";
         roomLogRepository.save(RoomLogConverter.toEntity(content, mate.getRoom(), null, mate));
+    }
+
+    public void changeRoomLogTodoToNull(Long todoId) {
+        List<RoomLog> roomLog = roomLogRepository.findAllByTodoId(todoId);
+        roomLog.forEach(RoomLog::changeTodoToNull);
     }
 
 }
