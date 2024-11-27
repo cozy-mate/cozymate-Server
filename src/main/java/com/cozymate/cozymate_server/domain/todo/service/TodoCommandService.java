@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TodoCommandService {
 
-    // TODO: max assignee 30명 제한 기능 추가
+    private static final int MAX_ASSIGNEE = 30;
     private static final int MAX_TODO_PER_DAY = 20;
     private static final int SINGLE_NUM = 1;
 
@@ -50,11 +50,12 @@ public class TodoCommandService {
         Mate mate = getMate(member.getId(), roomId);
         // 투두 타입 분류 (내 투두, 남 투두, 그룹 투두)
         TodoType type = classifyTodoType(requestDto.mateIdList());
-        // TODO: 추후 구현
         // 모든 메이트가 방에 메이트로 존재하는지 확인이 필요
         checkMateIdListIsSameRoomWithMate(mate, requestDto.mateIdList());
         // 최대 투두 생성 개수 초과 여부 판단
         checkMaxTodoPerDay(roomId, member.getId(), LocalDate.now());
+        // max assignee 초과 여부 판단
+        checkMaxAssignee(requestDto.mateIdList());
 
         Todo todo = todoRepository.save(
             TodoConverter.toEntity(mate.getRoom(), mate, requestDto.mateIdList(),
@@ -152,7 +153,6 @@ public class TodoCommandService {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
 
-        // TODO: 할당자가 모두 Mate에 속하는지 판단해야함.
         checkMateIdListIsSameRoomWithMate(mate, requestDto.mateIdList());
 
         // 삭제해야할 할당자 리스트
@@ -168,6 +168,9 @@ public class TodoCommandService {
         todo.removeAssignees(removeIdList);
         todo.addAssignees(addIdList);
         todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
+
+        // 할당자 최대 제한 체크
+        checkMaxAssignee(todo.getAssignedMateIdList());
 
         // 컨텐츠 업데이트
         todo.updateContent(requestDto.content(), requestDto.timePoint());
@@ -239,7 +242,17 @@ public class TodoCommandService {
     }
 
     private void checkMateIdListIsSameRoomWithMate(Mate mate, List<Long> mateIdList) {
-        // TODO: mateIdList에 있는 사용자들이 모두 mate와 동일한 방에 속했는지 확인하는 로직 필요
+        List<Mate> mateList = mateRepository.findByRoomId(mate.getRoom().getId());
+        if (mateIdList.stream().anyMatch(
+            mateId -> mateList.stream().noneMatch(m -> m.getMember().getId().equals(mateId)))) {
+            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
+        }
+    }
+
+    private void checkMaxAssignee(List<Long> mateIdList) {
+        if (mateIdList.size() > MAX_ASSIGNEE) {
+            throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
+        }
     }
 
 }
