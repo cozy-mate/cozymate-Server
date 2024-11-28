@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.member;
 
-
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
@@ -19,6 +18,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 import lombok.AccessLevel;
@@ -26,7 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @Getter
 @AllArgsConstructor
@@ -39,29 +39,29 @@ public class Member extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
+    @NotNull(message = "{EntityFieldNotNull}")
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
-    @NonNull
+    @NotNull(message = "{EntityFieldNotNull}")
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @NonNull
+    @NotNull(message = "{EntityFieldNotNull}")
     private String clientId;
 
-
-    @NonNull
+    @NotNull(message = "{EntityFieldNotNull}")
+    @NotEmpty(message = "{EntityFieldNotEmpty}")
     private String nickname;
 
-    @NonNull
+    @NotNull(message = "{EntityFieldNotNull}")
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @NonNull
+    @NotNull(message = "{EntityFieldNotNull}")
     private LocalDate birthDay;
 
-    @NonNull
+    @NotNull(message = "{EntityFieldNotNull}")
     private Integer persona;
 
     @ManyToOne()

@@ -1,13 +1,11 @@
 package com.cozymate.cozymate_server.domain.member.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.Builder;
-import lombok.Getter;
+import org.hibernate.validator.constraints.Range;
 
 
 /**
@@ -16,21 +14,21 @@ import lombok.Getter;
 
 @Builder
 public record SignUpRequestDTO(
-    @NotNull
-    @NotEmpty
+    @NotEmpty(message = "{RequestFiledNotEmpty}")
     String nickname,
 
-    @NotNull
+    @NotNull(message = "{RequestFiledNotNull}")
     String gender,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") LocalDate birthday,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @NotNull(message = "{RequestFiledNotNull}")
+    LocalDate birthday,
 
-    @NotNull
-    @Max(value = 16)
-    @Min(value = 1)
+    @NotNull(message = "{RequestFiledNotNull}")
+    @Range(min = 1, max = 16, message = "{RequestFieldRange}")
     Integer persona,
 
-    @NotNull
+    @NotNull(message = "{RequestFiledNotNull}")
     Long universityId
 ) {
 
