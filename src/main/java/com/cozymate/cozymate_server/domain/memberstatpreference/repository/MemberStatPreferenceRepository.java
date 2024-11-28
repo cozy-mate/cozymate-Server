@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberStatPreferenceRepository extends JpaRepository<MemberStatPreference, Long> {
     Optional<MemberStatPreference> findByMemberId(Long memberId);
+
+    void deleteByMemberId(Long memberId);
 }

@@ -117,4 +117,8 @@ public class Todo extends BaseTimeEntity {
     }
 
 
+    public boolean isAssignedMateListEmpty() {
+        return assignedMateIdList == null || assignedMateIdList.isEmpty();
+    }
+
 }

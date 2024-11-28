@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.CountChatRoomsWithNewChatDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.service.ChatRoomCommandService;
@@ -72,5 +73,16 @@ public class ChatRoomController {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
             chatRoomCommandService.saveChatRoom(member, simpleDTO.recipient())));
+    }
+
+    @GetMapping("/count/new-chat")
+    @Operation(summary = "[베로] 새로운 쪽지가 온 쪽지방의 갯수 반환", description = "")
+    @SwaggerApiError(
+        ErrorStatus._MEMBER_NOT_FOUND
+    )
+    public ResponseEntity<ApiResponse<CountChatRoomsWithNewChatDTO>> getCountChatRoomsWithNewChat(
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            chatRoomQueryService.countChatRoomsWithNewChat(memberDetails.member())));
     }
 }
