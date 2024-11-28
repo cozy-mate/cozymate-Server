@@ -32,8 +32,9 @@ public class MemberCommandService {
     private final AuthService authService;
     private final MemberQueryService memberQueryService;
     private final MemberRepository memberRepository;
-
     private final UniversityRepository universityRepository;
+
+    private final MemberWithdrawService memberWithdrawService;
 
     /**
      * 닉네임 유효성 검사 메서드
@@ -152,11 +153,8 @@ public class MemberCommandService {
      * @param memberDetails 사용자 세부 정보
      */
     public void withdraw(MemberDetails memberDetails) {
-        // 리프레시 토큰 삭제 및 회원 삭제
-        authService.deleteRefreshToken(memberDetails.getUsername());
-        memberRepository.delete(memberDetails.member());
+        memberWithdrawService.withdraw(memberDetails.member());
     }
-
     /**
      * 기존 회원 로그인 처리 메서드
      *

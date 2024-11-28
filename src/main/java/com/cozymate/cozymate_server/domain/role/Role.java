@@ -46,4 +46,15 @@ public class Role extends BaseTimeEntity {
         this.content = content;
         this.repeatDays = repeatDays;
     }
+
+    public void removeAssignee(Long assigneeId) {
+        int index = this.assignedMateIdList.indexOf(assigneeId);
+        if (index != -1) { // 해당 할당자가 있는지 확인
+            this.assignedMateIdList.remove(assigneeId);
+        }
+    }
+
+    public boolean isAssignedMateListEmpty() {
+        return assignedMateIdList == null || assignedMateIdList.isEmpty();
+    }
 }

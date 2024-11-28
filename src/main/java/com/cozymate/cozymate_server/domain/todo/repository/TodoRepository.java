@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.todo.Todo;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,4 +26,11 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo>findByTimePointAndRoleIsNotNull(LocalDate today);
 
 //    boolean existsByMateAndTimePointAndCompletedFalse(Mate mate, LocalDate timePoint);
+
+
+    List<Todo>findAllByMateId(Long mateId);
+
+    @Modifying
+    @Query("UPDATE Todo t SET t.mate = null WHERE t.mate = :mate")
+    void bulkDeleteMate(@Param("mate") Mate mate);
 }
