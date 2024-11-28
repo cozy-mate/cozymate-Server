@@ -57,28 +57,37 @@ public class ChatRoomCommandService {
         LocalDateTime memberALastDeleteAt = chatRoom.getMemberALastDeleteAt();
         LocalDateTime memberBLastDeleteAt = chatRoom.getMemberBLastDeleteAt();
 
-        if (Objects.nonNull(memberALastDeleteAt) && Objects.nonNull(memberBLastDeleteAt)
-            && canHardDelete(chatRoom, memberALastDeleteAt, memberBLastDeleteAt)) {
+        // 멤버 둘다 해당 방을 나간 적이 있는 경우
+        if (canHardDeleteWhenBothLeft(memberALastDeleteAt, memberBLastDeleteAt, chatRoom)) {
             hardDeleteChatRoom(chatRoom);
             return;
         }
 
-        if (Objects.nonNull(memberALastDeleteAt) && Objects.isNull(memberBLastDeleteAt)
-            && Objects.isNull(chatRoom.getMemberB())) {
-
-            if (canHardDeleteWithNullMember(chatRoom, memberALastDeleteAt)) {
-                hardDeleteChatRoom(chatRoom);
-                return;
-            }
+        // A는 해당 방을 나간적이 있고, B는 나간적은 없지만 null(탈퇴)인 경우
+        if (canHardDeleteWhenOneLeftAndOtherIsNull(memberALastDeleteAt, memberBLastDeleteAt,
+            chatRoom.getMemberB(), chatRoom)) {
+            hardDeleteChatRoom(chatRoom);
+            return;
         }
 
-        if (Objects.nonNull(memberBLastDeleteAt) && Objects.isNull(memberALastDeleteAt)
-            && Objects.isNull(chatRoom.getMemberA())) {
-
-            if (canHardDeleteWithNullMember(chatRoom, memberBLastDeleteAt)) {
-                hardDeleteChatRoom(chatRoom);
-            }
+        // B는 해당 방을 나간적이 있고, A는 나간적이 없지만 (null)탈퇴인 경우
+        if (canHardDeleteWhenOneLeftAndOtherIsNull(memberBLastDeleteAt, memberALastDeleteAt,
+            chatRoom.getMemberA(), chatRoom)) {
+            hardDeleteChatRoom(chatRoom);
         }
+    }
+
+    private boolean canHardDeleteWhenBothLeft(LocalDateTime memberALastDeleteAt,
+        LocalDateTime memberBLastDeleteAt, ChatRoom chatRoom) {
+        return Objects.nonNull(memberALastDeleteAt) && Objects.nonNull(memberBLastDeleteAt)
+            && canHardDelete(chatRoom, memberALastDeleteAt, memberBLastDeleteAt);
+    }
+
+    private boolean canHardDeleteWhenOneLeftAndOtherIsNull(LocalDateTime nonNullMemberLastDeleteAt,
+        LocalDateTime nullMemberLastDeleteAt, Member nullMember, ChatRoom chatRoom) {
+        return Objects.nonNull(nonNullMemberLastDeleteAt) && Objects.isNull(nullMemberLastDeleteAt)
+            && Objects.isNull(nullMember)
+            && canHardDeleteWithNullMember(chatRoom, nonNullMemberLastDeleteAt);
     }
 
     private boolean canHardDelete(ChatRoom chatRoom, LocalDateTime memberALastDeleteAt,
