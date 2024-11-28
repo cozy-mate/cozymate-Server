@@ -42,9 +42,9 @@ public class ChatRoomConverter {
             .build();
     }
 
-    public static CountChatRoomsWithNewChatDTO toCountChatRoomsWithNewChatDTO(Integer hasNewChatCount) {
+    public static CountChatRoomsWithNewChatDTO toCountChatRoomsWithNewChatDTO(Integer chatRoomsWithNewChatCount) {
         return CountChatRoomsWithNewChatDTO.builder()
-            .hasNewChatCount(hasNewChatCount)
+            .chatRoomsWithNewChatCount(chatRoomsWithNewChatCount)
             .build();
     }
 }

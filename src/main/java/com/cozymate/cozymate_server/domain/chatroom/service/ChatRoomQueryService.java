@@ -105,7 +105,7 @@ public class ChatRoomQueryService {
                 return lastDeleteAt == null || chat.getCreatedAt().isAfter(lastDeleteAt);
             }).toList();
 
-        long newChatRoomCount = chatRoomList.stream()
+        long chatRoomsWithNewChatCount = chatRoomList.stream()
             .filter(chatRoom -> {
                 // 탈퇴 사용자가 있는 경우, 새로운 쪽지가 없음 처리
                 if (Objects.isNull(chatRoom.getMemberA()) ||
@@ -122,7 +122,7 @@ public class ChatRoomQueryService {
                 return existNewChat(recipient, chatRoom, lastSeenAt);
             }).count();
 
-        return ChatRoomConverter.toCountChatRoomsWithNewChatDTO((int) newChatRoomCount);
+        return ChatRoomConverter.toCountChatRoomsWithNewChatDTO((int) chatRoomsWithNewChatCount);
     }
 
     public ChatRoomSimpleDTO getChatRoom(Member member, Long recipientId) {
