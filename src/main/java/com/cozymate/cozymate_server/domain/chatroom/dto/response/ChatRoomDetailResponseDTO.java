@@ -8,7 +8,8 @@ public record ChatRoomDetailResponseDTO(
     String nickname,
     String lastContent,
     Long chatRoomId,
-    Long memberId
+    Long memberId,
+    boolean hasNewChat
 ) {
 
 }
