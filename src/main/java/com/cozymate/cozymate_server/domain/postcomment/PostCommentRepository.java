@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PostCommentRepository extends JpaRepository<PostComment, Long> {
-    void deleteByPostId(Long postId);
-
     Integer countByPostId(Long postId);
 
     List<PostComment> findByPostIdOrderByCreatedAt(Long postId);

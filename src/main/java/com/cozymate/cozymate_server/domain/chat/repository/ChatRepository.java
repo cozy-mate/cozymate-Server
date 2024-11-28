@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,4 +25,11 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Modifying
     @Query("UPDATE Chat c SET c.sender = null WHERE c.sender = :member")
     void bulkDeleteSender(@Param("member") Member member);
+    @Query("select case when count(c) > 0 then true else false end " +
+        "from Chat c " +
+        "where c.sender = :member and c.chatRoom = :chatRoom " +
+        "and (c.createdAt > :lastSeenAt or :lastSeenAt is null)")
+    boolean existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
+        @Param("member") Member member, @Param("chatRoom") ChatRoom chatRoom,
+        @Param("lastSeenAt") LocalDateTime lastSeenAt);
 }
