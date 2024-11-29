@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat.MemberStatBuilder;
+import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPreferenceDetailColorDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailAndRoomIdAndEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
@@ -187,12 +188,47 @@ public class MemberStatConverter {
     }
 
     public static MemberStatPreferenceResponseDTO toPreferenceResponseDTO(MemberStat stat,
-        Map<String, Object> preferences, Integer equality) {
+        List<MemberStatPreferenceDetailColorDTO> preferences, Integer equality) {
 
         return MemberStatPreferenceResponseDTO.builder()
             .memberDetail(MemberConverter.toMemberDetailResponseDTOFromEntity(stat.getMember()))
             .equality(equality)
             .preferenceStats(preferences)
+            .build();
+    }
+
+
+    // 랜덤에서 사용하는 Converter
+    public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailColorDTOList(
+        MemberStat memberStat, List<String> preferences
+    ){
+        Map<String, Object> memberStatMap = MemberStatUtil.getMemberStatFields(memberStat, preferences);
+
+        return memberStatMap.entrySet().stream()
+            .map(entry ->
+                MemberStatConverter.toMemberStatPreferenceDetailColorDTO(entry.getKey(), entry.getValue(), DifferenceStatus.WHITE))
+            .toList();
+    }
+
+    // 일반 검색/ 필터링에서 사용하는 Converter
+    public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailColorDTOList(
+        MemberStat memberStat, MemberStat criteriaMemberStat, List<String> preferences
+    ){
+        Map<String, Object> memberStatMap = MemberStatUtil.getMemberStatFields(memberStat, preferences);
+        Map<String, Object> criteriaMemberStatMap = MemberStatUtil.getMemberStatFields(criteriaMemberStat, preferences);
+
+        return memberStatMap.entrySet().stream()
+            .map(entry->
+                MemberStatConverter.toMemberStatPreferenceDetailColorDTO(
+                    entry.getKey(), entry.getValue(), MemberStatUtil.compareField(entry.getValue(), criteriaMemberStatMap.get(entry.getKey())
+                    ))).toList();
+    }
+
+    public static MemberStatPreferenceDetailColorDTO toMemberStatPreferenceDetailColorDTO(String stat, Object value, DifferenceStatus color){
+        return MemberStatPreferenceDetailColorDTO.builder()
+            .stat(stat)
+            .value(value)
+            .color(color.getValue())
             .build();
     }
 

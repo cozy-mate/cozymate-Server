@@ -18,7 +18,6 @@ import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPre
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
-import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
@@ -139,7 +138,7 @@ public class MemberStatQueryService {
             return createEmptyPageResponse(pageable);
         }
 
-        return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,criteriaMemberStat.getMember()));
+        return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,criteriaMemberStat));
 
     }
 
@@ -156,7 +155,7 @@ public class MemberStatQueryService {
             return createEmptyPageResponse(pageable);
         }
 
-        return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,criteriaMemberStat.getMember()));
+        return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,criteriaMemberStat));
     }
 
     public Integer getNumOfSearchedAndFilteredMemberStatList(Member member,
@@ -194,15 +193,11 @@ public class MemberStatQueryService {
 
         // 선택된 멤버들에 대해 MemberStatPreferenceResponseDTO 리스트 생성
         List<MemberStatPreferenceResponseDTO> preferenceResponseList = randomMemberStats.stream()
-            .map(stat -> {
-                Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(stat,
-                    criteriaPreferences);
-                return MemberStatConverter.toPreferenceResponseDTO(
-                    stat,
-                    preferences,
-                    NO_EQUALITY
-                );
-            })
+            .map(stat ->
+                MemberStatConverter.toPreferenceResponseDTO(stat,
+                    MemberStatConverter.toMemberStatPreferenceDetailColorDTOList(stat,criteriaPreferences),
+                    NO_EQUALITY)
+            )
             .toList();
 
         return MemberStatConverter.toMemberStatRandomListDTO(
@@ -211,8 +206,7 @@ public class MemberStatQueryService {
     }
 
     public Slice<MemberStatPreferenceResponseDTO> createMemberStatPreferenceResponse(
-        Slice<Map<MemberStat, Integer>> filteredResult, Member criteriaMember) {
-
+        Slice<Map<MemberStat, Integer>> filteredResult, MemberStat criteriaMemberStat) {
         return filteredResult.map(
             memberStatIntegerMap ->{
                 Map.Entry<MemberStat, Integer> entry = memberStatIntegerMap.entrySet().iterator()
@@ -220,12 +214,10 @@ public class MemberStatQueryService {
                 MemberStat memberStat = entry.getKey();
                 Integer equality = entry.getValue();
                 List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
-                    criteriaMember.getId());
-                Map<String,Object> preferences = MemberStatUtil.getMemberStatFields(memberStat,
-                    criteriaPreferences);
+                    criteriaMemberStat.getMember().getId());
                 return MemberStatConverter.toPreferenceResponseDTO(
                     memberStat,
-                    preferences,
+                    MemberStatConverter.toMemberStatPreferenceDetailColorDTOList(memberStat,criteriaMemberStat,criteriaPreferences),
                     equality
                 );
             }

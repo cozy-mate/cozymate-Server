@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,14 @@ public class MemberStatUtil {
         } else {
             return DifferenceStatus.RED;
         }
+    }
+
+    public static DifferenceStatus compareField(
+        Object memberStatMapValue, Object criteriaMemberStatValue){
+        if(memberStatMapValue.equals(criteriaMemberStatValue)){
+            return DifferenceStatus.BLUE;
+        }
+        return DifferenceStatus.RED;
     }
 
 
@@ -109,6 +118,8 @@ public class MemberStatUtil {
         );
         return result;
     }
+
+
 
     // 학번 Response 위해 필요한 Util
     public static String formatNumber(int number) {
