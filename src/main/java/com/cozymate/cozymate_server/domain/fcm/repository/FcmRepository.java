@@ -19,4 +19,6 @@ public interface FcmRepository extends JpaRepository<Fcm, String> {
     List<Fcm> findByMemberAndIsValidIsTrue(Member member);
 
     List<Fcm> findAllByIsValidIsTrue();
+
+    void deleteAllByMemberId(Long memberId);
 }
