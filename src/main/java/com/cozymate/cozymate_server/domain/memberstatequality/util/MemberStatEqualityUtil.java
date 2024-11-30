@@ -1,7 +1,9 @@
 package com.cozymate.cozymate_server.domain.memberstatequality.util;
 
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MemberStatEqualityUtil {
 
     private static final Integer ADDITIONAL_SCORE = 36;
