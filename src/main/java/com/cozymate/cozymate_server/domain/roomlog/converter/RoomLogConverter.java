@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
 import com.cozymate.cozymate_server.domain.roomlog.dto.RoomLogResponseDto.RoomLogDetailResponseDto;
 import com.cozymate.cozymate_server.domain.todo.Todo;
+import java.util.Objects;
 
 public class RoomLogConverter {
 
@@ -13,7 +14,7 @@ public class RoomLogConverter {
             .content(content)
             .room(room)
             .todo(todo)
-            .mateId(mate.getId())
+            .mateId(Objects.isNull(mate) ? null : mate.getId())
             .build();
     }
 
