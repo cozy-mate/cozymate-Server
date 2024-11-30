@@ -19,16 +19,10 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     @Query("select t from Todo t join fetch t.mate m join fetch m.member where t.timePoint = :today")
     List<Todo> findByTimePoint(@Param("today") LocalDate today);
+    
+    List<Todo> findByTimePointAndRoleIsNotNull(LocalDate today);
 
-//    @Query("select t from Todo t join fetch t.mate m join fetch m.member where t.timePoint = :today and t.role is not null and t.completed is false")
-//    List<Todo> findByTimePointAndRoleIsNotNullCompletedFalse(@Param("today") LocalDate today);
-
-    List<Todo>findByTimePointAndRoleIsNotNull(LocalDate today);
-
-//    boolean existsByMateAndTimePointAndCompletedFalse(Mate mate, LocalDate timePoint);
-
-
-    List<Todo>findAllByMateId(Long mateId);
+    List<Todo> findAllByMateId(Long mateId);
 
     @Modifying
     @Query("UPDATE Todo t SET t.mate = null WHERE t.mate = :mate")

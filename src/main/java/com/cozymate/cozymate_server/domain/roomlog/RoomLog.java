@@ -33,4 +33,6 @@ public class RoomLog extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Todo todo;
+
+    private Long mateId;
 }
