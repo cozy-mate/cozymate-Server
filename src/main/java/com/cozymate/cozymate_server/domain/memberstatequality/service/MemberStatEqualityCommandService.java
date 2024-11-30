@@ -206,8 +206,6 @@ public class MemberStatEqualityCommandService {
             .flatMap(equality -> Stream.of(equality.getMemberAId(), equality.getMemberBId()))
             .collect(Collectors.toSet());
 
-        log.info(memberIds.toString());
-
         Map<Long, MemberStat> memberStatMap = memberStatRepository.findMemberStatsAndMemberIdsByMemberIds(
                 memberIds)
             .stream()
@@ -215,8 +213,6 @@ public class MemberStatEqualityCommandService {
                 tuple -> tuple.get(1, Long.class),
                 tuple -> tuple.get(0, MemberStat.class)
             ));
-
-        log.info(memberStatMap.toString());
 
         List<MemberStatEquality> updatedEqualities = relatedEqualities.stream()
             .map(
