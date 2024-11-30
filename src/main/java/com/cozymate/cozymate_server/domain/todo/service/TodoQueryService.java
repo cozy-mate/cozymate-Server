@@ -33,6 +33,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class TodoQueryService {
 
+    // 조회할 때 정렬 우선순위
+    private static final int PRIORITY_SELF = 1;
+    private static final int PRIORITY_GROUP = 3;
+    private static final int PRIORITY_OTHER = 2;
+    private static final int PRIORITY_ROLE = 4;
+
     private final TodoRepository todoRepository;
     private final MateRepository mateRepository;
     private final RoomLogCommandService roomLogCommandService;
@@ -86,31 +92,19 @@ public class TodoQueryService {
     public void addReminderRoleRoomLog() {
         LocalDate today = LocalDate.now();
         List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
-        Map<Long, List<Todo>> mateTodoMap = todoList.stream()
-            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
-                .map(mateId -> Map.entry(mateId, todo)))
-            .collect(Collectors.groupingBy(
-                Map.Entry::getKey,
-                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
-            ));
+        Map<Long, List<Todo>> mateTodoMap = getMateTodoMap(todoList);
 
         roomLogCommandService.addRoomLogRemindingRole(mateTodoMap);
     }
 
     /**
-     * 매일 자정에 완료하지 않은 Todo에 대한 알림 전송 (SCHEDULED)
+     * 매일 21시에 완료하지 않은 Todo에 대한 알림 전송 (SCHEDULED)
      */
     public void sendReminderRoleNotification() {
         LocalDate today = LocalDate.now();
         List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
 
-        Map<Long, List<Todo>> mateTodoMap = todoList.stream()
-            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
-                .map(mateId -> Map.entry(mateId, todo)))
-            .collect(Collectors.groupingBy(
-                Map.Entry::getKey,
-                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
-            ));
+        Map<Long, List<Todo>> mateTodoMap = getMateTodoMap(todoList);
 
         Map<Long, Member> mateIdMemberMap = mateRepository.findAllByIdIn(
                 mateTodoMap.keySet().stream().toList())
@@ -125,6 +119,21 @@ public class TodoQueryService {
                         todo.getContent())
                 ))
         );
+    }
+
+    /**
+     * 할당자 ID를 기준으로 할당된 투두를 맵으로 반환
+     * @param todoList 할당된 투두 리스트
+     * @return 할당자 ID를 기준으로 할당된 투두 맵
+     */
+    private Map<Long, List<Todo>> getMateTodoMap(List<Todo> todoList) {
+        return todoList.stream()
+            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
+                .map(mateId -> Map.entry(mateId, todo)))
+            .collect(Collectors.groupingBy(
+                Map.Entry::getKey,
+                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+            ));
     }
 
     /**
@@ -161,10 +170,10 @@ public class TodoQueryService {
         List<TodoDetailResponseDTO> list) {
         // Define the sorting priority for each todoType
         Map<String, Integer> priorityMap = Map.of(
-            "self", 1,
-            "group", 3,
-            "other", 2,
-            "role", 4
+            "self", PRIORITY_SELF,
+            "group", PRIORITY_GROUP,
+            "other", PRIORITY_OTHER,
+            "role", PRIORITY_ROLE
         );
 
         // Sort based on the priority defined in the map
@@ -173,6 +182,8 @@ public class TodoQueryService {
                 o -> priorityMap.getOrDefault(o.todoType(), Integer.MAX_VALUE)))
             .toList();
     }
+
+
 
 
 }

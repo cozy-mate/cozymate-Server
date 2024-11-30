@@ -106,7 +106,7 @@ public class NotificationScheduler {
     /**
      * 매일 자정에 완료하지 않은 RoomLog에 대해서 알림 추가
      */
-    @Scheduled(cron = "0 0 0 * * *") // 매일 22시에 실행
+    @Scheduled(cron = "0 0 0 * * *")
     public void addReminderRoleRoomLog() {
         todoQueryService.addReminderRoleRoomLog();
     }
