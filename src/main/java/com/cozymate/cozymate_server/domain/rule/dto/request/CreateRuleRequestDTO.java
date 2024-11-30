@@ -9,7 +9,7 @@ public record CreateRuleRequestDTO(
     String content,
 
     @NotNull(message = "메모는 필수로 입력해주세요. 아니면 빈 문자열로 보내주세요.")
-    @Size(max = 40, message = "메모는 40자 이하로 입력해주세요.")
+    @Size(max = 50, message = "메모는 50자 이하로 입력해주세요.")
     String memo
 ) {
 
