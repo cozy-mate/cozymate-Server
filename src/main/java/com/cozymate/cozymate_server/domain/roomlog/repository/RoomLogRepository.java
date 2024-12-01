@@ -14,7 +14,7 @@ public interface RoomLogRepository extends JpaRepository<RoomLog, Long> {
 
     Slice<RoomLog> findAllByRoomIdOrderByCreatedAtDesc(Long roomId, Pageable pageable);
 
-    Optional<RoomLog> findByTodoId(Long todoId);
+    Optional<RoomLog> findByTodoIdAndMateId(Long todoId, Long mateId);
 
     void deleteByRoomId(Long roomId);
 

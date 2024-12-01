@@ -109,8 +109,8 @@ public class FcmPushTargetDto {
 
     /**
      * 특정 사용자의 행위를 본인을 제외한 다른 사용자들에게 알림을 전송하는 경우 사용
-     * me.getNickname()님이 오늘 해야 할 일을 전부 완료했어요!
-     * 매치되는 NotificationType -> 현재 해당 dto와 매칭되는 NotificationType은 없습니다
+     * me.getNickname()님이 오늘 해야 할 일을 전부 완료했어요! -> 사용중
+     * 매치되는 NotificationType : COMPLETE_ALL_TODAY_TODO
      */
     @Getter
     public static class GroupWithOutMeTargetDto {

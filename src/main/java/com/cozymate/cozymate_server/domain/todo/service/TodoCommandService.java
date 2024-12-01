@@ -1,8 +1,12 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
+import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
+import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO;
@@ -14,7 +18,6 @@ import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,14 +26,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TodoCommandService {
 
-    // TODO: max assignee 30명 제한 기능 추가
+    private static final int MAX_ASSIGNEE = 30;
     private static final int MAX_TODO_PER_DAY = 20;
     private static final int SINGLE_NUM = 1;
 
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
-    //    private final RoomLogCommandService roomLogCommandService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final RoomLogCommandService roomLogCommandService;
+    private final FcmPushService fcmPushService;
 
 
     /**
@@ -47,11 +50,12 @@ public class TodoCommandService {
         Mate mate = getMate(member.getId(), roomId);
         // 투두 타입 분류 (내 투두, 남 투두, 그룹 투두)
         TodoType type = classifyTodoType(requestDto.mateIdList());
-        // TODO: 추후 구현
         // 모든 메이트가 방에 메이트로 존재하는지 확인이 필요
         checkMateIdListIsSameRoomWithMate(mate, requestDto.mateIdList());
         // 최대 투두 생성 개수 초과 여부 판단
         checkMaxTodoPerDay(roomId, member.getId(), LocalDate.now());
+        // max assignee 초과 여부 판단
+        checkMaxAssignee(requestDto.mateIdList());
 
         Todo todo = todoRepository.save(
             TodoConverter.toEntity(mate.getRoom(), mate, requestDto.mateIdList(),
@@ -86,13 +90,15 @@ public class TodoCommandService {
 
         if (completed) { // 완료 상태로 바꾸는 경우
             todo.markTodoComplete(mate.getId());
-//            //모든 투두가 완료되었을 때 알림을 보냄
-//            // TODO: 바뀐 기획에 따라 로직 변경이 필요함, 추후 수정 예정
-//            allTodoCompleteNotification(todo, member);
+            roomLogCommandService.addRoomLogFromTodo(mate, todo);
+            //모든 투두가 완료되었을 때 알림을 보냄
+            allTodoCompleteNotification(mate);
             return;
         }
+
         // 미완료 상태로 바꾸는 경우
         todo.unmarkTodoComplete(mate.getId());
+        roomLogCommandService.deleteRoomLogFromTodo(mate, todo);
     }
 
     /**
@@ -148,7 +154,6 @@ public class TodoCommandService {
             throw new GeneralException(ErrorStatus._TODO_NOT_VALID);
         }
 
-        // TODO: 할당자가 모두 Mate에 속하는지 판단해야함.
         checkMateIdListIsSameRoomWithMate(mate, requestDto.mateIdList());
 
         // 삭제해야할 할당자 리스트
@@ -164,6 +169,9 @@ public class TodoCommandService {
         todo.removeAssignees(removeIdList);
         todo.addAssignees(addIdList);
         todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
+
+        // 할당자 최대 제한 체크
+        checkMaxAssignee(todo.getAssignedMateIdList());
 
         // 컨텐츠 업데이트
         todo.updateContent(requestDto.content(), requestDto.timePoint());
@@ -203,30 +211,33 @@ public class TodoCommandService {
         return todo.getRole() != null;
     }
 
-//    /**
-//     * TODO: 바뀐 기획으로 수정해야됨
-//     * 모든 투두가 완료되었을 때 알림을 보냄
-//     *
-//     * @param todo   투두
-//     * @param member 사용자
-//     */
-////    private void allTodoCompleteNotification(Todo todo, Member member) {
-////        boolean existsFalseTodo = todoRepository.existsByMateAndTimePointAndCompletedFalse(
-////            todo.getMate(), LocalDate.now());
-////
-////        if (!existsFalseTodo) {
-////            List<Mate> findRoomMates = mateRepository.findByRoom(todo.getRoom());
-////
-////            List<Member> memberList = findRoomMates.stream()
-////                .map(Mate::getMember)
-////                .filter(findMember -> !findMember.getId().equals(member.getId()))
-////                .toList();
-////
-////            eventPublisher.publishEvent(GroupWithOutMeTargetDto.create(member, memberList,
-////                NotificationType.COMPLETE_ALL_TODAY_TODO));
-////        }
-////    }
+    /**
+     * 모든 투두가 완료되었을 때 알림을 보냄
+     */
+    private void allTodoCompleteNotification(Mate mate) {
+        LocalDate now = LocalDate.now();
+        List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(mate.getRoom().getId(),
+            now);
 
+        List<Mate> mateList = mateRepository.findByRoomId(mate.getRoom().getId());
+
+        // 모든 투두중 내가 할당되었는데, 완료되지 않은 투두가 있는지 확인
+        if (todoList.stream().filter(
+                todo -> todo.isAssigneeIn(mate.getId()) && !todo.isAssigneeCompleted(mate.getId()))
+            .findFirst().isEmpty()) {
+
+            // 없으면 FCM 발행 (모든 투두를 완료했음)
+            fcmPushService.sendNotification(GroupWithOutMeTargetDto.create(mate.getMember(),
+                mateList.stream().map(Mate::getMember).toList(),
+                NotificationType.COMPLETE_ALL_TODAY_TODO));
+        }
+    }
+
+    /**
+     * 투두 타입 분류, GROUP, SINGLE을 분류함
+     * @param todoIdList 투두 ID 리스트
+     * @return TodoType
+     */
     private TodoType classifyTodoType(List<Long> todoIdList) {
         // size가 1보다 크면 그룹투두
         if (todoIdList.size() > SINGLE_NUM) {
@@ -236,8 +247,27 @@ public class TodoCommandService {
         return TodoType.SINGLE_TODO;
     }
 
+    /**
+     * 할당자 리스트가 모두 호출한 사람과 같은 방에 있는지 확인
+     * @param mate 호출한 사람
+     * @param mateIdList 할당자 리스트
+     */
     private void checkMateIdListIsSameRoomWithMate(Mate mate, List<Long> mateIdList) {
-        // TODO: mateIdList에 있는 사용자들이 모두 mate와 동일한 방에 속했는지 확인하는 로직 필요
+        List<Mate> mateList = mateRepository.findByRoomId(mate.getRoom().getId());
+        if (mateIdList.stream().anyMatch(
+            mateId -> mateList.stream().noneMatch(m -> m.getMember().getId().equals(mateId)))) {
+            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 최대 할당자 수 체크
+     * @param mateIdList 할당자 리스트
+     */
+    private void checkMaxAssignee(List<Long> mateIdList) {
+        if (mateIdList.size() > MAX_ASSIGNEE) {
+            throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
+        }
     }
 
 }

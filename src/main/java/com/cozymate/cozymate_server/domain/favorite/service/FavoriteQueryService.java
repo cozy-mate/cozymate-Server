@@ -70,15 +70,16 @@ public class FavoriteQueryService {
 
         List<FavoriteMemberResponseDTO> favoriteMemberResponseDTOList = existFavoriteMemberList.stream()
             .filter(favoriteMember -> Objects.nonNull(favoriteMember.getMemberStat()))
-            .map(favoriteMember -> {
-                Map<String, Object> preferences = MemberStatUtil.getMemberStatFields(
-                    favoriteMember.getMemberStat(), criteriaPreferences);
-
-                return FavoriteConverter.toFavoriteMemberResponseDTO(
+            .map(favoriteMember ->
+                FavoriteConverter.toFavoriteMemberResponseDTO(
                     memberIdFavoriteIdMap.get(favoriteMember.getId()),
-                    MemberStatConverter.toPreferenceResponseDTO(favoriteMember.getMemberStat(),
-                        preferences, equalityMap.get(favoriteMember.getId())));
-            }).toList();
+                    MemberStatConverter.toPreferenceResponseDTO(
+                        favoriteMember.getMemberStat(),
+                        MemberStatConverter.toMemberStatPreferenceDetailColorDTOList(
+                            member.getMemberStat(), favoriteMember.getMemberStat(), criteriaPreferences
+                        ),
+                        equalityMap.get(favoriteMember.getId())))
+            ).toList();
 
         // 탈퇴한 회원이 있다면 삭제 처리
         deleteFavoriteMember(findFavoriteMemberIdList, existFavoriteMemberList);

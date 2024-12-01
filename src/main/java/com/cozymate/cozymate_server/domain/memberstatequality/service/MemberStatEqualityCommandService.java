@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.memberstatequality.util.MemberStatEqu
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -216,18 +217,27 @@ public class MemberStatEqualityCommandService {
         List<MemberStatEquality> updatedEqualities = relatedEqualities.stream()
             .map(
                 equality -> {
+
                     boolean isMemberAChanged = equality.getMemberAId().equals(changedMemberId);
 
                     MemberStat memberStat = isMemberAChanged ?
                         memberStatMap.get(equality.getMemberBId()) :
                         memberStatMap.get(equality.getMemberAId());
 
-                    Integer updatedEquality = MemberStatEqualityUtil.calculateEquality(
-                        changedMemberStat, memberStat);
+                    if (memberStat != null) {
+                        Integer updatedEquality = MemberStatEqualityUtil.calculateEquality(
+                            changedMemberStat, memberStat);
 
-                    return equality.updateEquality(updatedEquality);
+                        return equality.updateEquality(updatedEquality);
+                    }
+
+                    deleteMemberStatEqualitiesWithMemberId(
+                        isMemberAChanged ? equality.getMemberBId() : equality.getMemberAId());
+
+                    return null;
                 }
             )
+            .filter(Objects::nonNull)
             .toList();
 
         memberStatEqualityBulkRepository.updateAll(updatedEqualities);
