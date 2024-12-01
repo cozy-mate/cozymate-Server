@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositor
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
@@ -101,7 +102,9 @@ public class MemberWithdrawService {
         mateRepository.findAllByMemberId(member.getId())
             .forEach(mate -> {
                 deleteRelatedWithMate(mate);
-                roomCommandService.quitRoom(mate.getRoom().getId(), mate.getMember().getId());
+                if (mate.getEntryStatus().equals(EntryStatus.JOINED)) {
+                    roomCommandService.quitRoom(mate.getRoom().getId(), mate.getMember().getId());
+                }
             });
 
         mateRepository.deleteAllByMemberId(member.getId());
