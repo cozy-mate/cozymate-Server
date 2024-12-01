@@ -7,11 +7,11 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import io.sentry.Sentry;
 import io.sentry.SentryLevel;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -35,12 +35,16 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
         String errorMessage = e.getConstraintViolations().stream()
-            .map(ConstraintViolation::getMessage)
+            .map(violation -> String.format("prop '%s' | val '%s' | msg %s",
+                violation.getPropertyPath(), // 위반된 필드 경로
+                violation.getInvalidValue(), // 유효하지 않은 값
+                violation.getMessage()       // 제약 조건 위반 메시지
+            ))
             .findFirst()
             .orElseThrow(() -> new RuntimeException("ConstraintViolationException 추출 도중 에러 발생"));
 
-        return handleExceptionInternalConstraint(e, ErrorStatus.valueOf(errorMessage),
-            HttpHeaders.EMPTY, request);
+        log.info("[   Valid] rid {} | {}", MDC.get(MdcKey.REQUEST_ID.name()), errorMessage);
+        return handleExceptionInternalConstraint(e, HttpHeaders.EMPTY, request, errorMessage);
     }
 
     // @Valid 어노테이션을 통한 검증 실패 시 발생하는 예외를 처리
@@ -61,6 +65,8 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                         + newErrorMessage);
             });
 
+        log.error("[   Valid] rid {} | err {}", MDC.get(MdcKey.REQUEST_ID.name()), errors);
+
         return handleExceptionInternalArgs(e, HttpHeaders.EMPTY,
             ErrorStatus.valueOf("_BAD_REQUEST"), request, errors);
     }
@@ -69,15 +75,18 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
 
+        String errorMessage = e.getMessage();
+        String errorPoint = Objects.isNull(e.getStackTrace()) ? "No Stack Trace Error."
+            : e.getStackTrace()[0].toString();
         log.error("[   ERROR] rid {} | msg {} | loc {}", MDC.get(MdcKey.REQUEST_ID.name()),
-            e.getMessage(), e.getStackTrace()[0]);
+            errorMessage, errorPoint);
         Sentry.withScope(scope -> {
             scope.setTag("handled", "no");
             scope.setTag("status_code",
                 ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus().toString());
             scope.setTag("user_id", MDC.get(MdcKey.USER_ID.name()));
-            scope.setExtra("location", e.getStackTrace()[0].toString());
-            scope.setExtra("message", e.getMessage());
+            scope.setExtra("location", errorPoint);
+            scope.setExtra("message", errorMessage);
             scope.setLevel(SentryLevel.FATAL);
             scope.setFingerprint(List.of("cozymate", "FATAL", MDC.get(MdcKey.USER_ID.name()),
                 MDC.get(MdcKey.REQUEST_ID.name())));
@@ -167,15 +176,14 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
     // 검증 실패에 대한 처리 메소드
     private ResponseEntity<Object> handleExceptionInternalConstraint(Exception e,
-        ErrorStatus errorCommonStatus,
-        HttpHeaders headers, WebRequest request) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),
-            errorCommonStatus.getMessage(), null);
+        HttpHeaders headers, WebRequest request, String message) {
+        ApiResponse<Object> body = ApiResponse.onFailure(ErrorStatus._FORBIDDEN.getCode(),
+            message, null);
         return super.handleExceptionInternal(
             e,
             body,
             headers,
-            errorCommonStatus.getHttpStatus(),
+            ErrorStatus._FORBIDDEN.getHttpStatus(),
             request
         );
     }
