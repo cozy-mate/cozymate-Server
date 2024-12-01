@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.converter.NotificationLogConverter;
 import com.cozymate.cozymate_server.domain.notificationlog.dto.response.NotificationLogResponseDTO;
+import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,8 @@ public class NotificationLogQueryService {
     private final NotificationLogRepository notificationLogRepository;
 
     public List<NotificationLogResponseDTO> getNotificationLogList(Member member) {
-        List<NotificationLog> notificationLogs = notificationLogRepository.findByMemberOrderByIdDesc(
-            member);
+        List<NotificationLog> notificationLogs = notificationLogRepository.findByMemberAndCategoryNotInOrderByIdDesc(
+            member, List.of(NotificationCategory.COZY_HOME, NotificationCategory.COZY_ROLE));
 
         List<NotificationLogResponseDTO> notificationLogResponseDTOList = notificationLogs.stream()
             .map(notificationLog -> NotificationLogConverter.toNotificationLogResponseDTO(
