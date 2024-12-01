@@ -16,11 +16,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberQueryService {
 
     private final MemberRepository memberRepository;
+    private static final String NICKNAME_PATTERN = "^[가-힣a-zA-Z][가-힣a-zA-Z0-9_]*$";
 
     @Transactional
-    public Boolean isValidNickName(String nickname) {
-        // todo: 금지 닉네임 로직 추가
-        return !memberRepository.existsByNickname(nickname);
+    public void isValidNickName(String nickname) {
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new GeneralException(ErrorStatus._NICKNAME_EXISTING);
+        }
+
+        if (!nickname.matches(NICKNAME_PATTERN)) {
+            throw new GeneralException(ErrorStatus._INVALID_NICKNAME_PATTERN);
+        }
+
+        if (nickname.length() < 2 || nickname.length() > 8) {
+            throw new GeneralException(ErrorStatus._INVALID_NICKNAME_LENGTH);
+        }
     }
 
     @Transactional
@@ -30,11 +40,6 @@ public class MemberQueryService {
         );
     }
 
-//    @Transactional
-//    public MemberResponseDTO.SearchResponseDTO searchByNickname(MemberDetails memberDetails, String searchTerm){
-//
-//
-//    }
 
     @Transactional
     public Boolean isPresent(String clientId) {

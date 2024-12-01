@@ -18,8 +18,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 import lombok.AccessLevel;
@@ -27,6 +25,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import org.hibernate.validator.constraints.Range;
 
 @Getter
 @AllArgsConstructor
@@ -39,29 +39,30 @@ public class Member extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "{EntityFieldNotNull}")
+    @NonNull
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
-    @NotNull(message = "{EntityFieldNotNull}")
+    @NonNull
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @NotNull(message = "{EntityFieldNotNull}")
+    @NonNull
     private String clientId;
 
-    @NotNull(message = "{EntityFieldNotNull}")
-    @NotEmpty(message = "{EntityFieldNotEmpty}")
+    @NonNull
+//    @Length(min = 2, max = 8)
     private String nickname;
 
-    @NotNull(message = "{EntityFieldNotNull}")
+    @NonNull
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @NotNull(message = "{EntityFieldNotNull}")
+    @NonNull
     private LocalDate birthDay;
 
-    @NotNull(message = "{EntityFieldNotNull}")
+    @NonNull
+    @Range(min = 1, max = 16)
     private Integer persona;
 
     @ManyToOne()
