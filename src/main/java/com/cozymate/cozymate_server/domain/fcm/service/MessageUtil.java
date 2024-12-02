@@ -34,6 +34,10 @@ public class MessageUtil {
 
         String content = getContent(contentMember, room, notificationType);
 
+        if (NotificationType.ARRIVE_ROOM_INVITE.equals(notificationType)) {
+            return getMessageResult(fcmList, content, room);
+        }
+
         return getMessageResult(fcmList, content);
     }
 
@@ -45,6 +49,10 @@ public class MessageUtil {
         }
 
         String content = getContent(member, notificationType);
+
+        if (NotificationType.ARRIVE_ROOM_JOIN_REQUEST.equals(notificationType)) {
+            return getMessageResult(fcmList, content, member);
+        }
 
         return getMessageResult(fcmList, content);
     }
@@ -122,6 +130,78 @@ public class MessageUtil {
 
     private String getContent(Member member, Room room, NotificationType notificationType) {
         return notificationType.generateContent(FcmPushContentDto.create(member, room));
+    }
+
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Member member) {
+        Map<Message, String> messageTokenMap = new HashMap<>();
+
+        List<Message> messages = fcmList.stream()
+            .map(fcm -> {
+                String token = fcm.getToken();
+
+                HashMap<String, String> messageMap = new HashMap<>();
+                messageMap.put("title", NOTIFICATION_TITLE);
+                messageMap.put("body", content);
+                messageMap.put("memberId", member.getId().toString());
+
+                Notification notification = Notification.builder()
+                    .setTitle(NOTIFICATION_TITLE)
+                    .setBody(content)
+                    .build();
+
+                Message message = Message.builder()
+                    .putAllData(messageMap)
+                    .setToken(token)
+                    .setNotification(notification)
+                    .build();
+
+                messageTokenMap.put(message, token);
+
+                return message;
+            }).toList();
+
+        MessageResult messageResult = MessageResult.builder()
+            .messageTokenMap(messageTokenMap)
+            .messages(messages)
+            .content(content)
+            .build();
+        return messageResult;
+    }
+
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Room room) {
+        Map<Message, String> messageTokenMap = new HashMap<>();
+
+        List<Message> messages = fcmList.stream()
+            .map(fcm -> {
+                String token = fcm.getToken();
+
+                HashMap<String, String> messageMap = new HashMap<>();
+                messageMap.put("title", NOTIFICATION_TITLE);
+                messageMap.put("body", content);
+                messageMap.put("roomId", room.getId().toString());
+
+                Notification notification = Notification.builder()
+                    .setTitle(NOTIFICATION_TITLE)
+                    .setBody(content)
+                    .build();
+
+                Message message = Message.builder()
+                    .putAllData(messageMap)
+                    .setToken(token)
+                    .setNotification(notification)
+                    .build();
+
+                messageTokenMap.put(message, token);
+
+                return message;
+            }).toList();
+
+        MessageResult messageResult = MessageResult.builder()
+            .messageTokenMap(messageTokenMap)
+            .messages(messages)
+            .content(content)
+            .build();
+        return messageResult;
     }
 
     private MessageResult getMessageResult(List<Fcm> fcmList, String content) {
