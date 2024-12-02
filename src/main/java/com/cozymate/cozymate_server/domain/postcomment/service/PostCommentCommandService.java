@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.postcomment.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.post.Post;
@@ -30,7 +31,8 @@ public class PostCommentCommandService {
     public Long createPostComment(Member member,
         PostCommentCreateDTO postCommentCreateDTO) {
 
-        Mate commenter = mateRepository.findByMemberIdAndRoomId(member.getId(), postCommentCreateDTO.getRoomId()).orElseThrow(
+        Mate commenter = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(
+            postCommentCreateDTO.getRoomId(), member.getId(), EntryStatus.JOINED).orElseThrow(
             () -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND)
         );
 
@@ -47,15 +49,17 @@ public class PostCommentCommandService {
     public Long updatePostComment(Member member,
         PostCommentUpdateDTO postCommentUpdateDTO) {
 
-        if (!mateRepository.existsByMemberIdAndRoomId(member.getId(), postCommentUpdateDTO.getRoomId())) {
+        if (!mateRepository.existsByMemberIdAndRoomId(member.getId(),
+            postCommentUpdateDTO.getRoomId())) {
             throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
 
-        if(!postRepository.existsById(postCommentUpdateDTO.getPostId())){
+        if (!postRepository.existsById(postCommentUpdateDTO.getPostId())) {
             throw new GeneralException(ErrorStatus._POST_NOT_FOUND);
         }
 
-        PostComment postComment = postCommentRepository.findById(postCommentUpdateDTO.getCommentId()).orElseThrow(
+        PostComment postComment = postCommentRepository.findById(
+            postCommentUpdateDTO.getCommentId()).orElseThrow(
             () -> new GeneralException(ErrorStatus._POST_COMMENT_NOT_FOUND)
         );
 
@@ -70,7 +74,7 @@ public class PostCommentCommandService {
             throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
 
-        if(!postRepository.existsById(postId)){
+        if (!postRepository.existsById(postId)) {
             throw new GeneralException(ErrorStatus._POST_NOT_FOUND);
         }
 

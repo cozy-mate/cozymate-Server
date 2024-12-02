@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.role.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.role.Role;
@@ -132,7 +133,7 @@ public class RoleCommandService {
      * @return Mate
      */
     private Mate getMate(Long memberId, Long roomId) {
-        return mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+        return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
     }
 

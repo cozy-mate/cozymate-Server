@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.todo.service;
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
@@ -181,7 +182,8 @@ public class TodoCommandService {
     }
 
     private Mate getMate(Long memberId, Long roomId) {
-        return mateRepository.findByMemberIdAndRoomId(memberId, roomId)
+        return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+                EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
     }
 
@@ -238,6 +240,7 @@ public class TodoCommandService {
 
     /**
      * 투두 타입 분류, GROUP, SINGLE을 분류함
+     *
      * @param todoIdList 투두 ID 리스트
      * @return TodoType
      */
@@ -252,7 +255,8 @@ public class TodoCommandService {
 
     /**
      * 할당자 리스트가 모두 호출한 사람과 같은 방에 있는지 확인
-     * @param mate 호출한 사람
+     *
+     * @param mate       호출한 사람
      * @param mateIdList 할당자 리스트
      */
     private void checkMateIdListIsSameRoomWithMate(Mate mate, List<Long> mateIdList) {
@@ -265,6 +269,7 @@ public class TodoCommandService {
 
     /**
      * 최대 할당자 수 체크
+     *
      * @param mateIdList 할당자 리스트
      */
     private void checkMaxAssignee(List<Long> mateIdList) {

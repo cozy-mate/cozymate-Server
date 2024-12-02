@@ -37,8 +37,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     boolean existsByMemberIdAndRoomStatuses(@Param("memberId") Long memberId,
         @Param("status1") RoomStatus status1, @Param("status2") RoomStatus status2);
 
-    Optional<Mate> findByMemberIdAndRoomId(Long MemberId, Long RoomId);
-
     Optional<Mate> findByRoomIdAndMemberIdAndEntryStatus(Long roomId, Long memberId,
         EntryStatus status);
 
@@ -74,7 +72,7 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findFetchMemberByRoom(@Param("room") Room room,
         @Param("entryStatus") EntryStatus entryStatus);
 
-    Optional<Mate> findByMemberAndEntryStatus(Member member,EntryStatus entryStatus);
+    Optional<Mate> findByMemberAndEntryStatus(Member member, EntryStatus entryStatus);
 
     @Query("select m from Mate m join fetch m.member")
     List<Mate> findFetchAll();

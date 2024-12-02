@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.roomlog.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
@@ -34,7 +35,8 @@ public class RoomLogQueryService {
         int size) {
 
         // 본인 방에 속한건지 확인
-        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(), roomId)
+        Mate mate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, member.getId(),
+                EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
         Pageable pageable = PageRequest.of(page, size);

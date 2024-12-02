@@ -4,6 +4,7 @@ package com.cozymate.cozymate_server.domain.post.service;
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.post.Post;
@@ -37,8 +38,8 @@ public class PostCommandService {
 
     public Long createPost(Member member, PostCreateDTO postCreateDTO) {
 
-        Mate mate = mateRepository.findByMemberIdAndRoomId(member.getId(),
-            postCreateDTO.getRoomId()).orElseThrow(
+        Mate mate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(postCreateDTO.getRoomId(),
+            member.getId(), EntryStatus.JOINED).orElseThrow(
             () -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND)
         );
 
