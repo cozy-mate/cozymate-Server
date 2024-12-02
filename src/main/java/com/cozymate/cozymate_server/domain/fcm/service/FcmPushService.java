@@ -113,8 +113,6 @@ public class FcmPushService {
 
     /**
      * ex) 더기님에게 xx방으로 초대 요청을 보냈어요 SEND_ROOM_INVITE <-> 델로님이 xx방으로 나를 초대했어요 ARRIVE_ROOM_INVITE
-     * 더기님의 방 참여 요청을 거절했어요 SELF_REJECT_ROOM_JOIN <-> 델로님이 방 참여 요청을 거절했어요 REJECT_ROOM_JOIN
-     * 더기님의 방 참여 요청을 수락햇어요 SELF_ACCEPT_ROOM_JOIN <-> 델로님이 방 참여 요청을 수락했어요 ACCEPT_ROOM_JOIN
      */
     @Async
     public void sendNotification(HostAndMemberAndRoomTargetDto target) {
