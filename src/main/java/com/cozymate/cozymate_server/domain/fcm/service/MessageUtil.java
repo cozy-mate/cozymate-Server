@@ -15,8 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MessageUtil {
@@ -50,10 +52,6 @@ public class MessageUtil {
 
         String content = getContent(member, notificationType);
 
-        if (NotificationType.ARRIVE_ROOM_JOIN_REQUEST.equals(notificationType)) {
-            return getMessageResult(fcmList, content, member);
-        }
-
         return getMessageResult(fcmList, content);
     }
 
@@ -66,6 +64,10 @@ public class MessageUtil {
         }
 
         String content = getContent(contentMember, notificationType);
+
+        if (NotificationType.ARRIVE_ROOM_JOIN_REQUEST.equals(notificationType)) {
+            return getMessageResult(fcmList, content, contentMember);
+        }
 
         return getMessageResult(fcmList, content);
     }
