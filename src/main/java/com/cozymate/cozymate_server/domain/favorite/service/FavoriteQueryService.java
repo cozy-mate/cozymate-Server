@@ -60,7 +60,8 @@ public class FavoriteQueryService {
 
         List<Long> findFavoriteMemberIdList = new ArrayList<>(memberIdFavoriteIdMap.keySet());
 
-        List<Member> existFavoriteMemberList = memberRepository.findAllById(findFavoriteMemberIdList);
+        List<Member> existFavoriteMemberList = memberRepository.findAllById(
+            findFavoriteMemberIdList);
 
         Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(member.getId(),
             existFavoriteMemberList.stream().map(Member::getId).toList());
@@ -76,7 +77,8 @@ public class FavoriteQueryService {
                     MemberStatConverter.toPreferenceResponseDTO(
                         favoriteMember.getMemberStat(),
                         MemberStatConverter.toMemberStatPreferenceDetailColorDTOList(
-                            member.getMemberStat(), favoriteMember.getMemberStat(), criteriaPreferences
+                            favoriteMember.getMemberStat(), member.getMemberStat(),
+                            criteriaPreferences
                         ),
                         equalityMap.get(favoriteMember.getId())))
             ).toList();
@@ -137,7 +139,8 @@ public class FavoriteQueryService {
                 // 선호 스탯 일치 횟수 계산
                 List<PreferenceMatchCountDTO> preferenceStatsMatchCountList =
                     Objects.nonNull(memberStat)
-                        ? getPreferenceStatsMatchCounts(member, criteriaPreferenceList, mates, memberStat)
+                        ? getPreferenceStatsMatchCounts(member, criteriaPreferenceList, mates,
+                        memberStat)
                         : getPreferenceStatsMatchCountsWithoutMemberStat(criteriaPreferenceList);
 
                 // 로그인 사용자와 mate들의 멤버 스탯 "일치율" 계산
@@ -151,7 +154,8 @@ public class FavoriteQueryService {
                 Integer roomEquality = getCalculateRoomEquality(member.getId(), equalityMap);
 
                 // 방 해시태그 조회
-                List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
+                List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(
+                    room.getId());
 
                 return FavoriteConverter.toFavoriteRoomResponseDTO(
                     roomIdFavoriteIdMap.get(room.getId()), room, roomEquality,
@@ -159,7 +163,6 @@ public class FavoriteQueryService {
                 );
             })
             .toList();
-
 
         // 조회 조건에 맞지 않는 방 찜 삭제 처리
         deleteFavoriteRoom(existFavoriteRoomList, findFavoriteRoomIdList, partitionedRoomStatusMap,
@@ -207,7 +210,8 @@ public class FavoriteQueryService {
         return roomEquality.isEmpty() ? null : (int) Math.round((double) sum / roomEquality.size());
     }
 
-    private void deleteFavoriteMember(List<Long> findFavoriteMemberIdList, List<Member> existFavoriteMemberList) {
+    private void deleteFavoriteMember(List<Long> findFavoriteMemberIdList,
+        List<Member> existFavoriteMemberList) {
         Set<Long> existMemberIdSet = existFavoriteMemberList.stream()
             .map(Member::getId)
             .collect(Collectors.toSet());
@@ -220,7 +224,8 @@ public class FavoriteQueryService {
             FavoriteType.MEMBER);
     }
 
-    private void deleteFavoriteRoom(List<Room> existFavoriteRoomList, List<Long> findFavoriteRoomIdList,
+    private void deleteFavoriteRoom(List<Room> existFavoriteRoomList,
+        List<Long> findFavoriteRoomIdList,
         Map<Boolean, List<Room>> partitionedRoomStatusMap,
         Map<Boolean, List<Room>> partitionedMateNumMap) {
         // 찜한 방id 에서 실제 조회된 방들의 id
