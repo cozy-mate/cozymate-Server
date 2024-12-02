@@ -3,7 +3,10 @@ package com.cozymate.cozymate_server.domain.member.service;
 import com.cozymate.cozymate_server.domain.auth.repository.TokenRepository;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
+import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
+import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepository;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
@@ -20,7 +23,6 @@ import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
 import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.report.repository.ReportRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
-import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
@@ -56,6 +58,10 @@ public class MemberWithdrawService {
 
     private final RoomCommandService roomCommandService;
 
+    private final FavoriteRepository favoriteRepository;
+
+    private final InquiryRepository inquiryRepository;
+
 
     /**
      * 회원 탈퇴 로직을 처리하는 메서드. 관련된 모든 데이터를 삭제한 뒤, 최종적으로 회원 정보를 삭제한다.
@@ -75,12 +81,17 @@ public class MemberWithdrawService {
      * 회원과 연관된 데이터를 삭제하는 메서드.
      */
 
-    private void deleteRelatedWithMember(Member member) {
+    @Transactional
+    public void deleteRelatedWithMember(Member member) {
         log.debug("사용자 관련 데이터 삭제 시작");
         tokenRepository.deleteById(member.getClientId());
         mailRepository.deleteById(member.getId());
-
         log.debug("토큰,메일 삭제 완료");
+
+
+        favoriteRepository.deleteByTargetIdAndFavoriteType(member.getId(), FavoriteType.MEMBER);
+        favoriteRepository.deleteByMemberId(member.getId());
+        log.debug("찜 삭제 완료");
 
         memberStatRepository.deleteByMemberId(member.getId());
         memberStatPreferenceRepository.deleteByMemberId(member.getId());
@@ -91,8 +102,9 @@ public class MemberWithdrawService {
         handleChatAndChatRoom(member);
 
         reportRepository.bulkDeleteReporter(member);
+        inquiryRepository.bulkDeleteMember(member);
 
-        log.debug("신고내역 처리 완료");
+        log.debug("문의, 신고내역 처리 완료");
 
         fcmRepository.deleteAllByMemberId(member.getId());
         notificationLogRepository.deleteAllByMemberId(member.getId());
@@ -110,7 +122,6 @@ public class MemberWithdrawService {
         mateRepository.deleteAllByMemberId(member.getId());
 
         log.debug("mate 삭제 완료");
-
 
     }
 

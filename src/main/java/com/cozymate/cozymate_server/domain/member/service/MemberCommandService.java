@@ -80,6 +80,9 @@ public class MemberCommandService {
     public SignInResponseDTO signUp(String clientId,
         SignUpRequestDTO signUpRequestDTO) {
 
+        if (!checkNickname(signUpRequestDTO.nickname())) {
+            throw new GeneralException(ErrorStatus._NICKNAME_EXISTING);
+        }
         if (memberQueryService.isPresent(clientId)) { // 사용자 중복 검증
             throw new GeneralException(ErrorStatus._MEMBER_EXISTING);
         }

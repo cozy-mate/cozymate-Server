@@ -28,4 +28,9 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     void deleteAllByTargetIdsAndFavoriteType(@Param("targetIds") List<Long> targetIds,
         @Param("favoriteType") FavoriteType favoriteType);
 
+    void deleteByTargetIdAndFavoriteType(@Param("targetId") Long targetId,
+        @Param("favoriteType") FavoriteType favoriteType);
+
+    void deleteByMemberId(Long memberId);
+
 }
