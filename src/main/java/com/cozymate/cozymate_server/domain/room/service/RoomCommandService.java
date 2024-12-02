@@ -465,16 +465,22 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberIdAndNotEntryStatus(
-            roomId, memberId, EntryStatus.EXITED);
+        Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(room.getId(), memberId);
         checkEntryStatus(existingMate);
 
         if (room.getNumOfArrival() >= room.getMaxMateNum()) {
             throw new GeneralException(ErrorStatus._ROOM_FULL);
         }
 
-        Mate mate = MateConverter.toPending(room, member, false);
-        mateRepository.save(mate);
+        if (existingMate.isPresent()) {
+            Mate mate = existingMate.get();
+            mate.setEntryStatus(EntryStatus.PENDING);
+            mate.setNotExit();
+            mateRepository.save(mate);
+        } else {
+            Mate mate = MateConverter.toPending(room, member, false);
+            mateRepository.save(mate);
+        }
 
         // 푸시 알림 코드
         Mate managerMate = mateRepository.findFetchByRoomAndIsRoomManager(room, true).orElseThrow(
