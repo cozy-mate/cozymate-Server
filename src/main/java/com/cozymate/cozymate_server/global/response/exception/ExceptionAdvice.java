@@ -177,13 +177,13 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     // 검증 실패에 대한 처리 메소드
     private ResponseEntity<Object> handleExceptionInternalConstraint(Exception e,
         HttpHeaders headers, WebRequest request, String message) {
-        ApiResponse<Object> body = ApiResponse.onFailure(ErrorStatus._FORBIDDEN.getCode(),
+        ApiResponse<Object> body = ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(),
             message, null);
         return super.handleExceptionInternal(
             e,
             body,
             headers,
-            ErrorStatus._FORBIDDEN.getHttpStatus(),
+            ErrorStatus._BAD_REQUEST.getHttpStatus(),
             request
         );
     }
