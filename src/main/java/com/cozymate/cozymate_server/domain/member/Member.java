@@ -8,7 +8,7 @@ import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Entity;
@@ -70,7 +70,7 @@ public class Member extends BaseTimeEntity {
 
     private String majorName;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "member")
+    @OneToOne(mappedBy = "member",fetch = FetchType.LAZY)
     private MemberStat memberStat;
 
     public void verifyMemberUniversity(University university, String majorName){
