@@ -27,4 +27,6 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     @Modifying
     @Query("UPDATE Todo t SET t.mate = null WHERE t.mate = :mate")
     void bulkDeleteMate(@Param("mate") Mate mate);
+
+    void deleteAllByRoleId(Long roleId);
 }

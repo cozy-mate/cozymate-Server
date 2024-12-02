@@ -13,6 +13,7 @@ import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
+import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.DayOfWeek;
@@ -32,6 +33,7 @@ public class RoleCommandService {
     private final RoleRepository roleRepository;
     private final MateRepository mateRepository;
     private final TodoRepository todoRepository;
+    private final TodoCommandService todoCommandService;
 
     /**
      * Role 생성
@@ -68,6 +70,7 @@ public class RoleCommandService {
 
         checkUpdatePermission(role, mate);
 
+        todoCommandService.deleteTodoByRoleId(roleId);
         roleRepository.delete(role);
     }
 

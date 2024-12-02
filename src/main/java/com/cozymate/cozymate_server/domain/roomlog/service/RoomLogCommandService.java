@@ -103,4 +103,9 @@ public class RoomLogCommandService {
         roomLogRepository.save(RoomLogConverter.toEntity(content, mate.getRoom(), null, mate));
     }
 
+    public void changeRoomLogTodoToNull(Long todoId) {
+        List<RoomLog> roomLog = roomLogRepository.findAllByTodoId(todoId);
+        roomLog.forEach(RoomLog::changeTodoToNull);
+    }
+
 }

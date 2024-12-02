@@ -32,7 +32,7 @@ public class Rule extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String content;
 
-    @Column(nullable = false, length = 40)
+    @Column(nullable = false, length = 50)
     private String memo;
 
     // 메모가 nullable이라, 수정할 때 그냥 값을 덮어씌우도록 구성
