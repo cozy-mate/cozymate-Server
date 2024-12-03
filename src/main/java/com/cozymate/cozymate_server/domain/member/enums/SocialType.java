@@ -1,10 +1,8 @@
 package com.cozymate.cozymate_server.domain.member.enums;
 
-import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
-import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.Arrays;
+import com.cozymate.cozymate_server.global.utils.EnumValue;
 
-public enum SocialType {
+public enum SocialType implements EnumValue {
     KAKAO,
     NAVER,
     GOOGLE,
@@ -17,10 +15,7 @@ public enum SocialType {
         return name();
     }
 
-    public static SocialType getValue(String socialTypeString) {
-        return Arrays.stream(values())
-                .filter(socialType -> socialType.name().equalsIgnoreCase(socialTypeString))
-                .findFirst()
-                .orElseThrow( () -> new GeneralException(ErrorStatus._INVALID_SOCIAL_TYPE));
+    public static SocialType getValue(String socialTypeString){
+        return EnumValue.getValue(SocialType.class,socialTypeString);
     }
 }

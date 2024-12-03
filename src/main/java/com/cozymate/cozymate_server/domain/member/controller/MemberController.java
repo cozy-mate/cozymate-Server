@@ -9,21 +9,22 @@ import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
-import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,12 +50,8 @@ public class MemberController {
         ErrorStatus._MEMBER_BINDING_FAIL,
     })
     ResponseEntity<ApiResponse<SignInResponseDTO>> signIn(
-        @RequestBody @Valid SignInRequestDTO signInRequestDTO,
-        BindingResult bindingResult) {
-
-        if (bindingResult.hasErrors()) {
-            throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
-        }
+        @Valid @RequestBody SignInRequestDTO signInRequestDTO
+    ) {
 
         SignInResponseDTO signInResponseDTO = memberCommandService.signIn(signInRequestDTO);
 
@@ -64,7 +61,8 @@ public class MemberController {
     @GetMapping("/check-nickname")
     @Operation(summary = "[말즈] 닉네임 유효성 검증",
         description = "false : 사용 불가, true : 사용 가능")
-    ResponseEntity<ApiResponse<Boolean>> checkNickname(@RequestParam String nickname) {
+    ResponseEntity<ApiResponse<Boolean>> checkNickname(
+        @RequestParam @Length(min = 2, max = 10) String nickname) {
         Boolean isValid = memberCommandService.checkNickname(nickname);
 
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
@@ -84,14 +82,7 @@ public class MemberController {
     })
     ResponseEntity<ApiResponse<SignInResponseDTO>> signUp(
         @RequestAttribute("client_id") String clientId,
-        @RequestBody @Valid SignUpRequestDTO signUpRequestDTO,
-        BindingResult bindingResult
-    ) {
-        log.info("enter MemberController : [post] /member/sign-up");
-
-        if (bindingResult.hasErrors()) {
-            throw new GeneralException(ErrorStatus._MEMBER_BINDING_FAIL);
-        }
+        @RequestBody @Valid SignUpRequestDTO signUpRequestDTO) {
 
         SignInResponseDTO signInResponseDTO = memberCommandService.signUp(clientId,
             signUpRequestDTO);
@@ -141,8 +132,7 @@ public class MemberController {
         description = "사용자의 프로필 이미지를 수정합니다.<br>1~16 사이의 정수값을 전달하며, 이 값은 사전에 정의된 이미지 ID를 나타냅니다.<br>예시: `persona=3`")
     ResponseEntity<ApiResponse<Boolean>> updatePersona(
         @RequestParam
-        @Max(value = 16)
-        @Min(value = 1)
+        @Range(min = 1, max = 16)
         Integer persona,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
@@ -167,7 +157,10 @@ public class MemberController {
     @Operation(summary = "[말즈] 사용자 학과 수정",
         description = "사용자의 학과명을 수정합니다.<br>학과명은 문자열 형식으로 전달됩니다.<br>예시: `majorName=컴퓨터공학과`")
     ResponseEntity<ApiResponse<Boolean>> updateMajorName(
-        @RequestParam String majorName,
+        @RequestParam
+        @NotEmpty
+        @NotNull
+        String majorName,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         memberCommandService.updateMajor(memberDetails.member(), majorName);

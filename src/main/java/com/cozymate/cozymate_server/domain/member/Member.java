@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.member;
 
-
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
@@ -27,6 +26,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.hibernate.validator.constraints.Range;
 
 @Getter
 @AllArgsConstructor
@@ -50,8 +50,8 @@ public class Member extends BaseTimeEntity {
     @NonNull
     private String clientId;
 
-
     @NonNull
+//    @Length(min = 2, max = 8)
     private String nickname;
 
     @NonNull
@@ -62,6 +62,7 @@ public class Member extends BaseTimeEntity {
     private LocalDate birthDay;
 
     @NonNull
+    @Range(min = 1, max = 16)
     private Integer persona;
 
     @ManyToOne()
