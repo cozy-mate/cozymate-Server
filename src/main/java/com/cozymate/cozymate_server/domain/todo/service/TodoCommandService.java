@@ -267,6 +267,7 @@ public class TodoCommandService {
         HashSet<Long> roomMateIdSet = roomMateList.stream().map(Mate::getId).collect(
             HashSet::new, HashSet::add, HashSet::addAll);
 
+        // mateIdList가 roomMateList에 모두 포함되어있는지 확인
         if (!roomMateIdSet.containsAll(mateIdList)) {
             throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
         }
