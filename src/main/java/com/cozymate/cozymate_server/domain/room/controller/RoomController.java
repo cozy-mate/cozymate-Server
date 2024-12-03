@@ -380,7 +380,7 @@ public class RoomController {
     }
 
     @GetMapping("/invited-status/{memberId}")
-    @Operation(summary = "[바니] 방장 -> 방장이 사용자를 초대 했는지 여부 조회", description = "방장이 memberId에 해당하는 사용자에게 방 참여 요청을 보냈는지 여부를 조회합니다.")
+    @Operation(summary = "[바니] 방장 -> 방장이 초대한 사용자인지 조회", description = "방장이 memberId에 해당하는 사용자에게 방 참여 요청을 보냈는지 여부를 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
@@ -393,7 +393,7 @@ public class RoomController {
     }
 
     @GetMapping("pending-status/{memberId}")
-    @Operation(summary = "[바니] 방장 -> 사용자가 방에 참여 요청을 했는지 여부 조회", description = "memberId에 해당하는 사용자가 방장의 방에 참여 요청을 보냈는지 여부를 조회합니다.")
+    @Operation(summary = "[바니] 방장 -> 방에 참여 요청한 사용자인지 조회", description = "memberId에 해당하는 사용자가 방장의 방에 참여 요청을 보냈는지 여부를 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
@@ -406,7 +406,7 @@ public class RoomController {
     }
 
     @GetMapping("/{roomId}/invited-status")
-    @Operation(summary = "[바니] 사용자가 해당 방에 초대 받았는지 여부 조회", description = "로그인한 사용자가 해당 roomId의 방에 초대받았는지 여부를 조회합니다.")
+    @Operation(summary = "[바니] 사용자 -> 사용자가 초대받은 방인지 조회", description = "로그인한 사용자가 해당 roomId의 방에 초대받았는지 여부를 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
@@ -417,7 +417,7 @@ public class RoomController {
     }
 
     @GetMapping("/{roomId}/pending-status")
-    @Operation(summary = "[바니] 사용자가 해당 방에 참여 요청을 했는지 여부 조회", description = "로그인한 사용자가 roomId에 해당하는 방에 참여 요청을 했는지 여부를 조회합니다.")
+    @Operation(summary = "[바니] 사용자 -> 사용자가 참여 요청한 방인지 조회", description = "로그인한 사용자가 roomId에 해당하는 방에 참여 요청을 했는지 여부를 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND
