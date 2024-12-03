@@ -315,16 +315,6 @@ public class RoomQueryService {
         return managerMate.getMember().getMemberStat().getDormitoryName();
     }
 
-    public Boolean getPendingStatus(Long roomId, Long memberId) {
-        memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        roomRepository.findById(roomId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.PENDING);
-    }
-
     public Long isFavoritedRoom(Long memberId, Long roomId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -400,7 +390,7 @@ public class RoomQueryService {
                 .isPresent());
     }
 
-    public Boolean getInvitedStatus(Long memberId, Long managerId) {
+    public Boolean isMemberInEntryStatus(Long memberId, Long managerId, EntryStatus entryStatus) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -414,6 +404,16 @@ public class RoomQueryService {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
-        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId, EntryStatus.INVITED);
+        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId, entryStatus);
+    }
+
+    public Boolean isEntryStatusToRoom(Long roomId, Long memberId, EntryStatus entryStatus) {
+        memberRepository.findById(memberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        roomRepository.findById(roomId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+
+        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, entryStatus);
     }
 }
