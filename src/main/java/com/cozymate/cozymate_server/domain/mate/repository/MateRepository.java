@@ -27,12 +27,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     Optional<Mate> findByRoomIdAndMemberIdAndNotEntryStatus(@Param("roomId") Long roomId,
         @Param("memberId") Long memberId, @Param("entryStatus") EntryStatus entryStatus);
 
-
-    @Query("SELECT COUNT(m) FROM Mate m WHERE m.room.id = :roomId AND m.entryStatus = 'JOINED'")
-    long countActiveMatesByRoomId(@Param("roomId") Long roomId);
-
-    Long countByRoomId(Long roomId);
-
     @Query("SELECT COUNT(m) > 0 FROM Mate m WHERE m.member.id = :memberId AND (m.room.status = :status1 OR m.room.status = :status2)")
     boolean existsByMemberIdAndRoomStatuses(@Param("memberId") Long memberId,
         @Param("status1") RoomStatus status1, @Param("status2") RoomStatus status2);
@@ -41,8 +35,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
         EntryStatus status);
 
     boolean existsByRoomIdAndMemberIdAndEntryStatus(Long roomId, Long memberId, EntryStatus status);
-
-    Optional<Mate> findByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
 
     List<Mate> findAllByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
 
@@ -66,8 +58,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findAllByMemberBirthDayMonthAndDayAndEntryStatus(@Param("month") int month,
         @Param("day") int day, @Param("entryStatus") EntryStatus entryStatus);
 
-    List<Mate> findByRoom(Room room);
-
     @Query("select m from Mate m join fetch m.member where m.room = :room and m.entryStatus = :entryStatus")
     List<Mate> findFetchMemberByRoom(@Param("room") Room room,
         @Param("entryStatus") EntryStatus entryStatus);
@@ -79,8 +69,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     @Query("select m.id from Mate m where m.member.id in :memberIds")
     Set<Long> findMateIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
-
-    void deleteByRoomIdAndMemberId(Long roomId, Long memberId);
 
     List<Mate> findByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
 
@@ -97,4 +85,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     void deleteAllByMemberId(Long memberId);
 
     List<Mate> findAllByIdIn(List<Long> mateIds);
+
+    void deleteAllByMemberIdAndEntryStatusIn(Long memberId, List<EntryStatus> entryStatuses);
 }
