@@ -35,8 +35,6 @@ public class Mate extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private boolean isExit = false;
-
     // 룸메이트 대기상태 조회를 위해 EntryStatus를 추가하였습니다.
     @Enumerated(EnumType.STRING)
     private EntryStatus entryStatus = EntryStatus.PENDING;
@@ -55,7 +53,6 @@ public class Mate extends BaseTimeEntity {
     }
 
     public void quit() {
-        this.isExit = true;
         setEntryStatus(EntryStatus.EXITED);
     }
 
@@ -67,7 +64,4 @@ public class Mate extends BaseTimeEntity {
         this.isRoomManager = false;
     }
 
-    public void setNotExit() {
-        this.isExit = false;
-    }
 }

@@ -143,7 +143,6 @@ public class RoomCommandService {
             // 재입장 처리
             Mate exitingMate = existingMate.get();
             exitingMate.setEntryStatus(EntryStatus.JOINED);
-            exitingMate.setNotExit();
             mateRepository.save(exitingMate);
             room.arrive();
             room.isRoomFull();
@@ -334,7 +333,6 @@ public class RoomCommandService {
         if (invitee.isPresent()) {
             Mate mate = invitee.get();
             mate.setEntryStatus(EntryStatus.INVITED);
-            mate.setNotExit();
             mateRepository.save(mate);
         } else {
             Mate mate = MateConverter.toInvitation(room, inviteeMember, false);
@@ -475,7 +473,6 @@ public class RoomCommandService {
         if (existingMate.isPresent()) {
             Mate mate = existingMate.get();
             mate.setEntryStatus(EntryStatus.PENDING);
-            mate.setNotExit();
             mateRepository.save(mate);
         } else {
             Mate mate = MateConverter.toPending(room, member, false);
