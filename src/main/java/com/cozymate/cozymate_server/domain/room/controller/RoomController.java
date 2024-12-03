@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.room.controller;
 
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.request.RoomUpdateRequestDTO;
@@ -368,18 +369,6 @@ public class RoomController {
         return ResponseEntity.ok(ApiResponse.onSuccess("비공개방 전환 완료"));
     }
 
-    @GetMapping("/{roomId}/pending-status")
-    @Operation(summary = "[바니] 사용자가 해당 방에 참여 요청을 했는지 여부 조회", description = "로그인한 사용자가 roomId에 해당하는 방에 참여 요청을 했는지 여부를 조회합니다.")
-    @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
-        ErrorStatus._ROOM_NOT_FOUND
-    })
-    public ResponseEntity<ApiResponse<Boolean>> getPendingStatus(
-        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        Boolean response = roomQueryService.getPendingStatus(roomId, memberDetails.member().getId());
-        return ResponseEntity.ok(ApiResponse.onSuccess(response));
-    }
-
     @GetMapping("/search")
     @Operation(summary = "[바니] 방 검색", description = "공개방을 검색합니다. 라이프 스타일 없는 경우 가나다순, 있는 경우 평균 일치율 순으로 정렬됩니다.")
     @SwaggerApiError({
@@ -391,16 +380,52 @@ public class RoomController {
     }
 
     @GetMapping("/invited-status/{memberId}")
-    @Operation(summary = "[바니] 방장이 사용자한테 방 참여 요청을 보냈는지 여부 조회", description = "방장이 memberId에게 방 참여 요청을 보냈는지 여부를 조회합니다.")
+    @Operation(summary = "[바니] 방장 -> 방장이 초대한 사용자인지 조회", description = "방장이 memberId에 해당하는 사용자에게 방 참여 요청을 보냈는지 여부를 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER
     })
-    public ResponseEntity<ApiResponse<Boolean>> getInvitedStatus(
+    public ResponseEntity<ApiResponse<Boolean>> isInvitedMember(
         @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getInvitedStatus(memberId, memberDetails.member().getId())));
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.isMemberInEntryStatus(memberId, memberDetails.member().getId(), EntryStatus.INVITED)));
+    }
+
+    @GetMapping("pending-status/{memberId}")
+    @Operation(summary = "[바니] 방장 -> 방에 참여 요청한 사용자인지 조회", description = "memberId에 해당하는 사용자가 방장의 방에 참여 요청을 보냈는지 여부를 조회합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+        ErrorStatus._ROOM_MANAGER_NOT_FOUND,
+        ErrorStatus._NOT_ROOM_MANAGER
+    })
+    public ResponseEntity<ApiResponse<Boolean>> isPendingMember(
+        @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.isMemberInEntryStatus(memberId, memberDetails.member().getId(), EntryStatus.PENDING)));
+    }
+
+    @GetMapping("/{roomId}/invited-status")
+    @Operation(summary = "[바니] 사용자 -> 사용자가 초대받은 방인지 조회", description = "로그인한 사용자가 해당 roomId의 방에 초대받았는지 여부를 조회합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND,
+    })
+    public ResponseEntity<ApiResponse<Boolean>> isInvitedToRoom(
+        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.isEntryStatusToRoom(roomId, memberDetails.member().getId(), EntryStatus.INVITED)));
+    }
+
+    @GetMapping("/{roomId}/pending-status")
+    @Operation(summary = "[바니] 사용자 -> 사용자가 참여 요청한 방인지 조회", description = "로그인한 사용자가 roomId에 해당하는 방에 참여 요청을 했는지 여부를 조회합니다.")
+    @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
+        ErrorStatus._ROOM_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<Boolean>> isPendingToRoom(
+        @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
+        Boolean response = roomQueryService.isEntryStatusToRoom(roomId, memberDetails.member().getId(), EntryStatus.PENDING);
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
 }
