@@ -44,7 +44,12 @@ public class MemberCommandService {
      */
     public Boolean checkNickname(String nickname) {
         //todo: nickname 금지어 로직 추가, redis 같은 거 써야 할듯
-        return memberQueryService.isValidNickName(nickname);
+        try {
+            memberQueryService.isValidNickName(nickname);  // 닉네임 유효성 검증
+            return true;  // 검증 성공 시
+        } catch (IllegalArgumentException e) {
+            return false;  // 예외 메시지 반환
+        }
     }
 
     /**
@@ -59,7 +64,7 @@ public class MemberCommandService {
 
         String clientId = ClientIdMaker.makeClientId(signInRequestDTO.clientId(), socialType);
 
-        log.debug("사용자 로그인 : {}",clientId);
+        log.debug("사용자 로그인 : {}", clientId);
         // 사용자가 기존 회원인지 확인하고, 로그인 처리
         if (memberQueryService.isPresent(clientId)) {
             return signInByExistingMember(clientId);
@@ -158,6 +163,7 @@ public class MemberCommandService {
     public void withdraw(MemberDetails memberDetails) {
         memberWithdrawService.withdraw(memberDetails.member());
     }
+
     /**
      * 기존 회원 로그인 처리 메서드
      *

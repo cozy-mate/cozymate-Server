@@ -27,6 +27,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBER_EXISTING(HttpStatus.BAD_REQUEST, "MEMBER402", "이미 존재하는 사용자 입니다"),
 
     _NICKNAME_EXISTING(HttpStatus.BAD_REQUEST, "MEMBER404", "이미 존재하는 닉네임 입니다"),
+    _INVALID_NICKNAME_PATTERN(HttpStatus.BAD_REQUEST, "MEMBER405", "한글, 영어로 시작해야합니다. : "
+        + "첫 번째 문자는 한글 또는 영문 대소문자, 이후에는 한글, 영문 대소문자, 숫자, _(underscore)만 허용"),
+    _INVALID_NICKNAME_LENGTH(HttpStatus.BAD_REQUEST, "MEMBER406", "닉네임 길이는 2에서 8사이입니다."),
+
 
     _INVALID_SOCIAL_TYPE(HttpStatus.BAD_REQUEST, "SOCIAL400", "제공하지 않는 소셜 타입입니다."),
     _INVALID_GENDER(HttpStatus.BAD_REQUEST, "GENDER400", "제공하지 않는 성별입니다."),
