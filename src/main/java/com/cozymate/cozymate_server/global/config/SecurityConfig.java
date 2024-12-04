@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.auth.service.LogoutService;
 import com.cozymate.cozymate_server.domain.auth.utils.JwtFilter;
 import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
 
+import com.cozymate.cozymate_server.global.utils.SwaggerFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @Slf4j
 public class SecurityConfig {
+
     private final JwtUtil jwtUtil;
 
     private final AuthService authService;
@@ -39,7 +41,8 @@ public class SecurityConfig {
     private final LogoutService logoutService;
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
+        throws Exception {
         return configuration.getAuthenticationManager();
     }
 
@@ -51,64 +54,66 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .cors((cors) -> cors
-                        .configurationSource(new CorsConfigurationSource() {
-                            @Override
-                            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                                CorsConfiguration configuration = new CorsConfiguration();
-                                configuration.setAllowedOrigins(
-                                        Arrays.asList("https://cozymate.store:3000",
-                                                "https://cozymate.store"));
-                                configuration.setAllowedMethods(Collections.singletonList("*"));
-                                configuration.setAllowCredentials(true);
-                                configuration.setAllowedHeaders(Collections.singletonList("*"));
-                                configuration.setMaxAge(3600L);
+            .cors((cors) -> cors
+                .configurationSource(new CorsConfigurationSource() {
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        CorsConfiguration configuration = new CorsConfiguration();
+                        configuration.setAllowedOrigins(
+                            Arrays.asList("https://cozymate.store:3000",
+                                "https://cozymate.store"));
+                        configuration.setAllowedMethods(Collections.singletonList("*"));
+                        configuration.setAllowCredentials(true);
+                        configuration.setAllowedHeaders(Collections.singletonList("*"));
+                        configuration.setMaxAge(3600L);
 
-                                configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
 
-                                return configuration;
-                            }
-                        }));
+                        return configuration;
+                    }
+                }));
 
         //csrf disable
         httpSecurity
-                .csrf((auth) -> auth.disable());
+            .csrf((auth) -> auth.disable());
 
         //Form login 방식 disable
         httpSecurity
-                .formLogin((auth) -> auth.disable());
+            .formLogin((auth) -> auth.disable());
 
         //http basic 인증 방식 disable
         httpSecurity
-                .httpBasic((auth) -> auth.disable());
+            .httpBasic((auth) -> auth.disable());
 
         //경로별 인가 작업
         httpSecurity
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config",
-                                "/swagger-resources/**").permitAll()
-                        .requestMatchers("/", "/members/sign-in").permitAll()
-                        .anyRequest()
-                        .authenticated());
+            .authorizeHttpRequests((auth) -> auth
+                .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config",
+                    "/swagger-resources/**").permitAll()
+                .requestMatchers("/", "/members/sign-in").permitAll()
+                .anyRequest()
+                .authenticated());
 
-        //JWT 필터 추가
         httpSecurity
-                .addFilterBefore(new JwtFilter(jwtUtil, authService),
-                        UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtFilter(jwtUtil, authService),
+                UsernamePasswordAuthenticationFilter.class);
+
+        httpSecurity.addFilterBefore(new SwaggerFilter(jwtUtil),
+            JwtFilter.class); // JwtFilter 앞에 SwaggerFilter 추가
 
         //session 설정 (jwt 사용 -> stateless)
         httpSecurity
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            .sessionManagement((session) -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         // 로그아웃 필터
         httpSecurity.logout((logout) -> logout
-                .logoutUrl("/members/logout")// 로그아웃 URL 설정
-                .addLogoutHandler(logoutService) // LogoutHandler 등록
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().flush();
-                })
+            .logoutUrl("/members/logout")// 로그아웃 URL 설정
+            .addLogoutHandler(logoutService) // LogoutHandler 등록
+            .logoutSuccessHandler((request, response, authentication) -> {
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().flush();
+            })
         );
 
         return httpSecurity.build();
