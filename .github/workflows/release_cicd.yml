@@ -56,8 +56,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      ## Main Branch Build
-      - name: Build, Tag (Main Branch)
+      - name: Build, Tag (Release Branch)
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
@@ -87,8 +86,8 @@ jobs:
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
-      - name: Deploy to EC2 (Main Branch)
-        if: github.ref == 'refs/heads/main'
+      - name: Deploy to EC2 (Release Branch)
+        if: github.ref == 'refs/heads/release'
         uses: appleboy/ssh-action@master
         env:
           ENV_FILE: "/home/ubuntu/.env"
