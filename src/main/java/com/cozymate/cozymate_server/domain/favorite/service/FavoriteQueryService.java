@@ -197,7 +197,7 @@ public class FavoriteQueryService {
             .map(preference -> {
                 return PreferenceMatchCountDTO.builder()
                     .preferenceName(preference)
-                    .count(0)
+                    .count(null)
                     .build();
             }).toList();
     }

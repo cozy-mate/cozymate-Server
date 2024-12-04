@@ -5,7 +5,7 @@ import lombok.Builder;
 @Builder
 public record PreferenceMatchCountDTO(
     String preferenceName,
-    int count
+    Integer count
 ) {
 
 }
