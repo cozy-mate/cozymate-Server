@@ -3,7 +3,6 @@ package com.cozymate.cozymate_server.domain.auth.utils;
 import com.cozymate.cozymate_server.domain.auth.enums.TokenType;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.AdminDetails;
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
@@ -37,9 +36,8 @@ public class JwtUtil {
     @Getter
     private String ADMIN_KEY;
     @Getter
-//    @Value("${jwt.access-token.expire-length}")
-//  주의!!! 테스트용!! access 토큰 6개월!!!
-    private static final Long ACCESS_EXPIRATION = 15778476000L;
+    @Value("${jwt.access-token.expire-length}")
+    private Long ACCESS_EXPIRATION;
     @Getter
     @Value("${jwt.refresh-token.expire-length}")
     private Long REFRESH_EXPIRATION;
@@ -98,11 +96,6 @@ public class JwtUtil {
 
     public String generateAdminToken() {
         return buildToken(TokenType.ADMIN, new AdminDetails(), 15778476000L);
-    }
-
-    public boolean isAdmin(String token) {
-        return extractTokenType(token).equals(
-            TokenType.ADMIN); // Assuming "admin" is the role assigned to admins in the token
     }
 
     // 주어진 클레임, 사용자 정보, 그리고 만료 시간을 바탕으로 JWT 토큰을 생성
