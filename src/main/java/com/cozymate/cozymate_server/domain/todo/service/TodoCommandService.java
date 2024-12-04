@@ -17,6 +17,7 @@ import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -260,9 +261,13 @@ public class TodoCommandService {
      * @param mateIdList 할당자 리스트
      */
     private void checkMateIdListIsSameRoomWithMate(Mate mate, List<Long> mateIdList) {
-        List<Mate> mateList = mateRepository.findByRoomId(mate.getRoom().getId());
-        if (mateIdList.stream().anyMatch(
-            mateId -> mateList.stream().noneMatch(m -> m.getMember().getId().equals(mateId)))) {
+        List<Mate> roomMateList = mateRepository.findByRoomId(mate.getRoom().getId());
+
+        // roomMateList의 id만 추출해서 hashset으로 만들어줌
+        HashSet<Long> roomMateIdSet = roomMateList.stream().map(Mate::getId).collect(
+            HashSet::new, HashSet::add, HashSet::addAll);
+
+        if (!roomMateIdSet.containsAll(mateIdList)) {
             throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
         }
     }

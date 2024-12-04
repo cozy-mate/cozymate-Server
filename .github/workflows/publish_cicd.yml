@@ -1,0 +1,110 @@
+name: PRODUCTION CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.PRODUCTION_AWS_REGION }}
+      ECR_REPOSITORY: ${{ secrets.PRODUCTION_ECR_REPOSITORY }}
+      ECR_URI: ${{ secrets.PRODUCTION_ECR_URI }}
+      SUBMODULE_TOKEN: ${{ secrets.SUBMODULE_ACTION_TOKEN }}
+      IMAGE_TAG: ${{ github.sha }}
+
+
+    steps:
+      #체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # JDK 설치
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      #서브 모듈 접근
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ env.SUBMODULE_TOKEN }}
+          submodules: true
+
+      # 서브 모듈 변경 점 있으면 update
+      - name: Git Submodule Update
+        run: |
+          git submodule update --remote --recursive
+
+      # gradlew 권한 변경
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 빌드(test는 제외)
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: clean build -x test
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      ## Main Branch Build
+      - name: Build, Tag (Main Branch)
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build --build-arg SPRING_PROFILE=prod -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
+
+      - name: AWS ECR Push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          echo "::set-output name=image::${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+
+  cd:
+    needs: ci
+    name: CD
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.PRODUCTION_AWS_REGION }}
+      ECR_REPOSITORY: ${{ secrets.PRODUCTION_ECR_REPOSITORY }}
+      ECR_URI: ${{ secrets.PRODUCTION_ECR_URI }}
+      PROFILE: ${{ secrets.PRODUCTION_PROFILE }}
+      EC2_HOST: ${{ secrets.PRODUCTION_EC2_HOST }}
+      SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+      SUBMODULE_TOKEN: ${{ secrets.SUBMODULE_ACTION_TOKEN }}
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Deploy to EC2 (Main Branch)
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@master
+        env:
+          ENV_FILE: "/home/ubuntu/.env"
+          COMPOSE: "/home/ubuntu/docker-compose.yml"
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ubuntu
+          key: ${{ env.SSH_KEY }}
+          script: |
+            echo "ECR_URI=${{ env.ECR_URI }}" > /home/ubuntu/.env
+            echo "GITHUB_SHA=${{ env.IMAGE_TAG }}" >> /home/ubuntu/.env
+            echo "SPRING_PROFILES=${{ env.PROFILE }}" >> /home/ubuntu/.env
+            
+            sudo docker stop $(sudo docker ps -a -q) || true
+            sudo docker rm $(sudo docker ps -a -q) || true
+            sudo docker images -q | xargs -r docker rmi || true
+            sudo docker system prune -af
+            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ env.ECR_URI }} && sudo docker pull ${{ env.ECR_URI }}:${{ env.IMAGE_TAG }}
+            sudo -E  docker-compose up -d
