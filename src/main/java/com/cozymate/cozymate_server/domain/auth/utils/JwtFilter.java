@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -14,33 +15,38 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
 @Component
 @RequiredArgsConstructor
+@Order(1)
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
+
     // JWT 검증을 제외할 URL 목록
     private static final List<String> EXCLUDE_URLS = List.of(
-            "/members/sign-in"
+        "/members/sign-in"
     );
 
     // 임시 토큰으로만 접근 가능한 URL 목록
     private static final List<String> TEMPORARY_URLS = List.of(
-            "/members/sign-up",
-            "/members/check-nickname",
-            "/university/get-list"
+        "/members/sign-up",
+        "/members/check-nickname",
+        "/university/get-list"
     );
 
     private static final List<String> VERIFIED_URLS = List.of(
-            "/university/get-member-univ-info"
+        "/university/get-member-univ-info"
     );
 
     private static final List<String> REFRESH_URLS = List.of("/auth/reissue");
@@ -48,16 +54,33 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final String REQUEST_ATTRIBUTE_NAME_REFRESH = "refresh";
 
+    private static final List<String> ADMIN_ONLY_URLS = List.of(
+        "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config",
+        "/swagger-resources/**"
+    );
+
+
     private final JwtUtil jwtUtil; // JWT 토큰 발급 검증 클래스
     private final UserDetailsService userDetailsService; // 사용자 상세 정보를 로드하는 서비스
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+        HttpServletRequest request,
+        HttpServletResponse response,
+        FilterChain filterChain) throws ServletException, IOException {
 
         try {
+            if (isAdminOnlyUrl(request)) {
+                // 관리자 토큰이 있을 경우 swagger-ui 접근 허용
+                if (isAdminRequest(request)) {
+                    filterChain.doFilter(request, response); // 관리자 토큰이 있을 경우, swagger-ui 접근 허용
+                    return;
+                }
+                // 관리자 토큰이 없을 경우 swagger-ui 접근 거부
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403 Forbidden
+                return;
+            }
+
             // 요청 URL이 제외할 URL 목록에 있는지 확인
             if (shouldExclude(request)) {
                 filterChain.doFilter(request, response); // 다음 필터로 진행
@@ -86,7 +109,8 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.TEMPORARY)) {
                 if (isNotAllowTemporary(request)) {
                     // 임시토큰 접근 거부 예외
-                    throw new RuntimeException(ErrorStatus._TEMPORARY_TOKEN_ACCESS_DENIED_.getMessage());
+                    throw new RuntimeException(
+                        ErrorStatus._TEMPORARY_TOKEN_ACCESS_DENIED_.getMessage());
                 }
                 request.setAttribute(REQUEST_ATTRIBUTE_NAME_CLIENT_ID, userDetails.getUsername());
             }
@@ -95,15 +119,17 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.REFRESH)) {
                 if (isNotAllowRefresh(request)) {
                     // refresh 토큰 접근 거부 예외
-                    throw new RuntimeException(ErrorStatus._REFRESH_TOKEN_ACCESS_DENIED_.getMessage());
+                    throw new RuntimeException(
+                        ErrorStatus._REFRESH_TOKEN_ACCESS_DENIED_.getMessage());
                 }
                 request.setAttribute(REQUEST_ATTRIBUTE_NAME_REFRESH, jwt);
             }
 
             // 사용자 메일인증 여부에 따른 권한 조회
             if (userDetails.getAuthorities().stream()
-                    .noneMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER_VERIFIED"))){
-                if(isNotAllowUnverified(request)){
+                .noneMatch(grantedAuthority -> grantedAuthority.getAuthority()
+                    .equals("ROLE_USER_VERIFIED"))) {
+                if (isNotAllowUnverified(request)) {
                     throw new RuntimeException(ErrorStatus._MEMBER_NOT_VERIFIED.getMessage());
                 }
 
@@ -111,12 +137,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
             // 사용자 정보와 권한을 설정하고 SecurityContext에 인증 정보를 저장
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
+                userDetails,
+                null,
+                userDetails.getAuthorities()
             );
             authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
+                new WebAuthenticationDetailsSource().buildDetails(request)
             );
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
@@ -146,7 +172,51 @@ public class JwtFilter extends OncePerRequestFilter {
         return REFRESH_URLS.stream().noneMatch(url -> request.getRequestURI().equals(url));
     }
 
-    private boolean isNotAllowUnverified(HttpServletRequest request){
+    private boolean isNotAllowUnverified(HttpServletRequest request) {
         return VERIFIED_URLS.stream().anyMatch(url -> request.getRequestURI().equals(url));
     }
+
+    private boolean isAdminOnlyUrl(HttpServletRequest request) {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        String requestUri = request.getRequestURI();  // URI를 추출
+        return ADMIN_ONLY_URLS.stream()
+            .anyMatch(url -> pathMatcher.match(url, requestUri));  // URI와 패턴을 비교
+    }
+
+    // 관리자 토큰을 확인하는 메소드
+    private boolean isAdminRequest(HttpServletRequest request) {
+        String jwt = getAdminTokenFromCookies(request); // 쿠키에서 JWT를 가져옴
+        if (jwt == null) {
+            return false;
+        }
+
+        try {
+            // JWT 토큰 검증
+            jwtUtil.validateToken(jwt);
+
+            if (jwtUtil.equalsTokenTypeWith(jwt,
+                TokenType.ADMIN)) { // 예시: 토큰 내에 'ADMIN' 타입이 있다면 관리자 토큰으로 간주
+                return true;
+            }
+
+        } catch (Exception e) {
+            log.error("관리자 토큰 검증 실패 = {}", e.getMessage());
+        }
+        return false;
+    }
+
+    // 요청의 쿠키에서 JWT 토큰을 찾는 메소드
+    private String getAdminTokenFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("JWT".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+
 }
