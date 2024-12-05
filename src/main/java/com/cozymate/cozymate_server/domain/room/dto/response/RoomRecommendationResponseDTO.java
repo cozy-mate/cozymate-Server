@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.dto.response;
 
+import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import java.util.List;
-import java.util.Map;
 import lombok.Builder;
 
 
@@ -14,7 +14,7 @@ public record RoomRecommendationResponseDTO(
     Integer equality,
     Integer numOfArrival,
     Integer maxMateNum,
-    Map<String, Integer> equalMemberStatNum
+    List<PreferenceMatchCountDTO> preferenceMatchCountList
 ) {
 
 }
