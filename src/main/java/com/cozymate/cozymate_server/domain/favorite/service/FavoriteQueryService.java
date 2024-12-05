@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.favorite.dto.response.FavoriteRoomRes
 import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
+import com.cozymate.cozymate_server.domain.hashtag.Hashtag;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -14,13 +15,13 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
-import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
-import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
+import com.cozymate.cozymate_server.global.utils.RoomStatUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,6 @@ public class FavoriteQueryService {
     private final MemberRepository memberRepository;
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
-    private final RoomHashtagRepository roomHashtagRepository;
 
     private final MemberStatEqualityQueryService memberStatEqualityQueryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
@@ -133,7 +133,7 @@ public class FavoriteQueryService {
         // <방 id, 해당 방의 mate 리스트>
         Map<Long, List<Mate>> roomIdMatesMap = responseRoomList.stream().collect(
             Collectors.toMap(Room::getId,
-                room -> mateRepository.findFetchMemberByRoom(room, EntryStatus.JOINED)));
+                room -> mateRepository.findFetchMemberAndMemberStatByRoom(room, EntryStatus.JOINED)));
 
         // 로그인 사용자의 선호 스탯 4가지를 리스트로 가져온다
         List<String> criteriaPreferenceList = memberStatPreferenceQueryService.getPreferencesToList(
@@ -149,9 +149,10 @@ public class FavoriteQueryService {
                 // 선호 스탯 일치 횟수 계산
                 List<PreferenceMatchCountDTO> preferenceStatsMatchCountList =
                     Objects.nonNull(memberStat)
-                        ? getPreferenceStatsMatchCounts(member, criteriaPreferenceList, mates,
-                        memberStat)
-                        : getPreferenceStatsMatchCountsWithoutMemberStat(criteriaPreferenceList);
+                        ? RoomStatUtil.getPreferenceStatsMatchCounts(member, criteriaPreferenceList,
+                        mates, memberStat)
+                        : RoomStatUtil.getPreferenceStatsMatchCountsWithoutMemberStat(
+                            criteriaPreferenceList);
 
                 // 로그인 사용자와 mate들의 멤버 스탯 "일치율" 계산
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
@@ -161,11 +162,14 @@ public class FavoriteQueryService {
                 );
 
                 // 로그인 사용자와 방 일치율 계산
-                Integer roomEquality = getCalculateRoomEquality(member.getId(), equalityMap);
+                Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
 
                 // 방 해시태그 조회
-                List<String> roomHashTags = roomHashtagRepository.findHashtagsByRoomId(
-                    room.getId());
+                List<RoomHashtag> roomHashtags = room.getRoomHashtags();
+                List<String> roomHashTags = roomHashtags.stream()
+                    .map(RoomHashtag::getHashtag)
+                    .map(Hashtag::getHashtag)
+                    .toList();
 
                 return FavoriteConverter.toFavoriteRoomResponseDTO(
                     roomIdFavoriteIdMap.get(room.getId()), room, roomEquality,
@@ -179,45 +183,6 @@ public class FavoriteQueryService {
             partitionedMateNumMap);
 
         return favoriteRoomResponseList;
-    }
-
-    private List<PreferenceMatchCountDTO> getPreferenceStatsMatchCounts(Member member,
-        List<String> criteriaPreferenceList, List<Mate> mates, MemberStat memberStat) {
-        List<PreferenceMatchCountDTO> preferenceMatchCountDTOList = criteriaPreferenceList.stream()
-            .map(preference -> {
-                long equalCount = mates.stream()
-                    .map(mate -> mate.getMember().getMemberStat())
-                    .filter(mateStat -> mateStat != null && !mateStat.getMember().getId().equals(
-                        member.getId())
-                        && Objects.equals(MemberStatUtil.getMemberStatField(mateStat, preference),
-                        MemberStatUtil.getMemberStatField(memberStat, preference)))
-                    .count();
-
-                return PreferenceMatchCountDTO.builder()
-                    .preferenceName(preference)
-                    .count((int) equalCount)
-                    .build();
-            }).toList();
-        return preferenceMatchCountDTOList;
-    }
-
-    private List<PreferenceMatchCountDTO> getPreferenceStatsMatchCountsWithoutMemberStat(
-        List<String> criteriaPreferenceList) {
-        return criteriaPreferenceList.stream()
-            .map(preference -> {
-                return PreferenceMatchCountDTO.builder()
-                    .preferenceName(preference)
-                    .count(null)
-                    .build();
-            }).toList();
-    }
-
-    private Integer getCalculateRoomEquality(Long memberId, Map<Long, Integer> equalityMap) {
-        List<Integer> roomEquality = equalityMap.values().stream()
-            .toList();
-
-        int sum = roomEquality.stream().mapToInt(Integer::intValue).sum();
-        return roomEquality.isEmpty() ? null : (int) Math.round((double) sum / roomEquality.size());
     }
 
     private void deleteFavoriteMember(List<Long> findFavoriteMemberIdList,
