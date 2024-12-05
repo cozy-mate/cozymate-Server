@@ -7,6 +7,8 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.fcm.dto.MessageResult;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MulticastMessage;
 import com.google.firebase.messaging.Notification;
@@ -37,10 +39,10 @@ public class MessageUtil {
         String content = getContent(contentMember, room, notificationType);
 
         if (NotificationType.ARRIVE_ROOM_INVITE.equals(notificationType)) {
-            return getMessageResult(fcmList, content, room);
+            return getMessageResult(fcmList, content, room, notificationType);
         }
 
-        return getMessageResult(fcmList, content);
+        return getMessageResult(fcmList, content, notificationType);
     }
 
     public MessageResult createMessage(Member member, NotificationType notificationType) {
@@ -52,7 +54,7 @@ public class MessageUtil {
 
         String content = getContent(member, notificationType);
 
-        return getMessageResult(fcmList, content);
+        return getMessageResult(fcmList, content, notificationType);
     }
 
     public MessageResult createMessage(Member contentMember, Member recipientMember,
@@ -65,11 +67,7 @@ public class MessageUtil {
 
         String content = getContent(contentMember, notificationType);
 
-        if (NotificationType.ARRIVE_ROOM_JOIN_REQUEST.equals(notificationType)) {
-            return getMessageResult(fcmList, content, contentMember);
-        }
-
-        return getMessageResult(fcmList, content);
+        return getMessageResult(fcmList, content, notificationType);
     }
 
     public MessageResult createMessage(Member member, NotificationType notificationType,
@@ -82,7 +80,7 @@ public class MessageUtil {
 
         String content = getContent(member, notificationType, todoContents);
 
-        return getMessageResult(fcmList, content);
+        return getMessageResult(fcmList, content, notificationType);
     }
 
     public MessageResult createMessage(Member member, NotificationType notificationType,
@@ -95,7 +93,7 @@ public class MessageUtil {
 
         String content = getContent(member, notificationType, roleContent);
 
-        return getMessageResult(fcmList, content);
+        return getMessageResult(fcmList, content, notificationType);
     }
 
     public MulticastMessage createMessage(List<String> fcmTokenValueList, String content) {
@@ -134,7 +132,7 @@ public class MessageUtil {
         return notificationType.generateContent(FcmPushContentDto.create(member, room));
     }
 
-    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Member member) {
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Member member, NotificationType notificationType) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()
@@ -145,6 +143,7 @@ public class MessageUtil {
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
                 messageMap.put("memberId", member.getId().toString());
+                messageMap.put("actionType", String.valueOf(notificationType));
 
                 Notification notification = Notification.builder()
                     .setTitle(NOTIFICATION_TITLE)
@@ -170,7 +169,7 @@ public class MessageUtil {
         return messageResult;
     }
 
-    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Room room) {
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Room room, NotificationType notificationType) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()
@@ -181,6 +180,7 @@ public class MessageUtil {
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
                 messageMap.put("roomId", room.getId().toString());
+                messageMap.put("actionType", String.valueOf(notificationType));
 
                 Notification notification = Notification.builder()
                     .setTitle(NOTIFICATION_TITLE)
@@ -206,7 +206,7 @@ public class MessageUtil {
         return messageResult;
     }
 
-    private MessageResult getMessageResult(List<Fcm> fcmList, String content) {
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content, NotificationType notificationType) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()
@@ -216,6 +216,7 @@ public class MessageUtil {
                 HashMap<String, String> messageMap = new HashMap<>();
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
+                messageMap.put("actionType", String.valueOf(notificationType));
 
                 Notification notification = Notification.builder()
                     .setTitle(NOTIFICATION_TITLE)
