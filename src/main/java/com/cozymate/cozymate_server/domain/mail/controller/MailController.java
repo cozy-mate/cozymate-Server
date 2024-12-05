@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.mail.service.MailService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members/mail")
+@Slf4j
 public class MailController {
 
     private final MailService mailService;
@@ -60,6 +62,16 @@ public class MailController {
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(mailService.isVerified(memberDetails.member())));
+    }
+
+    @PostMapping("/test")
+    @Operation(summary = "[말즈] 관리자 메일 테스트", description = "관리자에게 메일 보내기 테스트")
+    @Deprecated
+    public ResponseEntity<ApiResponse<Boolean>> testMail(
+    ) {
+        log.info("controller 진입 성공");
+        mailService.sendCustomMailToAdmin("제목", "내용");
+        return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
 
 }
