@@ -68,8 +68,8 @@ public class RoomRecommendService {
                 EntryStatus.JOINED)
             .stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
 
-        Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, roomMateMap,
-            member);
+        Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, member,
+            roomMateMap);
 
         // null을 가장 후순위로 처리
         List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
@@ -87,8 +87,8 @@ public class RoomRecommendService {
             .build();
     }
 
-    private Map<Long, Integer> calculateRoomEqualityMap(List<Room> roomList,
-        Map<Long, List<Mate>> roomMateMap, Member member) {
+    private Map<Long, Integer> calculateRoomEqualityMap(List<Room> roomList, Member member,
+        Map<Long, List<Mate>> roomMateMap) {
 
         Map<Long, Integer> roomEqualityMap = new HashMap<>();
 
