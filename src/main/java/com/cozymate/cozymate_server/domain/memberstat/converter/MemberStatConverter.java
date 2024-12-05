@@ -67,7 +67,8 @@ public class MemberStatConverter {
     }
 
 
-    public static MemberStatDetailResponseDTO toMemberStatDetailDTOFromEntity(MemberStat memberStat) {
+    public static MemberStatDetailResponseDTO toMemberStatDetailDTOFromEntity(
+        MemberStat memberStat) {
 
         return MemberStatDetailResponseDTO.builder()
             .admissionYear(MemberStatUtil.formatNumber(memberStat.getAdmissionYear()))
@@ -101,13 +102,15 @@ public class MemberStatConverter {
             .build();
     }
 
-    public static MemberStatDetailAndRoomIdAndEqualityResponseDTO toMemberStatDetailAndRoomIdAndEqualityResponseDTO(MemberStat memberStat,
+    public static MemberStatDetailAndRoomIdAndEqualityResponseDTO toMemberStatDetailAndRoomIdAndEqualityResponseDTO(
+        MemberStat memberStat,
         Integer equality,
         Long roomId,
         Boolean hasRequestedRoomEntry,
         Long favoriteId) {
         return MemberStatDetailAndRoomIdAndEqualityResponseDTO.builder()
-            .memberDetail(MemberConverter.toMemberDetailResponseDTOFromEntity(memberStat.getMember()))
+            .memberDetail(
+                MemberConverter.toMemberDetailResponseDTOFromEntity(memberStat.getMember()))
             .memberStatDetail(MemberStatConverter.toMemberStatDetailDTOFromEntity(memberStat))
             .equality(equality)
             .roomId(roomId)
@@ -116,9 +119,11 @@ public class MemberStatConverter {
             .build();
     }
 
-    public static MemberStatDetailWithMemberDetailResponseDTO toMemberStatDetailWithMemberDetailDTO(MemberStat memberStat){
+    public static MemberStatDetailWithMemberDetailResponseDTO toMemberStatDetailWithMemberDetailDTO(
+        MemberStat memberStat) {
         return MemberStatDetailWithMemberDetailResponseDTO.builder()
-            .memberDetail(MemberConverter.toMemberDetailResponseDTOFromEntity(memberStat.getMember()))
+            .memberDetail(
+                MemberConverter.toMemberDetailResponseDTOFromEntity(memberStat.getMember()))
             .memberStatDetail(MemberStatConverter.toMemberStatDetailDTOFromEntity(memberStat))
             .build();
     }
@@ -140,7 +145,7 @@ public class MemberStatConverter {
                 .build();
         }
 
-        Map<String, BiFunction<Member,MemberStat, Object>> fieldGetters = createFieldGetters();
+        Map<String, BiFunction<Member, MemberStat, Object>> fieldGetters = createFieldGetters();
 
         // 방 초기 생성 시, 혹은 멤버 상세정보를 입력한 사람이 1명일 때
         if (memberStatList.size() == 1) {
@@ -175,13 +180,13 @@ public class MemberStatConverter {
     }
 
     public static DifferenceStatus toDifferenceStatus(List<MemberStat> memberStatList, String key) {
-        if(memberStatList.isEmpty()) {
+        if (memberStatList.isEmpty()) {
             return DifferenceStatus.WHITE;
         }
-        if(memberStatList.size() == 1) {
+        if (memberStatList.size() == 1) {
             return DifferenceStatus.WHITE;
         }
-        Map<String, BiFunction<Member,MemberStat, Object>> fieldGetters = createFieldGetters();
+        Map<String, BiFunction<Member, MemberStat, Object>> fieldGetters = createFieldGetters();
 
         return compareField(memberStatList, fieldGetters.get(key));
 
@@ -201,34 +206,59 @@ public class MemberStatConverter {
     // 랜덤에서 사용하는 Converter
     public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailColorDTOList(
         MemberStat memberStat, List<String> preferences
-    ){
-        Map<String, Object> memberStatMap = MemberStatUtil.getMemberStatFields(memberStat, preferences);
+    ) {
+        Map<String, Object> memberStatMap = MemberStatUtil.getMemberStatFields(memberStat,
+            preferences);
 
         return memberStatMap.entrySet().stream()
             .map(entry ->
-                MemberStatConverter.toMemberStatPreferenceDetailColorDTO(entry.getKey(), entry.getValue(), DifferenceStatus.WHITE))
+                MemberStatConverter.toMemberStatPreferenceDetailColorDTO(entry.getKey(),
+                    entry.getValue(), DifferenceStatus.WHITE))
             .toList();
     }
 
     // 일반 검색/ 필터링에서 사용하는 Converter
     public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailColorDTOList(
         MemberStat memberStat, MemberStat criteriaMemberStat, List<String> preferences
-    ){
-        Map<String, Object> memberStatMap = MemberStatUtil.getMemberStatFields(memberStat, preferences);
-        Map<String, Object> criteriaMemberStatMap = MemberStatUtil.getMemberStatFields(criteriaMemberStat, preferences);
+    ) {
+        Map<String, Object> memberStatMap = MemberStatUtil.getMemberStatFields(memberStat,
+            preferences);
+        Map<String, Object> criteriaMemberStatMap = MemberStatUtil.getMemberStatFields(
+            criteriaMemberStat, preferences);
 
         return memberStatMap.entrySet().stream()
-            .map(entry->
+            .map(entry ->
                 MemberStatConverter.toMemberStatPreferenceDetailColorDTO(
-                    entry.getKey(), entry.getValue(), MemberStatUtil.compareField(entry.getValue(), criteriaMemberStatMap.get(entry.getKey())
+                    entry.getKey(), entry.getValue(), MemberStatUtil.compareField(entry.getValue(),
+                        criteriaMemberStatMap.get(entry.getKey())
                     ))).toList();
     }
 
-    public static MemberStatPreferenceDetailColorDTO toMemberStatPreferenceDetailColorDTO(String stat, Object value, DifferenceStatus color){
+    public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailWithoutColorDTOList(
+        MemberStat memberStat, List<String> preferences) {
+        Map<String, Object> memberStatMap = MemberStatUtil.getMemberStatFields(memberStat,
+            preferences);
+
+        return memberStatMap.entrySet().stream()
+            .map(entry -> MemberStatConverter.toMemberStatPreferenceDetailWithoutColorDTO(
+                entry.getKey(), entry.getValue()))
+            .toList();
+    }
+
+    public static MemberStatPreferenceDetailColorDTO toMemberStatPreferenceDetailColorDTO(
+        String stat, Object value, DifferenceStatus color) {
         return MemberStatPreferenceDetailColorDTO.builder()
             .stat(stat)
             .value(value)
             .color(color.getValue())
+            .build();
+    }
+
+    public static MemberStatPreferenceDetailColorDTO toMemberStatPreferenceDetailWithoutColorDTO(
+        String stat, Object value) {
+        return MemberStatPreferenceDetailColorDTO.builder()
+            .stat(stat)
+            .value(value)
             .build();
     }
 
@@ -242,7 +272,7 @@ public class MemberStatConverter {
 
     public static MemberStatSearchResponseDTO toMemberStatSearchResponseDTO(
         Member member, Integer equality
-    ){
+    ) {
         return MemberStatSearchResponseDTO.builder()
             .memberDetail(MemberConverter.toMemberDetailResponseDTOFromEntity(member))
             .equality(equality)

@@ -12,7 +12,6 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,13 +57,10 @@ public class FavoriteCommandService {
 
     private void validTarget(FavoriteType favoriteType, Long targetId) {
         if (favoriteType.equals(FavoriteType.MEMBER)) {
-            Member member = memberRepository.findById(targetId).orElseThrow(
+            memberRepository.findById(targetId).orElseThrow(
                 () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND)
             );
 
-            if (Objects.isNull(member.getMemberStat())) {
-                throw new GeneralException(ErrorStatus._FAVORITE_CANNOT_MEMBER_WITHOUT_MEMBERSTAT);
-            }
         } else {
             Room room = roomRepository.findById(targetId).orElseThrow(
                 () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND)

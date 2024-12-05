@@ -69,18 +69,28 @@ public class FavoriteQueryService {
         List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
 
+        MemberStat memberStat = member.getMemberStat();
+
         List<FavoriteMemberResponseDTO> favoriteMemberResponseDTOList = existFavoriteMemberList.stream()
             .filter(favoriteMember -> Objects.nonNull(favoriteMember.getMemberStat()))
-            .map(favoriteMember ->
-                FavoriteConverter.toFavoriteMemberResponseDTO(
-                    memberIdFavoriteIdMap.get(favoriteMember.getId()),
-                    MemberStatConverter.toPreferenceResponseDTO(
-                        favoriteMember.getMemberStat(),
-                        MemberStatConverter.toMemberStatPreferenceDetailColorDTOList(
-                            favoriteMember.getMemberStat(), member.getMemberStat(),
-                            criteriaPreferences
-                        ),
-                        equalityMap.get(favoriteMember.getId())))
+            .map(favoriteMember -> {
+                    if (Objects.isNull(memberStat)) {
+                        return FavoriteConverter.toFavoriteMemberResponseDTO(
+                            memberIdFavoriteIdMap.get(favoriteMember.getId()),
+                            MemberStatConverter.toPreferenceResponseDTO(
+                                favoriteMember.getMemberStat(),
+                                MemberStatConverter.toMemberStatPreferenceDetailWithoutColorDTOList(
+                                    favoriteMember.getMemberStat(), criteriaPreferences), null));
+                    }
+                    return FavoriteConverter.toFavoriteMemberResponseDTO(
+                        memberIdFavoriteIdMap.get(favoriteMember.getId()),
+                        MemberStatConverter.toPreferenceResponseDTO(
+                            favoriteMember.getMemberStat(),
+                            MemberStatConverter.toMemberStatPreferenceDetailColorDTOList(
+                                favoriteMember.getMemberStat(), member.getMemberStat(),
+                                criteriaPreferences
+                            ), equalityMap.get(favoriteMember.getId())));
+                }
             ).toList();
 
         // 탈퇴한 회원이 있다면 삭제 처리
@@ -197,7 +207,7 @@ public class FavoriteQueryService {
             .map(preference -> {
                 return PreferenceMatchCountDTO.builder()
                     .preferenceName(preference)
-                    .count(0)
+                    .count(null)
                     .build();
             }).toList();
     }
