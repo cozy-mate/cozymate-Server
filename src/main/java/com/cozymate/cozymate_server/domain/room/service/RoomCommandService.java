@@ -135,25 +135,21 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        if (mateRepository.countActiveMatesByRoomId(roomId) >= room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL);
+        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
+            throw new GeneralException(ErrorStatus._ROOM_FULL); // 방이 가득 찼을 경우 예외 처리
         }
 
         if (existingMate.isPresent()) {
             // 재입장 처리
-            Mate exitingMate = existingMate.get();
-            exitingMate.setEntryStatus(EntryStatus.JOINED);
-            mateRepository.save(exitingMate);
-            room.arrive();
-            room.isRoomFull();
-            roomRepository.save(room);
+            processJoinRequest(existingMate.get(), room);
+            clearOtherRoomRequests(memberId);
         } else {
             Mate mate = MateConverter.toEntity(room, member, false);
             mateRepository.save(mate);
             room.arrive();
             room.isRoomFull();
-            roomRepository.save(room);
         }
+        roomRepository.save(room);
 
         // 푸시 알림 코드
         List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room, EntryStatus.JOINED);
@@ -330,8 +326,8 @@ public class RoomCommandService {
         }
 
         // 방 정원 검사
-        if (mateRepository.countActiveMatesByRoomId(room.getId()) >= room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL);
+        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
+            throw new GeneralException(ErrorStatus._ROOM_FULL); // 방이 가득 찼을 경우 예외 처리
         }
 
         if (invitee.isPresent()) {
@@ -374,10 +370,8 @@ public class RoomCommandService {
 
         if (accept) {
             // 초대 요청을 수락하여 JOINED 상태로 변경
-            invitee.setEntryStatus(EntryStatus.JOINED);
-            mateRepository.save(invitee);
-            room.arrive();
-            room.isRoomFull();
+            processJoinRequest(invitee, room);
+            clearOtherRoomRequests(inviteeId);
         } else {
             // 초대 요청을 거절하여 PENDING 상태를 삭제
             mateRepository.delete(invitee);
@@ -551,15 +545,13 @@ public class RoomCommandService {
                 requesterId, EntryStatus.PENDING)
             .orElseThrow(() -> new GeneralException(ErrorStatus._REQUEST_NOT_FOUND));
 
-        if (room.getNumOfArrival() + 1 > room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL);
+        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
+            throw new GeneralException(ErrorStatus._ROOM_FULL); // 방이 가득 찼을 경우 예외 처리
         }
 
         if (accept) {
-            requester.setEntryStatus(EntryStatus.JOINED);
-            mateRepository.save(requester);
-            room.arrive();
-            room.isRoomFull();
+            processJoinRequest(requester, room);
+            clearOtherRoomRequests(requesterId);
         } else {
             mateRepository.delete(requester); // 거절 시 요청자 삭제
         }
@@ -632,6 +624,19 @@ public class RoomCommandService {
         }
 
         room.changeToPrivateRoom();
+    }
+
+    private void processJoinRequest(Mate mate, Room room) {
+        mate.setEntryStatus(EntryStatus.JOINED);
+        mateRepository.save(mate);
+        room.arrive();
+        room.isRoomFull();
+    }
+
+    private void clearOtherRoomRequests(Long memberId) {
+        mateRepository.deleteAllByMemberIdAndEntryStatusIn(
+            memberId, List.of(EntryStatus.PENDING, EntryStatus.INVITED)
+        );
     }
 
     // 초대코드 생성 부분
