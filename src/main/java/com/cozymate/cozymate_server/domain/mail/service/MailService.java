@@ -47,7 +47,7 @@ public class MailService {
     private final AuthService authService;
 
     @Value("${spring.mail.username}")
-    private static final String ADMIN_MAIL_USERNAME = "qnfn120";
+    private static final String ADMIN_MAIL_USERNAME = "cozymate0";
 
     private static final String ADMIN_MAIL_DOMAIN = "@gmail.com"; // 관리자 이메일 주소
 
