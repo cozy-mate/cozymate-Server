@@ -4,10 +4,12 @@ import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.auth.utils.ClientIdMaker;
+import com.cozymate.cozymate_server.domain.mail.service.MailService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
+import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
@@ -35,6 +37,8 @@ public class MemberCommandService {
     private final UniversityRepository universityRepository;
 
     private final MemberWithdrawService memberWithdrawService;
+
+    private final MailService mailService;
 
     /**
      * 닉네임 유효성 검사 메서드
@@ -111,17 +115,6 @@ public class MemberCommandService {
         return MemberConverter.toMemberDetailResponseDTOFromEntity(memberDetails.member());
     }
 
-    @Transactional
-    public TokenResponseDTO verifyMemberUniversity(MemberDetails memberDetails, Long universityId,
-        String majorName) {
-        University memberUniversity = universityRepository.findById(universityId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
-
-        memberDetails.member().verifyMemberUniversity(memberUniversity, majorName);
-        memberRepository.save(memberDetails.member());
-
-        return authService.generateMemberTokenDTO(memberDetails);
-    }
 
     @Transactional
     public void updateNickname(Member member, String nickname) {
@@ -160,7 +153,11 @@ public class MemberCommandService {
      *
      * @param memberDetails 사용자 세부 정보
      */
-    public void withdraw(MemberDetails memberDetails) {
+    public void withdraw(WithdrawRequestDTO withdrawRequestDTO, MemberDetails memberDetails) {
+        String withdrawReason = withdrawRequestDTO.withdrawReason();
+        String mailSubject = memberDetails.member().getNickname() + "탈퇴 사유";
+
+        mailService.sendCustomMailToAdmin(mailSubject, withdrawReason);
         memberWithdrawService.withdraw(memberDetails.member());
     }
 
