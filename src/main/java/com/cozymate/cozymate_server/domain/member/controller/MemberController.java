@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.member.controller;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
+import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
@@ -171,8 +172,9 @@ public class MemberController {
     @Operation(summary = "[말즈] 회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
     @DeleteMapping("/withdraw")
     public ResponseEntity<ApiResponse<String>> withdraw(
-        @AuthenticationPrincipal MemberDetails memberDetails) {
-        memberCommandService.withdraw(memberDetails);
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @Valid WithdrawRequestDTO withdrawRequestDTO) {
+        memberCommandService.withdraw(withdrawRequestDTO,memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
