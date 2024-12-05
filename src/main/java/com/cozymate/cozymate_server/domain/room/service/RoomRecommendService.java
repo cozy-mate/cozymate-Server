@@ -68,7 +68,29 @@ public class RoomRecommendService {
                 EntryStatus.JOINED)
             .stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
 
-        HashMap<Long, Integer> roomEqualityMap = new HashMap<>();
+        Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, roomMateMap,
+            member);
+
+        // null을 가장 후순위로 처리
+        List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
+            roomMap, sortType, page, size);
+        boolean hasNext = sortedRoomList.size() > size;
+        sortedRoomList = sortedRoomList.stream().limit(size).toList();
+
+        List<RoomRecommendationResponseDTO> roomRecommendationResponseDTOList = buildRoomRecommendationResponseList(
+            member, sortedRoomList, roomMateMap, roomList, memberPreferenceList);
+
+        return PageResponseDto.<List<RoomRecommendationResponseDTO>>builder()
+            .page(page)
+            .hasNext(hasNext)
+            .result(roomRecommendationResponseDTOList)
+            .build();
+    }
+
+    private Map<Long, Integer> calculateRoomEqualityMap(List<Room> roomList,
+        Map<Long, List<Mate>> roomMateMap, Member member) {
+
+        Map<Long, Integer> roomEqualityMap = new HashMap<>();
 
         roomList.forEach(room -> {
             List<Mate> mates = roomMateMap.get(room.getId());
@@ -85,20 +107,7 @@ public class RoomRecommendService {
             roomEqualityMap.put(room.getId(), roomEquality);
         });
 
-        // null을 가장 후순위로 처리
-        List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
-            roomMap, sortType, page, size);
-        boolean hasNext = sortedRoomList.size() > size;
-        sortedRoomList = sortedRoomList.stream().limit(size).toList();
-
-        List<RoomRecommendationResponseDTO> roomRecommendationResponseDTOList = buildRoomRecommendationResponseList(
-            member, sortedRoomList, roomMateMap, roomList, memberPreferenceList);
-
-        return PageResponseDto.<List<RoomRecommendationResponseDTO>>builder()
-            .page(page)
-            .hasNext(hasNext)
-            .result(roomRecommendationResponseDTOList)
-            .build();
+        return roomEqualityMap;
     }
 
     private List<RoomRecommendationResponseDTO> buildRoomRecommendationResponseList(
