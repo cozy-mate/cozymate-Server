@@ -62,25 +62,25 @@ public class NotificationScheduler {
         });
     }
 
-    @Scheduled(cron = "0 0 12 L * ?")
-    public void sendMonthlyNotification() {
-        List<Mate> mates = mateRepository.findFetchAll();
-
-        List<Member> memberList = mates.stream()
-            .map(Mate::getMember)
-            .toList();
-
-        memberList.forEach(member -> {
-            fcmPushService.sendNotification(
-                OneTargetDto.create(member, NotificationType.SELECT_COZY_MATE));
-        });
-
-        //  각 Room에 대해 로그 추가 (이달의 베스트 코지메이트, 워스트 코지메이트 선정 알림)
-        LocalDateTime now = LocalDateTime.now();
-        String month = now.format(DateTimeFormatter.ofPattern("M월"));
-        List<Room> roomList = roomRepository.findAll();
-        roomList.forEach(room -> roomLogCommandService.addRoomLogChoiceCozyMate(room, month));
-    }
+//    @Scheduled(cron = "0 0 12 L * ?")
+//    public void sendMonthlyNotification() {
+//        List<Mate> mates = mateRepository.findFetchAll();
+//
+//        List<Member> memberList = mates.stream()
+//            .map(Mate::getMember)
+//            .toList();
+//
+//        memberList.forEach(member -> {
+//            fcmPushService.sendNotification(
+//                OneTargetDto.create(member, NotificationType.SELECT_COZY_MATE));
+//        });
+//
+//        //  각 Room에 대해 로그 추가 (이달의 베스트 코지메이트, 워스트 코지메이트 선정 알림)
+//        LocalDateTime now = LocalDateTime.now();
+//        String month = now.format(DateTimeFormatter.ofPattern("M월"));
+//        List<Room> roomList = roomRepository.findAll();
+//        roomList.forEach(room -> roomLogCommandService.addRoomLogChoiceCozyMate(room, month));
+//    }
 
     // 매일 자정 반복 (생일인 사람 확인해서 해당 방에 로그 추가)
     @Scheduled(cron = "0 0 0 * * *")

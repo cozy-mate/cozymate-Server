@@ -175,7 +175,8 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+                EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         if (!member.isRoomManager()) {
@@ -240,14 +241,16 @@ public class RoomCommandService {
     private void assignNewRoomManager(Long roomId, Mate quittingMate) {
         quittingMate.setNotRoomManager();
         mateRepository.save(quittingMate);
-        List<Mate> remainingMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED);
+        List<Mate> remainingMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
+            EntryStatus.JOINED);
 
         if (remainingMates.isEmpty()) {
             return;
         }
         Mate newManager = remainingMates.stream()
             .min(Comparator.comparing(Mate::getCreatedAt))
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND)); // 방장 없음 예외 처리
+            .orElseThrow(
+                () -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND)); // 방장 없음 예외 처리
         newManager.setRoomManager();
     }
 
@@ -283,7 +286,8 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+                EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         if (!member.isRoomManager()) {
@@ -341,8 +345,9 @@ public class RoomCommandService {
 
         // 푸시 알림 코드
         eventPublisher.publishEvent(
-            HostAndMemberAndRoomTargetDto.create(inviter.getMember(), NotificationType.SEND_ROOM_INVITE,
-                inviteeMember, NotificationType.ARRIVE_ROOM_INVITE, room));
+            HostAndMemberAndRoomTargetDto.create(inviter.getMember(),
+                NotificationType.SEND_ROOM_INVITE, inviteeMember,
+                NotificationType.ARRIVE_ROOM_INVITE, room));
     }
 
     public void respondToInvitation(Long roomId, Long inviteeId, boolean accept) {
@@ -562,9 +567,9 @@ public class RoomCommandService {
 
         // 푸시 알림 코드
         if (accept) {
-            eventPublisher.publishEvent(HostAndMemberAndRoomTargetDto.create(manager.getMember(),
-                NotificationType.SELF_ACCEPT_ROOM_JOIN, requestMember,
-                NotificationType.ACCEPT_ROOM_JOIN, room));
+            eventPublisher.publishEvent(
+                OneTargetReverseDto.create(manager.getMember(), requestMember,
+                    NotificationType.ACCEPT_ROOM_JOIN));
 
             List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room,
                 EntryStatus.JOINED);
@@ -578,9 +583,9 @@ public class RoomCommandService {
                 GroupRoomNameWithOutMeTargetDto.create(requestMember, memberList, room,
                     NotificationType.ROOM_IN));
         } else {
-            eventPublisher.publishEvent(HostAndMemberAndRoomTargetDto.create(manager.getMember(),
-                NotificationType.SELF_REJECT_ROOM_JOIN, requestMember,
-                NotificationType.REJECT_ROOM_JOIN, room));
+            eventPublisher.publishEvent(
+                OneTargetReverseDto.create(manager.getMember(), requestMember,
+                    NotificationType.REJECT_ROOM_JOIN));
         }
     }
 
@@ -591,7 +596,8 @@ public class RoomCommandService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+                EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장이 아니면 예외 발생

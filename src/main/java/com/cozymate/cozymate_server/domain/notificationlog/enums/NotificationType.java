@@ -10,9 +10,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum NotificationType {
-    /**
-     * 여기부터 이미 사용중인 알림들
-     */
 
     // OneTarget, 스케줄러
     SELECT_COZY_MATE(NotificationCategory.COZY_HOME) {
@@ -27,6 +24,10 @@ public enum NotificationType {
                 month);
         }
     },
+
+    /**
+     * 여기부터 이미 사용중인 알림들
+     */
 
     // OneTarget, 스케줄러
     REMINDER_ROLE(NotificationCategory.COZY_ROLE) {
@@ -136,32 +137,6 @@ public enum NotificationType {
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
             return fcmPushContentDto.getMember().getNickname() + "님에게 "
                 + fcmPushContentDto.getRoom().getName() + "으로 초대 요청을 보냈어요";
-        }
-    },
-
-    /**
-     * ex) xx님의 방 참여 요청을 거절했어요
-     * 방장이 xx로부터 온 방 참여 요청을 거절한 경우 방장 자신에게 오는 알림
-     * OneTargetReverse
-     */
-    SELF_REJECT_ROOM_JOIN(NotificationCategory.ROOM_JOIN_REQUEST) {
-        @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname()
-                + "님의 방 참여 요청을 거절했어요";
-        }
-    },
-
-    /**
-     * ex) xx님의 방 참여 요청을 수락했어요
-     * 방장이 xx로부터 온 방 참여 요청을 수락한 경우 방장 자신에게 오는 알림
-     * OneTargetReverse
-     */
-    SELF_ACCEPT_ROOM_JOIN(NotificationCategory.ROOM_JOIN_REQUEST) {
-        @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname()
-                + "님의 방 참여 요청을 수락했어요";
         }
     },
 
