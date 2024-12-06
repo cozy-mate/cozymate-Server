@@ -8,11 +8,7 @@ import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-@Slf4j
-@Component
 public class RoomStatUtil {
 
     public static List<PreferenceMatchCountDTO> getPreferenceStatsMatchCounts(Member member,
