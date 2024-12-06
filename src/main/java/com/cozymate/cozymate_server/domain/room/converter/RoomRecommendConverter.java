@@ -1,14 +1,15 @@
 package com.cozymate.cozymate_server.domain.room.converter;
 
+import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomRecommendationResponseDTO;
-import java.util.Map;
+import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class RoomRecommendConverter {
 
     public static RoomRecommendationResponseDTO toRoomRecommendationResponse(Room room,
-        Pair<Long, Integer> pair, Map<String, Integer> preferenceMap) {
+        Pair<Long, Integer> pair, List<PreferenceMatchCountDTO> preferenceMatchCountList) {
         return RoomRecommendationResponseDTO.builder()
             .roomId(pair.getLeft())
             .name(room.getName())
@@ -18,12 +19,12 @@ public class RoomRecommendConverter {
             .equality(pair.getRight())
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(room.getNumOfArrival())
-            .equalMemberStatNum(preferenceMap)
+            .preferenceMatchCountList(preferenceMatchCountList)
             .build();
     }
 
     public static RoomRecommendationResponseDTO toRoomRecommendationResponseWhenNoMemberStat(Room room,
-        Map<String, Integer> preferenceMap) {
+        List<PreferenceMatchCountDTO> preferenceMatchCountList) {
         return RoomRecommendationResponseDTO.builder()
             .roomId(room.getId())
             .name(room.getName())
@@ -33,7 +34,7 @@ public class RoomRecommendConverter {
             .equality(null)
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(room.getNumOfArrival())
-            .equalMemberStatNum(preferenceMap)
+            .preferenceMatchCountList(preferenceMatchCountList)
             .build();
     }
 

@@ -1,14 +1,13 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
-import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
-import com.cozymate.cozymate_server.domain.memberstatequality.MemberStatEquality;
-import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberStatEqualityRepository;
+import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomRecommendConverter;
@@ -18,10 +17,8 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
-import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
-import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import jakarta.transaction.Transactional;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +37,8 @@ public class RoomRecommendService {
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final MemberStatRepository memberStatRepository;
-    private final MemberStatEqualityRepository memberStatEqualityRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
+    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
 
     public PageResponseDto<List<RoomRecommendationResponseDTO>> getRecommendationList(Member member,
         int size, int page, RoomSortType sortType) {
@@ -67,10 +64,10 @@ public class RoomRecommendService {
             .collect(Collectors.toMap(Room::getId, room -> room));
 
         // roomId에 해당하는 MateList로 구성됨
-        Map<Long, List<Mate>> roomMateMap = mateRepository.findAllByEntryStatus(EntryStatus.JOINED)
+        Map<Long, List<Mate>> roomMateMap = mateRepository.findAllFetchMemberAndMemberStatByEntryStatus(
+                EntryStatus.JOINED)
             .stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
 
-        // roomId와 member의 일치율로 구성됨
         Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, member,
             roomMateMap);
 
@@ -88,25 +85,26 @@ public class RoomRecommendService {
             .hasNext(hasNext)
             .result(roomRecommendationResponseDTOList)
             .build();
-
     }
 
     private Map<Long, Integer> calculateRoomEqualityMap(List<Room> roomList, Member member,
         Map<Long, List<Mate>> roomMateMap) {
+
         Map<Long, Integer> roomEqualityMap = new HashMap<>();
 
         roomList.forEach(room -> {
-            List<Member> memberList = roomMateMap.get(room.getId()).stream()
-                .map(Mate::getMember)
-                .toList();
-            List<Integer> equalityList = memberStatEqualityRepository.findByMemberAIdAndMemberBIdIn(
-                    member.getId(), memberList.stream().map(Member::getId).toList()).stream()
-                .map(MemberStatEquality::getEquality)
-                .toList();
-            // TODO: null 처리 필요
-            Integer averageEquality = equalityList.isEmpty() ? null
-                : equalityList.stream().reduce(Integer::sum).orElse(null) / equalityList.size();
-            roomEqualityMap.put(room.getId(), averageEquality);
+            List<Mate> mates = roomMateMap.get(room.getId());
+
+            Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
+                member.getId(),
+                mates.stream()
+                    .map(mate -> mate.getMember().getId())
+                    .toList()
+            );
+
+            Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
+
+            roomEqualityMap.put(room.getId(), roomEquality);
         });
 
         return roomEqualityMap;
@@ -129,31 +127,11 @@ public class RoomRecommendService {
         Member member, Pair<Long, Integer> pair, Room room, Map<Long, List<Mate>> roomMateMap,
         List<String> preferenceList) {
 
-        Map<String, Integer> preferenceMap = new HashMap<>();
-        List<Long> mateMemberIds = roomMateMap.getOrDefault(pair.getLeft(), Collections.emptyList())
-            .stream()
-            .map(mate -> mate.getMember().getId())
-            .toList();
+        List<PreferenceMatchCountDTO> preferenceStatsMatchCounts = RoomStatUtil.getPreferenceStatsMatchCounts(
+            member, preferenceList, roomMateMap.get(room.getId()), member.getMemberStat());
 
-        MemberStat myMemberStat = memberStatRepository.findByMemberId(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
-        Map<String, Object> myPreference = MemberStatUtil.getMemberStatFields(myMemberStat,
-            preferenceList);
-        List<MemberStat> memberStatList = memberStatRepository.findAllById(mateMemberIds);
-
-        preferenceList.forEach(preference -> {
-            preferenceMap.put(preference, 0);
-            memberStatList.forEach(memberStat -> {
-                Map<String, Object> memberPreference = MemberStatUtil.getMemberStatFields(
-                    memberStat,
-                    preferenceList);
-                if (myPreference.get(preference).equals(memberPreference.get(preference))) {
-                    preferenceMap.merge(preference, 1, Integer::sum);
-                }
-            });
-        });
-
-        return RoomRecommendConverter.toRoomRecommendationResponse(room, pair, preferenceMap);
+        return RoomRecommendConverter.toRoomRecommendationResponse(room, pair,
+            preferenceStatsMatchCounts);
     }
 
     private List<Pair<Long, Integer>> getSortedRoomListBySortType(
@@ -197,14 +175,14 @@ public class RoomRecommendService {
 
     private PageResponseDto<List<RoomRecommendationResponseDTO>> getRoomRecommendationResponseListWhenNoMemberStat(
         int size, int page, List<String> memberPreferenceList, List<Room> roomList) {
-        Map<String, Integer> preferenceMap = new HashMap<>();
-        memberPreferenceList.forEach(preference -> preferenceMap.put(preference, null));
+        List<PreferenceMatchCountDTO> preferenceMatchCountDTOList = RoomStatUtil.getPreferenceStatsMatchCountsWithoutMemberStat(
+            memberPreferenceList);
 
         List<RoomRecommendationResponseDTO> responseList =
             roomList.stream()
                 .map(
                     room -> RoomRecommendConverter.toRoomRecommendationResponseWhenNoMemberStat(
-                        room, preferenceMap
+                        room, preferenceMatchCountDTOList
                     ))
                 .skip((long) page * size)
                 .limit(size)

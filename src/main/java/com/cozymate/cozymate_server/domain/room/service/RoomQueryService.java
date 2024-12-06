@@ -26,6 +26,7 @@ import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -71,7 +72,7 @@ public class RoomQueryService {
         Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
             joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
 
-        Integer roomEquality = getCalculateRoomEquality(equalityMap);
+        Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
 
         List<MateDetailResponseDTO> mates = joinedMates.stream()
             .map(mate -> {
@@ -142,14 +143,6 @@ public class RoomQueryService {
         return getExistRoom(otherMemberId);
     }
 
-    public Integer getCalculateRoomEquality(Map<Long, Integer> equalityMap){
-        List<Integer> roomEquality = equalityMap.values().stream()
-            .toList();
-        int sum = roomEquality.stream().mapToInt(Integer::intValue).sum();
-        return roomEquality.isEmpty() ? null : sum / roomEquality.size();
-
-    }
-
     public List<MateDetailResponseDTO> getInvitedMemberList(Long roomId, Long memberId) {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -209,7 +202,7 @@ public class RoomQueryService {
                 List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
                 Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
                     joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
-                Integer roomEquality = getCalculateRoomEquality(equalityMap);
+                Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
                 List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
                 return RoomConverter.toRoomDetailResponseDTOWithParams(
                     room.getId(),
@@ -307,7 +300,7 @@ public class RoomQueryService {
                     );
                     return RoomConverter.toRoomSearchResponseDTO(
                         room,
-                        getCalculateRoomEquality(equalityMap)
+                        RoomStatUtil.getCalculateRoomEquality(equalityMap)
                     );
                 })
                 .sorted(Comparator.comparing(RoomSearchResponseDTO::equality, Comparator.nullsLast(Comparator.reverseOrder())))
@@ -330,7 +323,7 @@ public class RoomQueryService {
                 );
                 return RoomConverter.toRoomSearchResponseDTO(
                     room,
-                    getCalculateRoomEquality(equalityMap)
+                    RoomStatUtil.getCalculateRoomEquality(equalityMap)
                 );
             })
             .sorted(Comparator.comparing(RoomSearchResponseDTO::name))
