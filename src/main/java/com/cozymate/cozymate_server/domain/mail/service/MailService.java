@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.mail.service;
 
 
 import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
+import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
 import com.cozymate.cozymate_server.domain.mail.converter.MailConverter;
@@ -10,7 +11,7 @@ import com.cozymate.cozymate_server.domain.mail.dto.request.VerifyRequestDTO;
 import com.cozymate.cozymate_server.domain.mail.dto.response.VerifyResponseDTO;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -40,8 +42,15 @@ public class MailService {
     private static final Integer MAIL_AUTHENTICATION_EXPIRED_TIME = 30;
     private final JavaMailSender mailSender;
     private final MailRepository mailRepository;
-    private final MemberCommandService memberCommandService;
+    private final MemberRepository memberRepository;
     private final UniversityRepository universityRepository;
+    private final AuthService authService;
+
+    @Value("${spring.mail.username}")
+    private static final String ADMIN_MAIL_USERNAME = "cozymate0";
+
+    private static final String ADMIN_MAIL_DOMAIN = "@gmail.com"; // 관리자 이메일 주소
+
 
     @Transactional
     public void sendUniversityAuthenticationCode(MemberDetails memberDetails,
@@ -61,24 +70,39 @@ public class MailService {
     @Transactional
     public VerifyResponseDTO verifyMemberUniversity(MemberDetails memberDetails,
         VerifyRequestDTO verifyDTO) {
-        Member member = memberDetails.member();
+        University memberUniversity = universityRepository.findById(verifyDTO.universityId())
+            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
-        verifyAuthenticationCode(member, verifyDTO.code());
+        memberDetails.member().verifyMemberUniversity(memberUniversity, verifyDTO.majorName());
+        memberRepository.save(memberDetails.member());
 
-        TokenResponseDTO tokenResponseDTO = memberCommandService.verifyMemberUniversity(
-            memberDetails,
-            verifyDTO.universityId(),
-            verifyDTO.majorName());
+        TokenResponseDTO tokenResponseDTO = authService.generateMemberTokenDTO(memberDetails);
         return MailConverter.toVerifyResponseDTO(tokenResponseDTO);
     }
 
     public String isVerified(Member member) {
         Optional<MailAuthentication> mailAuthentication = mailRepository.findById(member.getId());
 
-        if (mailAuthentication.isPresent() && Boolean.TRUE.equals(mailAuthentication.get().getIsVerified())) {
+        if (mailAuthentication.isPresent() && Boolean.TRUE.equals(
+            mailAuthentication.get().getIsVerified())) {
             return mailAuthentication.get().getMailAddress();
         }
         return "";
+    }
+
+    public void sendCustomMailToAdmin(String subject, String content) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(ADMIN_MAIL_USERNAME + ADMIN_MAIL_DOMAIN);
+            helper.setSubject(subject);
+            helper.setText(content, true); // 전달받은 content를 그대로 전송
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new GeneralException(ErrorStatus._MAIL_SEND_FAIL);
+        }
     }
 
     private void verifyAuthenticationCode(Member member, String requestCode) {
@@ -101,13 +125,14 @@ public class MailService {
         mailAuthentication.verify();
     }
 
-    private MailAuthentication createAndSendMail(Long memberId, String mailAddress, String universityName) {
+    private MailAuthentication createAndSendMail(Long memberId, String mailAddress,
+        String universityName) {
 
         String authenticationCode = Base64.getEncoder()
             .encodeToString(UUID.randomUUID().toString().getBytes())
             .substring(0, 6);
 
-        String emailBody = makeMailBody(authenticationCode,universityName);
+        String emailBody = makeMailBody(authenticationCode, universityName);
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -120,7 +145,7 @@ public class MailService {
 
             return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress,
                 authenticationCode, false);
-        }catch (MessagingException e){
+        } catch (MessagingException e) {
             throw new GeneralException(ErrorStatus._MAIL_SEND_FAIL);
         }
     }

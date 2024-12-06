@@ -39,6 +39,7 @@ public class SwaggerFilter implements Filter {
         }
         Cookie cookie = new Cookie("JWT", jwtUtil.generateAdminToken()); // 쿠키 이름 및 값 설정
         cookie.setHttpOnly(true); // 클라이언트 측 스크립트에서 쿠키를 접근하지 못하게 함
+        cookie.setSecure(true);
         cookie.setPath("/"); // 쿠키의 유효 범위 설정
         cookie.setMaxAge(3600); // 쿠키의 만료 시간 설정 (예: 1시간)
         httpResponse.addCookie(cookie); // 응답에 쿠키 추가
