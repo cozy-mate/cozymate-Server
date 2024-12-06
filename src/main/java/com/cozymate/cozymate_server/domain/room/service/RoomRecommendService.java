@@ -17,7 +17,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
-import com.cozymate.cozymate_server.global.utils.RoomStatUtil;
+import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import jakarta.transaction.Transactional;
 import java.util.Comparator;
 import java.util.HashMap;

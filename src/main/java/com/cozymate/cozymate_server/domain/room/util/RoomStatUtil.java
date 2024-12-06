@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.global.utils;
+package com.cozymate.cozymate_server.domain.room.util;
 
 import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.mate.Mate;

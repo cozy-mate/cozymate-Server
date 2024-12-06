@@ -26,7 +26,7 @@ import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import com.cozymate.cozymate_server.global.utils.RoomStatUtil;
+import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

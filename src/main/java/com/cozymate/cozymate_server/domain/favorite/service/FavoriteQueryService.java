@@ -21,7 +21,7 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
-import com.cozymate.cozymate_server.global.utils.RoomStatUtil;
+import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
