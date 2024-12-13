@@ -46,10 +46,10 @@ public class MailService {
     private final UniversityRepository universityRepository;
     private final AuthService authService;
 
-    @Value("${spring.mail.username}")
-    private static final String ADMIN_MAIL_USERNAME = "cozymate0";
 
-    private static final String ADMIN_MAIL_DOMAIN = "@gmail.com"; // 관리자 이메일 주소
+    private static final String ADMIN_MAIL_ADDRESS = "cozymate0@gmail.com"; // 관리자 이메일 주소
+
+    private static final String CONFUSION_CHARACTERS = "[IlOo0]";
 
 
     @Transactional
@@ -95,7 +95,7 @@ public class MailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setTo(ADMIN_MAIL_USERNAME + ADMIN_MAIL_DOMAIN);
+            helper.setTo(ADMIN_MAIL_ADDRESS);
             helper.setSubject(subject);
             helper.setText(content, true); // 전달받은 content를 그대로 전송
             mailSender.send(message);
@@ -130,6 +130,7 @@ public class MailService {
 
         String authenticationCode = Base64.getEncoder()
             .encodeToString(UUID.randomUUID().toString().getBytes())
+            .replaceAll(CONFUSION_CHARACTERS, "") // 제외할 문자 제거
             .substring(0, 6);
 
         String emailBody = makeMailBody(authenticationCode, universityName);
