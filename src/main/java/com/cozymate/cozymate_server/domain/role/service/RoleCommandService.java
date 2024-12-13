@@ -76,6 +76,31 @@ public class RoleCommandService {
     }
 
     /**
+     * 메이트가 방에서 나갔을 때 Role에서 할당 해제 + Todo에서도 할당 해제
+     *
+     * @param mate
+     * @param roomId
+     */
+    public void updateAssignedMateIfMateExitRoom(Mate mate, Long roomId) {
+        List<Role> roleList = roleRepository.findAllByMateRoomId(roomId);
+        roleList.forEach(role -> {
+            if(role.getAssignedMateIdList().contains(mate.getId())) {
+                todoCommandService.updateAssignedMateIfMateExitRoom(mate, role.getId());
+                role.removeAssignee(mate.getId());
+            }
+        });
+    }
+
+    /**
+     * Role을 조회할 때 유효한 할당자가 없으면 해당 Role을 삭제함 추후 삭제 예정 """다른곳에서 사용 금지"""
+     *
+     * @param role
+     */
+    public void deleteRoleIfMateEmpty(Role role) {
+        roleRepository.delete(role);
+    }
+
+    /**
      * Role 수정
      *
      * @param member     사용자
@@ -133,7 +158,8 @@ public class RoleCommandService {
      * @return Mate
      */
     private Mate getMate(Long memberId, Long roomId) {
-        return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+        return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+                EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
     }
 
