@@ -29,4 +29,6 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     void bulkDeleteMate(@Param("mate") Mate mate);
 
     void deleteAllByRoleId(Long roleId);
+
+    List<Todo> findAllByRoleId(Long roleId);
 }

@@ -118,32 +118,17 @@ public class TodoCommandService {
         checkTodoRoomId(todo, roomId);
         checkUpdatePermission(todo, mate);
 
-        int indexOfMateOnIdList = todo.getAssignedMateIdList().indexOf(mate.getId());
+        deleteTodoAssignee(mate, todo);
+    }
 
-        // 내가 할당된 사람에 없으면 삭제 불가능 (남 투두, 그룹 투두인데 난 없는 투두)
-        if (indexOfMateOnIdList == -1) {
-            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
-        }
-
-        // 롤 투두면 삭제 불가능
-        if (todo.getTodoType() == TodoType.ROLE_TODO) {
-            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
-        }
-
-        // 투두를 삭제하기 전 Todo를 NULL로 변경
-        roomLogCommandService.changeRoomLogTodoToNull(todo.getId());
-
-        // 내 투두면 투두 자체를 삭제
-        if (todo.getTodoType() == TodoType.SINGLE_TODO) {
-            todoRepository.delete(todo);
-            return;
-        }
-
-        // 그룹 투두일 때 타입 수정(SINGLE로) 필요하면 수정
-        if (todo.getTodoType() == TodoType.GROUP_TODO && todo.getAssignedMateIdList().size() > 1) {
-            todo.removeAssignee(mate.getId());
-            todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
-        }
+    /**
+     * 메이트가 방에서 나갔을 때 Todo에서 할당 해제 role에서 연계되어 나옴
+     * @param mate
+     * @param roleId
+     */
+    public void updateAssignedMateIfMateExitRoom(Mate mate, Long roleId) {
+        List<Todo> todoList = todoRepository.findAllByRoleId(roleId);
+        todoList.forEach(todo -> deleteTodoAssignee(mate, todo));
     }
 
     public void updateTodoContent(Member member, Long roomId, Long todoId,
@@ -281,6 +266,35 @@ public class TodoCommandService {
     private void checkMaxAssignee(List<Long> mateIdList) {
         if (mateIdList.size() > MAX_ASSIGNEE) {
             throw new GeneralException(ErrorStatus._TODO_OVER_MAX);
+        }
+    }
+
+    private void deleteTodoAssignee(Mate mate, Todo todo) {
+        int indexOfMateOnIdList = todo.getAssignedMateIdList().indexOf(mate.getId());
+
+        // 내가 할당된 사람에 없으면 삭제 불가능 (남 투두, 그룹 투두인데 난 없는 투두)
+        if (indexOfMateOnIdList == -1) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
+        }
+
+        // 롤 투두면 삭제 불가능
+        if (todo.getTodoType() == TodoType.ROLE_TODO) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
+        }
+
+        // 투두를 삭제하기 전 Todo를 NULL로 변경
+        roomLogCommandService.changeRoomLogTodoToNull(todo.getId());
+
+        // 내 투두면 투두 자체를 삭제
+        if (todo.getTodoType() == TodoType.SINGLE_TODO) {
+            todoRepository.delete(todo);
+            return;
+        }
+
+        // 그룹 투두일 때 타입 수정(SINGLE로) 필요하면 수정
+        if (todo.getTodoType() == TodoType.GROUP_TODO && todo.getAssignedMateIdList().size() > 1) {
+            todo.removeAssignee(mate.getId());
+            todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
         }
     }
 
