@@ -57,7 +57,7 @@ public class ChatCommandService {
     }
 
     private void saveChat(ChatRoom chatRoom, Member sender, String content) {
-        Chat chat = ChatConverter.toEntity(chatRoom, sender, content);
+        Chat chat = ChatConverter.toEntity(chatRoom, sender, content.trim());
         chatRepository.save(chat);
     }
 }

@@ -21,7 +21,7 @@ public class ChatRoomConverter {
         Long chatRoomId, Integer persona, Long memberId, boolean hasNewChat) {
         return ChatRoomDetailResponseDTO.builder()
             .nickname(nickname)
-            .lastContent(content)
+            .lastContent(content.trim())
             .chatRoomId(chatRoomId)
             .persona(persona)
             .memberId(memberId)
