@@ -38,7 +38,7 @@ public class ChatCommandService {
             recipient);
 
         if (findChatRoom.isPresent()) {
-            saveChat(findChatRoom.get(), sender, createChatRequestDTO.content().trim());
+            saveChat(findChatRoom.get(), sender, createChatRequestDTO.content());
 
             return ChatRoomConverter.toChatRoomIdResponseDTO(findChatRoom.get().getId());
         } else {
@@ -57,7 +57,7 @@ public class ChatCommandService {
     }
 
     private void saveChat(ChatRoom chatRoom, Member sender, String content) {
-        Chat chat = ChatConverter.toEntity(chatRoom, sender, content);
+        Chat chat = ChatConverter.toEntity(chatRoom, sender, content.trim());
         chatRepository.save(chat);
     }
 }
