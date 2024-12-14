@@ -38,7 +38,7 @@ public class ChatCommandService {
             recipient);
 
         if (findChatRoom.isPresent()) {
-            saveChat(findChatRoom.get(), sender, createChatRequestDTO.content());
+            saveChat(findChatRoom.get(), sender, createChatRequestDTO.content().trim());
 
             return ChatRoomConverter.toChatRoomIdResponseDTO(findChatRoom.get().getId());
         } else {
