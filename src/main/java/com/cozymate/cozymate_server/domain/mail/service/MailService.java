@@ -127,6 +127,10 @@ public class MailService {
 
     private MailAuthentication createAndSendMail(Long memberId, String mailAddress,
         String universityName) {
+        if (mailAddress.equals("test123@inha.edu")) {
+            return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress, "123456",
+                false);
+        } // 애플심사를 위한 테스트 메일 인증
 
         String authenticationCode = Base64.getEncoder()
             .encodeToString(UUID.randomUUID().toString().getBytes())
