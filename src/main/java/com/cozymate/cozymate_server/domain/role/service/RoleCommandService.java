@@ -21,6 +21,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -82,11 +83,14 @@ public class RoleCommandService {
      * @param roomId
      */
     public void updateAssignedMateIfMateExitRoom(Mate mate, Long roomId) {
-        List<Role> roleList = roleRepository.findAllByMateRoomId(roomId);
+        List<Role> roleList = roleRepository.findAllByRoomId(roomId);
         roleList.forEach(role -> {
-            if(role.getAssignedMateIdList().contains(mate.getId())) {
-                todoCommandService.updateAssignedMateIfMateExitRoom(mate, role.getId());
-                role.removeAssignee(mate.getId());
+            if (role.isAssigneeIn(mate.getId())) {
+                if (role.isAssignedMateListEmpty()) {
+                    roleRepository.delete(role);
+                } else {
+                    role.removeAssignee(mate.getId());
+                }
             }
         });
     }

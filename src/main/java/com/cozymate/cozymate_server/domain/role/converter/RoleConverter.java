@@ -16,6 +16,7 @@ public class RoleConverter {
     public static Role toEntity(Mate mate, List<Long> assignedMateIdList, String content,
         int repeatDays) {
         return Role.builder()
+            .room(mate.getRoom())
             .mate(mate)
             .assignedMateIdList(assignedMateIdList)
             .content(content)

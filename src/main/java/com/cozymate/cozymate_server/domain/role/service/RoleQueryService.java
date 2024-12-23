@@ -40,7 +40,7 @@ public class RoleQueryService {
             .filter(mate -> Objects.equals(mate.getMember().getId(), member.getId())).findFirst()
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
-        List<Role> roleList = roleRepository.findAllByMateRoomId(currentMate.getRoom().getId());
+        List<Role> roleList = roleRepository.findAllByRoomId(currentMate.getRoom().getId());
 
         return roleList.stream()
             .map(role -> {

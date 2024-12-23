@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
-    List<Role> findAllByMateRoomId(Long roomId);
+    List<Role> findAllByRoomId(Long roomId);
 
     void deleteByMateId(Long mateId);
 

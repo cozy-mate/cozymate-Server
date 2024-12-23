@@ -33,6 +33,7 @@ import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
+import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
@@ -68,6 +69,7 @@ public class RoomCommandService {
     private final ApplicationEventPublisher eventPublisher;
     private final RoomHashtagCommandService roomHashtagCommandService;
     private final RoleCommandService roleCommandService;
+    private final TodoCommandService todoCommandService;
 
 
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -208,6 +210,7 @@ public class RoomCommandService {
 
         // 방을 나갈 때 Role과 투두 삭제\
 
+        todoCommandService.updateAssignedMateIfMateExitRoom(quittingMate);
         roleCommandService.updateAssignedMateIfMateExitRoom(quittingMate, roomId);
 
         quittingMate.quit();
