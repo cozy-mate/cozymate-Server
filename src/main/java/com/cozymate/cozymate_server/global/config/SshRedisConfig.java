@@ -15,7 +15,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableRedisRepositories(basePackages = "com.cozymate.cozymate_server.global.redis")
+@EnableRedisRepositories(basePackages = {
+    "com.cozymate.cozymate_server.global.redis",
+    "com.cozymate.cozymate_server.domain.auth.repository"
+})
 public class SshRedisConfig {
 
     private final SshTunnelConfig initializer;
@@ -47,7 +50,8 @@ public class SshRedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<String, Object> redisTemplate(
+        RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
