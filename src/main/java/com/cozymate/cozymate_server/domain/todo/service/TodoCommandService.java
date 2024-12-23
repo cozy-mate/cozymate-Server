@@ -60,7 +60,7 @@ public class TodoCommandService {
         checkMaxAssignee(requestDto.mateIdList());
 
         Todo todo = todoRepository.save(
-            TodoConverter.toEntity(mate.getRoom(), mate, requestDto.mateIdList(),
+            TodoConverter.toEntity(mate.getRoom(), mate.getId(), requestDto.mateIdList(),
                 requestDto.content(), requestDto.timePoint(), null, type)
         );
         return TodoConverter.toTodoSimpleResponseDTO(todo);

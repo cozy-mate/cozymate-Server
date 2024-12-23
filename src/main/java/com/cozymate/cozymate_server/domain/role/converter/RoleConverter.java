@@ -17,7 +17,7 @@ public class RoleConverter {
         int repeatDays) {
         return Role.builder()
             .room(mate.getRoom())
-            .mate(mate)
+            .mateId(mate.getId())
             .assignedMateIdList(assignedMateIdList)
             .content(content)
             .repeatDays(repeatDays)

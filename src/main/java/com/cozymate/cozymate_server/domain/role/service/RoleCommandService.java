@@ -135,7 +135,7 @@ public class RoleCommandService {
         roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
             .forEach(role ->
                 todoRepository.save(
-                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
+                    TodoConverter.toEntity(role.getRoom(), role.getMateId(),
                         role.getAssignedMateIdList(), role.getContent(),
                         LocalDate.now(), role, TodoType.ROLE_TODO)
                 )

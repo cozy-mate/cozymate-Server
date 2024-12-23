@@ -18,12 +18,12 @@ import java.util.Map;
 
 public class TodoConverter {
 
-    public static Todo toEntity(Room room, Mate mate, List<Long> assignedMateIdList, String content,
+    public static Todo toEntity(Room room, Long mateId, List<Long> assignedMateIdList, String content,
         LocalDate timePoint,
         Role role, TodoType type) {
         return Todo.builder()
             .room(room)
-            .mate(mate)
+            .mateId(mateId)
             .content(content)
             .timePoint(timePoint)
             .role(role) // role은 null이 될 수 있음

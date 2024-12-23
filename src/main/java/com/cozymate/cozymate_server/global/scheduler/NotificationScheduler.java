@@ -8,15 +8,12 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.role.service.RoleCommandService;
-import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoQueryService;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,25 +39,29 @@ public class NotificationScheduler {
     private final RoleCommandService roleCommandService;
 
     // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가) 작업 자정에 먼저하고 나서 시작하도록 30초로 설정
-    @Scheduled(cron = "30 0 0 * * *")
-    public void sendDailyNotification() {
-        LocalDate today = LocalDate.now();
-        List<Todo> todoList = todoRepository.findByTimePoint(today);
-
-        Map<Member, List<String>> todoMap = todoList.stream()
-            .collect(Collectors.groupingBy(
-                todo -> todo.getMate().getMember(),
-                Collectors.mapping(
-                    Todo::getContent,
-                    Collectors.toList()
-                )
-            ));
-
-        todoMap.forEach((member, todoContents) -> {
-            fcmPushService.sendNotification(
-                OneTargetDto.create(member, NotificationType.TODO_LIST, todoContents));
-        });
-    }
+    // TODO: 20241223 Todo 할당자에게 알림 보내도록 수정해야함
+//    @Scheduled(cron = "30 0 0 * * *")
+//    public void sendDailyNotification() {
+//        LocalDate today = LocalDate.now();
+//        List<Todo> todoList = todoRepository.findByTimePoint(today);
+//
+//        Map<Member, List<String>> todoMap = todoList.stream()
+//            .collect(Collectors.groupingBy(
+//                todo -> mateRepository.findById(todo.getMateId())
+//                    .orElse()
+//                    .getMember(),
+//                Collectors.mapping(
+//                    Todo::getContent,
+//                    Collectors.toList()
+//                )
+//
+//            ));
+//
+//        todoMap.forEach((member, todoContents) -> {
+//            fcmPushService.sendNotification(
+//                OneTargetDto.create(member, NotificationType.TODO_LIST, todoContents));
+//        });
+//    }
 
 //    @Scheduled(cron = "0 0 12 L * ?")
 //    public void sendMonthlyNotification() {

@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.role;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
@@ -31,10 +30,9 @@ public class Role extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Mate mate; // 롤을 생성한 사람
-
-    @ManyToOne(fetch = FetchType.LAZY)
     private Room room;
+
+    private Long mateId;
 
     @Type(JsonType.class)
     @Column(columnDefinition = "json")
