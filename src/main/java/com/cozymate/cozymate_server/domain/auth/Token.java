@@ -1,27 +1,30 @@
 package com.cozymate.cozymate_server.domain.auth;
 
 
-import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import java.io.Serializable;
 
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
-@Entity
-public class Token extends BaseTimeEntity {
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
+import org.springframework.data.redis.core.index.Indexed;
+
+
+@RedisHash(value = "Token")
+public class Token implements Serializable {
     @Id
-    @NonNull
+    @Indexed
     private String userName;
-
-
-    @Getter
-    @NonNull
+    @Indexed
     private String refreshToken;
+
+    @TimeToLive
+    @Value("${jwt.refresh-token.expire-length}")
+    private Long expiration;
+
+    // 사용자 정의 생성자
+    public Token(final String userName, final String refreshToken) {
+        this.userName = userName;
+        this.refreshToken = refreshToken;
+    }
 }
