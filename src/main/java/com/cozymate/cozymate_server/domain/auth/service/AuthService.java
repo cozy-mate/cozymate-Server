@@ -36,7 +36,7 @@ public class AuthService implements UserDetailsService {
     public TokenResponseDTO reissue(String refreshToken) {
         String clientId = jwtUtil.extractUserName(refreshToken);
 
-        findTokenByValue(refreshToken);
+        validateRefreshToken(refreshToken);
 
         return generateMemberTokenDTO(loadMember(clientId));
     }
@@ -100,7 +100,6 @@ public class AuthService implements UserDetailsService {
     private TemporaryMember loadTemporaryMember(String clientId) {
         return new TemporaryMember(clientId);
     }
-
     // refresh token을 db에 저장하는 함수
     @Transactional
     void saveRefreshToken(String clientId, String refreshToken) {
@@ -124,9 +123,9 @@ public class AuthService implements UserDetailsService {
     }
 
     @Transactional
-    Token findTokenByValue(String refreshToken) {
-        return tokenRepository.findByRefreshToken(refreshToken).orElseThrow(
-                () -> new GeneralException(ErrorStatus._TOKEN_NOT_FOUND)
+    void validateRefreshToken(String refreshToken) {
+        tokenRepository.findByRefreshToken(refreshToken).orElseThrow(
+            () -> new GeneralException(ErrorStatus._TOKEN_NOT_FOUND)
         );
     }
 
