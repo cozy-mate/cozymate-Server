@@ -177,9 +177,6 @@ public class MemberWithdrawService {
             }
         });
 
-        roleRepository.bulkDeleteMate(mate);
-        todoRepository.bulkDeleteMate(mate);
-
         log.debug("todo 삭제 완료");
         log.debug("mate 관련 엔티티 삭제 완료");
     }

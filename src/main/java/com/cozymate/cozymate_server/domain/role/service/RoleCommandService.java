@@ -21,6 +21,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -76,6 +77,34 @@ public class RoleCommandService {
     }
 
     /**
+     * 메이트가 방에서 나갔을 때 Role에서 할당 해제 + Todo에서도 할당 해제
+     *
+     * @param mate
+     * @param roomId
+     */
+    public void updateAssignedMateIfMateExitRoom(Mate mate, Long roomId) {
+        List<Role> roleList = roleRepository.findAllByRoomId(roomId);
+        roleList.forEach(role -> {
+            if (role.isAssigneeIn(mate.getId())) {
+                if (role.isAssignedMateListEmpty()) {
+                    roleRepository.delete(role);
+                } else {
+                    role.removeAssignee(mate.getId());
+                }
+            }
+        });
+    }
+
+    /**
+     * Role을 조회할 때 유효한 할당자가 없으면 해당 Role을 삭제함 추후 삭제 예정 """다른곳에서 사용 금지"""
+     *
+     * @param role
+     */
+    public void deleteRoleIfMateEmpty(Role role) {
+        roleRepository.delete(role);
+    }
+
+    /**
      * Role 수정
      *
      * @param member     사용자
@@ -106,7 +135,7 @@ public class RoleCommandService {
         roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
             .forEach(role ->
                 todoRepository.save(
-                    TodoConverter.toEntity(role.getMate().getRoom(), role.getMate(),
+                    TodoConverter.toEntity(role.getRoom(), role.getMateId(),
                         role.getAssignedMateIdList(), role.getContent(),
                         LocalDate.now(), role, TodoType.ROLE_TODO)
                 )
@@ -133,7 +162,8 @@ public class RoleCommandService {
      * @return Mate
      */
     private Mate getMate(Long memberId, Long roomId) {
-        return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+        return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+                EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
     }
 

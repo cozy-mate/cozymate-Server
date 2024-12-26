@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.role;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
@@ -30,7 +30,9 @@ public class Role extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Mate mate; // 롤을 생성한 사람
+    private Room room;
+
+    private Long mateId;
 
     @Type(JsonType.class)
     @Column(columnDefinition = "json")
@@ -41,7 +43,7 @@ public class Role extends BaseTimeEntity {
 
     private int repeatDays = 0;
 
-    public void updateEntity(List<Long> assignedMateIdList ,String content, int repeatDays) {
+    public void updateEntity(List<Long> assignedMateIdList, String content, int repeatDays) {
         this.assignedMateIdList = assignedMateIdList;
         this.content = content;
         this.repeatDays = repeatDays;
@@ -56,5 +58,10 @@ public class Role extends BaseTimeEntity {
 
     public boolean isAssignedMateListEmpty() {
         return assignedMateIdList == null || assignedMateIdList.isEmpty();
+    }
+
+    // 해당 메이트가 할당자인지 확인
+    public boolean isAssigneeIn(Long assigneeId) {
+        return this.assignedMateIdList.contains(assigneeId);
     }
 }

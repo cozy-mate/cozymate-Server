@@ -10,13 +10,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
-    List<Role> findAllByMateRoomId(Long roomId);
+    List<Role> findAllByRoomId(Long roomId);
 
     void deleteByMateId(Long mateId);
 
     List<Role> findAllByMateId(Long mateId);
-
-    @Modifying
-    @Query("UPDATE Role r SET r.mate = null WHERE r.mate = :mate")
-    void bulkDeleteMate(@Param("mate") Mate mate);
 }

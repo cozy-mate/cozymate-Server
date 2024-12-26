@@ -2,7 +2,7 @@ package com.cozymate.cozymate_server.domain.role.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO;
-import com.cozymate.cozymate_server.domain.role.dto.response.RoleListResponseDTO;
+import com.cozymate.cozymate_server.domain.role.dto.response.RoleDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.service.RoleCommandService;
 import com.cozymate.cozymate_server.domain.role.service.RoleQueryService;
@@ -12,6 +12,7 @@ import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -66,7 +67,7 @@ public class RoleController {
     @GetMapping("/{roomId}/roles")
     @Operation(summary = "[무빗] 특정 방에 role 목록 조회", description = "")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
-    public ResponseEntity<ApiResponse<RoleListResponseDTO>> getRoleList(
+    public ResponseEntity<ApiResponse<List<RoleDetailResponseDTO>>> getRoleList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId
     ) {

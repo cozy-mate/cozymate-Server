@@ -18,6 +18,7 @@ import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
 import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
+import com.cozymate.cozymate_server.domain.role.service.RoleCommandService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
@@ -32,6 +33,7 @@ import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
+import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
@@ -66,6 +68,8 @@ public class RoomCommandService {
     private final RoomLogCommandService roomLogCommandService;
     private final ApplicationEventPublisher eventPublisher;
     private final RoomHashtagCommandService roomHashtagCommandService;
+    private final RoleCommandService roleCommandService;
+    private final TodoCommandService todoCommandService;
 
 
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -203,6 +207,11 @@ public class RoomCommandService {
         if (quittingMate.getEntryStatus() == EntryStatus.EXITED) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MATE);
         }
+
+        // 방을 나갈 때 Role과 투두 삭제\
+
+        todoCommandService.updateAssignedMateIfMateExitRoom(quittingMate);
+        roleCommandService.updateAssignedMateIfMateExitRoom(quittingMate, roomId);
 
         quittingMate.quit();
         mateRepository.save(quittingMate);
@@ -462,7 +471,8 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(room.getId(), memberId);
+        Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(room.getId(),
+            memberId);
         checkEntryStatus(existingMate);
 
         if (room.getNumOfArrival() >= room.getMaxMateNum()) {

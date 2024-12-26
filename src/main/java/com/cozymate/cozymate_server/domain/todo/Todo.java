@@ -39,8 +39,7 @@ public class Todo extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Room room;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Mate mate; // 투두를 생성한 사람
+    private Long mateId; // 투두를 생성한 사람
 
     @Type(JsonType.class)
     @Column(columnDefinition = "json")

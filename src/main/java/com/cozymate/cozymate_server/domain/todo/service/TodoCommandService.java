@@ -60,7 +60,7 @@ public class TodoCommandService {
         checkMaxAssignee(requestDto.mateIdList());
 
         Todo todo = todoRepository.save(
-            TodoConverter.toEntity(mate.getRoom(), mate, requestDto.mateIdList(),
+            TodoConverter.toEntity(mate.getRoom(), mate.getId(), requestDto.mateIdList(),
                 requestDto.content(), requestDto.timePoint(), null, type)
         );
         return TodoConverter.toTodoSimpleResponseDTO(todo);
@@ -110,41 +110,23 @@ public class TodoCommandService {
      * @param roomId 방 Id
      * @param todoId 투두 Id
      */
-    public void deleteTodo(Member member, Long roomId, Long todoId
-    ) {
+    public void deleteTodo(Member member, Long roomId, Long todoId) {
         Mate mate = getMate(member.getId(), roomId);
         Todo todo = getTodo(todoId);
 
         checkTodoRoomId(todo, roomId);
         checkUpdatePermission(todo, mate);
 
-        int indexOfMateOnIdList = todo.getAssignedMateIdList().indexOf(mate.getId());
-
-        // 내가 할당된 사람에 없으면 삭제 불가능 (남 투두, 그룹 투두인데 난 없는 투두)
-        if (indexOfMateOnIdList == -1) {
-            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
-        }
-
-        // 롤 투두면 삭제 불가능
-        if (todo.getTodoType() == TodoType.ROLE_TODO) {
-            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
-        }
-
-        // 투두를 삭제하기 전 Todo를 NULL로 변경
-        roomLogCommandService.changeRoomLogTodoToNull(todo.getId());
-
-        // 내 투두면 투두 자체를 삭제
-        if (todo.getTodoType() == TodoType.SINGLE_TODO) {
-            todoRepository.delete(todo);
-            return;
-        }
-
-        // 그룹 투두일 때 타입 수정(SINGLE로) 필요하면 수정
-        if (todo.getTodoType() == TodoType.GROUP_TODO && todo.getAssignedMateIdList().size() > 1) {
-            todo.removeAssignee(mate.getId());
-            todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
+        if (!deleteTodoAssignee(mate, todo, false)) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_FOUND);
         }
     }
+
+    public void updateAssignedMateIfMateExitRoom(Mate mate) {
+        List<Todo> todoList = todoRepository.findAllByRoomId(mate.getRoom().getId());
+        todoList.forEach(todo -> deleteTodoAssignee(mate, todo, true));
+    }
+
 
     public void updateTodoContent(Member member, Long roomId, Long todoId,
         CreateTodoRequestDTO requestDto
@@ -284,6 +266,60 @@ public class TodoCommandService {
         }
     }
 
+    /**
+     * 할당자를 삭제하는데, 할당자에 없으면 false 반환
+     *
+     * @param mate
+     * @param todo
+     * @return
+     */
+    private boolean deleteTodoAssignee(Mate mate, Todo todo, boolean isExitRoom) {
+        int indexOfMateOnIdList = todo.getAssignedMateIdList().indexOf(mate.getId());
+
+        // 투두를 검색하지 못함
+        if (indexOfMateOnIdList == -1) {
+            // 할당자에 없으면 false 반환
+            return false;
+        }
+
+        // 역할을 삭제하는게 아니고 롤 투두면 삭제 불가능
+        if (!isExitRoom && todo.getTodoType().equals(TodoType.ROLE_TODO)) {
+            throw new GeneralException(ErrorStatus._TODO_NOT_DELETE);
+        }
+
+        // 투두를 삭제하기 전 Roomlog의 todo를 NULL로 변경
+        roomLogCommandService.changeRoomLogTodoToNull(todo.getId());
+
+        // 내 투두면 투두 자체를 삭제
+        if (todo.getTodoType().equals(TodoType.SINGLE_TODO)) {
+            todoRepository.delete(todo);
+            return true;
+        }
+
+        // 그룹 투두일 때 타입 수정(SINGLE로) 필요하면 수정
+        if (todo.getTodoType().equals(TodoType.GROUP_TODO)
+            && todo.getAssignedMateIdList().size() > 1) {
+            todo.removeAssignee(mate.getId());
+            todo.updateTodoType(classifyTodoType(todo.getAssignedMateIdList()));
+            return true;
+        }
+
+        // 롤 투두일 경우는 isDeleteRole이 true여야함
+        if (isExitRoom && todo.getTodoType().equals(TodoType.ROLE_TODO)) {
+            // 할당자가 더 있다면 할당자만 삭제
+            if (todo.getAssignedMateIdList().size() > 1) {
+                todo.removeAssignee(mate.getId());
+            }
+            // 할당자가 1명이라면 투두 삭제
+            if (todo.getAssignedMateIdList().size() == 1) {
+                todoRepository.delete(todo);
+            }
+            return true;
+        }
+        return true;
+    }
+
+    // role을 삭제할 때에는 할당자에 상관없이 모든 투두를 삭제해야함
     public void deleteTodoByRoleId(Long roleId) {
         todoRepository.deleteAllByRoleId(roleId);
     }

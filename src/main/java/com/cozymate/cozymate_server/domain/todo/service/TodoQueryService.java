@@ -157,7 +157,7 @@ public class TodoQueryService {
         if (todo.getTodoType() != TodoType.SINGLE_TODO) {
             return todo.getTodoType().getTodoName();
         }
-        if (todo.getAssignedMateIdList().contains(todo.getMate().getId())) {
+        if (todo.getAssignedMateIdList().contains(todo.getMateId())) {
             return "self";
         }
         return "other";
