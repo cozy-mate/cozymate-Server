@@ -154,7 +154,8 @@ public class MemberCommandService {
      * @param memberDetails 사용자 세부 정보
      */
     public void withdraw(WithdrawRequestDTO withdrawRequestDTO, MemberDetails memberDetails) {
-        String withdrawReason = withdrawRequestDTO.withdrawReason();
+        String withdrawReason = memberDetails.member().getNickname() + "님의 탈퇴 사유 입니다."
+            + withdrawRequestDTO.withdrawReason();
         String mailSubject = memberDetails.member().getNickname() + "탈퇴 사유";
 
         mailService.sendCustomMailToAdmin(mailSubject, withdrawReason);
