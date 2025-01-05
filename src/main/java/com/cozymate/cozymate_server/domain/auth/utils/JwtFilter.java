@@ -105,6 +105,12 @@ public class JwtFilter extends OncePerRequestFilter {
             MDC.put(MdcKey.USER_ID.name(), userName);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
 
+            if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.ACCESS)){
+                if (userDetails.getAuthorities() == null || userDetails.getAuthorities().isEmpty()){
+                    throw new RuntimeException(ErrorStatus._TOKEN_AUTHORIZATION_EMPTY.getMessage());
+                }
+            }
+
             // 임시 토큰일 경우, 접근을 제한할 URL 목록에 대한 접근 여부 확인
             if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.TEMPORARY)) {
                 if (isNotAllowTemporary(request)) {
