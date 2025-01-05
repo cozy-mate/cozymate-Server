@@ -25,4 +25,6 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     void deleteAllByRoleId(Long roleId);
 
     List<Todo> findAllByRoomId(Long roomId);
+
+    void deleteAllByRoomId(Long roomId);
 }

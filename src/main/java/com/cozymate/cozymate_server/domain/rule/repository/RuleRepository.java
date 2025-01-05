@@ -11,4 +11,7 @@ public interface RuleRepository extends JpaRepository<Rule, Long> {
     Integer countAllByRoomId(Long roomId);
 
     void deleteByRoomId(Long roomId);
+
+    void deleteAllByRoomId(Long roomId);
+
 }

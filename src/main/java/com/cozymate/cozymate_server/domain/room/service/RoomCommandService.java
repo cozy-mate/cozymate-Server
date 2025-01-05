@@ -261,13 +261,15 @@ public class RoomCommandService {
 
     private void deleteRoomDatas(Long roomId) {
         List<Mate> mates = mateRepository.findByRoomId(roomId);
-        for (Mate mate : mates) {
-            roleRepository.deleteByMateId(mate.getId());
-            todoRepository.deleteByMateId(mate.getId());
-        }
-        mateRepository.deleteByRoomId(roomId);
-        ruleRepository.deleteByRoomId(roomId);
-        roomLogRepository.deleteByRoomId(roomId);
+//        for (Mate mate : mates) {
+//            roleRepository.deleteByMateId(mate.getId());
+//            todoRepository.deleteByMateId(mate.getId());
+//        }
+        roomLogRepository.deleteAllByRoomId(roomId);
+        todoRepository.deleteAllByRoomId(roomId);
+        roleRepository.deleteAllByRoomId(roomId);
+        mateRepository.deleteAllByRoomId(roomId);
+        ruleRepository.deleteAllByRoomId(roomId);
 
         // 피드 삭제 로직
         if (feedRepository.existsByRoomId(roomId)) {
