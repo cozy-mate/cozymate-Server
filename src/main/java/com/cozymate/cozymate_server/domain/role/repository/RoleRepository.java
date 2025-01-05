@@ -16,6 +16,7 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 
     List<Role> findAllByMateId(Long mateId);
 
-    void deleteAllByRoomId(Long roomId);
-
+    @Modifying
+    @Query("DELETE FROM RoomLog r WHERE r.roomId = :roomId")
+    void deleteAllByRoomId(@Param("roomId") Long roomId);
 }

@@ -26,5 +26,6 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     List<Todo> findAllByRoomId(Long roomId);
 
-    void deleteAllByRoomId(Long roomId);
-}
+    @Modifying
+    @Query("DELETE FROM RoomLog r WHERE r.roomId = :roomId")
+    void deleteAllByRoomId(@Param("roomId") Long roomId);}

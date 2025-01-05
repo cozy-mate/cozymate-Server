@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -96,6 +97,7 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findAllFetchMemberAndMemberStatByEntryStatus(@Param("entryStatus") EntryStatus entryStatus);
 
 
-    void deleteAllByRoomId(Long roomId);
-
+    @Modifying
+    @Query("DELETE FROM RoomLog r WHERE r.roomId = :roomId")
+    void deleteAllByRoomId(@Param("roomId") Long roomId);
 }
