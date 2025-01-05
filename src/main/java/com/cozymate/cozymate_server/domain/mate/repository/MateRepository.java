@@ -94,10 +94,11 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
         @Param("entryStatus") EntryStatus entryStatus);
 
     @Query("select mt from Mate mt join fetch mt.member m join fetch m.memberStat where mt.entryStatus = :entryStatus")
-    List<Mate> findAllFetchMemberAndMemberStatByEntryStatus(@Param("entryStatus") EntryStatus entryStatus);
+    List<Mate> findAllFetchMemberAndMemberStatByEntryStatus(
+        @Param("entryStatus") EntryStatus entryStatus);
 
 
     @Modifying
-    @Query("DELETE FROM RoomLog r WHERE r.roomId = :roomId")
+    @Query("DELETE FROM Mate m WHERE m.room.id = :roomId")
     void deleteAllByRoomId(@Param("roomId") Long roomId);
 }

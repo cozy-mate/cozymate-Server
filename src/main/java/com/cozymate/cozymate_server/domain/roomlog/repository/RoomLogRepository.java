@@ -26,7 +26,7 @@ public interface RoomLogRepository extends JpaRepository<RoomLog, Long> {
     void bulkDeleteTodo(@Param("todo") Todo todo);
 
     @Modifying
-    @Query("DELETE FROM RoomLog r WHERE r.roomId = :roomId")
+    @Query("DELETE FROM RoomLog r WHERE r.room.id  = :roomId")
     void deleteAllByRoomId(@Param("roomId") Long roomId);
 
 }

@@ -16,6 +16,6 @@ public interface RuleRepository extends JpaRepository<Rule, Long> {
     void deleteByRoomId(Long roomId);
 
     @Modifying
-    @Query("DELETE FROM RoomLog r WHERE r.roomId = :roomId")
+    @Query("DELETE FROM Rule r WHERE r.room.id = :roomId")
     void deleteAllByRoomId(@Param("roomId") Long roomId);
 }
