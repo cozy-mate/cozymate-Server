@@ -1,0 +1,57 @@
+name: PR Review Pending Reminder
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 매일 오전 9시 (한국 시간)
+
+jobs:
+  pr-review-pending-reminder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Fetch Open PRs with Reviewers
+        id: fetch-prs
+        run: |
+          PRS=$(gh pr list --state open --json number,title,createdAt,reviewRequests,reviews)
+          echo "::set-output name=prs::$PRS"
+
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          PRS=${{ steps.fetch-prs.outputs.prs }}
+          if [ -z "$PRS" ]; then
+            echo "No open PRs pending review."
+          else
+            MESSAGE=":bell: **리뷰가 완료되지 않은 PR 목록:**\n"
+            for PR in $(echo "$PRS" | jq -c '.[]'); do
+              NUMBER=$(echo "$PR" | jq '.number')
+              TITLE=$(echo "$PR" | jq -r '.title')
+              CREATED_AT=$(echo "$PR" | jq -r '.createdAt')
+
+              # 리뷰 요청자 목록과 완료된 리뷰어 목록 비교
+              REVIEWERS=$(echo "$PR" | jq -r '.reviewRequests[].login // empty')
+              REVIEWED=$(echo "$PR" | jq -r '.reviews[] | select(.state=="APPROVED" or .state=="CHANGES_REQUESTED") | .user.login')
+          
+              PENDING_REVIEWERS=""
+              for REVIEWER in $REVIEWERS; do
+                if ! echo "$REVIEWED" | grep -q "$REVIEWER"; then
+                  PENDING_REVIEWERS+="@$REVIEWER "
+                fi
+              done
+
+              if [ -n "$PENDING_REVIEWERS" ]; then
+                MESSAGE+="• [PR #$NUMBER - $TITLE](https://github.com/${{ github.repository }}/pull/$NUMBER) (생성일: $CREATED_AT)\n"
+                MESSAGE+="   ↳ **리뷰 대기 중인 사람:** $PENDING_REVIEWERS\n\n"
+              fi
+            done
+
+            if [ -z "$MESSAGE" ]; then
+              MESSAGE=":white_check_mark: 모든 PR 리뷰가 완료되었습니다!"
+            fi
+
+            curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$MESSAGE\"}" $DISCORD_WEBHOOK_URL
+          fi
