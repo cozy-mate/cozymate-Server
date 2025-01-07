@@ -19,13 +19,15 @@ jobs:
         run: |
           PRS=$(gh pr list --state open --json number,title,createdAt,reviewRequests,reviews | jq -c '.')
           echo "$PRS" | jq .
-          echo "prs=$PRS" >> $GITHUB_ENV
+          echo "::set-output name=prs::$PRS"
 
 
       - name: Send Discord Notification
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
+          PRS=${{ steps.fetch-prs.outputs.prs }}
+          echo "$PRS"
           echo "$PRS" | jq .
           if [ "$(echo "$PRS" | jq -r '. | length')" -eq 0 ]; then
             echo "No open PRs pending review."
