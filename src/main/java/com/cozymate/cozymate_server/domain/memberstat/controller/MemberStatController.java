@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.memberstat.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberstat.dto.request.CreateMemberStatRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.dto.request.SearchMemberDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailAndRoomIdAndEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDetailWithMemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatPageResponseDTO;
@@ -441,7 +442,7 @@ public class MemberStatController {
             ));
     }
 
-    @GetMapping("/search")
+    @PostMapping("/search")
     @Operation(
         summary = "[포비] 사용자 검색",
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
@@ -460,13 +461,13 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_EQUALITY_NOT_FOUND
     })
     public ResponseEntity<ApiResponse<List<MemberStatSearchResponseDTO>>> getMemberSearchResponse(
-        @AuthenticationPrincipal MemberDetails memberDetails,
-        @RequestParam String keyword
-    ) {
+            @AuthenticationPrincipal MemberDetails memberDetails,
+            @RequestBody SearchMemberDTO searchMemberDTO
+            ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberSearchResponse(
-                    keyword,
+                    searchMemberDTO.keyword(),
                     memberDetails.member()
                 )
             )
