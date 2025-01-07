@@ -1,4 +1,4 @@
-name: PR Review Pending Reminder
+name: PR 리뷰 리마인더
 
 on:
   schedule:
