@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.domain.mail.dto.request.VerifyRequestDTO;
 import com.cozymate.cozymate_server.domain.mail.dto.response.VerifyResponseDTO;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
@@ -80,12 +81,20 @@ public class MailService {
     }
 
     public String isVerified(Member member) {
-        Optional<MailAuthentication> mailAuthentication = mailRepository.findById(member.getId());
-
-        if (mailAuthentication.isPresent() && Boolean.TRUE.equals(
-            mailAuthentication.get().getIsVerified())) {
-            return mailAuthentication.get().getMailAddress();
+        if(Role.USER_VERIFIED.equals(member.getRole())) {
+            Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
+                member.getId());
+            if (mailAuthentication.isPresent()){
+                return mailAuthentication.get().getMailAddress();
+            }
         }
+        // TODO: 인증했을 때 getIsVerified가 변경되지 않아서 문제 발생 -> 일단 조치
+//        Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
+//            member.getId());
+//        if (mailAuthentication.isPresent() && Boolean.TRUE.equals(
+//            mailAuthentication.get().getIsVerified())) {
+//            return mailAuthentication.get().getMailAddress();
+//        }
         return "";
     }
 
