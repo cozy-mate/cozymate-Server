@@ -27,13 +27,13 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           PRS=${{ steps.fetch-prs.outputs.prs }}
-          echo "$PRS"
           echo "$PRS" | jq .
-          if [ "$(echo "$PRS" | jq -r '. | length')" -eq 0 ]; then
-            echo "No open PRs pending review."
+          if [ -z "$PRS" ]; then
+            echo "No open PRs pending greview."
           else
             MESSAGE=":bell: **리뷰가 완료되지 않은 PR 목록:**\n"
             echo "$PRS" | jq -c '.[]' | while read -r PR; do
+              echo "$PR"
               NUMBER=$(echo "$PR" | jq '.number')
               TITLE=$(echo "$PR" | jq -r '.title')
               CREATED_AT=$(echo "$PR" | jq -r '.createdAt')
