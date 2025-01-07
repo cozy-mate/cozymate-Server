@@ -24,6 +24,7 @@ jobs:
 
       - name: Send Discord Notification
         env:
+          USER_MAPPING: ${{ vars.USER_MAPPING }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           if [ -z "$PRS" ]; then
@@ -41,12 +42,16 @@ jobs:
               REVIEWERS=$(echo "$PR" | jq -r '.reviewRequests[].login // empty')          
           
               PENDING_REVIEWERS=""
+              MAPPING_JSON=$USER_MAPPING
               for REVIEWER in $REVIEWERS; do
-                if ! echo "$REVIEWED" | grep -q "$REVIEWER"; then
+                DISCORD_ID=$(echo "$MAPPING_JSON" | jq -r --arg user "$REVIEWER" '.[$user] // ""')
+                if [ -n "$DISCORD_ID" ]; then
+                  PENDING_REVIEWERS+="<@$DISCORD_ID> "
+                else
                   PENDING_REVIEWERS+="@$REVIEWER "
                 fi
               done
-
+          
               echo "$NUMBER - $TITLE - $CREATED_AT - $PENDING_REVIEWERS"
               if [ -n "$PENDING_REVIEWERS" ]; then
                 echo "• [PR #$NUMBER - $TITLE](https://github.com/${{ github.repository }}/pull/$NUMBER)" >> "$TEMP_FILE"
