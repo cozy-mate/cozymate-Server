@@ -63,5 +63,7 @@ jobs:
               MESSAGE=":white_check_mark: 모든 PR 리뷰가 완료되었습니다!"
             fi
   
-            curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$MESSAGE\"}" $DISCORD_WEBHOOK_URL
+            JSON_MESSAGE=$(echo "$MESSAGE" | sed ':a;N;$!ba;s/\n/\\n/g')
+          
+            curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$JSON_MESSAGE\"}" $DISCORD_WEBHOOK_URL
           fi
