@@ -65,8 +65,8 @@ jobs:
             
             echo "$MESSAGE"
             
-            if [ -z "$MESSAGE" ]; then
-              MESSAGE=":white_check_mark: 모든 PR 리뷰가 완료되었습니다!"
+            if cmp -s "$TEMP_FILE" <(echo ":bell: **리뷰가 완료되지 않은 PR 목록:**\n"); then
+              echo ":white_check_mark: 모든 PR 리뷰가 완료되었습니다!" > "$TEMP_FILE"
             fi
   
             JSON_MESSAGE=$(echo "$MESSAGE" | sed ':a;N;$!ba;s/\n/\\n/g')
