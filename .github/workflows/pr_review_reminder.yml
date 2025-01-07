@@ -32,8 +32,9 @@ jobs:
             echo "No open PRs pending greview."
           else
             MESSAGE=":bell: **리뷰가 완료되지 않은 PR 목록:**\n"
-            echo "$PRS" | jq -c '.[]' | while read -r PR; do
-              echo "$PR"
+            echo "$PRS" | jq -c '.[]' | while IFS= read -r PR; do
+              printf "%s\n" "$PR"
+              echo "$PR" | jq .
               NUMBER=$(echo "$PR" | jq '.number')
               TITLE=$(echo "$PR" | jq -r '.title')
               CREATED_AT=$(echo "$PR" | jq -r '.createdAt')
