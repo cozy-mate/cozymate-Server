@@ -26,6 +26,7 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           PRS=${{ steps.fetch-prs.outputs.prs }}
+          echo "$PRS" | jq .
           if [ "$(echo "$PRS" | jq -r '. | length')" -eq 0 ]; then
             echo "No open PRs pending review."
           else
