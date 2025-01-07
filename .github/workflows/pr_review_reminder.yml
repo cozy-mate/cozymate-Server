@@ -49,7 +49,8 @@ jobs:
 
               echo "$NUMBER - $TITLE - $CREATED_AT - $PENDING_REVIEWERS"
               if [ -n "$PENDING_REVIEWERS" ]; then
-                echo "• [PR #$NUMBER - $TITLE](https://github.com/${{ github.repository }}/pull/$NUMBER) (생성일: $CREATED_AT)" >> "$TEMP_FILE"
+                echo "• [PR #$NUMBER - $TITLE](https://github.com/${{ github.repository }}/pull/$NUMBER)" >> "$TEMP_FILE"
+                echo "   → 생성일: $CREATED_AT" >> "$TEMP_FILE"
                 echo "   ↳ **리뷰 대기 중인 사람:** $PENDING_REVIEWERS" >> "$TEMP_FILE"
                 echo >> "$TEMP_FILE"
               fi
