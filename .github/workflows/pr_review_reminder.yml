@@ -26,13 +26,11 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          echo "$PRS" | jq .
           if [ -z "$PRS" ]; then
             echo "No open PRs pending greview."
           else
             MESSAGE=":bell: **리뷰가 완료되지 않은 PR 목록:**\n"
             echo "$PRS" | jq -c '.[]' | while IFS= read -r PR; do
-              printf "%s\n" "$PR"
               echo "$PR" | jq .
               NUMBER=$(echo "$PR" | jq '.number')
               TITLE=$(echo "$PR" | jq -r '.title')
@@ -49,6 +47,7 @@ jobs:
                 fi
               done
 
+              echo "$NUMBER - $TITLE - $CREATED_AT - $REVIEWERS - $REVIEWED - $PENDING_REVIEWERS"
               if [ -n "$PENDING_REVIEWERS" ]; then
                 MESSAGE+="• [PR #$NUMBER - $TITLE](https://github.com/${{ github.repository }}/pull/$NUMBER) (생성일: $CREATED_AT)\n"
                 MESSAGE+="   ↳ **리뷰 대기 중인 사람:** $PENDING_REVIEWERS\n\n"
