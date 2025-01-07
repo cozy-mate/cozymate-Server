@@ -2,7 +2,7 @@ name: PR Review Pending Reminder
 
 on:
   schedule:
-    - cron: '50 8 * * *' # 매일 오후 5시 20분 (한국 시간)
+    - cron: '0 3 * * *' # 매일 정오 (한국 시간, UTC+9)
   workflow_dispatch: # 수동 실행 트리거 추가
 jobs:
   pr-review-pending-reminder:
