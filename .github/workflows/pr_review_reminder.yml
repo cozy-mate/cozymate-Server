@@ -29,16 +29,16 @@ jobs:
           if [ -z "$PRS" ]; then
             echo "No open PRs pending greview."
           else
-            MESSAGE=":bell: **리뷰가 완료되지 않은 PR 목록:**\n"
-            echo "$PRS" | jq -c '.[]' | while IFS= read -r PR; do
+            TEMP_FILE=$(mktemp) # 임시 파일 생성
+            echo ":bell: **리뷰가 완료되지 않은 PR 목록:**\n" > "$TEMP_FILE"
+            jq -c '.[]' <<< "$PRS" | while IFS= read -r PR; do
               echo "$PR" | jq .
               NUMBER=$(echo "$PR" | jq '.number')
               TITLE=$(echo "$PR" | jq -r '.title')
               CREATED_AT=$(echo "$PR" | jq -r '.createdAt')
 
               # 리뷰 요청자 목록과 완료된 리뷰어 목록 비교
-              REVIEWERS=$(echo "$PR" | jq -r '.reviewRequests[].login // empty')
-              REVIEWED=$(echo "$PR" | jq -r '.reviews[] | select(.state=="APPROVED" or .state=="CHANGES_REQUESTED") | .user.login')
+              REVIEWERS=$(echo "$PR" | jq -r '.reviewRequests[].login // empty')          
           
               PENDING_REVIEWERS=""
               for REVIEWER in $REVIEWERS; do
@@ -47,16 +47,21 @@ jobs:
                 fi
               done
 
-              echo "$NUMBER - $TITLE - $CREATED_AT - $REVIEWERS - $REVIEWED - $PENDING_REVIEWERS"
+              echo "$NUMBER - $TITLE - $CREATED_AT - $PENDING_REVIEWERS"
               if [ -n "$PENDING_REVIEWERS" ]; then
-                MESSAGE+="• [PR #$NUMBER - $TITLE](https://github.com/${{ github.repository }}/pull/$NUMBER) (생성일: $CREATED_AT)\n"
-                MESSAGE+="   ↳ **리뷰 대기 중인 사람:** $PENDING_REVIEWERS\n\n"
+                echo "• [PR #$NUMBER - $TITLE](https://github.com/${{ github.repository }}/pull/$NUMBER) (생성일: $CREATED_AT)" >> "$TEMP_FILE"
+                echo "   ↳ **리뷰 대기 중인 사람:** $PENDING_REVIEWERS" >> "$TEMP_FILE"
+                echo >> "$TEMP_FILE"
               fi
             done
-
+            MESSAGE=$(cat "$TEMP_FILE") # 임시 파일의 내용을 MESSAGE로 읽어오기
+            rm "$TEMP_FILE" # 임시 파일 삭제
+            
+            echo "$MESSAGE"
+            
             if [ -z "$MESSAGE" ]; then
               MESSAGE=":white_check_mark: 모든 PR 리뷰가 완료되었습니다!"
             fi
-
+  
             curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$MESSAGE\"}" $DISCORD_WEBHOOK_URL
           fi
