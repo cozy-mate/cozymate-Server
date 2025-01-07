@@ -83,7 +83,6 @@ public class MemberWithdrawService {
 
     @Transactional
     public void deleteRelatedWithMember(Member member) {
-        log.debug("사용자 관련 데이터 삭제 시작");
         tokenRepository.deleteById(member.getClientId());
         mailRepository.deleteById(member.getId());
         log.debug("토큰,메일 삭제 완료");
