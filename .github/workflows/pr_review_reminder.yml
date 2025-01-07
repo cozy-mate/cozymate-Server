@@ -29,7 +29,7 @@ jobs:
             echo "No open PRs pending review."
           else
             MESSAGE=":bell: **리뷰가 완료되지 않은 PR 목록:**\n"
-            for PR in $(echo "$PRS" | jq -c '.[]'); do
+            echo "$PRS" | jq -c '.[]' | while read -r PR; do
               NUMBER=$(echo "$PR" | jq '.number')
               TITLE=$(echo "$PR" | jq -r '.title')
               CREATED_AT=$(echo "$PR" | jq -r '.createdAt')
