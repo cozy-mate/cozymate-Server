@@ -16,8 +16,8 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
-import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import jakarta.transaction.Transactional;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -47,10 +47,7 @@ public class RoomRecommendService {
         List<String> memberPreferenceList = memberStatPreferenceQueryService.getPreferencesToList(
             member.getId());
 
-        // TODO: 대학, 성별, 시기 필터링
-        // 모든 방을 가져옴 (Public 방 중에서, Disble 상태가 아니며, 인원이 꽉 차지 않은 방)
-        List<Room> roomList = roomRepository.findAllRoomListCanDisplay(RoomType.PUBLIC,
-            RoomStatus.DISABLE);
+        List<Room> roomList = getRoomList(member);
 
         // MemberStat을 가져오되, 없으면 무작위로 방 추천을 진행
         Optional<MemberStat> memberStat = memberStatRepository.findByMemberId(member.getId());
@@ -109,6 +106,21 @@ public class RoomRecommendService {
 
         return roomEqualityMap;
     }
+
+    private List<Room> getRoomList(Member member) {
+        // 모든 공개 방을 가져옴 (Public 방 중에서, Disable 상태가 아니며, 인원이 꽉 차지 않은 방)
+        List<Room> roomList = roomRepository.findAllRoomListCanDisplay(RoomType.PUBLIC, RoomStatus.DISABLE);
+
+        // 본인이 참여한 방 가져오기
+        Optional<Room> joinedRoom = mateRepository.findByMemberAndEntryStatus(member, EntryStatus.JOINED)
+            .map(Mate::getRoom);
+
+        // 본인이 이미 참여한 방을 제외
+        return roomList.stream()
+            .filter(room -> joinedRoom.map(joined -> !joined.equals(room)).orElse(true))
+            .toList();
+    }
+
 
     private List<RoomRecommendationResponseDTO> buildRoomRecommendationResponseList(
         Member member, List<Pair<Long, Integer>> sortedRoomList, Map<Long, List<Mate>> roomMateMap,
