@@ -77,7 +77,8 @@ dependencies {
     implementation 'commons-validator:commons-validator:1.7'
 
     // sentry
-    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.17.0'
+    // 아래 두 라이브러리는 버전을 통일해서 사용하길 권장
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.20.0'
     implementation 'io.sentry:sentry-jdbc:7.20.0'
 
 }
