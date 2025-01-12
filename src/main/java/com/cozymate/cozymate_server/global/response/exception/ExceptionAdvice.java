@@ -71,7 +71,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             ErrorStatus.valueOf("_BAD_REQUEST"), request, errors);
     }
 
-    // 모든 Exception 클래스 타입의 예외 처리
+    // 모든 Exception 클래스 타입의 예외 처리 (500번대)
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
 
@@ -88,8 +88,12 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             scope.setExtra("location", errorPoint);
             scope.setExtra("message", errorMessage);
             scope.setLevel(SentryLevel.FATAL);
-            scope.setFingerprint(List.of("cozymate", "FATAL", MDC.get(MdcKey.USER_ID.name()),
-                MDC.get(MdcKey.REQUEST_ID.name())));
+            // 500번대 Fingerprint 설정 요청 API 메소드 + 경로 + 사용자 ID (FATAL이기 때문에)
+            scope.setFingerprint(List.of("cozymate", "FATAL",
+                MDC.get(MdcKey.REQUEST_METHOD.name()),
+                MDC.get(MdcKey.REQUEST_URI.name()),
+                MDC.get(MdcKey.USER_ID.name())
+            ));
             Sentry.captureException(e);
         });
 
@@ -98,7 +102,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             e.getMessage());
     }
 
-    // 사용자 정의 예외 처리
+    // 사용자 정의 예외 처리 (400번대)
     @ExceptionHandler(value = GeneralException.class)
     public ResponseEntity onThrowException(GeneralException generalException,
         HttpServletRequest request) {
@@ -118,8 +122,12 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
             scope.setTag("user_id", MDC.get(MdcKey.USER_ID.name()));
             scope.setExtra("message", generalException.getErrorReasonHttpStatus().getMessage());
             scope.setLevel(SentryLevel.WARNING);
-            scope.setFingerprint(List.of("cozymate", "WARN", MDC.get(MdcKey.USER_ID.name()),
-                generalException.getErrorReasonHttpStatus().getCode()));
+            // 400번대 Fingerprint 설정 요청 API 메소드 + 경로 (사용자별로 구분할 필요 없음)
+            scope.setFingerprint(List.of("cozymate", "WARN",
+                MDC.get(MdcKey.REQUEST_METHOD.name()),
+                MDC.get(MdcKey.REQUEST_URI.name()),
+                generalException.getErrorReasonHttpStatus().getCode()
+            ));
 
             Sentry.captureException(newGeneralException);
         });
