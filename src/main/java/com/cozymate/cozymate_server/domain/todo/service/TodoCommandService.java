@@ -207,7 +207,8 @@ public class TodoCommandService {
         List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(mate.getRoom().getId(),
             now);
 
-        List<Mate> mateList = mateRepository.findByRoomId(mate.getRoom().getId());
+        List<Mate> mateList = mateRepository.findByRoomIdAndNotMateId(mate.getRoom().getId(),
+            mate.getId());
 
         // 모든 투두중 내가 할당되었는데, 완료되지 않은 투두가 있는지 확인
         if (todoList.stream().filter(
