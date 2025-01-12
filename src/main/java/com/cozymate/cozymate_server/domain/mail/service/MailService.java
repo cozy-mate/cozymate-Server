@@ -76,7 +76,7 @@ public class MailService {
         memberDetails.member().verifyMemberUniversity(memberUniversity, verifyDTO.majorName());
         memberRepository.save(memberDetails.member());
 
-        verifyAuthenticationCode(memberDetails.member(),verifyDTO.code());
+        verifyAuthenticationCode(memberDetails.member(), verifyDTO.code());
         TokenResponseDTO tokenResponseDTO = authService.generateMemberTokenDTO(memberDetails);
         return MailConverter.toVerifyResponseDTO(tokenResponseDTO);
     }
