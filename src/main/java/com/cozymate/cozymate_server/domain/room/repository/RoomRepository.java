@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,10 +25,12 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     Optional<Room> findByInviteCode(String inviteCode);
 
+    /**
+     * 사용자가
+     */
+    @EntityGraph(attributePaths = {"roomHashtags", "roomHashtags.hashtag"})
     @Query("""
-        SELECT r FROM Room r
-        JOIN FETCH r.roomHashtags rh
-        JOIN FETCH rh.hashtag h
+        SELECT distinct r FROM Room r
         WHERE r.roomType = :roomType
         AND r.status != :status
         AND r.maxMateNum > r.numOfArrival
