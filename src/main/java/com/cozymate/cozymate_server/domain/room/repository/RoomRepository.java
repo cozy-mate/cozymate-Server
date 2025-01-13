@@ -26,6 +26,8 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     @Query("""
         SELECT r FROM Room r
+        JOIN FETCH r.roomHashtags rh
+        JOIN FETCH rh.hashtag h
         WHERE r.roomType = :roomType
         AND r.status != :status
         AND r.maxMateNum > r.numOfArrival
