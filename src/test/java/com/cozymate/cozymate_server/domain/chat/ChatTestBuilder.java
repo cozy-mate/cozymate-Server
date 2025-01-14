@@ -62,6 +62,7 @@ public class ChatTestBuilder {
         return Chat.builder()
             .id(1L)
             .chatRoom(ChatRoomTestBuilder.testChatRoomBuild())
+            .sender(testSenderBuild())
             .content("Chat 내용")
             .build();
     }
