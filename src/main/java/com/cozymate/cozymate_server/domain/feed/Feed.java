@@ -5,11 +5,9 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,8 +26,8 @@ public class Feed extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", referencedColumnName = "id")
+    // LAZY 설정해도 room에 대한 프록시 정보를 확인하기 위해 EAGER로 동작함
+    @OneToOne(mappedBy = "feed")
     private Room room;
 
     @Column(length = 50)
@@ -38,7 +36,7 @@ public class Feed extends BaseTimeEntity {
     @Column(length = 200)
     private String description;
 
-    public void update(FeedRequestDTO feedRequestDTO){
+    public void update(FeedRequestDTO feedRequestDTO) {
         this.name = feedRequestDTO.getName();
         this.description = feedRequestDTO.getDescription();
     }

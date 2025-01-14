@@ -13,6 +13,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
@@ -60,7 +61,8 @@ public class Room extends BaseTimeEntity {
 
     private int numOfArrival = 1;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "feed_id", referencedColumnName = "id") // 외래 키 관리
     private Feed feed;
 
     public void arrive() {
