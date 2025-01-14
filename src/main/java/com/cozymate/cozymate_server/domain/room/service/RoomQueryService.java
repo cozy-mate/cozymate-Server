@@ -260,9 +260,16 @@ public class RoomQueryService {
     }
 
     public String getDormitoryName(Room room) {
+        // Room에 dormitoryName 필드가 있는 경우
+        if (room.getDormitoryName() != null) {
+            return room.getDormitoryName();
+        }
+
         Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        return managerMate.getMember().getMemberStat().getDormitoryName();
+        return Optional.ofNullable(managerMate.getMember().getMemberStat())
+            .map(MemberStat::getDormitoryName)
+            .orElse(""); // MemberStat이 null일 경우 빈 문자열 반환
     }
 
     public Long isFavoritedRoom(Long memberId, Long roomId) {

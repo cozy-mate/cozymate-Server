@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.converter;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
+import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
@@ -11,11 +12,12 @@ import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
+import com.cozymate.cozymate_server.domain.university.University;
 import java.util.List;
 
 public class RoomConverter {
 
-    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode) {
+    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode, String dormitoryName, Gender gender, University university) {
         return Room.builder()
             .name(request.name())
             .profileImage(request.persona())
@@ -24,10 +26,13 @@ public class RoomConverter {
             .status(RoomStatus.ENABLE)
             .roomType(RoomType.PRIVATE)
             .numOfArrival(1)
+            .dormitoryName(dormitoryName)
+            .gender(gender)
+            .university(university)
             .build();
     }
 
-    public static Room toPublicRoom(PublicRoomCreateRequestDTO request, String inviteCode) {
+    public static Room toPublicRoom(PublicRoomCreateRequestDTO request, String inviteCode, String dormitoryName, Gender gender, University university) {
         return Room.builder()
             .name(request.name())
             .profileImage(request.persona())
@@ -36,6 +41,9 @@ public class RoomConverter {
             .status(RoomStatus.WAITING)
             .roomType(RoomType.PUBLIC)
             .numOfArrival(1)
+            .dormitoryName(dormitoryName)
+            .gender(gender)
+            .university(university)
             .build();
     }
 

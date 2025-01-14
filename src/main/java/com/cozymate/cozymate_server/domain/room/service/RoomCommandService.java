@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.domain.mate.converter.MateConverter;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.post.Post;
@@ -34,6 +35,7 @@ import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
+import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
@@ -82,8 +84,15 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
+        String dormitoryName = "";
+        if (creator.getMemberStat() != null) {
+            dormitoryName = creator.getMemberStat().getDormitoryName();
+        }
+        Gender gender = creator.getGender();
+        University university = creator.getUniversity();
+
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toPrivateRoom(request, inviteCode);
+        Room room = RoomConverter.toPrivateRoom(request, inviteCode, dormitoryName, gender, university);
         room.enableRoom();
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
@@ -107,8 +116,15 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
+        String dormitoryName = "";
+        if (creator.getMemberStat() != null) {
+            dormitoryName = creator.getMemberStat().getDormitoryName();
+        }
+        Gender gender = creator.getGender();
+        University university = creator.getUniversity();
+
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toPublicRoom(request, inviteCode);
+        Room room = RoomConverter.toPublicRoom(request, inviteCode, dormitoryName, gender, university);
 
         // 해시태그 저장 과정
         roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());

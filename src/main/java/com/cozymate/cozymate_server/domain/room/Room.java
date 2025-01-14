@@ -1,9 +1,11 @@
 package com.cozymate.cozymate_server.domain.room;
 
 import com.cozymate.cozymate_server.domain.feed.Feed;
+import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
+import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -13,6 +15,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
@@ -62,6 +65,14 @@ public class Room extends BaseTimeEntity {
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
     private Feed feed;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private University university;
+
+    private String dormitoryName;
 
     public void arrive() {
         numOfArrival++;
