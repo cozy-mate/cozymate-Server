@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.data;
+package com.cozymate.cozymate_server.fixture;
 
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
