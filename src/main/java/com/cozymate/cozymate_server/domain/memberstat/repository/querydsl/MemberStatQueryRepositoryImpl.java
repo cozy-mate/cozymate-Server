@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -32,13 +30,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository {
 
-    private static final Logger log = LoggerFactory.getLogger(MemberStatQueryRepositoryImpl.class);
     private final JPAQueryFactory queryFactory;
     private static final Integer NUM_OF_ROOMMATE_NOT_DETERMINED = 0;
     private static final String PERSONALITY = "personality";
     private static final String SLEEPING_HABIT = "sleepingHabit";
     private static final String NUM_OF_ROOMMATE = "numOfRoommate";
 
+    // 가장 기본이 되는 Base 쿼리 입니다.
+    // MemberStat, Member를 조인하고,
+    // 일치율이 없는 경우도 조인(LeftJoin)을 합니다.
     private JPAQuery<Tuple> createBaseQuery(MemberStat criteriaMemberStat) {
         return queryFactory
             .select(memberStat, memberStatEquality.equality)
@@ -50,50 +50,22 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .where(initDefaultQuery(criteriaMemberStat));
     }
 
-//    @Override
-//    public Map<Member, MemberStat> getFilteredMemberStat(List<String> filterList,
-//        MemberStat criteriaMemberStat) {
-//        // Tuple로 MemberStat과 Member를 함께 조회
-//        List<Tuple> results = createBaseQuery(criteriaMemberStat)
-//            .where(applyFilters(filterList, criteriaMemberStat))
-//            .fetch();
-//
-//        // 결과를 Map<Member, MemberStat>으로 변환
-//        return results.stream()
-//            .collect(Collectors.toMap(
-//                tuple -> tuple.get(member),         // key: Member
-//                tuple -> tuple.get(memberStat)      // value: MemberStat
-//            ));
-//    }
-
-//    @Override
-//    public Map<Member, MemberStat> getAdvancedFilteredMemberStat(HashMap<String, List<?>> filterMap,
-//        MemberStat criteriaMemberStat) {
-//        // Tuple로 MemberStat과 Member를 함께 조회
-//        List<Tuple> results = createBaseQuery(criteriaMemberStat)
-//            .where(applyFilters(filterMap, criteriaMemberStat))
-//            .fetch();
-//
-//        // 결과를 Map<Member, MemberStat>으로 변환
-//        return results.stream()
-//            .collect(Collectors.toMap(
-//                tuple -> tuple.get(member),         // key: Member
-//                tuple -> tuple.get(memberStat)      // value: MemberStat
-//            ));
-//    }
-
-
+    // 가장 기본적으로 필터링 해야 하는 항목들을 넣어놓은 쿼리입니다.
     private BooleanBuilder initDefaultQuery(MemberStat criteriaMemberStat) {
 
         Member criteriaMember = criteriaMemberStat.getMember();
 
         BooleanBuilder builder = new BooleanBuilder()
+            // 본인 제외하기
             .and(memberStat.id.ne(criteriaMemberStat.getId()))
+            // 성별 필터링
             .and(member.gender.eq(criteriaMember.getGender()))
+            // 대학 일치 여부
             .and(member.university.id.eq(criteriaMember.getUniversity().getId()))
+            // 기숙사 일치 여부
             .and(memberStat.dormitoryName.eq(criteriaMemberStat.getDormitoryName()));
 
-        // '미정'인 경우 인실 조건을 무시, 그렇지 않으면 인실 조건 추가
+        // '미정'인 경우 인실 일치 조건을 무시, 그렇지 않으면 인실 일치 조건 추가
         if (!criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)) {
             builder.and(memberStat.numOfRoommate.eq(criteriaMemberStat.getNumOfRoommate()));
         }
@@ -101,25 +73,30 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return builder;
     }
 
-    // 단순 필터링 (criteriaMemberStat과 각 필드의 값이 일치하는지 확인)
+    // 단순 필터링하는 필터 (기준 멤버 스탯과 각 필드의 값이 일치하는지 확인)
     private BooleanBuilder applyFilters(List<String> filterList, MemberStat criteriaMemberStat) {
+
         BooleanBuilder builder = new BooleanBuilder();
 
         // filterList가 주어진 경우에만 필터링 수행
         if (filterList != null) {
             filterList.forEach(filter -> {
-                // 기존의 getPathByKey를 사용하여 동적 필터링을 적용
-                Path<?> path = getPathByKey(filter);
-                Object criteriaValue = getFieldValueByKey(criteriaMemberStat, filter);
 
+                // 필터링 key가 잘못되었으면 null 반환
+                Path<?> path = getPathByKey(filter);
+                // key에 대한 value가 없어도 null 반환
+                Object criteriaValue = getFieldValueByKey(criteriaMemberStat, filter);
+                // FIXME: exception을 여기서 걸어줘야하는지 판단이 안 서네요
                 if (path != null && criteriaValue != null) {
                     applyFilter(builder, filter, criteriaValue, criteriaMemberStat);
                 }
+
             });
         }
         return builder;
     }
 
+    // 단순 필터링시 서비스가 사용하는 메서드
     @Override
     public Slice<Map<MemberStat, Integer>> getFilteredMemberStat(MemberStat criteriaMemberStat,
         List<String> filterList, Pageable pageable) {
@@ -156,6 +133,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return new SliceImpl<>(resultList, pageable, hasNext);
     }
 
+    // 상세 필터링시 서비스가 사용하는 메서드
     @Override
     public Slice<Map<MemberStat, Integer>> getAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
         HashMap<String, List<?>> filterMap, Pageable pageable) {
@@ -192,6 +170,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return new SliceImpl<>(resultList, pageable, hasNext);
     }
 
+    // 상세 검색 필터링에 대한 멤버 개수 표시
     @Override
     public int countAdvancedFilteredMemberStat(MemberStat criteriaMemberStat, HashMap<String, List<?>> filterMap) {
         return createBaseQuery(criteriaMemberStat)
@@ -200,7 +179,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .size();
     }
 
-    // 상세 검색 필터링 (key : value) 필터링
+    // 상세 검색 필터들을 iteration하며 필터를 적용하는 메서드 (key : value)
     private BooleanBuilder applyFilters(HashMap<String, List<?>> filterMap,
         MemberStat criteriaMemberStat) {
         BooleanBuilder builder = new BooleanBuilder();
@@ -215,6 +194,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return builder;
     }
 
+
+    // 상세 검색 필터
     private void applyFilter(BooleanBuilder builder, String filterKey, Object filterValue,
         MemberStat criteriaMemberStat) {
 
@@ -229,22 +210,19 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         }
 
         switch (path.getClass().getSimpleName()) {
-            case "StringPath" ->
-                handleStringPathFilter(builder, (StringPath) path, filterKey, filterValue);
-            case "NumberPath" ->
-                handleNumberPathFilter(builder, (NumberPath<Integer>) path, filterKey, filterValue,
+            case "StringPath" -> handleStringPathFilter(builder, (StringPath) path, filterKey, filterValue);
+            case "NumberPath" -> handleNumberPathFilter(builder, (NumberPath<Integer>) path, filterKey, filterValue,
                     criteriaMemberStat);
             case "BooleanPath" -> builder.and(handleBooleanFilter((BooleanPath) path, filterValue));
-            case "DatePath" ->
-                builder.and(handleDateFilter((DatePath<LocalDate>) path, filterValue));
-            default ->
-                throw new GeneralException(ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID);
+            case "DatePath" -> builder.and(handleDateFilter((DatePath<LocalDate>) path, filterValue));
+            default -> throw new GeneralException(ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID);
         }
     }
 
+    // value가 String인 것들에 대한 필터
     private void handleStringPathFilter(BooleanBuilder builder, StringPath stringPath,
         String filterKey, Object filterValue) {
-        // 다중 선택 요소들의 경우
+        // 다중 선택 요소들의 필터는 다시 분리(성격, 잠버릇)
         if (filterKey.equals(PERSONALITY) || filterKey.equals(SLEEPING_HABIT)) {
             builder.and(handleMultiStringContentFilter(stringPath, filterValue));
         } else {
@@ -252,6 +230,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         }
     }
 
+    // value가 숫자인 것들에 대한 필터
+    // 인실은 예외 처리 때문에 함수를 따로 분리함
     private void handleNumberPathFilter(BooleanBuilder builder, NumberPath<Integer> numberPath,
         String filterKey, Object filterValue, MemberStat criteriaMemberStat) {
         if (filterKey.equals(NUM_OF_ROOMMATE)) {
@@ -261,7 +241,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         }
     }
 
-    // 성격은 다중 선택으로 String의 조합으로 저장됨. 따라서 일반 String 필터링과 분리함.
+
+    // 다중 선택 요소들의 필터(성격, 잠버릇)
     private BooleanExpression handleMultiStringContentFilter(StringPath path, Object filterValue) {
         if (filterValue instanceof String value) {
             return path.eq(value);
@@ -275,7 +256,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         return null;
     }
 
-
+    // 인실에 대한 필터(예외 경우의 수 처리)
     private BooleanExpression handleNumberOfRoommateFilter(NumberPath<Integer> path,
         Object filterValue, MemberStat criteriaMemberStat) {
         if (filterValue instanceof Integer value) {
@@ -291,10 +272,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
                 return path.in((List<Integer>) values);
             }
             // 특정 인실을 선택한 사용자는 필터링 불가능
-
             throw new GeneralException((ErrorStatus._MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE));
-
-            // return null;
         }
         return null;
     }
@@ -346,6 +324,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     }
 
 
+    // 멤버 스탯 String과 멤버 스탯의 값을 연결해주는 메서드입니다.
     private Path<?> getPathByKey(String key) {
         return switch (key) {
             case "acceptance" -> memberStat.acceptance;

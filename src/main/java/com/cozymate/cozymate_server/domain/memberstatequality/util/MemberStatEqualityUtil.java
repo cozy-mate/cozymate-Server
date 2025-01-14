@@ -15,12 +15,12 @@ public class MemberStatEqualityUtil {
     // 두 사용자간 일치율을 비교해야 할 때, 사용하는 util
     // 성격은 일치율에서 제외, 출생년도는 보류(총 22개 항목)
     // 제외 목록
-//    - 출생년도
-//    - 기숙사 합격 여부
-//    - 학번
-//    - 학과
-//    - 성격
-//    - mbti
+    //    - 출생년도
+    //    - 기숙사 합격 여부
+    //    - 학번
+    //    - 학과
+    //    - 성격
+    //    - mbti
     public static int calculateEquality(MemberStat criteriaMemberStat,
         MemberStat memberStat) {
 

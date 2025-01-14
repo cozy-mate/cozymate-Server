@@ -23,37 +23,37 @@ public class MemberStatCommandService {
     private final MemberStatEqualityCommandService memberStatEqualityCommandService;
 
     public Long createMemberStat(
-        Member member, CreateMemberStatRequestDTO createMemberStatRequestDTO) {
+            Member member, CreateMemberStatRequestDTO createMemberStatRequestDTO) {
 
         if (memberStatRepository.existsByMemberId(member.getId())) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_EXISTS);
         }
 
         MemberStat saveMemberStat = memberStatRepository.save(
-            MemberStatConverter.toEntity(
-                member, createMemberStatRequestDTO
-            )
+                MemberStatConverter.toEntity(
+                        member, createMemberStatRequestDTO
+                )
         );
 
         memberStatEqualityCommandService.createMemberStatEqualities(
-            saveMemberStat
+                saveMemberStat
         );
 
         return saveMemberStat.getMember().getId();
     }
 
     public Long modifyMemberStat(
-        Member member, CreateMemberStatRequestDTO createMemberStatRequestDTO) {
+            Member member, CreateMemberStatRequestDTO createMemberStatRequestDTO) {
 
         MemberStat updatedMemberStat = memberStatRepository.findByMemberId(member.getId())
-            .orElseThrow(
-                () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
-            );
+                .orElseThrow(
+                        () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+                );
 
-        updatedMemberStat.update(member,  createMemberStatRequestDTO);
+        updatedMemberStat.update(member, createMemberStatRequestDTO);
 
         memberStatEqualityCommandService.updateMemberStatEqualities(
-            updatedMemberStat
+                updatedMemberStat
         );
 
         return updatedMemberStat.getMember().getId();
@@ -67,11 +67,11 @@ public class MemberStatCommandService {
         }
 
         MemberStat memberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
+                () -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS)
         );
 
         memberStatEqualityCommandService.deleteMemberStatEqualities(
-            memberStat
+                memberStat
         );
 
         memberStatRepository.delete(memberStat);
