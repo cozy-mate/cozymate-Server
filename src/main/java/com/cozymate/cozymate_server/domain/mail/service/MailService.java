@@ -54,24 +54,24 @@ public class MailService {
 
     @Transactional
     public void sendUniversityAuthenticationCode(MemberDetails memberDetails,
-                                                 MailSendRequestDTO sendDTO) {
+        MailSendRequestDTO sendDTO) {
         University university = universityRepository.findById(sendDTO.universityId())
-                .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
         String mailAddress = sendDTO.mailAddress();
         validateMailAddress(mailAddress, university.getMailPattern());
 
         MailAuthentication mailAuthentication = createAndSendMail(memberDetails.member().getId(),
-                mailAddress, university.getName());
+            mailAddress, university.getName());
 
         mailRepository.save(mailAuthentication);
     }
 
     @Transactional
     public VerifyResponseDTO verifyMemberUniversity(MemberDetails memberDetails,
-                                                    VerifyRequestDTO verifyDTO) {
+        VerifyRequestDTO verifyDTO) {
         University memberUniversity = universityRepository.findById(verifyDTO.universityId())
-                .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
         memberDetails.member().verifyMemberUniversity(memberUniversity, verifyDTO.majorName());
         memberRepository.save(memberDetails.member());
@@ -82,17 +82,10 @@ public class MailService {
     }
 
     public String isVerified(Member member) {
-//        if(Role.USER_VERIFIED.equals(member.getRole())) {
-//            Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
-//                member.getId());
-//            if (mailAuthentication.isPresent()){
-//                return mailAuthentication.get().getMailAddress();
-//            }
-//        }
         Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
-                member.getId());
+            member.getId());
         if (mailAuthentication.isPresent() && Boolean.TRUE.equals(
-                mailAuthentication.get().getIsVerified())) {
+            mailAuthentication.get().getIsVerified())) {
             return mailAuthentication.get().getMailAddress();
         }
         return "";
@@ -116,12 +109,12 @@ public class MailService {
     private void verifyAuthenticationCode(Member member, String requestCode) {
 
         MailAuthentication mailAuthentication = mailRepository.findById(member.getId())
-                .orElseThrow(() -> new GeneralException(
-                        ErrorStatus._MAIL_AUTHENTICATION_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(
+                ErrorStatus._MAIL_AUTHENTICATION_NOT_FOUND));
         // 만료 시간 초과 여부 확인
         if (LocalDateTime.now()
-                .isAfter(
-                        mailAuthentication.getUpdatedAt().plusMinutes(MAIL_AUTHENTICATION_EXPIRED_TIME))) {
+            .isAfter(
+                mailAuthentication.getUpdatedAt().plusMinutes(MAIL_AUTHENTICATION_EXPIRED_TIME))) {
             throw new GeneralException(ErrorStatus._MAIL_AUTHENTICATION_CODE_EXPIRED);
         }
 
@@ -134,16 +127,16 @@ public class MailService {
     }
 
     private MailAuthentication createAndSendMail(Long memberId, String mailAddress,
-                                                 String universityName) {
+        String universityName) {
         if (mailAddress.equals("test123@inha.edu")) {
             return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress, "123456",
-                    false);
+                false);
         } // 애플심사를 위한 테스트 메일 인증
 
         String authenticationCode = Base64.getEncoder()
-                .encodeToString(UUID.randomUUID().toString().getBytes())
-                .replaceAll(CONFUSION_CHARACTERS, "") // 제외할 문자 제거
-                .substring(0, 6);
+            .encodeToString(UUID.randomUUID().toString().getBytes())
+            .replaceAll(CONFUSION_CHARACTERS, "") // 제외할 문자 제거
+            .substring(0, 6);
 
         String emailBody = makeMailBody(authenticationCode, universityName);
 
@@ -157,7 +150,7 @@ public class MailService {
             mailSender.send(message);
 
             return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress,
-                    authenticationCode, false);
+                authenticationCode, false);
         } catch (MessagingException e) {
             throw new GeneralException(ErrorStatus._MAIL_SEND_FAIL);
         }
@@ -165,7 +158,7 @@ public class MailService {
 
     private void validateMailAddress(String mailAddress, String mailPattern) {
         Optional<MailAuthentication> mailAuthentication = mailRepository.findByMailAddress(
-                mailAddress);
+            mailAddress);
 
         if (!mailAddress.contains(mailPattern)) {
             throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
@@ -178,7 +171,7 @@ public class MailService {
     private String makeMailBody(String authenticationCode, String universityName) {
         try {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
-                    "mail/mail_form.html");
+                "mail/mail_form.html");
 
             if (inputStream == null) {
                 throw new GeneralException(ErrorStatus._CANNOT_FIND_MAIL_FORM);
@@ -186,7 +179,7 @@ public class MailService {
             String template = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
             template = template.replace("{{universityName}}", universityName)
-                    .replace("{{authenticationCode}}", authenticationCode);
+                .replace("{{authenticationCode}}", authenticationCode);
 
             return template;
         } catch (IOException e) {
