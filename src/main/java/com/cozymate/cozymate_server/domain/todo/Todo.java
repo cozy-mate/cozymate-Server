@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.todo;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoTypeConverter;
@@ -15,6 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +48,7 @@ public class Todo extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Role role = null;
 
+    @Size(max = 35)
     @Column(nullable = false, length = 35)
     private String content;
 
