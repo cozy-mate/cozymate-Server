@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoomTestBuilder;
+import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
@@ -70,7 +72,10 @@ class ChatCommandServiceTest {
             @Test
             @DisplayName("쪽지방을 생성하고, 쪽지 작성에 성공한다.")
             void it_returns_new_chatroom_success_create_chat() {
-                chatCommandService.createChat(createChatRequestDTO, sender, recipient.getId());
+                ChatRoomIdResponseDTO result = chatCommandService.createChat(createChatRequestDTO,
+                    sender, recipient.getId());
+
+                assertThat(result.chatRoomId()).isEqualTo(chatRoom.getId());
             }
         }
 
@@ -96,7 +101,10 @@ class ChatCommandServiceTest {
             @Test
             @DisplayName("존재하던 쪽지방을 이용해서, 쪽지 작성에 성공한다.")
             void it_returns_exist_chatroom_success_create_chat() {
-                chatCommandService.createChat(createChatRequestDTO, sender, recipient.getId());
+                ChatRoomIdResponseDTO result = chatCommandService.createChat(createChatRequestDTO,
+                    sender, recipient.getId());
+
+                assertThat(result.chatRoomId()).isEqualTo(chatRoom.getId());
             }
         }
 

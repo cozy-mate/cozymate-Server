@@ -39,7 +39,7 @@ public class ChatCommandService {
             return ChatRoomConverter.toChatRoomIdResponseDTO(findChatRoom.get().getId());
         } else {
             ChatRoom chatRoom = ChatRoomConverter.toEntity(sender, recipient);
-            chatRoomRepository.save(chatRoom);
+            chatRoom = chatRoomRepository.save(chatRoom);
             saveChat(chatRoom, sender, createChatRequestDTO.content());
 
             return ChatRoomConverter.toChatRoomIdResponseDTO(chatRoom.getId());
