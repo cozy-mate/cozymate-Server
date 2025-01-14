@@ -58,7 +58,7 @@ public class RoleFixture {
             .build();
     }
 
-    public Role 내용이_없는_역할_1(Room room, Mate mate, List<Mate> assignedMateList) {
+    public Role 내용이_빈_역할(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .room(room)
             .mateId(mate.getId())
@@ -68,7 +68,7 @@ public class RoleFixture {
             .build();
     }
 
-    public Role 내용이_없는_역할_2(Room room, Mate mate, List<Mate> assignedMateList) {
+    public Role 내용이_null인_역할(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .room(room)
             .mateId(mate.getId())
@@ -78,7 +78,7 @@ public class RoleFixture {
             .build();
     }
 
-    public Role 반복_요일이_이상한_역할_1(Room room, Mate mate, List<Mate> assignedMateList) {
+    public Role 반복_요일_값이_넘치는_역할(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .room(room)
             .mateId(mate.getId())
@@ -88,13 +88,23 @@ public class RoleFixture {
             .build();
     }
 
-    public Role 반복_요일이_이상한_역할_2(Room room, Mate mate, List<Mate> assignedMateList) {
+    public Role 반복_요일_값이_음수인_역할(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
             .content("이건 왜 반복이 음수일까?")
             .repeatDays(-1) // 최소로 나올 수 있는 값은 0
+            .build();
+    }
+
+    public Role 내용이_너무_많은_역할(Room room, Mate mate, List<Mate> assignedMateList) {
+        return Role.builder()
+            .room(room)
+            .mateId(mate.getId())
+            .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
+            .content("역할의 최대 길이는 25자인데요. 어디까지 길어지나 확인해봅시다.") // 36자
+            .repeatDays(5) // 월, 수 반복
             .build();
     }
 }
