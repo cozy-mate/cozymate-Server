@@ -116,10 +116,12 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        String dormitoryName = "";
-        if (creator.getMemberStat() != null) {
-            dormitoryName = creator.getMemberStat().getDormitoryName();
+        // memberStat이 null일 경우 공개방 생성 불가
+        if (creator.getMemberStat() == null) {
+            throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
         }
+
+        String dormitoryName = creator.getMemberStat().getDormitoryName();
         Gender gender = creator.getGender();
         University university = creator.getUniversity();
 
