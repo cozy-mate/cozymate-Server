@@ -10,7 +10,6 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.chat.converter.ChatConverter;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
-import com.cozymate.cozymate_server.domain.memberblock.util.MemberBlockUtil;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Optional;
@@ -26,13 +25,10 @@ public class ChatCommandService {
     private final ChatRepository chatRepository;
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final MemberBlockUtil memberBlockUtil;
 
     public ChatRoomIdResponseDTO createChat(CreateChatRequestDTO createChatRequestDTO, Member sender, Long recipientId) {
         Member recipient = memberRepository.findById(recipientId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._CHAT_NOT_FOUND_RECIPIENT));
-
-        checkBlockedMember(sender, recipientId);
 
         Optional<ChatRoom> findChatRoom = chatRoomRepository.findByMemberAAndMemberB(sender,
             recipient);
@@ -47,12 +43,6 @@ public class ChatCommandService {
             saveChat(chatRoom, sender, createChatRequestDTO.content());
 
             return ChatRoomConverter.toChatRoomIdResponseDTO(chatRoom.getId());
-        }
-    }
-
-    private void checkBlockedMember(Member sender, Long recipientId) {
-        if (memberBlockUtil.existsMemberBlock(sender, recipientId)) {
-            throw new GeneralException(ErrorStatus._REQUEST_TO_BLOCKED_MEMBER);
         }
     }
 
