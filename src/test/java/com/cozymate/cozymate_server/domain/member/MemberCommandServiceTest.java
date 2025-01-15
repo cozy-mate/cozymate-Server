@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.member;
 
 
-import com.cozymate.cozymate_server.data.TestMember;
+import com.cozymate.cozymate_server.fixture.TestMember;
 
-import com.cozymate.cozymate_server.data.TestUniversity;
+import com.cozymate.cozymate_server.fixture.TestUniversity;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
 import com.cozymate.cozymate_server.domain.member.service.MemberQueryService;
@@ -57,8 +57,9 @@ class MemberCommandServiceTest {
         when(universityRepository.findById(anyLong())).thenReturn(Optional.of(university));
 
         // createAndSaveTestMembers 호출로 테스트용 멤버 생성
-        List<Member> members = TestMember.createAndSaveTestMembers(university,
-            2); // 여기서 1L은 임의의 universityId이고, 1은 생성할 멤버 수
+        List<Member> members = TestMember.정상_남성_리스트(university,
+            2);
+
         testMember = members.get(0); // 첫 번째로 생성된 멤버를 사용
         testMember2 = members.get(1);
 
@@ -71,7 +72,6 @@ class MemberCommandServiceTest {
     void testUpdateNickname_Success() {
         // given
         String newNickname = "newTestUser";
-
         // memberQueryService의 isValidNickName을 mock 처리
         doNothing().when(memberQueryService).isValidNickName(VALID_NICKNAME);  // 유효성 검증 성공
 

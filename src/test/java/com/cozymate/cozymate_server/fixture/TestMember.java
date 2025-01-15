@@ -1,13 +1,11 @@
-package com.cozymate.cozymate_server.data;
+package com.cozymate.cozymate_server.fixture;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 
 import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,8 +16,6 @@ public class TestMember {
 
     private static final Role DEFAULT_ROLE = Role.USER;
     private static final SocialType DEFAULT_SOCIAL_TYPE = SocialType.KAKAO;
-    private static final Gender DEFAULT_GENDER = Gender.MALE;
-    private static final String DEFAULT_MAJOR_NAME = "컴퓨터공학과";
 
 
     /**
@@ -29,9 +25,7 @@ public class TestMember {
      * @param count 생성할 멤버 수
      * @return 생성된 멤버 리스트
      */
-    public static final List<Member> createAndSaveTestMembers(University university, int count) {
-
-
+    public static List<Member> 정상_남성_리스트(University university, int count) {
         List<Member> members = new ArrayList<>();
 
         IntStream.range(0, count).forEach(i -> {
@@ -41,11 +35,34 @@ public class TestMember {
                 .role(DEFAULT_ROLE)
                 .clientId("clientId_" + nickname)
                 .nickname(nickname)
-                .gender(DEFAULT_GENDER)
+                .gender(Gender.MALE)
                 .birthDay(LocalDate.of(2000, 1, 1).plusDays(i))
                 .persona(5)
                 .university(university)
-                .majorName(DEFAULT_MAJOR_NAME)
+                .majorName("컴퓨터공학과")
+                .memberStat(null)
+                .build();
+
+            members.add(member);
+        });
+        return members;
+    }
+
+    public static List<Member> 정상_여성_리스트(University university, int count) {
+        List<Member> members = new ArrayList<>();
+
+        IntStream.range(0, count).forEach(i -> {
+            String nickname = "testUser" + (i + 1);
+            Member member = Member.builder()
+                .socialType(DEFAULT_SOCIAL_TYPE)
+                .role(DEFAULT_ROLE)
+                .clientId("clientId_" + nickname)
+                .nickname(nickname)
+                .gender(Gender.FEMALE)
+                .birthDay(LocalDate.of(2000, 1, 1).plusDays(i))
+                .persona(5)
+                .university(university)
+                .majorName("컴퓨터공학과")
                 .memberStat(null)
                 .build();
 
