@@ -23,7 +23,6 @@ import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +45,7 @@ public class RuleCommandServiceTest {
     private RuleCommandService ruleCommandService;
 
     @Nested
-    class Rule_규칙_생성 {
+    class createRule {
 
         private Room room;
         private Member member;
