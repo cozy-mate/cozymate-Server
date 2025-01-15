@@ -13,8 +13,8 @@ public class InquiryFixture {
 
     private static final String INQUIRY_CONTENT_1 = "테스트 문의 내용 1";
     private static final String INQUIRY_CONTENT_2 = "테스트 문의 내용 2";
-    private static final String INQUIRY_CONTENT_3 = "테스트 문의 내용 2";
-    private static final String INQUIRY_CONTENT_4 = "테스트 문의 내용 2";
+    private static final String INQUIRY_CONTENT_3 = "테스트 문의 내용 3";
+    private static final String INQUIRY_CONTENT_4 = "테스트 문의 내용 4";
 
     private static final String VALID_EMAIL = "test@gmail.com";
     private static final String INVALID_EMAIL = "invalid@test";

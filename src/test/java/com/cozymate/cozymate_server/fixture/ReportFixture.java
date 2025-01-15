@@ -15,7 +15,7 @@ public class ReportFixture {
     private static final String REPORT_CONTENT_1 = "테스트 신고 내용 1";
     private static final String REPORT_CONTENT_2 = "테스트 신고 내용 2";
 
-    public static Report buildReasonNotOtherAndChatSoruceReport(Member member, Member targetMember) {
+    public static Report buildReasonNotOtherAndChatSourceReport(Member member, Member targetMember) {
         return Report.builder()
             .id(REPORT_ID_1)
             .reporter(member)
@@ -25,7 +25,7 @@ public class ReportFixture {
             .build();
     }
 
-    public static Report buildReasonNotOtherAndMemberStatSoruceReport(Member member, Member targetMember) {
+    public static Report buildReasonNotOtherAndMemberStatSourceReport(Member member, Member targetMember) {
         return Report.builder()
             .id(REPORT_ID_2)
             .reporter(member)
@@ -35,7 +35,7 @@ public class ReportFixture {
             .build();
     }
 
-    public static Report buildReasonOtherAndChatSoruceReport(Member member, Member targetMember) {
+    public static Report buildReasonOtherAndChatSourceReport(Member member, Member targetMember) {
         return Report.builder()
             .id(REPORT_ID_3)
             .reporter(member)
@@ -46,7 +46,7 @@ public class ReportFixture {
             .build();
     }
 
-    public static Report buildReasonOtherAndMemberStatSoruceReport(Member member, Member targetMember) {
+    public static Report buildReasonOtherAndMemberStatSourceReport(Member member, Member targetMember) {
         return Report.builder()
             .id(REPORT_ID_4)
             .reporter(member)
