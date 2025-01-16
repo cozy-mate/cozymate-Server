@@ -15,26 +15,29 @@ import java.util.stream.Collectors;
 
 public class MemberStatUtil {
 
+    // 일관된 순서로 하나의 String을 넣어주기 위해 만든 함수(멤버 스탯의 값이 여러 개 들어갈 수 있을 때 저장용)
     public static String toSortedString(List<String> list) {
         return list.stream()
             .sorted()
             .collect(Collectors.joining(","));
     }
 
+    // 일관된 순서로 정리된 String을 다시 배열로 복구하는 함수
     public static List<String> fromStringToList(String str) {
         return Arrays.stream(str.replaceAll(",$", "").split(","))
             .collect(Collectors.toList());
     }
 
+    // 방에 속한 멤버들의 칩 색깔을 정하기 위해 Stat들을 비교해 Status를 리턴하는 메서드
     public static <T> DifferenceStatus compareField(List<MemberStat> memberStatList,
         BiFunction<Member, MemberStat, T> getter) {
 
         boolean foundSame = false;
         boolean foundDifferent = false;
 
-
         T firstValue = getter.apply(memberStatList.get(0).getMember(), memberStatList.get(0));
 
+        // FIXME: 첫번째 Stat과만 다름 여부를 판단하고 있어, WHITE인 경우도 RED일 때가 있음.
         for (int i = 1; i < memberStatList.size(); i++) {
 
             T currentValue = getter.apply(memberStatList.get(i).getMember(), memberStatList.get(i));
@@ -103,6 +106,7 @@ public class MemberStatUtil {
 
     private static final Map<String, BiFunction<Member,MemberStat,Object>> fieldGetters = createFieldGetters();
 
+    // String으로 필드 value 가져오는 메서드
     public static Object getMemberStatField(MemberStat memberStat, String fieldName) {
         BiFunction<Member,MemberStat,Object> getter = fieldGetters.get(fieldName);
         if (getter == null) {
@@ -111,6 +115,7 @@ public class MemberStatUtil {
         return getter.apply(memberStat.getMember(),memberStat);
     }
 
+    // 여러 key에 대한 value를 가져오기 위해서 사용하는 메서드
     public static Map<String, Object> getMemberStatFields(MemberStat memberStat, List<String> fieldNames) {
         Map<String, Object> result = new HashMap<>();
         fieldNames.forEach(fieldName ->
@@ -119,9 +124,7 @@ public class MemberStatUtil {
         return result;
     }
 
-
-
-    // 학번 Response 위해 필요한 Util
+    // 학번 Response 위해 필요한 Util(number->String)
     public static String formatNumber(int number) {
         return String.format("%02d", number);
     }
