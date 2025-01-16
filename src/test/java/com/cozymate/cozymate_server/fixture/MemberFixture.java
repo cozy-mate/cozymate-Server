@@ -48,7 +48,12 @@ public class MemberFixture {
      * @return 생성된 멤버 리스트 생성된 멤버 : 00 년생 컴퓨터공학과 반, 01년생 경영학과 반
      */
     public static List<Member> 정상_남성_리스트(University university, int count) {
-        return 정상_멤버_리스트_커스텀(university, count, Gender.MALE, "컴퓨터공학과", "경영학과");
+        List<Member> members = new ArrayList<>();
+
+        members.addAll(리스트_커스텀(university, count / 2, Gender.MALE, LocalDate.of(2000, 1, 1), "컴퓨터공학과"));
+        members.addAll(리스트_커스텀(university, count - (count / 2), Gender.MALE, LocalDate.of(2001, 1, 1), "행정학과"));
+
+        return members;
     }
 
     /**
@@ -59,22 +64,19 @@ public class MemberFixture {
      * @return 생성된 멤버 리스트 생성된 멤버 : 00 년생 컴퓨터공학과 반, 01년생 경영학과 반
      */
     public static List<Member> 정상_여성_리스트(University university, int count) {
-        return 정상_멤버_리스트_커스텀(university, count, Gender.FEMALE, "컴퓨터공학과", "경영학과");
-    }
-
-    public static List<Member> 정상_멤버_리스트_커스텀(University university, int count, Gender gender,
-        String majorName1, String majorName2) {
         List<Member> members = new ArrayList<>();
 
-        int tempCount = count / 2;
-        IntStream.range(0, tempCount).forEach(i ->
-            members.add(멤버_생성(university, gender, "testUser" + (i + 1),
-                LocalDate.of(2000, 1, 1).plusDays(i), majorName1))
-        );
+        members.addAll(리스트_커스텀(university, count / 2, Gender.FEMALE, LocalDate.of(2000, 1, 1), "컴퓨터공학과"));
+        members.addAll(리스트_커스텀(university, count - (count / 2), Gender.FEMALE, LocalDate.of(2001, 1, 1), "행정학과"));
 
-        IntStream.range(tempCount, count).forEach(i ->
-            members.add(멤버_생성(university, gender, "testUser" + (i + 1),
-                LocalDate.of(2001, 1, 1).plusDays(i), majorName2))
+        return members;
+    }
+
+    public static List<Member> 리스트_커스텀(University university, int count, Gender gender, LocalDate startDate, String majorName) {
+        List<Member> members = new ArrayList<>();
+
+        IntStream.range(0, count).forEach(i ->
+            members.add(멤버_생성(university, gender, "testUser" + (i + 1), startDate.plusDays(i), majorName))
         );
 
         return members;
