@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class TestMember {
+public class MemberFixture {
 
     private static final SocialType DEFAULT_SOCIAL_TYPE = SocialType.KAKAO;
 

@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.domain.member;
 
 
-import com.cozymate.cozymate_server.fixture.TestMember;
+import com.cozymate.cozymate_server.fixture.MemberFixture;
 
-import com.cozymate.cozymate_server.fixture.TestUniversity;
+import com.cozymate.cozymate_server.fixture.UniversityFixture;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
 import com.cozymate.cozymate_server.domain.member.service.MemberQueryService;
@@ -50,14 +50,14 @@ class MemberCommandServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        University university = TestUniversity.createTestUniversity();
+        University university = UniversityFixture.createTestUniversity();
         universityRepository.save(university);
 
         when(universityRepository.save(university)).thenReturn(university);
         when(universityRepository.findById(anyLong())).thenReturn(Optional.of(university));
 
         // createAndSaveTestMembers 호출로 테스트용 멤버 생성
-        List<Member> members = TestMember.정상_남성_리스트(university,
+        List<Member> members = MemberFixture.정상_남성_리스트(university,
             2);
 
         testMember = members.get(0); // 첫 번째로 생성된 멤버를 사용
