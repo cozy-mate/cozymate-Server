@@ -76,6 +76,7 @@ public class InquiryFixture {
     // 에러 더미데이터, content가 255자를 초과하는 경우
     public Inquiry 값이_255자를_초과하는_content(Member member) {
         return Inquiry.builder()
+            .id(7L)
             .member(member)
             .content("가나다라마바사아자차카타파하".repeat(19)) // 266자
             .email("test@gmail.com")
@@ -87,7 +88,7 @@ public class InquiryFixture {
     // 에러 더미데이터, email이 null인 경우
     public Inquiry 값이_null인_email(Member member) {
         return Inquiry.builder()
-            .id(7L)
+            .id(8L)
             .member(member)
             .content("테스트 문의 내용6")
             .email(null)
