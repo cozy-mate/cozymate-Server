@@ -27,4 +27,14 @@ public class FavoriteFixture {
             .favoriteType(FavoriteType.ROOM)
             .build();
     }
+
+    // 에러 더미데이터, targetId가 null인 경우
+    public Favorite 값이_null인_targetId(Member member) {
+        return Favorite.builder()
+            .id(3L)
+            .member(member)
+            .targetId(null)
+            .favoriteType(FavoriteType.MEMBER)
+            .build();
+    }
 }
