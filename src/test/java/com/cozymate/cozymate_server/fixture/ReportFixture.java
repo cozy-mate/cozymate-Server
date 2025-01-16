@@ -55,4 +55,52 @@ public class ReportFixture {
             .content("테스트 신고 내용 2")
             .build();
     }
+
+    // 에러 더미데이터, reportedMemberId가 null인 경우
+    public Report 값이_null인_reportedMemberId(Member member) {
+        return Report.builder()
+            .id(5L)
+            .reporter(member)
+            .reportedMemberId(null)
+            .reportReason(ReportReason.OBSCENITY)
+            .reportSource(ReportSource.CHAT)
+            .content(null)
+            .build();
+    }
+
+    // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 비어있는 경우
+    public Report 값이_비어있는_content(Member member, Member targetMember) {
+        return Report.builder()
+            .id(5L)
+            .reporter(member)
+            .reportedMemberId(targetMember.getId())
+            .reportReason(ReportReason.OTHER)
+            .reportSource(ReportSource.MEMBER_STAT)
+            .content("")
+            .build();
+    }
+
+    // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 null인 경우
+    public Report 값이_null인_content(Member member, Member targetMember) {
+        return Report.builder()
+            .id(5L)
+            .reporter(member)
+            .reportedMemberId(targetMember.getId())
+            .reportReason(ReportReason.OTHER)
+            .reportSource(ReportSource.CHAT)
+            .content(null)
+            .build();
+    }
+
+    // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 255자를 초과하는 경우
+    public Report 값이_255자_초과인_content(Member member, Member targetMember) {
+        return Report.builder()
+            .id(5L)
+            .reporter(member)
+            .reportedMemberId(targetMember.getId())
+            .reportReason(ReportReason.OTHER)
+            .reportSource(ReportSource.MEMBER_STAT)
+            .content("가나다라마바사아자차카타파하".repeat(19)) // 266자
+            .build();
+    }
 }
