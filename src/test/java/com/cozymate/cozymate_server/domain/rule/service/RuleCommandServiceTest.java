@@ -22,6 +22,7 @@ import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,9 +77,11 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        void 기존규칙이_없을때_성공한다() {
+        @DisplayName("기존 규칙이 없을 때 성공한다")
+        void success_when_existed_rule_count_0() {
             // given
-            given(ruleRepository.countAllByRoomId(room.getId())).willReturn(0); // 기존에 규칙이 없는 경우
+            given(ruleRepository.countAllByRoomId(room.getId()))
+                .willReturn(0); // 기존에 규칙이 없는 경우
 
             // when
             RuleIdResponseDTO responseDto = ruleCommandService.createRule(member, room.getId(),
@@ -90,9 +93,11 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        void 기존규칙이_9개일때_성공한다() {
+        @DisplayName("기존 규칙이 9개일 때 성공한다")
+        void success_when_existed_rule_count_9() {
             // given
-            given(ruleRepository.countAllByRoomId(room.getId())).willReturn(9); // 기존에 규칙이 9개인 경우
+            given(ruleRepository.countAllByRoomId(room.getId()))
+                .willReturn(9); // 기존에 규칙이 9개인 경우
 
             // when
             RuleIdResponseDTO responseDto = ruleCommandService.createRule(member, room.getId(),
@@ -104,9 +109,11 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        void 기존규칙이_10개일때_실패한다() {
+        @DisplayName("기존 규칙이 10개일 때 실패한다")
+        void failure_when_existed_rule_over_10() {
             // given
-            given(ruleRepository.countAllByRoomId(room.getId())).willReturn(10); // 기존에 규칙이 10개인 경우
+            given(ruleRepository.countAllByRoomId(room.getId()))
+                .willReturn(10); // 기존에 규칙이 10개인 경우
 
             // when, then
             assertThatThrownBy(
