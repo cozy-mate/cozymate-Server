@@ -59,6 +59,7 @@ public class MemberStatQueryService {
     private final FavoriteRepository favoriteRepository;
     private final RoomQueryService roomQueryService;
 
+    // 본인 멤버 스탯 가져올 때 사용
     public MemberStatDetailWithMemberDetailResponseDTO getMemberStat(Member member) {
 
         MemberStat memberStat = memberStatRepository.findByMemberId(member.getId())
@@ -71,6 +72,8 @@ public class MemberStatQueryService {
         );
     }
 
+    // 여러 도메인이 많이 섞여 있는 서비스입니다.
+    // memberStat + room + favorite
     public MemberStatDetailAndRoomIdAndEqualityResponseDTO getMemberStatWithId(Member viewer, Long memberId) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(
@@ -83,9 +86,11 @@ public class MemberStatQueryService {
 
         Integer equality = memberStatEqualityQueryService.getSingleEquality(
                 memberId,
-                viewer.getId()
-            );
+                viewer.getId());
 
+        // 멤버 상세정보 보기의 리턴으로
+        // roomId(없을 경우 0)
+        // 본인이 속해 있는 방에 속해 있는 여부를 줘야 해서 아래 코드를 작성함.
         List<Mate> mateList = mateRepository.findByMemberIdAndEntryStatusInAndRoomStatusIn(
             memberId,
             List.of(EntryStatus.PENDING, EntryStatus.JOINED),
@@ -98,9 +103,11 @@ public class MemberStatQueryService {
             .map(mate -> mate.getRoom().getId())
             .orElse(NO_ROOMMATE);
 
+        // 자신이 속한 방에 요청을 했는가를 보여주는 변수(only 방장 입장)
         boolean hasRequestedRoomEntry = roomId.equals(NO_ROOMMATE)
             && roomQueryService.checkInvitationStatus(viewer, mateList);
 
+        // 조회하는 사람을 좋아하는지 여부
         Long favoriteId = favoriteRepository.findByMemberAndTargetIdAndFavoriteType(viewer, memberId, FavoriteType.MEMBER)
             .map(Favorite::getId)
             .orElse(NOT_FAVORITE);
@@ -114,6 +121,7 @@ public class MemberStatQueryService {
         );
     }
 
+    // 인실 정보 제공(상세 필터링(key:value)전 필터링 리스트에 인실을 띄울지 말지 판단용)
     public Integer getNumOfRoommateStatus(Long memberId) {
 
         MemberStat memberStat = memberStatRepository.findByMemberId(memberId).orElseThrow(
@@ -123,6 +131,7 @@ public class MemberStatQueryService {
         return memberStat.getNumOfRoommate();
     }
 
+    // 일반 필터링
     public MemberStatPageResponseDTO<List<?>> getMemberStatList(Member member,
         List<String> filterList, Pageable pageable) {
 
@@ -142,6 +151,7 @@ public class MemberStatQueryService {
 
     }
 
+    // 상세 필터링
     public MemberStatPageResponseDTO<List<?>> getSearchedAndFilteredMemberStatList(Member member,
         HashMap<String, List<?>> filterMap, Pageable pageable) {
 
@@ -158,6 +168,7 @@ public class MemberStatQueryService {
         return toPageResponseDto(createMemberStatPreferenceResponse(filteredResult,criteriaMemberStat));
     }
 
+    // 상세 필터링의 개수
     public Integer getNumOfSearchedAndFilteredMemberStatList(Member member,
         HashMap<String, List<?>> filterMap) {
 
@@ -169,6 +180,7 @@ public class MemberStatQueryService {
 
     }
 
+    // 멤버 스탯이 없을 때, 랜덤 5명을 추천해주는 메서드
     public MemberStatRandomListResponseDTO getRandomMemberStatWithPreferences(Member member) {
 
         // 상세정보가 있다면 불러올 수 없는 API
@@ -205,6 +217,7 @@ public class MemberStatQueryService {
 
     }
 
+    // 4가지 선호 항목을 랜덤 추천, 일반 필터링, 상세 필터링에 결과를 주어야 해서 Response를 정제하는 메서드
     public Slice<MemberStatPreferenceResponseDTO> createMemberStatPreferenceResponse(
         Slice<Map<MemberStat, Integer>> filteredResult, MemberStat criteriaMemberStat) {
         return filteredResult.map(
@@ -224,9 +237,10 @@ public class MemberStatQueryService {
         );
     }
 
+    // keyword로 멤버를 검색하는 함수
+    // 다른 필터링과 마찬가지로 대학, 성별, 인실, 기숙사명에 대한 필터링을 먼저 함.
     public List<MemberStatSearchResponseDTO> getMemberSearchResponse(String subString, Member searchingMember) {
 
-        // 가독성을 위해 분리해 봄
         Long universityId = searchingMember.getUniversity().getId();
         Gender gender = searchingMember.getGender();
         Long searchingMemberId = searchingMember.getId();

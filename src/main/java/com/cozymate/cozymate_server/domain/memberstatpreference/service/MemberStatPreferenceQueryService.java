@@ -20,6 +20,7 @@ public class MemberStatPreferenceQueryService {
 
     private final MemberStatPreferenceRepository memberStatPreferenceRepository;
 
+    // 컨트롤러용
     public MemberStatPreferenceDto getPreferences(Long memberId) {
         MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(memberId)
             .orElseThrow(()-> new GeneralException(ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS));
@@ -30,6 +31,7 @@ public class MemberStatPreferenceQueryService {
             .build();
     }
 
+    // 타 서비스용
     public List<String> getPreferencesToList(Long memberId) {
         MemberStatPreference memberStatPreference = memberStatPreferenceRepository.findByMemberId(memberId)
             .orElseThrow(()-> new GeneralException(ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS));
