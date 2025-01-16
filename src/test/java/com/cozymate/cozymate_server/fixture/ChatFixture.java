@@ -36,4 +36,34 @@ public class ChatFixture {
             .content("테스트 쪽지 내용 3")
             .build();
     }
+
+    // 에러 더미데이터, content가 빈 값인 경우
+    public Chat 값이_비어있는_content(Member member, ChatRoom chatRoom) {
+        return Chat.builder()
+            .id(4L)
+            .chatRoom(chatRoom)
+            .sender(member)
+            .content("")
+            .build();
+    }
+
+    // 에러 더미데이터, content가 null인 경우
+    public Chat 값이_null인_content(Member member, ChatRoom chatRoom) {
+        return Chat.builder()
+            .id(5L)
+            .chatRoom(chatRoom)
+            .sender(member)
+            .content(null)
+            .build();
+    }
+
+    // 에러 더미데이터, content가 500자 초과인 경우
+    public Chat 값이_500자_초과인_content(Member member, ChatRoom chatRoom) {
+        return Chat.builder()
+            .id(6L)
+            .chatRoom(chatRoom)
+            .sender(member)
+            .content("가나다라마바사아자차카타파하".repeat(36)) // 504자
+            .build();
+    }
 }
