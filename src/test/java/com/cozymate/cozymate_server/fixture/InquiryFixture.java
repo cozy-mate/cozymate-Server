@@ -4,57 +4,49 @@ import com.cozymate.cozymate_server.domain.inquiry.Inquiry;
 import com.cozymate.cozymate_server.domain.inquiry.enums.InquiryStatus;
 import com.cozymate.cozymate_server.domain.member.Member;
 
+@SuppressWarnings("NonAsciiCharacters")
 public class InquiryFixture {
 
-    private static final Long INQUIRY_ID_1 = 1L;
-    private static final Long INQUIRY_ID_2 = 2L;
-    private static final Long INQUIRY_ID_3 = 3L;
-    private static final Long INQUIRY_ID_4 = 4L;
-
-    private static final String INQUIRY_CONTENT_1 = "테스트 문의 내용 1";
-    private static final String INQUIRY_CONTENT_2 = "테스트 문의 내용 2";
-    private static final String INQUIRY_CONTENT_3 = "테스트 문의 내용 3";
-    private static final String INQUIRY_CONTENT_4 = "테스트 문의 내용 4";
-
-    private static final String VALID_EMAIL = "test@gmail.com";
-    private static final String INVALID_EMAIL = "invalid@test";
-
-    public static Inquiry buildPendingInquiry1(Member member) {
+    // 정상 더미데이터, 문의 답변을 대기 중인 경우
+    public Inquiry 정상_1(Member member) {
         return Inquiry.builder()
-            .id(INQUIRY_ID_1)
+            .id(1L)
             .member(member)
-            .content(INQUIRY_CONTENT_1)
-            .email(VALID_EMAIL)
+            .content("테스트 문의 내용 1")
+            .email("test@gmail.com")
             .inquiryStatus(InquiryStatus.PENDING)
             .build();
     }
 
-    public static Inquiry buildPendingInquiry2(Member member) {
+    // 정상 더미데이터, 문의 답변을 대기 중인 경우
+    public Inquiry 정상_2(Member member) {
         return Inquiry.builder()
-            .id(INQUIRY_ID_2)
+            .id(2L)
             .member(member)
-            .content(INQUIRY_CONTENT_2)
-            .email(VALID_EMAIL)
+            .content("테스트 문의 내용 2")
+            .email("test@gmail.com")
             .inquiryStatus(InquiryStatus.PENDING)
             .build();
     }
 
-    public static Inquiry buildAnsweredInquiry1(Member member) {
+    // 정상 더미데이터, 문의 답변이 완료된 경우
+    public Inquiry 정상_3(Member member) {
         return Inquiry.builder()
-            .id(INQUIRY_ID_3)
+            .id(3L)
             .member(member)
-            .content(INQUIRY_CONTENT_3)
-            .email(VALID_EMAIL)
+            .content("테스트 문의 내용 3")
+            .email("test@gmail.com")
             .inquiryStatus(InquiryStatus.ANSWERED)
             .build();
     }
 
-    public static Inquiry buildAnsweredInquiry2(Member member) {
+    // 정상 더미데이터, 문의 답변이 완료된 경우
+    public Inquiry 정상_4(Member member) {
         return Inquiry.builder()
-            .id(INQUIRY_ID_4)
+            .id(4L)
             .member(member)
-            .content(INQUIRY_CONTENT_4)
-            .email(VALID_EMAIL)
+            .content("테스트 문의 내용 4")
+            .email("test@gmail.com")
             .inquiryStatus(InquiryStatus.ANSWERED)
             .build();
     }

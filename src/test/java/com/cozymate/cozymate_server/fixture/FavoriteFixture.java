@@ -5,24 +5,23 @@ import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
 
+@SuppressWarnings("NonAsciiCharacters")
 public class FavoriteFixture {
 
-    private static final Long FAVORITE_ID_1 = 1L;
-    private static final Long FAVORITE_ID_2 = 2L;
-
-
-    public static Favorite buildMemberFavorite(Member member, Member targetMember) {
+    // 정상 더미데이터, 멤버 찜인 경우
+    public Favorite 정상_1(Member member, Member targetMember) {
         return Favorite.builder()
-            .id(FAVORITE_ID_1)
+            .id(1L)
             .member(member)
             .targetId(targetMember.getId())
             .favoriteType(FavoriteType.MEMBER)
             .build();
     }
 
-    public static Favorite buildRoomFavorite(Member member, Room targetRoom) {
+    // 정상 더미데이터, 방 찜인 경우
+    public Favorite 정상_2(Member member, Room targetRoom) {
         return Favorite.builder()
-            .id(FAVORITE_ID_2)
+            .id(2L)
             .member(member)
             .targetId(targetRoom.getId())
             .favoriteType(FavoriteType.ROOM)

@@ -3,32 +3,31 @@ package com.cozymate.cozymate_server.fixture;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 
+@SuppressWarnings("NonAsciiCharacters")
 public class ChatRoomFixture {
 
-    private static final Long CHAT_ROOM_ID_1 = 1L;
-    private static final Long CHAT_ROOM_ID_2 = 2L;
-    private static final Long CHAT_ROOM_ID_3 = 3L;
-
-
-    public static ChatRoom buildChatRoom1(Member memberA, Member memberB) {
+    // 정상 더미데이터
+    public ChatRoom 정상_1(Member memberA, Member memberB) {
         return ChatRoom.builder()
-            .id(CHAT_ROOM_ID_1)
+            .id(1L)
             .memberA(memberA)
             .memberB(memberB)
             .build();
     }
 
-    public static ChatRoom buildChatRoom2(Member memberA, Member memberB) {
+    // 정상 더미데이터
+    public ChatRoom 정상_2(Member memberA, Member memberB) {
         return ChatRoom.builder()
-            .id(CHAT_ROOM_ID_2)
+            .id(2L)
             .memberA(memberA)
             .memberB(memberB)
             .build();
     }
 
-    public static ChatRoom buildChatRoom3(Member memberA, Member memberB) {
+    // 정상 더미데이터
+    public ChatRoom 정상_3(Member memberA, Member memberB) {
         return ChatRoom.builder()
-            .id(CHAT_ROOM_ID_3)
+            .id(3L)
             .memberA(memberA)
             .memberB(memberB)
             .build();

@@ -4,30 +4,27 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 
+@SuppressWarnings("NonAsciiCharacters")
 public class NotificationLogFixture {
 
-    private static final Long NOTIFICATION_LOG_ID_1 = 1L;
-    private static final Long NOTIFICATION_LOG_ID_2 = 2L;
-
-    private static final String NOTIFICATION_CONTENT_1 = "테스트 알림 내용 1";
-    private static final String NOTIFICATION_CONTENT_2 = "테스트 알림 내용 2";
-
-    public static NotificationLog buildNotificationLog1(Member member) {
+    // 정상 더미데이터, 카테고리가 "방"인 경우
+    public NotificationLog 정상_1(Member member) {
         return NotificationLog.builder()
-            .id(NOTIFICATION_LOG_ID_1)
+            .id(1L)
             .member(member)
             .category(NotificationCategory.ROOM)
-            .content(NOTIFICATION_CONTENT_1)
+            .content("테스트 알림 내용 1")
             .targetId(null) // 일단 null
             .build();
     }
 
-    public static NotificationLog buildNotificationLog2(Member member) {
+    // 정상 더미데이터, 카테고리가 "방 참여 요청"인 경우
+    public NotificationLog 정상_2(Member member) {
         return NotificationLog.builder()
-            .id(NOTIFICATION_LOG_ID_2)
+            .id(2L)
             .member(member)
             .category(NotificationCategory.ROOM_JOIN_REQUEST)
-            .content(NOTIFICATION_CONTENT_2)
+            .content("테스트 알림 내용 2")
             .targetId(null) // 일단 null
             .build();
     }
