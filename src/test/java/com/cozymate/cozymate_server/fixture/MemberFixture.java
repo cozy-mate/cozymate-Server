@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+
+@SuppressWarnings("NonAsciiCharacters")
 public class MemberFixture {
 
     private static final SocialType DEFAULT_SOCIAL_TYPE = SocialType.KAKAO;
