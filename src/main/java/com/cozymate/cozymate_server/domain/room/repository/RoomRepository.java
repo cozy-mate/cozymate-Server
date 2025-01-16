@@ -67,6 +67,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
         "AND r.maxMateNum > r.numOfArrival " +
         "AND member.university.id = :universityId " +
         "AND member.gender = :gender " +
-        "AND r.name LIKE %:keyword% ")
+        "AND LOWER(r.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Room> findMatchingPublicRooms(String keyword, Long universityId, Gender gender);
 }
