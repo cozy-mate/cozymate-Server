@@ -66,8 +66,8 @@ public class RuleCommandServiceTest {
             when(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
                 EntryStatus.JOINED)).thenReturn(Optional.ofNullable(mate)); // 방 멤버 조회
 
-            rule = ruleFixture.규칙_1(room); // 생성되었을 때 사용할 규칙
-            requestDto = ruleFixture.규칙_1_생성_요청_DTO(); // 기본 규칙 생성 요청 DTO
+            rule = ruleFixture.정상_1(room); // 생성되었을 때 사용할 규칙
+            requestDto = ruleFixture.정상_1_생성_요청_DTO(); // 기본 규칙 생성 요청 DTO
             lenient().when(ruleRepository.save(any()))
                 .thenReturn(rule); // 규칙 생성
         }
@@ -82,7 +82,7 @@ public class RuleCommandServiceTest {
                 requestDto);
 
             // then
-            assertThat(responseDto.ruleId()).isEqualTo(ruleFixture.규칙_1(room).getId());
+            assertThat(responseDto.ruleId()).isEqualTo(ruleFixture.정상_1(room).getId());
 
         }
 
@@ -96,7 +96,7 @@ public class RuleCommandServiceTest {
                 requestDto);
 
             // then
-            assertThat(responseDto.ruleId()).isEqualTo(ruleFixture.규칙_1(room).getId());
+            assertThat(responseDto.ruleId()).isEqualTo(ruleFixture.정상_1(room).getId());
 
         }
 
