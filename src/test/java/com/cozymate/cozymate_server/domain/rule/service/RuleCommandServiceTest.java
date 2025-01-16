@@ -2,9 +2,8 @@ package com.cozymate.cozymate_server.domain.rule.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
@@ -29,6 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +46,7 @@ public class RuleCommandServiceTest {
     private RuleCommandService ruleCommandService;
 
     @Nested
+    @MockitoSettings(strictness = Strictness.LENIENT)
     class createRule {
 
         private Room room;
@@ -63,19 +65,20 @@ public class RuleCommandServiceTest {
             mate = Mate.builder().id(1L).room(room).member(member)
                 .entryStatus(EntryStatus.JOINED).build(); // TODO: 기본 방 멤버 -> Fixture로 대체
 
-            when(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
-                EntryStatus.JOINED)).thenReturn(Optional.ofNullable(mate)); // 방 멤버 조회
-
             rule = ruleFixture.정상_1(room); // 생성되었을 때 사용할 규칙
             requestDto = ruleFixture.정상_1_생성_요청_DTO(); // 기본 규칙 생성 요청 DTO
-            lenient().when(ruleRepository.save(any()))
-                .thenReturn(rule); // 규칙 생성
+
+            given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
+                EntryStatus.JOINED))
+                .willReturn(Optional.ofNullable(mate)); // 방 멤버 조회
+            given(ruleRepository.save(any()))
+                .willReturn(rule); // 규칙 생성
         }
 
         @Test
         void 기존규칙이_없을때_성공한다() {
             // given
-            when(ruleRepository.countAllByRoomId(room.getId())).thenReturn(0); // 기존에 규칙이 없는 경우
+            given(ruleRepository.countAllByRoomId(room.getId())).willReturn(0); // 기존에 규칙이 없는 경우
 
             // when
             RuleIdResponseDTO responseDto = ruleCommandService.createRule(member, room.getId(),
@@ -89,7 +92,7 @@ public class RuleCommandServiceTest {
         @Test
         void 기존규칙이_9개일때_성공한다() {
             // given
-            when(ruleRepository.countAllByRoomId(room.getId())).thenReturn(9); // 기존에 규칙이 9개인 경우
+            given(ruleRepository.countAllByRoomId(room.getId())).willReturn(9); // 기존에 규칙이 9개인 경우
 
             // when
             RuleIdResponseDTO responseDto = ruleCommandService.createRule(member, room.getId(),
@@ -103,8 +106,7 @@ public class RuleCommandServiceTest {
         @Test
         void 기존규칙이_10개일때_실패한다() {
             // given
-            when(ruleRepository.countAllByRoomId(room.getId())).thenReturn(
-                10); // 기존에 규칙이 10개인 경우
+            given(ruleRepository.countAllByRoomId(room.getId())).willReturn(10); // 기존에 규칙이 10개인 경우
 
             // when, then
             assertThatThrownBy(
