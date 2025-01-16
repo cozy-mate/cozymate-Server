@@ -17,23 +17,23 @@ public class TestMember {
     private static final SocialType DEFAULT_SOCIAL_TYPE = SocialType.KAKAO;
 
     public static Member 정상_1(University university) {
-        return 멤버_생성(university, Gender.MALE, "테스트닉네임",
+        return 멤버_생성(university, Gender.MALE, "테스트닉네임1",
             LocalDate.of(2000, 11, 1), "컴퓨터공학과");
     }
 
     public static Member 정상_2(University university) {
-        return 멤버_생성(university, Gender.MALE, "테스트닉네임",
+        return 멤버_생성(university, Gender.MALE, "테스트닉네임2",
             LocalDate.of(2001, 11, 1), "경영학과");
 
     }
 
     public static Member 정상_3(University university) {
-        return 멤버_생성(university, Gender.FEMALE, "테스트닉네임",
+        return 멤버_생성(university, Gender.FEMALE, "테스트닉네임3",
             LocalDate.of(2000, 11, 1), "컴퓨터공학과");
     }
 
     public static Member 정상_4(University university) {
-        return 멤버_생성(university, Gender.FEMALE, "테스트닉네임",
+        return 멤버_생성(university, Gender.FEMALE, "테스트닉네임4",
             LocalDate.of(2001, 11, 1), "컴퓨터공학과");
     }
 
