@@ -80,7 +80,17 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 //                tuple -> tuple.get(member),         // key: Member
 //                tuple -> tuple.get(memberStat)      // value: MemberStat
 //            ));
-//    }
+/**
+     * Initializes a default query builder with base filtering conditions for member statistics.
+     *
+     * This method creates a {@link BooleanBuilder} that applies default query constraints:
+     * - Excludes the current member's own statistics record
+     * - Matches members of the same gender
+     * - Matches members from the same university
+     *
+     * @param criteriaMemberStat The member statistics used as a basis for filtering
+     * @return A {@link BooleanBuilder} with default query conditions
+     */
 
 
     private BooleanBuilder initDefaultQuery(MemberStat criteriaMemberStat) {

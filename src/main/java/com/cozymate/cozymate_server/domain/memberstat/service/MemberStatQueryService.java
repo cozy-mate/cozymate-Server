@@ -224,6 +224,19 @@ public class MemberStatQueryService {
         );
     }
 
+    /**
+     * Searches for members matching a given substring based on specific criteria.
+     *
+     * This method retrieves a list of members who match the search criteria, including:
+     * - Substring match in member details
+     * - Same university as the searching member
+     * - Opposite gender
+     *
+     * @param subString The substring to search for in member details
+     * @param searchingMember The member performing the search
+     * @return A list of member search results, sorted by equality score in descending order
+     *         If the searching member's statistics do not exist, returns members without equality scores
+     */
     public List<MemberStatSearchResponseDTO> getMemberSearchResponse(String subString, Member searchingMember) {
 
         // 가독성을 위해 분리해 봄
