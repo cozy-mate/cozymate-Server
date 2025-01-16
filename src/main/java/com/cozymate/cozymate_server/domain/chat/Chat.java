@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +34,7 @@ public class Chat extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member sender;
 
-    @Column(length = 500)
+    @Size(min = 1, max = 500)
+    @Column(nullable = false, length = 500)
     private String content;
 }
