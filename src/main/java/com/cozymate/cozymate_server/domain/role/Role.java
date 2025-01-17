@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.Range;
 
 @Getter
 @AllArgsConstructor
@@ -38,9 +40,11 @@ public class Role extends BaseTimeEntity {
     @Column(columnDefinition = "json")
     private List<Long> assignedMateIdList; // 롤에 할당된 사람
 
+    @Size(max = 25)
     @Column(nullable = false, length = 25)
     private String content;
 
+    @Range(min = 0, max = 127)
     private int repeatDays = 0;
 
     public void updateEntity(List<Long> assignedMateIdList, String content, int repeatDays) {

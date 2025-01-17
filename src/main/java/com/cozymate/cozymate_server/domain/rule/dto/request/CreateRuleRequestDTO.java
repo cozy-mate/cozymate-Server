@@ -2,7 +2,9 @@ package com.cozymate.cozymate_server.domain.rule.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record CreateRuleRequestDTO(
     @NotNull(message = "규칙 내용은 필수로 입력해주세요.")
     @Size(min = 1, max = 50, message = "규칙 내용은 1자 이상 50자 이하로 입력해주세요.")
