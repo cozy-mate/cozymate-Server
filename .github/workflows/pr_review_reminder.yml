@@ -17,7 +17,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PRS=$(gh pr list --state open --json number,title,createdAt,reviewRequests,reviews | jq -c '.')
+          PRS=$(gh pr list --state open --json number,title,createdAt,reviewRequests | jq -c '.')
           echo "$PRS" | jq .
           echo "PRS=$PRS" >> $GITHUB_ENV
 
