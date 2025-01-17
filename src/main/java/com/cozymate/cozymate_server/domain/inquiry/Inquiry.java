@@ -3,13 +3,16 @@ package com.cozymate.cozymate_server.domain.inquiry;
 import com.cozymate.cozymate_server.domain.inquiry.enums.InquiryStatus;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,11 +30,14 @@ public class Inquiry extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
+    @Size(min = 1, max = 255)
+    @Column(nullable = false, length = 255)
     private String content;
 
+    @Column(nullable = false)
     private String email;
 
     @Enumerated(value = EnumType.STRING)
