@@ -37,10 +37,30 @@ public class ChatFixture {
             .build();
     }
 
+    // 정상 더미데이터, 탈퇴한 사용자에 대한 Chat인 경우
+    public Chat 정상_4(ChatRoom chatRoom) {
+        return Chat.builder()
+            .id(4L)
+            .chatRoom(chatRoom)
+            .sender(null)
+            .content("탈퇴한 사용자의 남아 있는 쪽지 내용 1")
+            .build();
+    }
+
+    // 정상 더미데이터, 탈퇴한 사용자에 대한 Chat인 경우
+    public Chat 정상_5(ChatRoom chatRoom) {
+        return Chat.builder()
+            .id(5L)
+            .chatRoom(chatRoom)
+            .sender(null)
+            .content("탈퇴한 사용자의 남아 있는 쪽지 내용 2")
+            .build();
+    }
+
     // 에러 더미데이터, content가 빈 값인 경우
     public Chat 값이_비어있는_content(Member member, ChatRoom chatRoom) {
         return Chat.builder()
-            .id(4L)
+            .id(6L)
             .chatRoom(chatRoom)
             .sender(member)
             .content("")
@@ -50,7 +70,7 @@ public class ChatFixture {
     // 에러 더미데이터, content가 null인 경우
     public Chat 값이_null인_content(Member member, ChatRoom chatRoom) {
         return Chat.builder()
-            .id(5L)
+            .id(7L)
             .chatRoom(chatRoom)
             .sender(member)
             .content(null)
@@ -60,7 +80,7 @@ public class ChatFixture {
     // 에러 더미데이터, content가 500자 초과인 경우
     public Chat 값이_500자_초과인_content(Member member, ChatRoom chatRoom) {
         return Chat.builder()
-            .id(6L)
+            .id(8L)
             .chatRoom(chatRoom)
             .sender(member)
             .content("가나다라마바사아자차카타파하".repeat(36)) // 504자
