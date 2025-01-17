@@ -9,7 +9,7 @@ import com.cozymate.cozymate_server.domain.room.Room;
 public class FavoriteFixture {
 
     // 정상 더미데이터, 멤버 찜인 경우
-    public Favorite 정상_1(Member member, Member targetMember) {
+    public static Favorite 정상_1(Member member, Member targetMember) {
         return Favorite.builder()
             .id(1L)
             .member(member)
@@ -19,7 +19,7 @@ public class FavoriteFixture {
     }
 
     // 정상 더미데이터, 방 찜인 경우
-    public Favorite 정상_2(Member member, Room targetRoom) {
+    public static Favorite 정상_2(Member member, Room targetRoom) {
         return Favorite.builder()
             .id(2L)
             .member(member)
@@ -29,7 +29,7 @@ public class FavoriteFixture {
     }
 
     // 에러 더미데이터, targetId가 null인 경우
-    public Favorite 값이_null인_targetId(Member member) {
+    public static Favorite 값이_null인_targetId(Member member) {
         return Favorite.builder()
             .id(3L)
             .member(member)

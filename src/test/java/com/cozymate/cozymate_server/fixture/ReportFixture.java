@@ -9,7 +9,7 @@ import com.cozymate.cozymate_server.domain.report.enums.ReportSource;
 public class ReportFixture {
 
     // 정상 더미데이터, 신고 사유가 "기타"가 아니고, 신고 출처가 쪽지인 경우
-    public Report 정상_1(Member member, Member targetMember) {
+    public static Report 정상_1(Member member, Member targetMember) {
         return Report.builder()
             .id(1L)
             .reporter(member)
@@ -21,7 +21,7 @@ public class ReportFixture {
     }
 
     // 정상 더미데이터, 신고 사유가 "기타"가 아니고, 신고 출처가 라이프 스타일인 경우
-    public Report 정상_2(Member member, Member targetMember) {
+    public static Report 정상_2(Member member, Member targetMember) {
         return Report.builder()
             .id(2L)
             .reporter(member)
@@ -33,7 +33,7 @@ public class ReportFixture {
     }
 
     // 정상 더미데이터, 신고 사유가 "기타"이고, 신고 출처가 쪽지인 경우
-    public Report 정상_3(Member member, Member targetMember) {
+    public static Report 정상_3(Member member, Member targetMember) {
         return Report.builder()
             .id(3L)
             .reporter(member)
@@ -45,7 +45,7 @@ public class ReportFixture {
     }
 
     // 정상 더미데이터, 신고 사유가 "기타"이고, 신고 출처가 라이프 스타일인 경우
-    public Report 정상_4(Member member, Member targetMember) {
+    public static Report 정상_4(Member member, Member targetMember) {
         return Report.builder()
             .id(4L)
             .reporter(member)
@@ -57,7 +57,7 @@ public class ReportFixture {
     }
 
     // 에러 더미데이터, reportedMemberId가 null인 경우
-    public Report 값이_null인_reportedMemberId(Member member) {
+    public static Report 값이_null인_reportedMemberId(Member member) {
         return Report.builder()
             .id(5L)
             .reporter(member)
@@ -69,7 +69,7 @@ public class ReportFixture {
     }
 
     // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 비어있는 경우
-    public Report 값이_비어있는_content(Member member, Member targetMember) {
+    public static Report 값이_비어있는_content(Member member, Member targetMember) {
         return Report.builder()
             .id(6L)
             .reporter(member)
@@ -81,7 +81,7 @@ public class ReportFixture {
     }
 
     // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 null인 경우
-    public Report 값이_null인_content(Member member, Member targetMember) {
+    public static Report 값이_null인_content(Member member, Member targetMember) {
         return Report.builder()
             .id(7L)
             .reporter(member)
@@ -93,7 +93,7 @@ public class ReportFixture {
     }
 
     // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 255자를 초과하는 경우
-    public Report 값이_255자_초과인_content(Member member, Member targetMember) {
+    public static Report 값이_255자_초과인_content(Member member, Member targetMember) {
         return Report.builder()
             .id(8L)
             .reporter(member)

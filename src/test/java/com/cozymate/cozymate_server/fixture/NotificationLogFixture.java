@@ -8,7 +8,7 @@ import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationTyp
 public class NotificationLogFixture {
 
     // 정상 더미데이터, 카테고리가 "방"인 경우
-    public NotificationLog 정상_1(Member member) {
+    public static NotificationLog 정상_1(Member member) {
         return NotificationLog.builder()
             .id(1L)
             .member(member)
@@ -19,7 +19,7 @@ public class NotificationLogFixture {
     }
 
     // 정상 더미데이터, 카테고리가 "방 참여 요청"인 경우
-    public NotificationLog 정상_2(Member member) {
+    public static NotificationLog 정상_2(Member member) {
         return NotificationLog.builder()
             .id(2L)
             .member(member)
@@ -30,7 +30,7 @@ public class NotificationLogFixture {
     }
 
     // 에러 더미데이터, content가 null인 경우
-    public NotificationLog 값이_null인_content(Member member) {
+    public static NotificationLog 값이_null인_content(Member member) {
         return NotificationLog.builder()
             .id(3L)
             .member(member)

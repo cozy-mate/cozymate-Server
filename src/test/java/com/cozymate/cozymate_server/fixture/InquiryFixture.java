@@ -8,7 +8,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 public class InquiryFixture {
 
     // 정상 더미데이터, 문의 답변을 대기 중인 경우
-    public Inquiry 정상_1(Member member) {
+    public static Inquiry 정상_1(Member member) {
         return Inquiry.builder()
             .id(1L)
             .member(member)
@@ -19,7 +19,7 @@ public class InquiryFixture {
     }
 
     // 정상 더미데이터, 문의 답변을 대기 중인 경우
-    public Inquiry 정상_2(Member member) {
+    public static Inquiry 정상_2(Member member) {
         return Inquiry.builder()
             .id(2L)
             .member(member)
@@ -30,7 +30,7 @@ public class InquiryFixture {
     }
 
     // 정상 더미데이터, 문의 답변이 완료된 경우
-    public Inquiry 정상_3(Member member) {
+    public static Inquiry 정상_3(Member member) {
         return Inquiry.builder()
             .id(3L)
             .member(member)
@@ -41,7 +41,7 @@ public class InquiryFixture {
     }
 
     // 정상 더미데이터, 문의 답변이 완료된 경우
-    public Inquiry 정상_4(Member member) {
+    public static Inquiry 정상_4(Member member) {
         return Inquiry.builder()
             .id(4L)
             .member(member)
@@ -52,7 +52,7 @@ public class InquiryFixture {
     }
 
     // 에러 더미데이터, content가 null인 경우
-    public Inquiry 값이_null인_content(Member member) {
+    public static Inquiry 값이_null인_content(Member member) {
         return Inquiry.builder()
             .id(5L)
             .member(member)
@@ -63,7 +63,7 @@ public class InquiryFixture {
     }
 
     // 에러 더미데이터, content가 비어있는 경우
-    public Inquiry 값이_비어있는_content(Member member) {
+    public static Inquiry 값이_비어있는_content(Member member) {
         return Inquiry.builder()
             .id(6L)
             .member(member)
@@ -74,7 +74,7 @@ public class InquiryFixture {
     }
 
     // 에러 더미데이터, content가 255자를 초과하는 경우
-    public Inquiry 값이_255자를_초과하는_content(Member member) {
+    public static Inquiry 값이_255자를_초과하는_content(Member member) {
         return Inquiry.builder()
             .id(7L)
             .member(member)
@@ -86,7 +86,7 @@ public class InquiryFixture {
     }
 
     // 에러 더미데이터, email이 null인 경우
-    public Inquiry 값이_null인_email(Member member) {
+    public static Inquiry 값이_null인_email(Member member) {
         return Inquiry.builder()
             .id(8L)
             .member(member)
