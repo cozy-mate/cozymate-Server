@@ -71,7 +71,7 @@ public class ReportFixture {
     // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 비어있는 경우
     public Report 값이_비어있는_content(Member member, Member targetMember) {
         return Report.builder()
-            .id(5L)
+            .id(6L)
             .reporter(member)
             .reportedMemberId(targetMember.getId())
             .reportReason(ReportReason.OTHER)
@@ -83,7 +83,7 @@ public class ReportFixture {
     // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 null인 경우
     public Report 값이_null인_content(Member member, Member targetMember) {
         return Report.builder()
-            .id(5L)
+            .id(7L)
             .reporter(member)
             .reportedMemberId(targetMember.getId())
             .reportReason(ReportReason.OTHER)
@@ -95,7 +95,7 @@ public class ReportFixture {
     // 에러 더미데이터, 신고 사유가 OTHER일 때 content가 255자를 초과하는 경우
     public Report 값이_255자_초과인_content(Member member, Member targetMember) {
         return Report.builder()
-            .id(5L)
+            .id(8L)
             .reporter(member)
             .reportedMemberId(targetMember.getId())
             .reportReason(ReportReason.OTHER)
