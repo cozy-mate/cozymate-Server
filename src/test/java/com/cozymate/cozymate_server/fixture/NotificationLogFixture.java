@@ -28,4 +28,15 @@ public class NotificationLogFixture {
             .targetId(null) // 일단 null
             .build();
     }
+
+    // 에러 더미데이터, content가 null인 경우
+    public NotificationLog 값이_null인_content(Member member) {
+        return NotificationLog.builder()
+            .id(3L)
+            .member(member)
+            .category(NotificationCategory.NOTICE)
+            .content(null)
+            .targetId(null) // 일단 null
+            .build();
+    }
 }
