@@ -19,6 +19,7 @@ public class TodoFixture {
     // 정상 더미데이터, 오늘 투두
     public Todo 정상_1(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
+            .id(1L)
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
@@ -32,6 +33,7 @@ public class TodoFixture {
     // 정상 더미데이터, 오늘 투두
     public Todo 정상_2(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
+            .id(2L)
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
@@ -45,6 +47,7 @@ public class TodoFixture {
     // 정상 더미데이터, 오늘 투두
     public Todo 정상_3(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
+            .id(3L)
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
@@ -58,6 +61,7 @@ public class TodoFixture {
     // 정상 더미데이터, 내일 투두
     public Todo 정상_4(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
+            .id(4L)
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
@@ -71,6 +75,7 @@ public class TodoFixture {
     // 정상 더미데이터, 내일 투두
     public Todo 정상_5(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
+            .id(5L)
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
@@ -84,6 +89,7 @@ public class TodoFixture {
     // 정상 더미데이터, 오늘 투두, 롤에서 생성된 투두
     public Todo 정상_6(Room room, Mate mate, List<Mate> assignedMateList, Role role) {
         return Todo.builder()
+            .id(6L)
             .room(room)
             .mateId(mate.getId())
             .role(role)
@@ -98,6 +104,7 @@ public class TodoFixture {
     // 에러 더미데이터, content의 최대 길이는 35자인데, 36자로 너무 긴 content
     public Todo 너무_긴_content(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
+            .id(7L)
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
@@ -111,6 +118,7 @@ public class TodoFixture {
     // 에러 더미데이터, content의 값이 빈 문자열인 경우
     public Todo 값이_빈_content(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
+            .id(8L)
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
@@ -125,6 +133,7 @@ public class TodoFixture {
     public Todo 값이_null인_content(Room room, Mate mate, List<Mate> assignedMateList,
         TodoType todoType) {
         return Todo.builder()
+            .id(9L)
             .room(room)
             .mateId(mate.getId())
             .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
@@ -143,6 +152,7 @@ public class TodoFixture {
 
         IntStream.range(0, size).forEach(i ->
             todoList.add(Todo.builder()
+                .id((long) i + 10) // 기존에 존재한 9개의 todo와 겹치지 않도록 id를 10부터 시작
                 .room(room)
                 .mateId(mate.getId())
                 .assignedMateIdList(assignedMateList.stream().map(Mate::getId).toList())
