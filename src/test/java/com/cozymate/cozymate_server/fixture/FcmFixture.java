@@ -45,4 +45,14 @@ public class FcmFixture {
             .isValid(false)
             .build();
     }
+
+    // 에러 더미데이터, isValid가 true이고, token이 null인 경우
+    public Fcm 값이_null인_token(Member member) {
+        return Fcm.builder()
+            .id("test_device_id_5")
+            .token(null)
+            .member(member)
+            .isValid(true)
+            .build();
+    }
 }
