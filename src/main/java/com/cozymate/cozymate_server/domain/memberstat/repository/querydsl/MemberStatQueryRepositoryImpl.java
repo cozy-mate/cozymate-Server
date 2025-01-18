@@ -60,15 +60,13 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .and(memberStat.id.ne(criteriaMemberStat.getId()))
             // 성별 필터링
             .and(member.gender.eq(criteriaMember.getGender()))
-            // 대학 일치 여부
-            .and(member.university.id.eq(criteriaMember.getUniversity().getId()))
-            // 기숙사 일치 여부
-            .and(memberStat.dormitoryName.eq(criteriaMemberStat.getDormitoryName()));
+            .and(member.university.id.eq(criteriaMember.getUniversity().getId()));
+//            .and(memberStat.dormitoryName.eq(criteriaMemberStat.getDormitoryName()));
 
-        // '미정'인 경우 인실 일치 조건을 무시, 그렇지 않으면 인실 일치 조건 추가
-        if (!criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)) {
-            builder.and(memberStat.numOfRoommate.eq(criteriaMemberStat.getNumOfRoommate()));
-        }
+//        // '미정'인 경우 인실 조건을 무시, 그렇지 않으면 인실 조건 추가
+//        if (!criteriaMemberStat.getNumOfRoommate().equals(NUM_OF_ROOMMATE_NOT_DETERMINED)) {
+//            builder.and(memberStat.numOfRoommate.eq(criteriaMemberStat.getNumOfRoommate()));
+//        }
 
         return builder;
     }
