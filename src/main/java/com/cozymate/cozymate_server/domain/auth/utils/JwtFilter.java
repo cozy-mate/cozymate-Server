@@ -46,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
     );
 
     private static final List<String> VERIFIED_URLS = List.of(
-        "/university/get-member-univ-info"
+//        "/university/get-member-univ-info"
     );
 
     private static final List<String> REFRESH_URLS = List.of("/auth/reissue");

@@ -35,7 +35,11 @@ public record SignUpRequestDTO(
     Integer persona,
 
     @NotNull(message = "null일 수 없습니다.")
-    Long universityId
+    Long universityId,
+
+    @NotNull(message = "null일 수 없습니다.")
+    @NotEmpty(message = "비어 있을 수 없습니다.")
+    String majorName
 ) {
 
 }
