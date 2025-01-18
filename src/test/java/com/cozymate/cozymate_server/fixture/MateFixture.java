@@ -4,91 +4,83 @@ import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("NonAsciiCharacters")
 public class MateFixture {
 
-    private final RoomFixture roomFixture;
-
-    private final Room 비공개방1;
-    private final Room 공개방1;
-
-    public MateFixture(RoomFixture roomFixture) {
-        this.roomFixture = roomFixture;
-        this.비공개방1 = roomFixture.비공개방_1();
-        this.공개방1 = roomFixture.공개방_1();
-    }
-
-    public Mate 비공개방_1의_메이트_1(Member member) { // 비공개방의 방장
+    // 방에 참여 중인 Mate
+    public static Mate 정상_1(Room room, Member member) {
         return Mate.builder()
-            .room(비공개방1)
-            .member(member)
-            .entryStatus(EntryStatus.JOINED)
-            .isRoomManager(true)
-            .build();
-    }
-
-    public Mate 비공개방_1의_메이트_2(Member member) { // 비공개방에 참여중인 메이트
-        return Mate.builder()
-            .room(비공개방1)
+            .id(1L)
+            .room(room)
             .member(member)
             .entryStatus(EntryStatus.JOINED)
             .isRoomManager(false)
             .build();
     }
 
-    public Mate 비공개방_1의_메이트_3(Member member) { // 비공개방에서 퇴장한 상태
+    // 방에 PENDING 상태인 Mate
+    public static Mate 정상_2(Room room, Member member) {
         return Mate.builder()
-            .room(roomFixture.비공개방_1())
-            .member(member)
-            .entryStatus(EntryStatus.EXITED)
-            .isRoomManager(false)
-            .build();
-    }
-
-    public Mate 공개방_1의_메이트_1(Member member) { // 공개방의 방장
-        return Mate.builder()
-            .room(공개방1)
-            .member(member)
-            .entryStatus(EntryStatus.JOINED)
-            .isRoomManager(true)
-            .build();
-    }
-
-    public Mate 공개방_1의_메이트_2(Member member) { // 공개방에 참여중인 메이트
-        return Mate.builder()
-            .room(공개방1)
-            .member(member)
-            .entryStatus(EntryStatus.JOINED)
-            .isRoomManager(false)
-            .build();
-    }
-
-    public Mate 공개방_1의_메이트_3(Member member) { // 공개방에 입장 요청 중
-        return Mate.builder()
-            .room(공개방1)
+            .id(2L)
+            .room(room)
             .member(member)
             .entryStatus(EntryStatus.PENDING)
             .isRoomManager(false)
             .build();
     }
 
-    public Mate 공개방_1의_메이트_4(Member member) { // 공개방에 초대 받은 상태
+    // 방에 INVITED 상태인 Mate
+    public static Mate 정상_3(Room room, Member member) {
         return Mate.builder()
-            .room(공개방1)
+            .id(3L)
+            .room(room)
             .member(member)
-            .entryStatus(EntryStatus.INVITED) // 초대 받은 상태
+            .entryStatus(EntryStatus.INVITED)
             .isRoomManager(false)
             .build();
     }
 
-    public Mate 공개방_1의_메이트_5(Member member) { // 공개방에서 퇴장한 상태
+    // 방에서 나간 상태인 Mate
+    public static Mate 정상_4(Room room, Member member) {
         return Mate.builder()
-            .room(공개방1)
+            .id(4L)
+            .room(room)
             .member(member)
             .entryStatus(EntryStatus.EXITED)
             .isRoomManager(false)
             .build();
+    }
+
+    // 방장 상태의 Mate
+    public static Mate 정상_5(Room room, Member member) {
+        return Mate.builder()
+            .id(5L)
+            .room(room)
+            .member(member)
+            .entryStatus(EntryStatus.JOINED)
+            .isRoomManager(true)
+            .build();
+    }
+
+    public static List<Mate> 정상_리스트(Room room, Member member, EntryStatus entryStatus, int count) {
+        List<Mate> mates = new ArrayList<>();
+        IntStream.range(0, count)
+            .forEach(i ->
+                mates.add(
+                    Mate.builder()
+                        .id((long) i + 6)
+                        .room(room)
+                        .member(member)
+                        .entryStatus(entryStatus)
+                        .isRoomManager(false)
+                        .build()
+                )
+            );
+        return mates;
     }
 
 }

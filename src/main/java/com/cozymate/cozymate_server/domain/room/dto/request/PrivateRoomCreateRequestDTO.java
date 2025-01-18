@@ -4,8 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import org.hibernate.validator.constraints.Range;
 
+@Builder
 public record PrivateRoomCreateRequestDTO(
     @NotBlank(message = "방 이름은 필수입니다.")
     @Size(max=12, message = "방 이름은 최대 12글자입니다.")
