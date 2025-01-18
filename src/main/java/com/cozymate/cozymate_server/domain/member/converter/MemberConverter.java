@@ -29,7 +29,7 @@ public class MemberConverter {
             .birthDay(signUpRequestDTO.birthday())
             .persona(signUpRequestDTO.persona())
             .university(university)
-            .majorName("")
+            .majorName(signUpRequestDTO.majorName())
             .build();
     }
 
