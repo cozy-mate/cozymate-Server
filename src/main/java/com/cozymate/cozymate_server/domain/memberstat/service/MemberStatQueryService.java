@@ -251,8 +251,8 @@ public class MemberStatQueryService {
                 subString,
                 universityId,
                 gender,
-                searchingMember.getMemberStat().getNumOfRoommate(),
-                searchingMember.getMemberStat().getDormitoryName(),
+//                searchingMember.getMemberStat().getNumOfRoommate(),
+//                searchingMember.getMemberStat().getDormitoryName(),
                 searchingMemberId
             );
             return memberList.stream()
