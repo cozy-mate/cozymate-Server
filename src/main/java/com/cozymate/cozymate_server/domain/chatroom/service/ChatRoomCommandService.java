@@ -44,10 +44,10 @@ public class ChatRoomCommandService {
 
     private void softDeleteChatRoom(ChatRoom chatRoom, Long myId) {
         if (Objects.nonNull(chatRoom.getMemberA()) && chatRoom.getMemberA().getId().equals(myId)) {
-            chatRoom.updateMemberALastDeleteAt();
+            chatRoom.updateMemberALastDeleteAt(LocalDateTime.now());
         } else if (Objects.nonNull(chatRoom.getMemberB()) && chatRoom.getMemberB().getId()
             .equals(myId)) {
-            chatRoom.updateMemberBLastDeleteAt();
+            chatRoom.updateMemberBLastDeleteAt(LocalDateTime.now());
         } else {
             throw new GeneralException(ErrorStatus._CHATROOM_FORBIDDEN);
         }
