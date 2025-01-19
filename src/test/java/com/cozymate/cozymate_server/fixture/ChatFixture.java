@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.fixture;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
+import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 
@@ -85,5 +86,9 @@ public class ChatFixture {
             .sender(member)
             .content("가나다라마바사아자차카타파하".repeat(36)) // 504자
             .build();
+    }
+
+    public static CreateChatRequestDTO 정상_1_생성_요청_DTO(Chat chat) {
+        return new CreateChatRequestDTO(chat.getContent());
     }
 }
