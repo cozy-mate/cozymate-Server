@@ -4,58 +4,78 @@ import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
+import java.time.LocalDateTime;
 
 @SuppressWarnings("NonAsciiCharacters")
 public class ChatFixture {
 
     // 정상 더미데이터, content가 존재하는 경우
     public static Chat 정상_1(Member member, ChatRoom chatRoom) {
-        return Chat.builder()
+        Chat chat = Chat.builder()
             .id(1L)
             .chatRoom(chatRoom)
             .sender(member)
             .content("테스트 쪽지 내용 1")
             .build();
+
+        chat.setCreatedAtForTest(LocalDateTime.now().plusMinutes(10));
+
+        return chat;
     }
 
     // 정상 더미데이터, content가 존재하는 경우
     public static Chat 정상_2(Member member, ChatRoom chatRoom) {
-        return Chat.builder()
+        Chat chat = Chat.builder()
             .id(2L)
             .chatRoom(chatRoom)
             .sender(member)
             .content("테스트 쪽지 내용 2")
             .build();
+        chat.setCreatedAtForTest(LocalDateTime.now().plusMinutes(20));
+
+        return chat;
     }
 
     // 정상 더미데이터, content가 존재하는 경우
     public static Chat 정상_3(Member member, ChatRoom chatRoom) {
-        return Chat.builder()
+        Chat chat = Chat.builder()
             .id(3L)
             .chatRoom(chatRoom)
             .sender(member)
             .content("테스트 쪽지 내용 3")
             .build();
+
+        chat.setCreatedAtForTest(LocalDateTime.now().plusMinutes(30));
+
+        return chat;
     }
 
     // 정상 더미데이터, 탈퇴한 사용자에 대한 Chat인 경우
     public static Chat 정상_4(ChatRoom chatRoom) {
-        return Chat.builder()
+        Chat chat = Chat.builder()
             .id(4L)
             .chatRoom(chatRoom)
             .sender(null)
             .content("탈퇴한 사용자의 남아 있는 쪽지 내용 1")
             .build();
+
+        chat.setCreatedAtForTest(LocalDateTime.now().plusMinutes(40));
+
+        return chat;
     }
 
     // 정상 더미데이터, 탈퇴한 사용자에 대한 Chat인 경우
     public static Chat 정상_5(ChatRoom chatRoom) {
-        return Chat.builder()
+        Chat chat = Chat.builder()
             .id(5L)
             .chatRoom(chatRoom)
             .sender(null)
             .content("탈퇴한 사용자의 남아 있는 쪽지 내용 2")
             .build();
+
+        chat.setCreatedAtForTest(LocalDateTime.now().plusMinutes(50));
+
+        return chat;
     }
 
     // 에러 더미데이터, content가 빈 값인 경우
