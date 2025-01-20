@@ -167,4 +167,60 @@ public class RuleCommandServiceTest {
                 .isInstanceOf(GeneralException.class);
         }
     }
+
+    @Nested
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    class updateRule {
+
+        private Room room;
+        private Member member;
+        private Mate mate;
+
+        private Rule rule;
+        private CreateRuleRequestDTO requestDto;
+
+        @BeforeEach
+        void setUp() {
+            member = MemberFixture.정상_1(UniversityFixture.createTestUniversity()); // 기본 회원
+            room = RoomFixture.정상_1(member); // 기본 방
+            mate = MateFixture.정상_1(room, member); // 기본 방 멤버
+
+            rule = RuleFixture.정상_1(room); // 생성되었을 때 사용할 규칙
+            requestDto = RuleFixture.정상_2_생성_요청_DTO(); // 정상_1 -> 정상_2로 변경
+            given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
+                EntryStatus.JOINED)).willReturn(Optional.of(mate)); // 방 멤버 조회
+        }
+
+        @Test
+        @DisplayName("규칙이 존재하고, 멤버가 방에 속할 때 성공한다.")
+        void success_when_rule_exist() {
+            // given
+            given(ruleRepository.findById(rule.getId()))
+                .willReturn(Optional.ofNullable(rule)); // 규칙 조회
+
+            // when
+            ruleCommandService.updateRule(member, room.getId(), rule.getId(), requestDto);
+
+            // then
+            assertThat(rule.getContent()).isEqualTo(requestDto.content());
+            assertThat(rule.getMemo()).isEqualTo(requestDto.memo());
+        }
+
+        @Test
+        @DisplayName("Rule의 방 정보가 Room과 일치하지 않으면 실패한다.")
+        void failure_when_member_not_in_room() {
+            // given
+            Member member2 = MemberFixture.정상_2(UniversityFixture.createTestUniversity()); // 다른 멤버
+            Room room2 = RoomFixture.정상_2(member2); // 다른 방
+            Rule rule2 = RuleFixture.정상_2(room2); // 생성되었을 때 사용할 규칙
+
+            given(ruleRepository.findById(rule.getId()))
+                .willReturn(Optional.ofNullable(rule2)); // 규칙 조회
+
+            // when, then
+            assertThatThrownBy(
+                () -> ruleCommandService.updateRule(member, room.getId(), rule.getId(), requestDto))
+                .isInstanceOf(GeneralException.class);
+        }
+    }
 }
