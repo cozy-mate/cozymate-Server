@@ -17,7 +17,7 @@ public class TodoFixture {
     private static final Integer INITIAL_COMPLETE_BITMASK = 0;
 
     // 정상 더미데이터, 오늘 투두
-    public Todo 정상_1(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
+    public static Todo 정상_1(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
             .id(1L)
             .room(room)
@@ -31,7 +31,7 @@ public class TodoFixture {
     }
 
     // 정상 더미데이터, 오늘 투두
-    public Todo 정상_2(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
+    public static Todo 정상_2(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
             .id(2L)
             .room(room)
@@ -45,7 +45,7 @@ public class TodoFixture {
     }
 
     // 정상 더미데이터, 오늘 투두
-    public Todo 정상_3(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
+    public static Todo 정상_3(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
             .id(3L)
             .room(room)
@@ -59,7 +59,7 @@ public class TodoFixture {
     }
 
     // 정상 더미데이터, 내일 투두
-    public Todo 정상_4(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
+    public static Todo 정상_4(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
             .id(4L)
             .room(room)
@@ -73,7 +73,7 @@ public class TodoFixture {
     }
 
     // 정상 더미데이터, 내일 투두
-    public Todo 정상_5(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
+    public static Todo 정상_5(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
             .id(5L)
             .room(room)
@@ -87,7 +87,7 @@ public class TodoFixture {
     }
 
     // 정상 더미데이터, 오늘 투두, 롤에서 생성된 투두
-    public Todo 정상_6(Room room, Mate mate, List<Mate> assignedMateList, Role role) {
+    public static Todo 정상_6(Room room, Mate mate, List<Mate> assignedMateList, Role role) {
         return Todo.builder()
             .id(6L)
             .room(room)
@@ -102,7 +102,7 @@ public class TodoFixture {
     }
 
     // 에러 더미데이터, content의 최대 길이는 35자인데, 36자로 너무 긴 content
-    public Todo 너무_긴_content(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
+    public static Todo 너무_긴_content(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
             .id(7L)
             .room(room)
@@ -116,7 +116,7 @@ public class TodoFixture {
     }
 
     // 에러 더미데이터, content의 값이 빈 문자열인 경우
-    public Todo 값이_빈_content(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
+    public static Todo 값이_빈_content(Room room, Mate mate, List<Mate> assignedMateList, TodoType todoType) {
         return Todo.builder()
             .id(8L)
             .room(room)
@@ -130,7 +130,7 @@ public class TodoFixture {
     }
 
     // 에러 더미데이터, content의 값이 null인 경우
-    public Todo 값이_null인_content(Room room, Mate mate, List<Mate> assignedMateList,
+    public static Todo 값이_null인_content(Room room, Mate mate, List<Mate> assignedMateList,
         TodoType todoType) {
         return Todo.builder()
             .id(9L)
@@ -145,7 +145,7 @@ public class TodoFixture {
     }
 
     // 정상 리스트를 반환하는 함수, room, mate, 할당자, todoType이 모두 동일한 Todo 생성
-    public List<Todo> 정상_List(int size, Room room, Mate mate, List<Mate> assignedMateList,
+    public static List<Todo> 정상_List(int size, Room room, Mate mate, List<Mate> assignedMateList,
         TodoType todoType) {
 
         List<Todo> todoList = new ArrayList<>();

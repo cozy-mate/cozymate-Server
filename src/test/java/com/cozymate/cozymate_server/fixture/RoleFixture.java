@@ -20,7 +20,7 @@ public class RoleFixture {
     private static final int REPEAT_UNDERFLOW = -1;
 
     // 정상 더미데이터, 매주 월요일마다 반복되는 role
-    public Role 정상_1(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 정상_1(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(1L)
             .room(room)
@@ -32,7 +32,7 @@ public class RoleFixture {
     }
 
     // 정상 더미데이터, 매일 반복되는 role
-    public Role 정상_2(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 정상_2(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(2L)
             .room(room)
@@ -44,7 +44,7 @@ public class RoleFixture {
     }
 
     // 정상 더미데이터, 화요일, 목요일마다 반복되는 role
-    public Role 정상_3(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 정상_3(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(3L)
             .room(room)
@@ -56,7 +56,7 @@ public class RoleFixture {
     }
 
     // 정상 더미데이터, 월요일부터 금요일까지 반복되는 role
-    public Role 정상_4(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 정상_4(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(4L)
             .room(room)
@@ -68,7 +68,7 @@ public class RoleFixture {
     }
 
     // 정상 더미데이터, 반복 없는 role
-    public Role 정상_5(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 정상_5(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(5L)
             .room(room)
@@ -80,7 +80,7 @@ public class RoleFixture {
     }
 
     // 에러 더미데이터, content에 아무것도 적혀있지 않음. content는 최소 1자라도 적혀있어야 함.
-    public Role 값이_비어있는_content(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 값이_비어있는_content(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(6L)
             .room(room)
@@ -92,7 +92,7 @@ public class RoleFixture {
     }
 
     // 에러 더미데이터, content가 null인 경우. content 값이 빌 수 없음
-    public Role 값이_null인_content(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 값이_null인_content(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(7L)
             .room(room)
@@ -104,7 +104,7 @@ public class RoleFixture {
     }
 
     // 에러 더미데이터, repeatDays의 값은 127이 최대임. 하지만 그것보다 더 높은 값이 들어옴
-    public Role 값이_초과된_repeatDays(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 값이_초과된_repeatDays(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(8L)
             .room(room)
@@ -116,7 +116,7 @@ public class RoleFixture {
     }
 
     // 에러 더미데이터, repeatDays의 값은 0이 최소임. 하지만 그것보다 더 낮은 값이 들어옴
-    public Role 값이_음수인_repeatDays(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 값이_음수인_repeatDays(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(9L)
             .room(room)
@@ -128,7 +128,7 @@ public class RoleFixture {
     }
 
     // 에러 더미데이터, content의 최대 길이는 25자임. 하지만 더 긴 값(36자)이 들어옴
-    public Role 너무_긴_content(Room room, Mate mate, List<Mate> assignedMateList) {
+    public static Role 너무_긴_content(Room room, Mate mate, List<Mate> assignedMateList) {
         return Role.builder()
             .id(10L)
             .room(room)
@@ -140,7 +140,7 @@ public class RoleFixture {
     }
 
     // 정상 리스트를 반환하는 함수, room, mate, assignedMateList는 모두 동일한 Role 생성
-    public List<Role> 정상_List(int size, Room room, Mate mate, List<Mate> assignedMateList) {
+    public static List<Role> 정상_List(int size, Room room, Mate mate, List<Mate> assignedMateList) {
         List<Role> roleList = new ArrayList<>();
 
         IntStream.range(0, size).forEach(i ->
