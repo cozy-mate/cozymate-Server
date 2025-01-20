@@ -189,7 +189,7 @@ class ChatRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberA가 ChatRoom을 삭제할 때, memberB가 탈퇴(null)인 경우 물리적으로 삭제한다.")
+        @DisplayName("memberA가 ChatRoom을 삭제할 때, memberB가 탈퇴(null)인 경우, ChatRoom과 해당 ChatRoom의 Chat을 물리적으로 삭제한다.")
         void success_when_memberB_is_null() {
             // given
             given(chatRoomRepository.findById(memberBIsNullChatRoom.getId())).willReturn(
@@ -206,7 +206,7 @@ class ChatRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberB가 ChatRoom을 삭제할 때, memberA가 탈퇴(null)인 경우 물리적으로 삭제한다.")
+        @DisplayName("memberB가 ChatRoom을 삭제할 때, memberA가 탈퇴(null)인 경우, ChatRoom과 해당 ChatRoom의 Chat을 물리적으로 삭제한다.")
         void success_when_memberA_is_null() {
             // given
             given(chatRoomRepository.findById(memberAIsNullChatRoom.getId())).willReturn(
