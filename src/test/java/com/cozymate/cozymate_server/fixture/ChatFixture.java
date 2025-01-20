@@ -78,10 +78,49 @@ public class ChatFixture {
         return chat;
     }
 
+    public static Chat 정상_6(Member member, ChatRoom chatRoom) {
+        Chat chat = Chat.builder()
+            .id(6L)
+            .chatRoom(chatRoom)
+            .sender(member)
+            .content("테스트 쪽지 내용 4")
+            .build();
+
+        chat.setCreatedAtForTest(LocalDateTime.now().minusMinutes(30));
+
+        return chat;
+    }
+
+    public static Chat 정상_7(Member member, ChatRoom chatRoom) {
+        Chat chat = Chat.builder()
+            .id(7L)
+            .chatRoom(chatRoom)
+            .sender(member)
+            .content("테스트 쪽지 내용 5")
+            .build();
+
+        chat.setCreatedAtForTest(LocalDateTime.now().minusMinutes(20));
+
+        return chat;
+    }
+
+    public static Chat 정상_8(Member member, ChatRoom chatRoom) {
+        Chat chat = Chat.builder()
+            .id(8L)
+            .chatRoom(chatRoom)
+            .sender(member)
+            .content("테스트 쪽지 내용 6")
+            .build();
+
+        chat.setCreatedAtForTest(LocalDateTime.now().minusMinutes(10));
+
+        return chat;
+    }
+
     // 에러 더미데이터, content가 빈 값인 경우
     public static Chat 값이_비어있는_content(Member member, ChatRoom chatRoom) {
         return Chat.builder()
-            .id(6L)
+            .id(9L)
             .chatRoom(chatRoom)
             .sender(member)
             .content("")
@@ -91,7 +130,7 @@ public class ChatFixture {
     // 에러 더미데이터, content가 null인 경우
     public static Chat 값이_null인_content(Member member, ChatRoom chatRoom) {
         return Chat.builder()
-            .id(7L)
+            .id(10L)
             .chatRoom(chatRoom)
             .sender(member)
             .content(null)
@@ -101,7 +140,7 @@ public class ChatFixture {
     // 에러 더미데이터, content가 500자 초과인 경우
     public static Chat 값이_500자_초과인_content(Member member, ChatRoom chatRoom) {
         return Chat.builder()
-            .id(8L)
+            .id(11L)
             .chatRoom(chatRoom)
             .sender(member)
             .content("가나다라마바사아자차카타파하".repeat(36)) // 504자
