@@ -133,7 +133,7 @@ public class RuleCommandServiceTest {
             room = RoomFixture.정상_1(member); // 기본 방
             mate = MateFixture.정상_1(room, member); // 기본 방 멤버
 
-            rule = RuleFixture.정상_1(room); // 생성되었을 때 사용할 규칙
+            rule = RuleFixture.정상_1(room); // 삭제할 규칙
             given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
                 EntryStatus.JOINED)).willReturn(Optional.of(mate)); // 방 멤버 조회
         }
@@ -156,7 +156,7 @@ public class RuleCommandServiceTest {
             // given
             Member member2 = MemberFixture.정상_2(UniversityFixture.createTestUniversity()); // 다른 멤버
             Room room2 = RoomFixture.정상_2(member2); // 다른 방
-            Rule rule2 = RuleFixture.정상_2(room2); // 생성되었을 때 사용할 규칙
+            Rule rule2 = RuleFixture.정상_2(room2); // room2에 속한 Rule을 room1에 속한 Mate가 조회
 
             given(ruleRepository.findById(rule.getId()))
                 .willReturn(Optional.ofNullable(rule2)); // 규칙 조회
@@ -185,7 +185,7 @@ public class RuleCommandServiceTest {
             room = RoomFixture.정상_1(member); // 기본 방
             mate = MateFixture.정상_1(room, member); // 기본 방 멤버
 
-            rule = RuleFixture.정상_1(room); // 생성되었을 때 사용할 규칙
+            rule = RuleFixture.정상_1(room); // 수정할 때 사용할 규칙
             requestDto = RuleFixture.정상_2_생성_요청_DTO(); // 정상_1 -> 정상_2로 변경
             given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
                 EntryStatus.JOINED)).willReturn(Optional.of(mate)); // 방 멤버 조회
@@ -212,7 +212,7 @@ public class RuleCommandServiceTest {
             // given
             Member member2 = MemberFixture.정상_2(UniversityFixture.createTestUniversity()); // 다른 멤버
             Room room2 = RoomFixture.정상_2(member2); // 다른 방
-            Rule rule2 = RuleFixture.정상_2(room2); // 생성되었을 때 사용할 규칙
+            Rule rule2 = RuleFixture.정상_2(room2); // room2에 속한 Rule을 room1에 속한 Mate가 조회
 
             given(ruleRepository.findById(rule.getId()))
                 .willReturn(Optional.ofNullable(rule2)); // 규칙 조회
