@@ -35,21 +35,20 @@ public class MemberStatUtil {
         boolean foundSame = false;
         boolean foundDifferent = false;
 
-        T firstValue = getter.apply(memberStatList.get(0).getMember(), memberStatList.get(0));
-
-        // FIXME: 첫번째 Stat과만 다름 여부를 판단하고 있어, WHITE인 경우도 RED일 때가 있음.
-        for (int i = 1; i < memberStatList.size(); i++) {
-
+        // 리스트 내 모든 값 비교
+        for (int i = 0; i < memberStatList.size(); i++) {
             T currentValue = getter.apply(memberStatList.get(i).getMember(), memberStatList.get(i));
+            for (int j = i + 1; j < memberStatList.size(); j++) {
+                T comparisonValue = getter.apply(memberStatList.get(j).getMember(), memberStatList.get(j));
+                if (currentValue.equals(comparisonValue)) {
+                    foundSame = true;
+                } else {
+                    foundDifferent = true;
+                }
 
-            if (firstValue.equals(currentValue)) {
-                foundSame = true;
-            } else {
-                foundDifferent = true;
-            }
-
-            if (foundSame && foundDifferent) {
-                return DifferenceStatus.WHITE;
+                if (foundSame && foundDifferent) {
+                    return DifferenceStatus.WHITE;
+                }
             }
         }
 
@@ -59,6 +58,7 @@ public class MemberStatUtil {
             return DifferenceStatus.RED;
         }
     }
+
 
     public static DifferenceStatus compareField(
         Object memberStatMapValue, Object criteriaMemberStatValue){
