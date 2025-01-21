@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.memberstat_v2;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
+@Getter
 public class MemberUniversityStat {
     private Integer admissionYear;
 

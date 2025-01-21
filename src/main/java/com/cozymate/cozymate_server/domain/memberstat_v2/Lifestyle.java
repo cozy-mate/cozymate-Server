@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.memberstat_v2;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Range;
 
@@ -10,6 +11,7 @@ import org.hibernate.validator.constraints.Range;
  * 코지메이트 질문에 대한 답변 코지메이트 기획상으로 통제 가능하기에 모두 정수
  */
 @Builder
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
@@ -64,6 +66,9 @@ public class Lifestyle {
 
     @Range(min = 0, max = 4)
     private Integer cleannessSensitivity;
+
+    @Range(min = 0, max = 4)
+    private Integer noiseSensitivity;
 
     @Range(min = 0, max = 4)
     private Integer cleaningFrequency;
