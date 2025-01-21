@@ -22,7 +22,7 @@ public interface MemberStatRepository extends
     @Query("SELECT ms, ms.member.id FROM MemberStat ms WHERE ms.member.id IN :memberIds")
     List<Tuple> findMemberStatsAndMemberIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
 
-    //Eager Fetch가 필요한 경우
+    //멤버의 Eager Fetch가 필요한 경우
     @Query("SELECT ms FROM MemberStat ms JOIN FETCH ms.member")
     List<MemberStat> findAllWithMember();
 

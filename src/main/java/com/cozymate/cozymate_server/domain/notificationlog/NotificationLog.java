@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.notificationlog;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,6 +35,7 @@ public class NotificationLog extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private NotificationCategory category;
 
+    @Column(nullable = false)
     private String content;
 
     private Long targetId;

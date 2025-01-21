@@ -284,15 +284,24 @@ public class RoomQueryService {
         Long universityId = member.getUniversity().getId();
         Gender gender = member.getGender();
 
-        if (memberStatRepository.existsByMemberId(memberId)) {
-            List<Room> roomList = roomRepository.findMatchingPublicRooms(
-                keyword,
-                universityId,
-                gender,
-                member.getMemberStat().getNumOfRoommate(),
-                member.getMemberStat().getDormitoryName()
-            );
+//        if (memberStatRepository.existsByMemberId(memberId)) {
+//            List<Room> roomList = roomRepository.findMatchingPublicRooms(
+//                keyword,
+//                universityId,
+//                gender,
+//                member.getMemberStat().getNumOfRoommate(),
+//                member.getMemberStat().getDormitoryName()
+//            );
 
+        // 학교, 성별로만 필터링
+        List<Room> roomList = roomRepository.findMatchingPublicRooms(
+            keyword,
+            universityId,
+            gender
+        );
+
+        // memberstat 있는 경우 일치율 순으로 정렬
+        if (memberStatRepository.existsByMemberId(memberId)) {
             return roomList.stream()
                 .map(room -> {
                     List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
@@ -309,13 +318,7 @@ public class RoomQueryService {
                 .toList();
         }
 
-        // memberStat이 존재하지 않을 때
-        List<Room> roomList = roomRepository.findMatchingPublicRooms(
-            keyword,
-            universityId,
-            gender
-        );
-
+        // memberstat 없는 경우 가나다 순으로 정렬
         return roomList.stream()
             .map(room -> {
                 List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);

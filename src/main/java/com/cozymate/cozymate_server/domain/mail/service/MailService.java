@@ -76,25 +76,18 @@ public class MailService {
         memberDetails.member().verifyMemberUniversity(memberUniversity, verifyDTO.majorName());
         memberRepository.save(memberDetails.member());
 
+        verifyAuthenticationCode(memberDetails.member(), verifyDTO.code());
         TokenResponseDTO tokenResponseDTO = authService.generateMemberTokenDTO(memberDetails);
         return MailConverter.toVerifyResponseDTO(tokenResponseDTO);
     }
 
     public String isVerified(Member member) {
-        if(Role.USER_VERIFIED.equals(member.getRole())) {
-            Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
-                member.getId());
-            if (mailAuthentication.isPresent()){
-                return mailAuthentication.get().getMailAddress();
-            }
+        Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
+            member.getId());
+        if (mailAuthentication.isPresent() && Boolean.TRUE.equals(
+            mailAuthentication.get().getIsVerified())) {
+            return mailAuthentication.get().getMailAddress();
         }
-        // TODO: 인증했을 때 getIsVerified가 변경되지 않아서 문제 발생 -> 일단 조치
-//        Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
-//            member.getId());
-//        if (mailAuthentication.isPresent() && Boolean.TRUE.equals(
-//            mailAuthentication.get().getIsVerified())) {
-//            return mailAuthentication.get().getMailAddress();
-//        }
         return "";
     }
 

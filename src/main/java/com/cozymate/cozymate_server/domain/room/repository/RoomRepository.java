@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,8 +25,13 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     Optional<Room> findByInviteCode(String inviteCode);
 
+    /**
+     * 사용자에게 방 추천을 해줄 때 조회할 수 있는 방 목록을 보는 쿼리
+     * roomHashtags, hashtag로 인한 N+1 문제를 해결하기 위해 EntityGraph 사용
+     */
+    @EntityGraph(attributePaths = {"roomHashtags", "roomHashtags.hashtag"})
     @Query("""
-        SELECT r FROM Room r
+        SELECT distinct r FROM Room r
         WHERE r.roomType = :roomType
         AND r.status != :status
         AND r.maxMateNum > r.numOfArrival
@@ -61,6 +67,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
         "AND r.maxMateNum > r.numOfArrival " +
         "AND member.university.id = :universityId " +
         "AND member.gender = :gender " +
-        "AND r.name LIKE %:keyword% ")
+        "AND LOWER(r.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Room> findMatchingPublicRooms(String keyword, Long universityId, Gender gender);
 }

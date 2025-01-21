@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,9 +30,11 @@ public class Rule extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Room room;
 
+    @Size(max = 50)
     @Column(nullable = false, length = 50)
     private String content;
 
+    @Size(max = 50)
     @Column(nullable = false, length = 50)
     private String memo;
 

@@ -27,6 +27,7 @@ public class Fcm extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
+    @Column(nullable = false)
     private String token;
 
     private boolean isValid;

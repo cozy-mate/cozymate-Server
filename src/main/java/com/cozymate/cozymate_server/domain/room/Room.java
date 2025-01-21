@@ -16,8 +16,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AccessLevel;
@@ -25,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 
 @Getter
 @AllArgsConstructor
@@ -37,16 +43,23 @@ public class Room extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @Size(max = 12)
+    @Pattern(regexp = "^(?!\\s)[가-힣a-zA-Z0-9\\s]+(?<!\\s)$")
     private String name;
 
     private String inviteCode;
 
-    private int maxMateNum = 1;
+    @NotNull
+    @Range(min=2, max=6)
+    private int maxMateNum;
 
     private LocalDate enabledAt;
 
     // 캐릭터 이름이 삭제된다는 기획상의 수정으로 프론트에서 정수로 받고,
     // s3에서 /persona/1 과 같은 식으로 가져오는게 좋아보입니다.
+    @NotNull
+    @Range(min=1, max=16)
     private Integer profileImage;
 
     @Enumerated(EnumType.STRING)
@@ -63,7 +76,8 @@ public class Room extends BaseTimeEntity {
 
     private int numOfArrival = 1;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "feed_id", referencedColumnName = "id") // 외래 키 관리
     private Feed feed;
 
     @Enumerated(EnumType.STRING)

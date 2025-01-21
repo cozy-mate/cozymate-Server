@@ -17,7 +17,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PRS=$(gh pr list --state open --json number,title,createdAt,reviewRequests,reviews | jq -c '.')
+          PRS=$(gh pr list --state open --json number,title,createdAt,reviewRequests | jq -c '.')
           echo "$PRS" | jq .
           echo "PRS=$PRS" >> $GITHUB_ENV
 
@@ -63,13 +63,47 @@ jobs:
             MESSAGE=$(cat "$TEMP_FILE") # 임시 파일의 내용을 MESSAGE로 읽어오기
             rm "$TEMP_FILE" # 임시 파일 삭제
             
-            echo "$MESSAGE"
-            
+            # echo "$MESSAGE"
+          
+            CLEANED_MESSAGE=$(echo "$MESSAGE" | tr -d '\000-\011\013-\037' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+          
+          
+          
             if cmp -s "$TEMP_FILE" <(echo ":bell: **리뷰가 완료되지 않은 PR 목록:**\n"); then
               echo ":white_check_mark: 모든 PR 리뷰가 완료되었습니다!" > "$TEMP_FILE"
             fi
-  
-            JSON_MESSAGE=$(echo "$MESSAGE" | sed ':a;N;$!ba;s/\n/\\n/g')
+            
+            # 1. JSON 안전성을 위한 특수 문자 처리
+            JSON_MESSAGE=$(echo "$CLEANED_MESSAGE" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e ':a;N;$!ba;s/\n/\\n/g')
+            
+            # 2. 문자열 길이 확인 (2000자 제한)
+            if [ ${#JSON_MESSAGE} -gt 2000 ]; then
+              echo "Error: 메시지가 너무 깁니다 (2000자 제한 초과)."
+              exit 1
+            fi
           
-            curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$JSON_MESSAGE\"}" $DISCORD_WEBHOOK_URL
+            # 3. JSON 데이터 생성
+            JSON_PAYLOAD="{\"content\": \"$JSON_MESSAGE\"}"
+            
+            # 4. JSON 유효성 검사
+            echo "$JSON_PAYLOAD" | jq empty
+            if [ $? -ne 0 ]; then
+              echo "Error: 유효하지 않은 JSON 데이터입니다."
+              exit 1
+            fi
+          
+            # 5. curl 명령어로 Discord Webhook에 메시지 전송
+            curl -X POST -H "Content-Type: application/json" \
+              -d "$JSON_PAYLOAD" \
+              "$DISCORD_WEBHOOK_URL"
+            
+            # 6. 전송 결과 확인
+            if [ $? -eq 0 ]; then
+              echo "메시지가 성공적으로 전송되었습니다!"
+            else
+              echo "Error: 메시지 전송에 실패했습니다."
+            fi
           fi
+          
+          
+
