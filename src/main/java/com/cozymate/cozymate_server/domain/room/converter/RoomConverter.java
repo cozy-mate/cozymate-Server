@@ -17,7 +17,7 @@ import java.util.List;
 
 public class RoomConverter {
 
-    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode, Gender gender, University university) {
+    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode) {
         return Room.builder()
             .name(request.name())
             .profileImage(request.persona())
@@ -26,8 +26,6 @@ public class RoomConverter {
             .status(RoomStatus.ENABLE)
             .roomType(RoomType.PRIVATE)
             .numOfArrival(1)
-            .gender(gender)
-            .university(university)
             .build();
     }
 

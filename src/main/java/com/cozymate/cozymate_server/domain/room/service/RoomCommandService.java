@@ -84,11 +84,8 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        Gender gender = creator.getGender();
-        University university = creator.getUniversity();
-
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toPrivateRoom(request, inviteCode, gender, university);
+        Room room = RoomConverter.toPrivateRoom(request, inviteCode);
         room.enableRoom();
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
@@ -607,18 +604,18 @@ public class RoomCommandService {
     }
 
     public void changeToPublicRoom(Long roomId, Long memberId) {
-        memberRepository.findById(memberId)
+        Member manager = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+        Mate managerMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
                 EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장이 아니면 예외 발생
-        if (!member.isRoomManager()) {
+        if (!managerMate.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
@@ -626,7 +623,22 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._PUBLIC_ROOM);
         }
 
-        room.changeToPublicRoom();
+        List<Mate> mates = mateRepository.findFetchMemberByRoomAndEntryStatus(room, EntryStatus.JOINED);
+
+        Gender roomGender = manager.getGender();
+        University roomUniversity = manager.getUniversity();
+
+        for (Mate mate : mates) {
+            Member member = mate.getMember();
+            if (!member.getGender().equals(roomGender)) {
+                throw new GeneralException(ErrorStatus._MISMATCH_GENDER);
+            }
+            if (!member.getUniversity().equals(roomUniversity)) {
+                throw new GeneralException(ErrorStatus._MISMATCH_UNIVERSITY);
+            }
+        }
+
+        room.changeToPublicRoom(roomGender, roomUniversity);
     }
 
     public void changeToPrivateRoom(Long roomId, Long memberId) {

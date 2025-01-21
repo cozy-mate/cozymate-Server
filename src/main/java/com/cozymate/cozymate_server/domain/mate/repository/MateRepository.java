@@ -52,6 +52,9 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     List<Mate> findAllByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
 
+    @Query("SELECT m FROM Mate m JOIN FETCH m.member WHERE m.room = :room AND m.entryStatus = :entryStatus")
+    List<Mate> findFetchMemberByRoomAndEntryStatus(@Param("room") Room room, @Param("entryStatus") EntryStatus entryStatus);
+
     List<Mate> findAllByMemberBirthDayAndEntryStatus(LocalDate birthday, EntryStatus entryStatus);
 
     // MemberBirthDay의 Localdate 값에서 Month와 Day가 같은 Member들을 찾는다.

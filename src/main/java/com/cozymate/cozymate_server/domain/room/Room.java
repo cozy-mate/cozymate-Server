@@ -91,8 +91,10 @@ public class Room extends BaseTimeEntity {
         this.profileImage = newProfileImage;
     }
 
-    public void changeToPublicRoom() {
+    public void changeToPublicRoom(Gender gender, University university) {
         this.roomType = RoomType.PUBLIC;
+        this.gender = gender;
+        this.university = university;
     }
 
     public void changeToPrivateRoom() {
@@ -100,6 +102,8 @@ public class Room extends BaseTimeEntity {
         if (this.getStatus() != RoomStatus.ENABLE) {
             enableRoom();
         }
+        this.gender = null;
+        this.university = null;
     }
 
     public void enableRoom() {
