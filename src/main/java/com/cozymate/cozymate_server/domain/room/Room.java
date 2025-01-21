@@ -72,8 +72,6 @@ public class Room extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private University university;
 
-    private String dormitoryName;
-
     public void arrive() {
         numOfArrival++;
     }

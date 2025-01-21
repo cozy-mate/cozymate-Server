@@ -17,7 +17,7 @@ import java.util.List;
 
 public class RoomConverter {
 
-    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode, String dormitoryName, Gender gender, University university) {
+    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode, Gender gender, University university) {
         return Room.builder()
             .name(request.name())
             .profileImage(request.persona())
@@ -26,13 +26,12 @@ public class RoomConverter {
             .status(RoomStatus.ENABLE)
             .roomType(RoomType.PRIVATE)
             .numOfArrival(1)
-            .dormitoryName(dormitoryName)
             .gender(gender)
             .university(university)
             .build();
     }
 
-    public static Room toPublicRoom(PublicRoomCreateRequestDTO request, String inviteCode, String dormitoryName, Gender gender, University university) {
+    public static Room toPublicRoom(PublicRoomCreateRequestDTO request, String inviteCode, Gender gender, University university) {
         return Room.builder()
             .name(request.name())
             .profileImage(request.persona())
@@ -41,7 +40,6 @@ public class RoomConverter {
             .status(RoomStatus.WAITING)
             .roomType(RoomType.PUBLIC)
             .numOfArrival(1)
-            .dormitoryName(dormitoryName)
             .gender(gender)
             .university(university)
             .build();

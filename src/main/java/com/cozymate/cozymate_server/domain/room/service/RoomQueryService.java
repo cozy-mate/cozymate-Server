@@ -260,11 +260,6 @@ public class RoomQueryService {
     }
 
     public String getDormitoryName(Room room) {
-        // Room에 dormitoryName 필드가 있는 경우
-        if (room.getDormitoryName() != null) {
-            return room.getDormitoryName();
-        }
-
         Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
         return Optional.ofNullable(managerMate.getMember().getMemberStat())

@@ -84,15 +84,11 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
-        String dormitoryName = "";
-        if (creator.getMemberStat() != null) {
-            dormitoryName = creator.getMemberStat().getDormitoryName();
-        }
         Gender gender = creator.getGender();
         University university = creator.getUniversity();
 
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toPrivateRoom(request, inviteCode, dormitoryName, gender, university);
+        Room room = RoomConverter.toPrivateRoom(request, inviteCode, gender, university);
         room.enableRoom();
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
@@ -121,12 +117,11 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
         }
 
-        String dormitoryName = creator.getMemberStat().getDormitoryName();
         Gender gender = creator.getGender();
         University university = creator.getUniversity();
 
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toPublicRoom(request, inviteCode, dormitoryName, gender, university);
+        Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university);
 
         // 해시태그 저장 과정
         roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
