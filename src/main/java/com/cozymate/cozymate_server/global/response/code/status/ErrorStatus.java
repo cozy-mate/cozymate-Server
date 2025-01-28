@@ -65,6 +65,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _PUBLIC_ROOM(HttpStatus.BAD_REQUEST, "ROOM413", "공개방입니다."),
     _PRIVATE_ROOM(HttpStatus.BAD_REQUEST, "ROOM414", "비공개방입니다."),
     _INVALID_SORT_TYPE(HttpStatus.BAD_REQUEST, "ROOM415", "유효하지 않은 정렬 타입입니다."),
+    _MISMATCH_GENDER(HttpStatus.BAD_REQUEST, "ROOM416", "일치하지 않는 성별입니다."),
+    _MISMATCH_UNIVERSITY(HttpStatus.BAD_REQUEST, "ROOM417", "일치하지 않는 학교입니다."),
 
 
     // Hashtag

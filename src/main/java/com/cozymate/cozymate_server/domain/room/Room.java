@@ -1,9 +1,11 @@
 package com.cozymate.cozymate_server.domain.room;
 
 import com.cozymate.cozymate_server.domain.feed.Feed;
+import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
+import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -13,6 +15,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -77,6 +80,12 @@ public class Room extends BaseTimeEntity {
     @JoinColumn(name = "feed_id", referencedColumnName = "id") // 외래 키 관리
     private Feed feed;
 
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private University university;
+
     public void arrive() {
         numOfArrival++;
     }
@@ -96,8 +105,10 @@ public class Room extends BaseTimeEntity {
         this.profileImage = newProfileImage;
     }
 
-    public void changeToPublicRoom() {
+    public void changeToPublicRoom(Gender gender, University university) {
         this.roomType = RoomType.PUBLIC;
+        this.gender = gender;
+        this.university = university;
     }
 
     public void changeToPrivateRoom() {
@@ -105,6 +116,8 @@ public class Room extends BaseTimeEntity {
         if (this.getStatus() != RoomStatus.ENABLE) {
             enableRoom();
         }
+        this.gender = null;
+        this.university = null;
     }
 
     public void enableRoom() {
