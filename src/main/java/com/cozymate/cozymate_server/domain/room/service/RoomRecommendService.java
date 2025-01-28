@@ -26,12 +26,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class RoomRecommendService {
 
     private final RoomRepository roomRepository;
@@ -110,6 +112,20 @@ public class RoomRecommendService {
     private List<Room> getRoomList(Member member) {
         // 모든 공개 방을 가져옴 (Public 방 중에서, Disable 상태가 아니며, 인원이 꽉 차지 않은 방)
         List<Room> roomList = roomRepository.findAllRoomListCanDisplay(RoomType.PUBLIC, RoomStatus.DISABLE);
+
+        // 대학교 필터링, 성별 필터링 -> TODO: 추후 room으로 해당 데이터가 저장되면 삭제 후 위 쿼리 수정
+        List<Mate> managerList = mateRepository.findAllByRoomIdListAndIsRoomManagerAndEntryStatus(
+            roomList.stream().map(Room::getId).toList(), Boolean.TRUE, EntryStatus.JOINED);
+
+        // 대학 필터링
+        managerList.stream()
+            .filter(manager -> !manager.getMember().getUniversity().getId().equals(member.getUniversity().getId()))
+            .forEach(manager -> roomList.remove(manager.getRoom()));
+
+        // 성별 필터링
+        managerList.stream()
+            .filter(manager -> !manager.getMember().getGender().equals(member.getGender()))
+            .forEach(manager -> roomList.remove(manager.getRoom()));
 
         // 본인이 참여한 방 가져오기
         Optional<Room> joinedRoom = mateRepository.findByMemberAndEntryStatus(member, EntryStatus.JOINED)
