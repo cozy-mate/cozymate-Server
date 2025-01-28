@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.memberstat_v2.memberstat.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.memberstat_v2.MemberStatMigrationService;
 import com.cozymate.cozymate_server.domain.memberstat_v2.memberstat.dto.request.CreateMemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat_v2.memberstat.dto.response.MemberStatDetailAndRoomIdAndEqualityResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat_v2.memberstat.dto.response.MemberStatDetailWithMemberDetailResponseDTO;
@@ -44,6 +45,9 @@ public class MemberStatController_v2 {
     private final MemberStatCommandService_v2 memberStatService;
 
     private final MemberStatQueryService_v2 memberStatQueryService;
+
+    private final MemberStatMigrationService migrationService;
+
     @Operation(
         summary = "[말즈] 사용자 상세정보 등록",
         description = "사용자의 토큰을 넣어 사용하고, body로 사용자 상세정보를 넣어 사용합니다.\n\n"
@@ -63,7 +67,8 @@ public class MemberStatController_v2 {
         @Valid @RequestBody CreateMemberStatRequestDTO createMemberStatRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatService.createMemberStat(memberDetails.member(),createMemberStatRequestDTO)
+                memberStatService.createMemberStat(memberDetails.member(),
+                    createMemberStatRequestDTO)
             ));
     }
 
@@ -131,6 +136,7 @@ public class MemberStatController_v2 {
                 memberStatQueryService.getMemberStatWithId(memberDetails.member(), memberId)
             ));
     }
+
     @Operation(
         summary = "[포비] 기숙사 인원 미정 여부 조회",
         description = "사용자 토큰을 넣고 사용합니다. 결과 값으로 정수를 리턴합니다.\n\n"
@@ -373,7 +379,7 @@ public class MemberStatController_v2 {
 
     @GetMapping("/search")
     @Operation(
-        summary = "[포비] 사용자 검색",
+        summary = "[말즈] 사용자 검색",
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
             + "검색어의 일부만 일치해도, 일치율이 높은 순으로 결과를 리턴합니다.\n\n"
             + "완전일치 순으로 주는게 좋긴 하지만, 우선 일치율, ID 순으로 구현했습니다.\n\n"
@@ -396,9 +402,20 @@ public class MemberStatController_v2 {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberSearchResponse(
-                    memberDetails.member(),keyword
+                    memberDetails.member(), keyword
                 )
             )
         );
     }
+
+    @PostMapping("/migrate")
+    @Operation(
+        summary = "[말즈] 사용자 상세정보 마이그레이션",
+        description = "요청자의 토큰을 넣고 사용합니다.\n\n"
+    )
+//    @Deprecated
+    public void migrate() {
+        migrationService.migrate();
+    }
+
 }

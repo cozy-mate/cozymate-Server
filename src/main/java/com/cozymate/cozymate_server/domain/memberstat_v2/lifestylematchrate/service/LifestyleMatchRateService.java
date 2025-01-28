@@ -98,7 +98,7 @@ public class LifestyleMatchRateService {
 
     @Transactional
     public void calculateAllLifeStyleMatchRate() {
-        universityRepository.findAll().parallelStream()
+        universityRepository.findAll()
             .forEach(university -> {
                 calculateAllLifeStyleMatchRateWithSameUniversityAndGender(
                     university, Gender.MALE);
@@ -112,8 +112,6 @@ public class LifestyleMatchRateService {
         Set<MemberStatTest> memberStatSet = new HashSet<>(
             memberStatRepository.findByMemberUniversityAndGender(gender, university.getId()));
 
-        List<LifestyleMatchRate> newOrUpdatedRates = new ArrayList<>();
-
         for (MemberStatTest memberA : memberStatSet) {
             for (MemberStatTest memberB : memberStatSet) {
                 if (memberA.equals(memberB)) {
@@ -122,23 +120,17 @@ public class LifestyleMatchRateService {
                 Long idA = memberA.getMember().getId();
                 Long idB = memberB.getMember().getId();
 
-                LifestyleMatchRate rate = lifestyleMatchRateRepository.findById(
-                    new LifestyleMatchRate.LifestyleMatchRateId(idA, idB)).orElse(null);
+                Integer matchRate = MemberMatchRateCalculator.calculateLifestyleMatchRate(
+                    memberA.getLifestyle(), memberB.getLifestyle()
+                );
 
-                int newMatchRate = MemberMatchRateCalculator.calculateLifestyleMatchRate(
-                    memberA.getLifestyle(), memberB.getLifestyle());
+                LifestyleMatchRate rate = new LifestyleMatchRate(idA, idB, matchRate);
 
-                if (rate != null) {
-                    rate.updateMatchRate(newMatchRate);
-                } else {
-                    rate = new LifestyleMatchRate(idA, idB, newMatchRate);
-                }
-
-                newOrUpdatedRates.add(rate);
+                lifestyleMatchRateRepository.save(rate);
+                log.info("{}와 {}의 일치율 : {} 저장완료", memberA.getMember().getId(),
+                    memberB.getMember().getId(), rate.getMatchRate());
             }
         }
-
-        lifestyleMatchRateRepository.saveAll(newOrUpdatedRates);
     }
 
     private Map<Long, Integer> createMatchRateMap(

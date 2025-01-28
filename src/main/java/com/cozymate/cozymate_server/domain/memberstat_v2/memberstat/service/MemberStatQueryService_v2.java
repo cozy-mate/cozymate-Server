@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -177,10 +178,13 @@ public class MemberStatQueryService_v2 {
     }
 
 
+    @Transactional
     public List<MemberStatSearchResponseDTO> getMemberSearchResponse(Member searchingMember,
         String keyword) {
 
-        if (!existStat(searchingMember)) {
+        Optional<MemberStatTest> criteriaMemberStat = memberStatRepository.findByMemberId(
+            searchingMember.getId());
+        if (criteriaMemberStat.isEmpty()) {
             return memberRepository.findMembersWithMatchingCriteria(
                     keyword,
                     searchingMember.getUniversity().getId(),
@@ -192,8 +196,8 @@ public class MemberStatQueryService_v2 {
         }
 
         Map<MemberStatTest, Integer> memberStatLifestyleMatchRateMap =
-            memberStatRepository.getMemberStatsWithMatchRate(
-                searchingMember.getId());
+            memberStatRepository.getMemberStatsWithKeywordAndMatchRate(
+                criteriaMemberStat.get(), keyword);
 
         return memberStatLifestyleMatchRateMap.entrySet().stream()
             .map(entry -> {

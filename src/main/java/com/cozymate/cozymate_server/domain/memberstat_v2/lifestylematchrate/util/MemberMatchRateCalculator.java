@@ -70,7 +70,7 @@ public class MemberMatchRateCalculator {
         if (value1.equals(value2)) {
             return ADDITIONAL_SCORE;
         }
-        return ADDITIONAL_SCORE;
+        return NO_SCORE;
     }
 
     private static int calculateTimeScore(Integer time1, Integer time2) {

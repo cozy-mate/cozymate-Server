@@ -43,20 +43,48 @@ public class QuestionAnswerMapper {
     }
 
     public static int getIndex(String key, String value) {
+        int caseHandler = handleLegacyCase(key, value);
+        if (caseHandler != -1) {
+            return caseHandler;
+        }
+
         List<String> options = questionAnswerMap.get(key);
-        log.info("key:{}, value:{}", key, value);
         if (options == null) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR);
         }
         int index = options.indexOf(value);
-        log.info("index:{}", index);
         if (index == -1) {
+            log.error("key : {}. value : {}", key, value);
             throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR);
         }
         return index;
     }
 
-    public static String mapValue(String key, Integer index){
+    private static int handleLegacyCase(String key, String value) {
+        if (key.equals("흡연여부")) {
+            if (value.equals("전자담배")) {
+                return 3;
+            }
+        }
+        if (key.equals("물건공유")) {
+            if (value.equals("아무것도 공유하고싶지 않아요")) {
+                return 0;
+            }
+        }
+        if(key.equals("청소빈도")){
+            if (value.equals("이틀에 한 번 해요")){
+                return 3;
+            }
+        }
+        if(key.equals("음주빈도")){
+            if (value.equals("아예 안 마시요")){
+                return 0;
+            }
+        }
+        return -1;
+    }
+
+    public static String mapValue(String key, Integer index) {
         List<String> options = questionAnswerMap.get(key);
         if (options == null) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR);
@@ -66,9 +94,10 @@ public class QuestionAnswerMapper {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR));
 
     }
-    public static List<String> mapValues(String key, Integer bitmaskValue){
+
+    public static List<String> mapValues(String key, Integer bitmaskValue) {
         return getIndicesFromBitMask(bitmaskValue).stream()
-            .map(index -> mapValue(key,index))
+            .map(index -> mapValue(key, index))
             .collect(Collectors.toList());
     }
 
@@ -93,6 +122,7 @@ public class QuestionAnswerMapper {
         }
         return value;
     }
+
     public static List<Integer> getIndicesFromBitMask(int bitmask) {
         List<Integer> indices = new ArrayList<>();
         int index = 0;

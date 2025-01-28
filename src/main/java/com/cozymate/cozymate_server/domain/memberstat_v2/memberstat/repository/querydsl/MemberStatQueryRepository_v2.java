@@ -22,6 +22,6 @@ public interface MemberStatQueryRepository_v2 {
     int countAdvancedFilteredMemberStat(MemberStatTest criteriaMemberStat,
         HashMap<String, List<?>> filterMap);
 
-    Map<MemberStatTest, Integer> getMemberStatsWithMatchRate(Long memberId);
+    Map<MemberStatTest, Integer> getMemberStatsWithKeywordAndMatchRate(MemberStatTest criteriaMemberStat,String substring);
 
 }

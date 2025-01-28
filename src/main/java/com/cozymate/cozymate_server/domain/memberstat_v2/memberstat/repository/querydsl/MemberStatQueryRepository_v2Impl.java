@@ -22,6 +22,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -127,15 +128,15 @@ public class MemberStatQueryRepository_v2Impl implements MemberStatQueryReposito
     }
 
     @Override
-    public Map<MemberStatTest, Integer> getMemberStatsWithMatchRate(Long memberId) {
-        List<Tuple> results = queryFactory
-            .select(memberStatTest, lifestyleMatchRate.matchRate)
-            .from(memberStatTest)
-            .leftJoin(lifestyleMatchRate)
-            .on(lifestyleMatchRate.id.memberA.eq(memberStatTest.id)
-                .or(lifestyleMatchRate.id.memberB.eq(memberStatTest.id)))
-            .where(lifestyleMatchRate.id.memberA.eq(memberId)
-                .or(lifestyleMatchRate.id.memberB.eq(memberId)))
+    public Map<MemberStatTest, Integer> getMemberStatsWithKeywordAndMatchRate(
+        MemberStatTest criteriaMemberStat,
+        String substring) {
+
+        List<Tuple> results = createBaseQuery(criteriaMemberStat)
+            .where(memberStatTest.member.nickname.like("%" + substring + "%")) // 닉네임 조건 추가
+            .orderBy(lifestyleMatchRate.matchRate.desc(),
+                member.nickname.asc(),
+                memberStatTest.id.asc())
             .fetch();
 
         return results.stream()
@@ -144,7 +145,9 @@ public class MemberStatQueryRepository_v2Impl implements MemberStatQueryReposito
                 tuple -> {
                     Integer matchRate = tuple.get(lifestyleMatchRate.matchRate);
                     return (matchRate != null) ? matchRate : 0; // matchRate가 null이면 0으로 처리
-                }
+                },
+                (oldValue, newValue) -> oldValue, // 중복 키 발생 시 기존 값 유지
+                LinkedHashMap::new // 순서 보장
             ));
     }
 
