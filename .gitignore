@@ -38,13 +38,23 @@ out/
 .vscode/
 
 ### application.yml ###
+src/main/resources/application-local.yml
 src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
+src/test/resources/application-local.yml
 src/test/resources/application-dev.yml
+src/test/resources/application-prod.yml
 src/test/resources/application.yml
+
+## SQL Initialization Code ##
+src/main/resources/db/
 
 ### MAC ###
 **/.DS_Store
 
 src/main/resources/firebase-service-account.json
 
-src/main/resources/application-prod.yml
+
+
+
+

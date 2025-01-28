@@ -95,5 +95,6 @@ tasks.register('copyGitSubmodule', Copy) {
     from './config'
     include '*.yml'
     include 'firebase-service-account.json'
+    include 'db/*'
     into 'src/main/resources'
 }
