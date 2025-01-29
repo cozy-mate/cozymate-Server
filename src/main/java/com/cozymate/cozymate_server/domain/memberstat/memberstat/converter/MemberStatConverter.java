@@ -93,7 +93,7 @@ public class MemberStatConverter {
             .drinkingFrequency(
                 QuestionAnswerMapper.mapValue("음주빈도", lifestyle.getDrinkingFrequency()))
             .personality(
-                QuestionAnswerMapper.mapValues("성격", lifestyle.getSleepingHabit()))
+                QuestionAnswerMapper.mapValues("성격", lifestyle.getPersonality()))
             .mbti(
                 QuestionAnswerMapper.mapValue("MBTI", lifestyle.getMbti()))
             .selfIntroduction(memberStat.getSelfIntroduction())
