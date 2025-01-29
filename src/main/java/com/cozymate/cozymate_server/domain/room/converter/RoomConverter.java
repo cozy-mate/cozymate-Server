@@ -1,7 +1,8 @@
 package com.cozymate.cozymate_server.domain.room.converter;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
+
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;

@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
-import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 

@@ -4,9 +4,10 @@ import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
-import com.cozymate.cozymate_server.domain.memberstat.enums.DifferenceStatus;
-import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
+
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.enums.DifferenceStatus;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.FieldInstanceResolver;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roommemberstat.converter.RoomMemberStatDetailConverter;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomMemberStatDetailDTO;
@@ -56,7 +57,7 @@ public class RoomMemberStatService {
         List<RoomMemberStatDetailDTO> roomMemberStat = joinedMemberList.stream().map(
             joinedMember -> {
                 Map<String, Object> statMap = new HashMap<>();
-                Object stat = MemberStatUtil.getMemberStatField(
+                Object stat = FieldInstanceResolver.extractMemberStatField(
                     joinedMember.getMemberStat(), memberStatAttribute
                 );
                 statMap.put(memberStatAttribute, stat);

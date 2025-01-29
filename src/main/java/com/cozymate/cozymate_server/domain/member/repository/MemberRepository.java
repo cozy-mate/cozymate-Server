@@ -26,23 +26,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("select m.id from Member m")
     List<Long> findAllMemberIds();
 
-    @Query("SELECT m FROM Member m JOIN FETCH m.memberStat ms " +
-        "WHERE m.university.id = :universityId " +
-        "AND m.gender = :gender " +
-        "AND m.id <> :searchingMemberId " +
-        "AND ms IS NOT NULL " +
-        "AND (:numOfRoomMateOfSearchingMember = 0 OR ms.numOfRoommate = :numOfRoomMateOfSearchingMember) " +
-        "AND ms.dormitoryName = :dormitoryName "+
-        "AND m.nickname LIKE %:subString%")
-    List<Member> findMembersWithMatchingCriteria(
-        @Param("subString") String subString,
-        @Param("universityId") Long universityId,
-        @Param("gender") Gender gender,
-        @Param("numOfRoomMateOfSearchingMember") Integer numOfRoomMateOfSearchingMember,
-        @Param("dormitoryName") String dormitoryName,
-        @Param("searchingMemberId") Long searchingMemberId
-    );
-
     @Query("SELECT m FROM Member m JOIN m.memberStat ms " +
         "WHERE m.university.id = :universityId " +
         "AND m.gender = :gender " +

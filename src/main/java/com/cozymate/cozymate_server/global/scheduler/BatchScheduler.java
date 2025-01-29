@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.global.scheduler;
 
-import com.cozymate.cozymate_server.domain.memberstat_v2.lifestylematchrate.service.LifestyleMatchRateService;
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
