@@ -405,14 +405,4 @@ public class MemberStatController {
         );
     }
 
-//    @PostMapping("/migrate")
-//    @Operation(
-//        summary = "[말즈] 사용자 상세정보 마이그레이션",
-//        description = "요청자의 토큰을 넣고 사용합니다.\n\n"
-//    )
-//    @Deprecated
-//    public void migrate() {
-//        migrationService.migrate();
-//    }
-
 }
