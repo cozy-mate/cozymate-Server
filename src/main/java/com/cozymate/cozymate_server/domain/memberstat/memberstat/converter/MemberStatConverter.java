@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.memberstat.memberstat.util;
+package com.cozymate.cozymate_server.domain.memberstat.memberstat.converter;
 
 
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -17,6 +17,9 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.request.Cre
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatDetailWithMemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatPreferenceDetailColorDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatPreferenceResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.FieldInstanceResolver;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.MemberStatComparator;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAnswerMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +85,7 @@ public class MemberStatConverter {
             .studying(
                 QuestionAnswerMapper.mapValue("공부여부", lifestyle.getStudyingFrequency()))
             .intake(
-                QuestionAnswerMapper.mapValue("섭취여부", lifestyle.getStudyingFrequency()))
+                QuestionAnswerMapper.mapValue("섭취여부", lifestyle.getEatingFrequency()))
             .cleanSensitivity(lifestyle.getCleannessSensitivity())
             .noiseSensitivity(lifestyle.getNoiseSensitivity())
             .cleaningFrequency(

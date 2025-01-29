@@ -16,7 +16,7 @@ import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;

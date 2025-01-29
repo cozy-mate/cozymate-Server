@@ -7,7 +7,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.FieldInstanceResolver;
-import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roommemberstat.converter.RoomMemberStatDetailConverter;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomMemberStatDetailDTO;
