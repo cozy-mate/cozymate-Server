@@ -55,8 +55,6 @@ public class QuestionAnswerMapper {
         return index;
     }
 
-
-
 //    private static int handleLegacyCase(String key, String value) {
 //        if (key.equals("흡연여부")) {
 //            if (value.equals("전자담배")) {
@@ -146,9 +144,6 @@ public class QuestionAnswerMapper {
     }
 
     public static Map<String, String> convertToStringMap(Map<String, Object> rawMap) {
-
-        log.info("🔹 [Before Conversion] Raw Map: {}", rawMap); // 변환 전 로그
-
         return rawMap.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
@@ -157,6 +152,11 @@ public class QuestionAnswerMapper {
                     Object value = entry.getValue();
 
                     if (value instanceof Integer && questionAnswerMap.containsKey(key)) {
+                        if ("personality".equals(key) || "sleepingHabit".equals(key)) {
+                            List<String> mappedValues = mapValues(key, (Integer) value);
+                            return String.join(", ", mappedValues); // 여러 값을 콤마로 구분
+                        }
+
                         return mapValue(key, (Integer) value);
                     }
 
