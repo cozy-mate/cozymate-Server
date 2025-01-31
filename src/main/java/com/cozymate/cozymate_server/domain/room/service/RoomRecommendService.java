@@ -5,9 +5,10 @@ import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
-import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
+
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomRecommendConverter;
@@ -38,7 +39,7 @@ public class RoomRecommendService {
     private final MateRepository mateRepository;
     private final MemberStatRepository memberStatRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
-    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
+    private final LifestyleMatchRateService lifestyleMatchRateService;
 
     public PageResponseDto<List<RoomRecommendationResponseDTO>> getRecommendationList(Member member,
         int size, int page, RoomSortType sortType) {
@@ -92,7 +93,7 @@ public class RoomRecommendService {
         roomList.forEach(room -> {
             List<Mate> mates = roomMateMap.get(room.getId());
 
-            Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
+            Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
                 member.getId(),
                 mates.stream()
                     .map(mate -> mate.getMember().getId())

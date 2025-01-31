@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
-import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 
@@ -15,9 +15,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 import lombok.AccessLevel;
@@ -33,6 +35,9 @@ import org.hibernate.validator.constraints.Range;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
+@Table(name = "member", indexes = {
+    @Index(name = "idx_university_gender", columnList = "university_id, gender")
+})
 public class Member extends BaseTimeEntity {
 
     @Id

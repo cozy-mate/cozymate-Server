@@ -33,7 +33,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("""
         SELECT distinct r FROM Room r
         WHERE r.roomType = :roomType
-        AND r.status != :status
+        AND r.status <> :status
         AND r.maxMateNum > r.numOfArrival
         """)
     List<Room> findAllRoomListCanDisplay(@Param("roomType") RoomType roomType,
@@ -49,7 +49,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
         "AND member.university.id = :universityId " +
         "AND member.gender = :gender " +
         "AND (:numOfRoomMate = 0 OR r.maxMateNum = :numOfRoomMate) " +
-        "AND ms.dormitoryName = :dormitoryName " +
+        "AND ms.memberUniversityStat.dormitoryName = :dormitoryName " +
         "AND r.name LIKE %:keyword% ")
     List<Room> findMatchingPublicRooms(
         String keyword,

@@ -9,10 +9,11 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
-import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
-import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
+
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
@@ -46,7 +47,7 @@ public class RoomQueryService {
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
     private final RoomHashtagRepository roomHashtagRepository;
-    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
+    private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatRepository memberStatRepository;
     private final FavoriteRepository favoriteRepository;
 
@@ -57,8 +58,9 @@ public class RoomQueryService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        if (room.getRoomType()== RoomType.PRIVATE) {
-            mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+        if (room.getRoomType() == RoomType.PRIVATE) {
+            mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+                    EntryStatus.JOINED)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
         }
 
@@ -67,10 +69,13 @@ public class RoomQueryService {
 
         Boolean isRoomManager = creatingMate.getMember().getId().equals(memberId);
 
-        List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED);
+        List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
+            EntryStatus.JOINED);
 
-        Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
-            joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
+        Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
+            memberId,
+            joinedMates.stream().map(mate -> mate.getMember().getId())
+                .collect(Collectors.toList()));
 
         Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
 
@@ -89,7 +94,8 @@ public class RoomQueryService {
         //해시태그 가져오기
         List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(roomId);
 
-        return RoomConverter.toRoomDetailResponseDTOWithParams(room.getId(), room.getName(), room.getInviteCode(), room.getProfileImage(),
+        return RoomConverter.toRoomDetailResponseDTOWithParams(room.getId(), room.getName(),
+            room.getInviteCode(), room.getProfileImage(),
             mates.isEmpty() ? new ArrayList<>() : mates,
             creatingMate.getMember().getId(),
             creatingMate.getMember().getNickname(),
@@ -150,10 +156,12 @@ public class RoomQueryService {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId, EntryStatus.JOINED)
+        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId,
+                EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        List<Mate> invitedMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(), EntryStatus.INVITED);
+        List<Mate> invitedMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(),
+            EntryStatus.INVITED);
 
         return getMateDetailResponseDTOS(memberId, invitedMates);
 
@@ -162,7 +170,7 @@ public class RoomQueryService {
     public List<MateDetailResponseDTO> getPendingMemberList(Long managerId) {
         // 방장이 속한 방의 정보
         Room room = roomRepository.findById(getExistRoom(managerId).roomId())
-            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         // 방장인지 검증
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
@@ -171,14 +179,16 @@ public class RoomQueryService {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
-        List<Mate> pendingMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(), EntryStatus.PENDING);
+        List<Mate> pendingMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(),
+            EntryStatus.PENDING);
 
         return getMateDetailResponseDTOS(managerId, pendingMates);
     }
 
     private List<MateDetailResponseDTO> getMateDetailResponseDTOS(Long managerId,
         List<Mate> Mates) {
-        Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(managerId,
+        Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
+            managerId,
             Mates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
 
         return Mates.stream()
@@ -199,9 +209,12 @@ public class RoomQueryService {
         // 방 정보를 RoomDetailResponseDTO로 변환하여 반환
         return rooms.stream()
             .map(room -> {
-                List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
-                Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(memberId,
-                    joinedMates.stream().map(mate -> mate.getMember().getId()).collect(Collectors.toList()));
+                List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(),
+                    EntryStatus.JOINED);
+                Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
+                    memberId,
+                    joinedMates.stream().map(mate -> mate.getMember().getId())
+                        .collect(Collectors.toList()));
                 Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
                 List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
                 return RoomConverter.toRoomDetailResponseDTOWithParams(
@@ -210,7 +223,8 @@ public class RoomQueryService {
                     room.getInviteCode(),
                     room.getProfileImage(),
                     joinedMates.stream()
-                        .map(mate -> RoomConverter.toMateDetailListResponse(mate, equalityMap.get(mate.getMember().getId())))
+                        .map(mate -> RoomConverter.toMateDetailListResponse(mate,
+                            equalityMap.get(mate.getMember().getId())))
                         .toList(),
                     getManagerMemberId(room),
                     getManagerNickname(room),
@@ -243,7 +257,8 @@ public class RoomQueryService {
         memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        Integer invitedCount = mateRepository.countByMemberIdAndEntryStatus(memberId, EntryStatus.INVITED);
+        Integer invitedCount = mateRepository.countByMemberIdAndEntryStatus(memberId,
+            EntryStatus.INVITED);
         return new InvitedRoomResponseDTO(invitedCount, getRoomList(memberId, EntryStatus.INVITED));
     }
 
@@ -262,7 +277,7 @@ public class RoomQueryService {
     public String getDormitoryName(Room room) {
         Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        return managerMate.getMember().getMemberStat().getDormitoryName();
+        return managerMate.getMember().getMemberStat().getMemberUniversityStat().getDormitoryName();
     }
 
     public Long isFavoritedRoom(Long memberId, Long roomId) {
@@ -270,7 +285,8 @@ public class RoomQueryService {
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         roomRepository.findById(roomId).orElseThrow(
             () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-        return favoriteRepository.findByMemberAndTargetIdAndFavoriteType(member, roomId, FavoriteType.ROOM)
+        return favoriteRepository.findByMemberAndTargetIdAndFavoriteType(member, roomId,
+                FavoriteType.ROOM)
             .map(Favorite::getId)
             .orElse(0L);
     }
@@ -302,8 +318,9 @@ public class RoomQueryService {
         if (memberStatRepository.existsByMemberId(memberId)) {
             return roomList.stream()
                 .map(room -> {
-                    List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
-                    Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
+                    List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(
+                        room.getId(), EntryStatus.JOINED);
+                    Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
                         member.getId(),
                         joinedMates.stream().map(mate -> mate.getMember().getId()).toList()
                     );
@@ -312,15 +329,17 @@ public class RoomQueryService {
                         RoomStatUtil.getCalculateRoomEquality(equalityMap)
                     );
                 })
-                .sorted(Comparator.comparing(RoomSearchResponseDTO::equality, Comparator.nullsLast(Comparator.reverseOrder())))
+                .sorted(Comparator.comparing(RoomSearchResponseDTO::equality,
+                    Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
         }
 
         // memberstat 없는 경우 가나다 순으로 정렬
         return roomList.stream()
             .map(room -> {
-                List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(), EntryStatus.JOINED);
-                Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
+                List<Mate> joinedMates = mateRepository.findAllByRoomIdAndEntryStatus(room.getId(),
+                    EntryStatus.JOINED);
+                Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
                     member.getId(),
                     joinedMates.stream().map(mate -> mate.getMember().getId()).toList()
                 );
@@ -348,7 +367,7 @@ public class RoomQueryService {
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Room room = roomRepository.findById(getExistRoom(managerId).roomId())
-            .orElseThrow(()-> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         // 방장인지 검증
         Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
@@ -357,7 +376,8 @@ public class RoomQueryService {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
-        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId, entryStatus);
+        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId,
+            entryStatus);
     }
 
     public Boolean isEntryStatusToRoom(Long roomId, Long memberId, EntryStatus entryStatus) {
@@ -367,6 +387,7 @@ public class RoomQueryService {
         roomRepository.findById(roomId).orElseThrow(
             () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, entryStatus);
+        return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+            entryStatus);
     }
 }

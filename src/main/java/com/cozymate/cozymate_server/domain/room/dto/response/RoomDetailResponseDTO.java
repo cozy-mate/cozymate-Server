@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.dto.response;
 
-import com.cozymate.cozymate_server.domain.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
 import java.util.List;
 
 public record RoomDetailResponseDTO(
