@@ -23,7 +23,9 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAn
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MemberStatConverter {
 
     private static final Integer NO_EQUALITY = null;
@@ -67,35 +69,35 @@ public class MemberStatConverter {
             .turnOffTime(
                 QuestionAnswerMapper.calculateHour(lifestyle.getTurnOffTime()))
             .smoking(
-                QuestionAnswerMapper.mapValue("흡연여부", lifestyle.getSmokingStatus()))
+                QuestionAnswerMapper.mapValue("smoking", lifestyle.getSmokingStatus()))
             .sleepingHabit(
-                QuestionAnswerMapper.mapValues("잠버릇", lifestyle.getSleepingHabit())) // 중복선택
+                QuestionAnswerMapper.mapValues("sleepingHabit", lifestyle.getSleepingHabit())) // 중복선택
             .airConditioningIntensity(lifestyle.getCoolingIntensity())
             .heatingIntensity(lifestyle.getHeatingIntensity())
             .lifePattern(
-                QuestionAnswerMapper.mapValue("생활패턴", lifestyle.getLifePattern()))
+                QuestionAnswerMapper.mapValue("lifePattern", lifestyle.getLifePattern()))
             .intimacy(
-                QuestionAnswerMapper.mapValue("친밀도", lifestyle.getIntimacy()))
+                QuestionAnswerMapper.mapValue("intimacy", lifestyle.getIntimacy()))
             .canShare(
-                QuestionAnswerMapper.mapValue("물건공유", lifestyle.getItemSharing()))
+                QuestionAnswerMapper.mapValue("canShare", lifestyle.getItemSharing()))
             .isPlayGame(
-                QuestionAnswerMapper.mapValue("게임여부", lifestyle.getPlayingGameFrequency()))
+                QuestionAnswerMapper.mapValue("isPlayGame", lifestyle.getPlayingGameFrequency()))
             .isPhoneCall(
-                QuestionAnswerMapper.mapValue("전화여부", lifestyle.getPhoneCallingFrequency()))
+                QuestionAnswerMapper.mapValue("isPhoneCall", lifestyle.getPhoneCallingFrequency()))
             .studying(
-                QuestionAnswerMapper.mapValue("공부여부", lifestyle.getStudyingFrequency()))
+                QuestionAnswerMapper.mapValue("studying", lifestyle.getStudyingFrequency()))
             .intake(
-                QuestionAnswerMapper.mapValue("섭취여부", lifestyle.getEatingFrequency()))
+                QuestionAnswerMapper.mapValue("intake", lifestyle.getEatingFrequency()))
             .cleanSensitivity(lifestyle.getCleannessSensitivity())
             .noiseSensitivity(lifestyle.getNoiseSensitivity())
             .cleaningFrequency(
-                QuestionAnswerMapper.mapValue("청소빈도", lifestyle.getCleaningFrequency()))
+                QuestionAnswerMapper.mapValue("cleaningFrequency", lifestyle.getCleaningFrequency()))
             .drinkingFrequency(
-                QuestionAnswerMapper.mapValue("음주빈도", lifestyle.getDrinkingFrequency()))
+                QuestionAnswerMapper.mapValue("drinkingFrequency", lifestyle.getDrinkingFrequency()))
             .personality(
-                QuestionAnswerMapper.mapValues("성격", lifestyle.getPersonality()))
+                QuestionAnswerMapper.mapValues("personality", lifestyle.getPersonality()))
             .mbti(
-                QuestionAnswerMapper.mapValue("MBTI", lifestyle.getMbti()))
+                QuestionAnswerMapper.mapValue("mbti", lifestyle.getMbti()))
             .selfIntroduction(memberStat.getSelfIntroduction())
             .build();
     }
@@ -146,35 +148,38 @@ public class MemberStatConverter {
                 dto.sleepingTime()))
             .turnOffTime(
                 QuestionAnswerMapper.convertTimeToInteger(dto.turnOffMeridian(), dto.turnOffTime()))
-            .smokingStatus(QuestionAnswerMapper.getIndex("흡연여부", dto.smoking()))
+            .smokingStatus(QuestionAnswerMapper.getIndex("smoking", dto.smoking()))
             .sleepingHabit(
-                QuestionAnswerMapper.convertBitMaskToInteger("잠버릇", dto.sleepingHabit()))
+                QuestionAnswerMapper.convertBitMaskToInteger("sleepingHabit", dto.sleepingHabit()))
             .coolingIntensity(dto.airConditioningIntensity())
             .heatingIntensity(dto.heatingIntensity())
-            .lifePattern(QuestionAnswerMapper.getIndex("생활패턴", dto.lifePattern()))
-            .intimacy(QuestionAnswerMapper.getIndex("친밀도", dto.intimacy()))
-            .itemSharing(QuestionAnswerMapper.getIndex("물건공유", dto.canShare()))
-            .playingGameFrequency(QuestionAnswerMapper.getIndex("게임여부", dto.isPlayGame()))
-            .phoneCallingFrequency(QuestionAnswerMapper.getIndex("전화여부", dto.isPhoneCall()))
-            .studyingFrequency(QuestionAnswerMapper.getIndex("공부여부", dto.studying()))
-            .eatingFrequency(QuestionAnswerMapper.getIndex("섭취여부", dto.intake()))
+            .lifePattern(QuestionAnswerMapper.getIndex("lifePattern", dto.lifePattern()))
+            .intimacy(QuestionAnswerMapper.getIndex("intimacy", dto.intimacy()))
+            .itemSharing(QuestionAnswerMapper.getIndex("canShare", dto.canShare()))
+            .playingGameFrequency(QuestionAnswerMapper.getIndex("isPlayGame", dto.isPlayGame()))
+            .phoneCallingFrequency(QuestionAnswerMapper.getIndex("isPhoneCall", dto.isPhoneCall()))
+            .studyingFrequency(QuestionAnswerMapper.getIndex("studying", dto.studying()))
+            .eatingFrequency(QuestionAnswerMapper.getIndex("intake", dto.intake()))
             .noiseSensitivity(dto.noiseSensitivity())
             .cleannessSensitivity(dto.cleanSensitivity())
             .cleaningFrequency(
-                QuestionAnswerMapper.getIndex("청소빈도", dto.cleaningFrequency()))
+                QuestionAnswerMapper.getIndex("cleaningFrequency", dto.cleaningFrequency()))
             .drinkingFrequency(
-                QuestionAnswerMapper.getIndex("음주빈도", dto.drinkingFrequency()))
+                QuestionAnswerMapper.getIndex("drinkingFrequency", dto.drinkingFrequency()))
             .personality(
-                QuestionAnswerMapper.convertBitMaskToInteger("성격", dto.personality()))
-            .mbti(QuestionAnswerMapper.getIndex("MBTI", dto.mbti().toUpperCase()))
+                QuestionAnswerMapper.convertBitMaskToInteger("personality", dto.personality()))
+            .mbti(QuestionAnswerMapper.getIndex("mbti", dto.mbti().toUpperCase()))
             .build();
     }
 
     public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailColorDTOListWhenRandom(
         MemberStat memberStat, List<String> preferences) {
-        Map<String, Object> memberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
+        Map<String, Object> rawMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
             memberStat, preferences);
 
+        QuestionAnswerMapper.load();
+        Map<String, String> memberStatMap = QuestionAnswerMapper.convertToStringMap(
+            rawMemberStatMap);
         return memberStatMap.entrySet().stream()
             .map(entry -> toMemberStatPreferenceDetailColorDTO(entry.getKey(), entry.getValue(),
                 DifferenceStatus.NOT_SAME_NOT_DIFFERENT)
@@ -184,11 +189,18 @@ public class MemberStatConverter {
     public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailColorDTOList(
         MemberStat memberStat, MemberStat criteriaMemberStat, List<String> preferences
     ) {
-        Map<String, Object> memberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
-            memberStat,
-            preferences);
-        Map<String, Object> criteriaMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
+        // 원본 Map (Integer 값을 포함)
+        Map<String, Object> rawMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
+            memberStat, preferences);
+        Map<String, Object> rawCriteriaMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
             criteriaMemberStat, preferences);
+
+        // Integer 값을 String으로 변환한 Map 생성
+        QuestionAnswerMapper.load();
+        Map<String, String> memberStatMap = QuestionAnswerMapper.convertToStringMap(
+            rawMemberStatMap);
+        Map<String, String> criteriaMemberStatMap = QuestionAnswerMapper.convertToStringMap(
+            rawCriteriaMemberStatMap);
 
         return memberStatMap.entrySet().stream()
             .map(entry ->

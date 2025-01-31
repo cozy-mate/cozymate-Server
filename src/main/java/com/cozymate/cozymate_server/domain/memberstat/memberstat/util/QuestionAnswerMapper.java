@@ -144,5 +144,25 @@ public class QuestionAnswerMapper {
         }
         return bitMask;
     }
+
+    public static Map<String, String> convertToStringMap(Map<String, Object> rawMap) {
+
+        log.info("🔹 [Before Conversion] Raw Map: {}", rawMap); // 변환 전 로그
+
+        return rawMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+
+                    if (value instanceof Integer && questionAnswerMap.containsKey(key)) {
+                        return mapValue(key, (Integer) value);
+                    }
+
+                    return value.toString(); // Integer가 아니면 그냥 String 변환
+                }
+            ));
+    }
 }
 
