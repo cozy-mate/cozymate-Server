@@ -149,29 +149,20 @@ public class QuestionAnswerMapper {
 
         log.info("🔹 [Before Conversion] Raw Map: {}", rawMap); // 변환 전 로그
 
-        Map<String, String> convertedMap = rawMap.entrySet().stream()
+        return rawMap.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> {
                     String key = entry.getKey();
                     Object value = entry.getValue();
 
-
-                    // 변환 과정 로그 출력
                     if (value instanceof Integer && questionAnswerMap.containsKey(key)) {
-                        String mappedValue = mapValue(key, (Integer) value);
-                        log.info("✅ Converting: Key = {}, Integer Value = {}, Mapped String Value = {}",
-                            key, value, mappedValue);
-                        return mappedValue;
+                        return mapValue(key, (Integer) value);
                     }
 
-                    log.info("⏩ Keeping Original: Key = {}, Value = {}", key, value);
                     return value.toString(); // Integer가 아니면 그냥 String 변환
                 }
             ));
-
-        log.info("🔹 [After Conversion] Converted Map: {}", convertedMap); // 변환 후 로그
-        return convertedMap;
     }
 }
 
