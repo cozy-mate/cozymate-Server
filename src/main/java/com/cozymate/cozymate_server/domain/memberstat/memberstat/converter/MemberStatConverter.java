@@ -23,7 +23,10 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAn
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MemberStatConverter {
 
     private static final Integer NO_EQUALITY = null;
@@ -184,11 +187,15 @@ public class MemberStatConverter {
     public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailColorDTOList(
         MemberStat memberStat, MemberStat criteriaMemberStat, List<String> preferences
     ) {
-        Map<String, Object> memberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
-            memberStat,
-            preferences);
-        Map<String, Object> criteriaMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
-            criteriaMemberStat, preferences);
+        // 원본 Map (Integer 값을 포함)
+        Map<String, Object> rawMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(memberStat, preferences);
+        Map<String, Object> rawCriteriaMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(criteriaMemberStat, preferences);
+
+        
+        // Integer 값을 String으로 변환한 Map 생성
+        QuestionAnswerMapper.load();
+        Map<String, String> memberStatMap = QuestionAnswerMapper.convertToStringMap(rawMemberStatMap);
+        Map<String, String> criteriaMemberStatMap = QuestionAnswerMapper.convertToStringMap(rawCriteriaMemberStatMap);
 
         return memberStatMap.entrySet().stream()
             .map(entry ->
