@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class QuestionAnswerMapper {
 
-    private static Map<String, List<String>> questionAnswerMap;
+    public static Map<String, List<String>> questionAnswerMap;
     private static final String JSON_FILE = "memberstat/question_answer.json";
     private static final String AM = "오전";
     private static final String PM = "오후";
@@ -92,7 +92,7 @@ public class QuestionAnswerMapper {
 
     }
 
-    public static List<String> mapValues(String key, Integer bitmaskValue) {
+    public static List<String> mapMultiValues(String key, Integer bitmaskValue) {
         return getIndicesFromBitMask(bitmaskValue).stream()
             .map(index -> mapValue(key, index))
             .collect(Collectors.toList());

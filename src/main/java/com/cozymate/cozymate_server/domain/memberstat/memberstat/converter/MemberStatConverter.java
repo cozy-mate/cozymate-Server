@@ -23,7 +23,10 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAn
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MemberStatConverter {
 
     private static final Integer NO_EQUALITY = null;
@@ -67,35 +70,35 @@ public class MemberStatConverter {
             .turnOffTime(
                 QuestionAnswerMapper.calculateHour(lifestyle.getTurnOffTime()))
             .smoking(
-                QuestionAnswerMapper.mapValue("흡연여부", lifestyle.getSmokingStatus()))
+                QuestionAnswerMapper.mapValue("smoking", lifestyle.getSmokingStatus()))
             .sleepingHabit(
-                QuestionAnswerMapper.mapValues("잠버릇", lifestyle.getSleepingHabit())) // 중복선택
+                QuestionAnswerMapper.mapMultiValues("sleepingHabit", lifestyle.getSleepingHabit())) // 중복선택
             .airConditioningIntensity(lifestyle.getCoolingIntensity())
             .heatingIntensity(lifestyle.getHeatingIntensity())
             .lifePattern(
-                QuestionAnswerMapper.mapValue("생활패턴", lifestyle.getLifePattern()))
+                QuestionAnswerMapper.mapValue("lifePattern", lifestyle.getLifePattern()))
             .intimacy(
-                QuestionAnswerMapper.mapValue("친밀도", lifestyle.getIntimacy()))
+                QuestionAnswerMapper.mapValue("intimacy", lifestyle.getIntimacy()))
             .canShare(
-                QuestionAnswerMapper.mapValue("물건공유", lifestyle.getItemSharing()))
+                QuestionAnswerMapper.mapValue("canShare", lifestyle.getItemSharing()))
             .isPlayGame(
-                QuestionAnswerMapper.mapValue("게임여부", lifestyle.getPlayingGameFrequency()))
+                QuestionAnswerMapper.mapValue("isPlayGame", lifestyle.getPlayingGameFrequency()))
             .isPhoneCall(
-                QuestionAnswerMapper.mapValue("전화여부", lifestyle.getPhoneCallingFrequency()))
+                QuestionAnswerMapper.mapValue("isPhoneCall", lifestyle.getPhoneCallingFrequency()))
             .studying(
-                QuestionAnswerMapper.mapValue("공부여부", lifestyle.getStudyingFrequency()))
+                QuestionAnswerMapper.mapValue("studying", lifestyle.getStudyingFrequency()))
             .intake(
-                QuestionAnswerMapper.mapValue("섭취여부", lifestyle.getEatingFrequency()))
+                QuestionAnswerMapper.mapValue("intake", lifestyle.getEatingFrequency()))
             .cleanSensitivity(lifestyle.getCleannessSensitivity())
             .noiseSensitivity(lifestyle.getNoiseSensitivity())
             .cleaningFrequency(
-                QuestionAnswerMapper.mapValue("청소빈도", lifestyle.getCleaningFrequency()))
+                QuestionAnswerMapper.mapValue("cleaningFrequency", lifestyle.getCleaningFrequency()))
             .drinkingFrequency(
-                QuestionAnswerMapper.mapValue("음주빈도", lifestyle.getDrinkingFrequency()))
+                QuestionAnswerMapper.mapValue("drinkingFrequency", lifestyle.getDrinkingFrequency()))
             .personality(
-                QuestionAnswerMapper.mapValues("성격", lifestyle.getPersonality()))
+                QuestionAnswerMapper.mapMultiValues("personality", lifestyle.getPersonality()))
             .mbti(
-                QuestionAnswerMapper.mapValue("MBTI", lifestyle.getMbti()))
+                QuestionAnswerMapper.mapValue("mbti", lifestyle.getMbti()))
             .selfIntroduction(memberStat.getSelfIntroduction())
             .build();
     }
@@ -184,11 +187,13 @@ public class MemberStatConverter {
     public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailColorDTOList(
         MemberStat memberStat, MemberStat criteriaMemberStat, List<String> preferences
     ) {
-        Map<String, Object> memberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
-            memberStat,
-            preferences);
-        Map<String, Object> criteriaMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
-            criteriaMemberStat, preferences);
+        // 원본 Map (Integer 값을 포함)
+        Map<String, Object> rawMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(memberStat, preferences);
+        Map<String, Object> rawCriteriaMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(criteriaMemberStat, preferences);
+
+        // Integer 값을 String으로 변환한 Map 생성
+        Map<String, String> memberStatMap = convertToStringMap(rawMemberStatMap);
+        Map<String, String> criteriaMemberStatMap = convertToStringMap(rawCriteriaMemberStatMap);
 
         return memberStatMap.entrySet().stream()
             .map(entry ->
@@ -332,5 +337,36 @@ public class MemberStatConverter {
             .white(otherList)
             .build();
     }
+
+    private static Map<String, String> convertToStringMap(Map<String, Object> rawMap) {
+        QuestionAnswerMapper.load(); // JSON 파일 로드
+
+        log.info("🔹 [Before Conversion] Raw Map: {}", rawMap); // 변환 전 로그
+
+        Map<String, String> convertedMap = rawMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+
+
+                    // 변환 과정 로그 출력
+                    if (value instanceof Integer && QuestionAnswerMapper.questionAnswerMap.containsKey(key)) {
+                        String mappedValue = QuestionAnswerMapper.mapValue(key, (Integer) value);
+                        log.info("✅ Converting: Key = {}, Integer Value = {}, Mapped String Value = {}",
+                            key, value, mappedValue);
+                        return mappedValue;
+                    }
+
+                    log.info("⏩ Keeping Original: Key = {}, Value = {}", key, value);
+                    return value.toString(); // Integer가 아니면 그냥 String 변환
+                }
+            ));
+
+        log.info("🔹 [After Conversion] Converted Map: {}", convertedMap); // 변환 후 로그
+        return convertedMap;
+    }
+
 
 }
