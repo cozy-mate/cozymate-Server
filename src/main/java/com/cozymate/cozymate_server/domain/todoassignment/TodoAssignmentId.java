@@ -27,7 +27,7 @@ public class TodoAssignmentId implements Serializable {
         if (!(o instanceof TodoAssignmentId that)) {
             return false;
         }
-        return todoId.equals(that.todoId) && mateId.equals(that.mateId);
+        return Objects.equals(todoId, that.todoId) && Objects.equals(mateId, that.mateId);
     }
 
     @Override
