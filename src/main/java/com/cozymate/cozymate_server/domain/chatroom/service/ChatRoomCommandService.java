@@ -32,10 +32,7 @@ public class ChatRoomCommandService {
     }
 
     public ChatRoomIdResponseDTO saveChatRoom(Member member, Member recipient) {
-        ChatRoom chatRoom = ChatRoom.builder()
-            .memberA(member)
-            .memberB(recipient)
-            .build();
+        ChatRoom chatRoom = ChatRoomConverter.toEntity(member, recipient);
 
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
 
@@ -44,10 +41,10 @@ public class ChatRoomCommandService {
 
     private void softDeleteChatRoom(ChatRoom chatRoom, Long myId) {
         if (Objects.nonNull(chatRoom.getMemberA()) && chatRoom.getMemberA().getId().equals(myId)) {
-            chatRoom.updateMemberALastDeleteAt();
+            chatRoom.updateMemberALastDeleteAt(LocalDateTime.now());
         } else if (Objects.nonNull(chatRoom.getMemberB()) && chatRoom.getMemberB().getId()
             .equals(myId)) {
-            chatRoom.updateMemberBLastDeleteAt();
+            chatRoom.updateMemberBLastDeleteAt(LocalDateTime.now());
         } else {
             throw new GeneralException(ErrorStatus._CHATROOM_FORBIDDEN);
         }
@@ -57,22 +54,14 @@ public class ChatRoomCommandService {
         LocalDateTime memberALastDeleteAt = chatRoom.getMemberALastDeleteAt();
         LocalDateTime memberBLastDeleteAt = chatRoom.getMemberBLastDeleteAt();
 
-        // 멤버 둘다 해당 방을 나간 적이 있는 경우
+        // memberA or memberB 하나라도 null인 경우
+        if (Objects.isNull(chatRoom.getMemberA()) || Objects.isNull(chatRoom.getMemberB())) {
+            hardDeleteChatRoom(chatRoom);
+            return;
+        }
+
+        // 멤버 둘다 LastDeleteAt이 있는 경우
         if (canHardDeleteWhenBothLeft(memberALastDeleteAt, memberBLastDeleteAt, chatRoom)) {
-            hardDeleteChatRoom(chatRoom);
-            return;
-        }
-
-        // A는 해당 방을 나간적이 있고, B는 나간적은 없지만 null(탈퇴)인 경우
-        if (canHardDeleteWhenOneLeftAndOtherIsNull(memberALastDeleteAt, memberBLastDeleteAt,
-            chatRoom.getMemberB(), chatRoom)) {
-            hardDeleteChatRoom(chatRoom);
-            return;
-        }
-
-        // B는 해당 방을 나간적이 있고, A는 나간적이 없지만 (null)탈퇴인 경우
-        if (canHardDeleteWhenOneLeftAndOtherIsNull(memberBLastDeleteAt, memberALastDeleteAt,
-            chatRoom.getMemberA(), chatRoom)) {
             hardDeleteChatRoom(chatRoom);
         }
     }
@@ -83,25 +72,11 @@ public class ChatRoomCommandService {
             && canHardDelete(chatRoom, memberALastDeleteAt, memberBLastDeleteAt);
     }
 
-    private boolean canHardDeleteWhenOneLeftAndOtherIsNull(LocalDateTime nonNullMemberLastDeleteAt,
-        LocalDateTime nullMemberLastDeleteAt, Member nullMember, ChatRoom chatRoom) {
-        return Objects.nonNull(nonNullMemberLastDeleteAt) && Objects.isNull(nullMemberLastDeleteAt)
-            && Objects.isNull(nullMember)
-            && canHardDeleteWithNullMember(chatRoom, nonNullMemberLastDeleteAt);
-    }
-
     private boolean canHardDelete(ChatRoom chatRoom, LocalDateTime memberALastDeleteAt,
         LocalDateTime memberBLastDeleteAt) {
         return chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)
             .map(chat -> chat.getCreatedAt().isBefore(memberALastDeleteAt) && chat.getCreatedAt()
                 .isBefore(memberBLastDeleteAt))
-            .orElse(true);
-    }
-
-    private boolean canHardDeleteWithNullMember(ChatRoom chatRoom,
-        LocalDateTime lastDeleteAt) {
-        return chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)
-            .map(chat -> chat.getCreatedAt().isBefore(lastDeleteAt))
             .orElse(true);
     }
 

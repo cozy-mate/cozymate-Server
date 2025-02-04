@@ -19,23 +19,23 @@ public class MemberFixture {
     private static final SocialType DEFAULT_SOCIAL_TYPE = SocialType.KAKAO;
 
     public static Member 정상_1(University university) {
-        return 멤버_생성(university, Gender.MALE, "테스트닉네임1",
+        return 멤버_생성(1L, university, Gender.MALE, "테스트닉네임1",
             LocalDate.of(2000, 11, 1), "컴퓨터공학과");
     }
 
     public static Member 정상_2(University university) {
-        return 멤버_생성(university, Gender.MALE, "테스트닉네임2",
+        return 멤버_생성(2L, university, Gender.MALE, "테스트닉네임2",
             LocalDate.of(2001, 11, 1), "경영학과");
 
     }
 
     public static Member 정상_3(University university) {
-        return 멤버_생성(university, Gender.FEMALE, "테스트닉네임3",
+        return 멤버_생성(3L, university, Gender.FEMALE, "테스트닉네임3",
             LocalDate.of(2000, 11, 1), "컴퓨터공학과");
     }
 
     public static Member 정상_4(University university) {
-        return 멤버_생성(university, Gender.FEMALE, "테스트닉네임4",
+        return 멤버_생성(4L, university, Gender.FEMALE, "테스트닉네임4",
             LocalDate.of(2001, 11, 1), "컴퓨터공학과");
     }
 
@@ -76,15 +76,16 @@ public class MemberFixture {
         List<Member> members = new ArrayList<>();
 
         IntStream.range(0, count).forEach(i ->
-            members.add(멤버_생성(university, gender, "testUser" + (i + 1), startDate.plusDays(i), majorName))
+            members.add(멤버_생성((long) i + 1, university, gender, "testUser" + (i + 1), startDate.plusDays(i), majorName))
         );
 
         return members;
     }
 
-    private static Member 멤버_생성(University university, Gender gender, String nickname,
+    private static Member 멤버_생성(Long id, University university, Gender gender, String nickname,
         LocalDate birthDay, String majorName) {
         return Member.builder()
+            .id(id)
             .socialType(DEFAULT_SOCIAL_TYPE)
             .role(Role.USER)
             .clientId("clientId_" + nickname + ":" + SocialType.KAKAO.toString())

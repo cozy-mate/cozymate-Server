@@ -52,13 +52,21 @@ public class ChatQueryService {
     }
 
     private void checkMemberMisMatch(Member member, ChatRoom chatRoom) {
+        // ChatRoom의 MemberA가 null(탈퇴 회원)이고, 현재 요청 Member가 ChatRoom의 MemberB와 다른 경우
         if (Objects.isNull(chatRoom.getMemberA())
             && !member.getId().equals(chatRoom.getMemberB().getId())) {
             throw new GeneralException(ErrorStatus._CHATROOM_MEMBER_MISMATCH);
         }
 
+        // ChatRoom의 MemberB가 null(탈퇴 회원)이고, 현재 요청 Member가 ChatRoom의 MemberA와 다른 경우
         if (Objects.isNull(chatRoom.getMemberB())
             && !member.getId().equals(chatRoom.getMemberA().getId())) {
+            throw new GeneralException(ErrorStatus._CHATROOM_MEMBER_MISMATCH);
+        }
+
+        // ChatRoom의 두 Member가 모두 null(탈퇴 회원)이 아닌 경우, 현재 요청 Member가 MemberA, MemberB 둘다 아닌 경우
+        if (!member.getId().equals(chatRoom.getMemberA().getId())
+            && !member.getId().equals(chatRoom.getMemberB().getId())) {
             throw new GeneralException(ErrorStatus._CHATROOM_MEMBER_MISMATCH);
         }
     }

@@ -33,12 +33,21 @@ public class ChatRoomFixture {
             .build();
     }
 
-    // 정상 더미데이터, member 한명이 탈퇴한 경우
+    // 정상 더미데이터, memberB가 탈퇴한 경우
     public static ChatRoom 정상_4(Member member) {
         return ChatRoom.builder()
             .id(4L)
             .memberA(member)
             .memberB(null)
+            .build();
+    }
+
+    // 정상 더미데이터, memberA가 탈퇴한 경우
+    public static ChatRoom 정상_5(Member member) {
+        return ChatRoom.builder()
+            .id(5L)
+            .memberA(null)
+            .memberB(member)
             .build();
     }
 }
