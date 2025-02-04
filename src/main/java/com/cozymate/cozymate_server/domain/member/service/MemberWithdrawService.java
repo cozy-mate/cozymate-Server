@@ -13,8 +13,9 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.domain.memberstat.repository.MemberStatRepository;
-import com.cozymate.cozymate_server.domain.memberstatequality.repository.MemberStatEqualityRepository;
+
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatpreference.repository.MemberStatPreferenceRepository;
 import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepository;
 import com.cozymate.cozymate_server.domain.post.Post;
@@ -42,7 +43,7 @@ public class MemberWithdrawService {
     private final MailRepository mailRepository;
     private final MemberStatRepository memberStatRepository;
     private final MemberStatPreferenceRepository memberStatPreferenceRepository;
-    private final MemberStatEqualityRepository memberStatEqualityRepository;
+    private final LifestyleMatchRateRepository lifestyleMatchRateRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
     private final ReportRepository reportRepository;
@@ -94,7 +95,7 @@ public class MemberWithdrawService {
 
         memberStatRepository.deleteByMemberId(member.getId());
         memberStatPreferenceRepository.deleteByMemberId(member.getId());
-        memberStatEqualityRepository.deleteByMemberAIdOrMemberBId(member.getId());
+        lifestyleMatchRateRepository.deleteAllByMemberId(member.getId());
 
         log.debug("사용자 상세정보 및 관련 통계 삭제 완료");
 

@@ -13,9 +13,10 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.converter.MemberStatConverter;
-import com.cozymate.cozymate_server.domain.memberstatequality.service.MemberStatEqualityQueryService;
+
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
@@ -42,7 +43,7 @@ public class FavoriteQueryService {
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
 
-    private final MemberStatEqualityQueryService memberStatEqualityQueryService;
+    private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
     public List<FavoriteMemberResponseDTO> getFavoriteMemberList(Member member) {
@@ -61,7 +62,7 @@ public class FavoriteQueryService {
         List<Member> existFavoriteMemberList = memberRepository.findAllById(
             findFavoriteMemberIdList);
 
-        Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(member.getId(),
+        Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(member.getId(),
             existFavoriteMemberList.stream().map(Member::getId).toList());
 
         List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
@@ -153,7 +154,7 @@ public class FavoriteQueryService {
                             criteriaPreferenceList);
 
                 // 로그인 사용자와 mate들의 멤버 스탯 "일치율" 계산
-                Map<Long, Integer> equalityMap = memberStatEqualityQueryService.getEquality(
+                Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
                     member.getId(), mates.stream()
                         .map(mate -> mate.getMember().getId())
                         .toList()

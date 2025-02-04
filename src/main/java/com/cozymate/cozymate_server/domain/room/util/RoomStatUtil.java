@@ -3,8 +3,9 @@ package com.cozymate.cozymate_server.domain.room.util;
 import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.util.MemberStatUtil;
+
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.FieldInstanceResolver;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,8 +21,9 @@ public class RoomStatUtil {
                     .map(mate -> mate.getMember().getMemberStat())
                     .filter(mateStat -> mateStat != null && !mateStat.getMember().getId().equals(
                         member.getId())
-                        && Objects.equals(MemberStatUtil.getMemberStatField(mateStat, preference),
-                        MemberStatUtil.getMemberStatField(memberStat, preference)))
+                        && Objects.equals(
+                        FieldInstanceResolver.extractMemberStatField(mateStat, preference),
+                        FieldInstanceResolver.extractMemberStatField(memberStat, preference)))
                     .count();
 
                 return PreferenceMatchCountDTO.builder()

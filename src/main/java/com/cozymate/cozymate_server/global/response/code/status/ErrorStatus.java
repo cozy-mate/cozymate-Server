@@ -87,6 +87,10 @@ public enum ErrorStatus implements BaseErrorCode {
         "멤버 상세정보 인자가 잘못되었습니다."),
     _MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST(HttpStatus.BAD_REQUEST, "MEMBERSTAT406",
         "needsDetail 옵션과 needsPreferences 옵션은 공존할 수 없습니다."),
+    _MEMBERSTAT_FILE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERSTAT407",
+        "member stat 질의 파일을 찾을 수 없습니다."),
+    _MEMBERSTAT_FILE_READ_ERROR(HttpStatus.BAD_REQUEST, "MEMBERSTAT408",
+        "member stat 질의 Json 파일 파싱 실패"),
 
 
     _MEMBERSTAT_PREFERENCE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTATPREFERENCE400", "멤버 선호 항목이 존재하지 않습니다."),

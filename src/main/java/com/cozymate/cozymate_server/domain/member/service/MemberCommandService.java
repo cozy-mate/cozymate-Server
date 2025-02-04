@@ -40,6 +40,8 @@ public class MemberCommandService {
 
     private final MailService mailService;
 
+    private final SignUpNotificationService signUpNotificationService;
+
     /**
      * 닉네임 유효성 검사 메서드
      *
@@ -98,8 +100,10 @@ public class MemberCommandService {
         University memberUniversity = universityRepository.findById(signUpRequestDTO.universityId())
             .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
 
-        memberRepository.save(
+        Member member = memberRepository.save(
             MemberConverter.toMember(clientId, signUpRequestDTO, memberUniversity));
+
+        signUpNotificationService.sendSignUpNotification(member);
 
         // 기존 회원으로 로그인 처리
         return signInByExistingMember(clientId);

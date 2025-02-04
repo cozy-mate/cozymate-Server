@@ -115,4 +115,15 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     WHERE mt.room.id = :roomId AND mt.id != :mateId
     """)
     List<Mate> findByRoomIdAndNotMateId(@Param("roomId") Long roomId, @Param("mateId") Long mateId);
+
+    @Query("""
+    SELECT mt FROM Mate mt
+    JOIN FETCH mt.room r
+    JOIN FETCH mt.member m
+    JOIN FETCH m.university u
+    WHERE mt.room.id IN :roomIdList
+    AND mt.isRoomManager = :isRoomManager
+    AND mt.entryStatus = :entryStatus
+""")
+    List<Mate> findAllByRoomIdListAndIsRoomManagerAndEntryStatus(List<Long> roomIdList, boolean isRoomManager, EntryStatus entryStatus);
 }
