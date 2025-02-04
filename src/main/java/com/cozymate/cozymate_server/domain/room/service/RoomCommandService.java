@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.domain.mate.converter.MateConverter;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.post.Post;
@@ -34,6 +35,7 @@ import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
+import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
@@ -107,8 +109,16 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
+        // memberStat이 null일 경우 공개방 생성 불가
+        if (creator.getMemberStat() == null) {
+            throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
+        }
+
+        Gender gender = creator.getGender();
+        University university = creator.getUniversity();
+
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toPublicRoom(request, inviteCode);
+        Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university);
 
         // 해시태그 저장 과정
         roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
@@ -594,18 +604,18 @@ public class RoomCommandService {
     }
 
     public void changeToPublicRoom(Long roomId, Long memberId) {
-        memberRepository.findById(memberId)
+        Member manager = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+        Mate managerMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
                 EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
         // 방장이 아니면 예외 발생
-        if (!member.isRoomManager()) {
+        if (!managerMate.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
@@ -613,7 +623,22 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._PUBLIC_ROOM);
         }
 
-        room.changeToPublicRoom();
+        List<Mate> mates = mateRepository.findFetchMemberByRoomAndEntryStatus(room, EntryStatus.JOINED);
+
+        Gender roomGender = manager.getGender();
+        University roomUniversity = manager.getUniversity();
+
+        for (Mate mate : mates) {
+            Member member = mate.getMember();
+            if (!member.getGender().equals(roomGender)) {
+                throw new GeneralException(ErrorStatus._MISMATCH_GENDER);
+            }
+            if (!member.getUniversity().equals(roomUniversity)) {
+                throw new GeneralException(ErrorStatus._MISMATCH_UNIVERSITY);
+            }
+        }
+
+        room.changeToPublicRoom(roomGender, roomUniversity);
     }
 
     public void changeToPrivateRoom(Long roomId, Long memberId) {
