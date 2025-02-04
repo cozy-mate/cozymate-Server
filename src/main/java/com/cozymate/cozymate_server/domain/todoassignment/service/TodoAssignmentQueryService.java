@@ -27,11 +27,7 @@ public class TodoAssignmentQueryService {
     private final Clock clock;
 
     public TodoAssignment getAssignment(Mate mate, Todo todo) {
-        return todoAssignmentRepository.findById(
-            TodoAssignmentId.builder()
-                .todoId(todo.getId())
-                .mateId(mate.getId())
-                .build()
+        return todoAssignmentRepository.findById(new TodoAssignmentId(todo.getId(), mate.getId())
         ).orElseThrow(() -> new GeneralException(ErrorStatus._TODO_ASSIGNMENT_NOT_FOUND));
     }
 

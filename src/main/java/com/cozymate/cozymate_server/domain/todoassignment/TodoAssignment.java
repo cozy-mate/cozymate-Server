@@ -13,17 +13,13 @@ import jakarta.persistence.MapsId;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class TodoAssignment {
 
     @EmbeddedId
@@ -43,6 +39,14 @@ public class TodoAssignment {
     @Column(updatable = false)
     private LocalDateTime assignedAt; // 할당된 시간
     private LocalDateTime completedAt; // 완료한 시간
+
+    public TodoAssignment(Mate mate, Todo todo, boolean isCompleted) {
+        this.id = new TodoAssignmentId(todo.getId(), mate.getId());
+        this.mate = mate;
+        this.todo = todo;
+        this.isCompleted = isCompleted;
+        this.assignedAt = LocalDateTime.now();
+    }
 
     public void complete(Clock clock) {
         if (this.isCompleted) { // 이미 완료된 경우

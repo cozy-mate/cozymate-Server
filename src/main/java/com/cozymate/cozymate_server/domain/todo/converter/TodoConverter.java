@@ -29,12 +29,13 @@ public class TodoConverter {
     }
 
     public static TodoDetailResponseDTO toTodoDetailResponseDTO(TodoAssignment todoAssignment,
-        String todoType) {
+        String todoType, List<Long> mateIdList) {
         return TodoDetailResponseDTO.builder()
             .todoId(todoAssignment.getTodo().getId())
             .content(todoAssignment.getTodo().getContent())
             .completed(todoAssignment.isCompleted())
             .todoType(todoType) // Todo의 type에서 가공된 값임
+            .mateIdList(mateIdList)
             .build();
     }
 

@@ -3,18 +3,21 @@ package com.cozymate.cozymate_server.domain.todoassignment;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Builder
+@Getter
 @Embeddable
 @NoArgsConstructor
-@AllArgsConstructor
 public class TodoAssignmentId implements Serializable {
 
     private Long todoId;
     private Long mateId;
+
+    public TodoAssignmentId(Long todoId, Long mateId) {
+        this.todoId = todoId;
+        this.mateId = mateId;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -11,11 +11,7 @@ public class TodoAssignmentConverter {
     private static final boolean DEFAULT_COMPLETE_STATUS = false;
 
     public TodoAssignment toEntity(Mate mate, Todo todo) {
-        return TodoAssignment.builder()
-            .mate(mate)
-            .todo(todo)
-            .isCompleted(DEFAULT_COMPLETE_STATUS)
-            .build();
+        return new TodoAssignment(mate, todo, DEFAULT_COMPLETE_STATUS);
     }
 
 }

@@ -22,7 +22,7 @@ public interface TodoAssignmentRepository extends JpaRepository<TodoAssignment, 
         FROM TodoAssignment ta
         JOIN FETCH ta.todo
         JOIN FETCH ta.mate
-        WHERE ta.mate IN :mateIdList
+        WHERE ta.mate.id IN :mateIdList
         AND ta.todo.timePoint = :timePoint
         """)
     List<TodoAssignment> findAllByMateIdInAndTodoTimePoint(

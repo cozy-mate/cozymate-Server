@@ -53,10 +53,13 @@ public class TodoQueryService {
         Map<Long, List<TodoDetailResponseDTO>> mateTodoList = new HashMap<>();
         mateList.forEach(mate -> mateTodoList.put(mate.getId(), new ArrayList<>()));
 
+        // 투두마다 할당자 리스트를 저장
+        Map<Long, List<Long>> todoMateIdList = getTodoMateIdListMap(todoAssignmentList);
+
         todoAssignmentList.forEach(todoAssignment -> {
             String todoType = getTodoType(todoAssignment); // 투두에 존재하는 type과는 다름
             TodoDetailResponseDTO todoDto = TodoConverter.toTodoDetailResponseDTO(
-                todoAssignment, todoType
+                todoAssignment, todoType, todoMateIdList.get(todoAssignment.getTodo().getId())
             );
             mateTodoList.get(todoAssignment.getMate().getId()).add(todoDto);
         });
@@ -124,5 +127,17 @@ public class TodoQueryService {
             .toList();
     }
 
+    private Map<Long, List<Long>> getTodoMateIdListMap(List<TodoAssignment> todoAssignmentList) {
+        Map<Long, List<Long>> todoMateIdList = new HashMap<>();
+
+        todoAssignmentList.forEach(todoAssignment -> {
+            Long todoId = todoAssignment.getTodo().getId();
+            if (!todoMateIdList.containsKey(todoId)) {
+                todoMateIdList.put(todoId, new ArrayList<>());
+            }
+            todoMateIdList.get(todoId).add(todoAssignment.getMate().getId());
+        });
+        return todoMateIdList;
+    }
 
 }
