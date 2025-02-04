@@ -9,11 +9,10 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
@@ -24,10 +23,10 @@ import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseD
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -278,7 +277,7 @@ public class RoomQueryService {
         Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
         return Optional.ofNullable(managerMate.getMember().getMemberStat())
-            .map(MemberStat::getDormitoryName)
+            .map(membetStat -> membetStat.getMemberUniversityStat().getDormitoryName())
             .orElse(""); // MemberStat이 null일 경우 빈 문자열 반환
     }
 
