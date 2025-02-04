@@ -1,20 +1,17 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
-import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateListResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
-import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
+import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
+import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
@@ -23,7 +20,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,34 +35,30 @@ public class TodoQueryService {
     private static final int PRIORITY_OTHER = 2;
     private static final int PRIORITY_ROLE = 4;
 
-    private final TodoRepository todoRepository;
     private final MateRepository mateRepository;
-    private final RoomLogCommandService roomLogCommandService;
-    private final FcmPushService fcmPushService;
+    private final TodoAssignmentQueryService todoAssignmentQueryService;
 
     public TodoMateResponseDTO getTodo(Member member, Long roomId, LocalDate timePoint) {
-
+        // 방에 속한 모든 mate 조회
         List<Mate> mateList = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
             EntryStatus.JOINED);
-        List<Long> mateIdList = mateList.stream().map(Mate::getId).toList();
+
         Mate currentMate = mateList.stream()
             .filter(mate -> mate.getMember().getId().equals(member.getId())).findFirst()
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
-        List<Todo> todoList = todoRepository.findAllByRoomIdAndTimePoint(roomId, timePoint);
+
+        List<TodoAssignment> todoAssignmentList = todoAssignmentQueryService.getAssignmentList(
+            mateList, timePoint);
 
         Map<Long, List<TodoDetailResponseDTO>> mateTodoList = new HashMap<>();
         mateList.forEach(mate -> mateTodoList.put(mate.getId(), new ArrayList<>()));
 
-        todoList.forEach(todo -> {
-            String todoType = getTodoType(todo); // Todo에 존재하는 type과는 다름
-            // 투두마다 반복하면서 투두의 mateIdList에 존재하는 ID마다 mateList에서 찾아서 mateTodoList에 추가
-            todo.getAssignedMateIdList()
-                .stream().filter(mateIdList::contains)
-                .forEach(mateId -> {
-                    TodoDetailResponseDTO todoDto = TodoConverter.toTodoDetailResponseDTO(
-                        todo, mateId, todoType);
-                    mateTodoList.get(mateId).add(todoDto);
-                });
+        todoAssignmentList.forEach(todoAssignment -> {
+            String todoType = getTodoType(todoAssignment); // 투두에 존재하는 type과는 다름
+            TodoDetailResponseDTO todoDto = TodoConverter.toTodoDetailResponseDTO(
+                todoAssignment, todoType
+            );
+            mateTodoList.get(todoAssignment.getMate().getId()).add(todoDto);
         });
 
         // todoType를 self, other, group, role 순으로 정렬
@@ -87,56 +79,6 @@ public class TodoQueryService {
     }
 
     /**
-     * 매일 자정에 완료하지 않은 RoomLog에 대해서 알림 추가 (SCHEDULED)
-     */
-    public void addReminderRoleRoomLog() {
-        LocalDate today = LocalDate.now();
-        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
-        Map<Long, List<Todo>> mateTodoMap = getMateTodoMap(todoList);
-
-        roomLogCommandService.addRoomLogRemindingRole(mateTodoMap);
-    }
-
-    /**
-     * 매일 21시에 완료하지 않은 Todo에 대한 알림 전송 (SCHEDULED)
-     */
-    public void sendReminderRoleNotification() {
-        LocalDate today = LocalDate.now();
-        List<Todo> todoList = todoRepository.findByTimePointAndRoleIsNotNull(today);
-
-        Map<Long, List<Todo>> mateTodoMap = getMateTodoMap(todoList);
-
-        Map<Long, Member> mateIdMemberMap = mateRepository.findAllByIdIn(
-                mateTodoMap.keySet().stream().toList())
-            .stream().collect(Collectors.toMap(Mate::getId, Mate::getMember));
-
-        // TODO: remide할 size가 여러개면 ~~ 외 몇개로 수정
-        mateTodoMap.forEach((mateId, todos) ->
-            todos.forEach(todo ->
-                fcmPushService.sendNotification(
-                    OneTargetDto.create(mateIdMemberMap.get(mateId),
-                        NotificationType.REMINDER_ROLE,
-                        todo.getContent())
-                ))
-        );
-    }
-
-    /**
-     * 할당자 ID를 기준으로 할당된 투두를 맵으로 반환
-     * @param todoList 할당된 투두 리스트
-     * @return 할당자 ID를 기준으로 할당된 투두 맵
-     */
-    private Map<Long, List<Todo>> getMateTodoMap(List<Todo> todoList) {
-        return todoList.stream()
-            .flatMap(todo -> todo.getIncompleteAssigneeIdList().stream()
-                .map(mateId -> Map.entry(mateId, todo)))
-            .collect(Collectors.groupingBy(
-                Map.Entry::getKey,
-                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
-            ));
-    }
-
-    /**
      * 두 mate가 다른지 확인
      *
      * @param mate1 메이트 1
@@ -149,15 +91,14 @@ public class TodoQueryService {
 
     /**
      * 여러명이 할당 - 그룹 투두 / 생성자, 할당자가 동일 - 내 투두 / 생성자, 할당자가 다름 - 남 투두 / 롤 투두 - 롤 투두
-     *
-     * @param todo 투두
-     * @return 투두 타입
      */
-    private String getTodoType(Todo todo) {
+    private String getTodoType(TodoAssignment todoAssignment) {
+        Todo todo = todoAssignment.getTodo();
         if (todo.getTodoType() != TodoType.SINGLE_TODO) {
             return todo.getTodoType().getTodoName();
         }
-        if (todo.getAssignedMateIdList().contains(todo.getMateId())) {
+        // 할당자가 1명인 경우에 생성자와 같으면 self, 다르면 other
+        if (todo.getMateId().equals(todoAssignment.getMate().getId())) {
             return "self";
         }
         return "other";
@@ -182,8 +123,6 @@ public class TodoQueryService {
                 o -> priorityMap.getOrDefault(o.todoType(), Integer.MAX_VALUE)))
             .toList();
     }
-
-
 
 
 }

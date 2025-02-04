@@ -1,16 +1,15 @@
 package com.cozymate.cozymate_server.domain.todo.converter;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateListResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateResponseDTO;
-import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;
-import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
+import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -18,27 +17,23 @@ import java.util.Map;
 
 public class TodoConverter {
 
-    public static Todo toEntity(Room room, Long mateId, List<Long> assignedMateIdList, String content,
-        LocalDate timePoint,
-        Role role, TodoType type) {
+    public static Todo toEntity(Room room, Long mateId, String content,
+        LocalDate timePoint, Role role) {
         return Todo.builder()
             .room(room)
             .mateId(mateId)
             .content(content)
             .timePoint(timePoint)
             .role(role) // role은 null이 될 수 있음
-            .completeBitmask(0)
-            .todoType(type)
-            .assignedMateIdList(assignedMateIdList)
             .build();
     }
 
-    public static TodoDetailResponseDTO toTodoDetailResponseDTO(Todo todo, Long mateId, String todoType) {
+    public static TodoDetailResponseDTO toTodoDetailResponseDTO(TodoAssignment todoAssignment,
+        String todoType) {
         return TodoDetailResponseDTO.builder()
-            .todoId(todo.getId())
-            .content(todo.getContent())
-            .completed(todo.isAssigneeCompleted(mateId))
-            .mateIdList(todo.getAssignedMateIdList())
+            .todoId(todoAssignment.getTodo().getId())
+            .content(todoAssignment.getTodo().getContent())
+            .completed(todoAssignment.isCompleted())
             .todoType(todoType) // Todo의 type에서 가공된 값임
             .build();
     }
