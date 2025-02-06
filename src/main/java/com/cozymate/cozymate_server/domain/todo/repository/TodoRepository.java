@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.todo.repository;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import java.time.LocalDate;
 import java.util.List;
@@ -11,20 +10,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface TodoRepository extends JpaRepository<Todo, Long> {
 
-    List<Todo> findAllByRoomIdAndTimePoint(Long roomId, LocalDate timePoint);
-
-    void deleteByMateId(Long mateId);
-
-    Integer countAllByRoomIdAndMateIdAndTimePoint(Long roomId, Long mateId, LocalDate timePoint);
-
-    List<Todo> findByTimePointAndRoleIsNotNull(LocalDate today);
-
-    List<Todo> findAllByMateId(Long mateId);
-
+    Integer countAllByRoomIdAndTimePoint(Long room, LocalDate timePoint);
 
     void deleteAllByRoleId(Long roleId);
 
-    List<Todo> findAllByRoomId(Long roomId);
+    List<Todo> findAllByRoleId(Long roomId);
 
     @Modifying
     @Query("DELETE FROM Todo t WHERE t.room.id = :roomId")
