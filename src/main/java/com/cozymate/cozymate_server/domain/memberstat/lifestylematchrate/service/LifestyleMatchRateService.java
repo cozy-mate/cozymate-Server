@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.Memb
 
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,9 @@ public class LifestyleMatchRateService {
     public Map<Long, Integer> getMatchRateWithMemberIdAndIdList(Long memberId,
         List<Long> memberIdList) {
 
+        if(memberIdList.isEmpty()){
+            return Collections.emptyMap();
+        }
         List<LifestyleMatchRate.LifestyleMatchRateId> idList = memberIdList.stream()
             .map(id -> new LifestyleMatchRate.LifestyleMatchRateId(memberId, id))
             .toList();
