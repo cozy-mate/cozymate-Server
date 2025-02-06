@@ -7,7 +7,7 @@ import lombok.Builder;
 @Builder
 public record RoomMemberStatDetailDTO(
     MemberDetailResponseDTO memberDetail,
-    Map<String, Object> memberStat
+    Map<String, String> memberStat
 ) {
 
 }

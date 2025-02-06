@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.FieldInstanceResolver;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAnswerMapper;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roommemberstat.converter.RoomMemberStatDetailConverter;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomMemberStatDetailDTO;
@@ -32,42 +33,44 @@ public class RoomMemberStatService {
     private final MateRepository mateRepository;
 
 
-    public RoomMemberStatDetailListDTO getRoomMemberStatDetailList(Long roomId, String memberStatAttribute) {
+    public RoomMemberStatDetailListDTO getRoomMemberStatDetailList(Long roomId,
+        String memberStatAttribute) {
 
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-
-        if(room.getRoomType().equals(RoomType.PRIVATE)){
+        if (room.getRoomType().equals(RoomType.PRIVATE)) {
             throw new GeneralException(ErrorStatus._PRIVATE_ROOM);
         }
 
-        List<Member> joinedMemberList =  mateRepository.findAllByRoomIdAndEntryStatus(roomId, EntryStatus.JOINED)
+        List<Member> joinedMemberList = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
+                EntryStatus.JOINED)
             .stream()
             .map(Mate::getMember)
             .toList();
 
         DifferenceStatus color = MemberStatConverter.toDifferenceStatus(
             joinedMemberList.stream().map(
-            Member::getMemberStat)
-            .toList(),
+                    Member::getMemberStat)
+                .toList(),
             memberStatAttribute
         );
 
+        QuestionAnswerMapper.load();
         List<RoomMemberStatDetailDTO> roomMemberStat = joinedMemberList.stream().map(
             joinedMember -> {
-                Map<String, Object> statMap = new HashMap<>();
+                Map<String, Object> rawStatMap = new HashMap<>();
                 Object stat = FieldInstanceResolver.extractMemberStatField(
                     joinedMember.getMemberStat(), memberStatAttribute
                 );
-                statMap.put(memberStatAttribute, stat);
+                rawStatMap.put(memberStatAttribute, stat);
                 return RoomMemberStatDetailConverter.toRoomMemberStatDetailDTO(
-                    joinedMember,  statMap
+                    joinedMember, QuestionAnswerMapper.convertToStringMap(rawStatMap)
                 );
             }
         ).toList();
 
-        return RoomMemberStatDetailConverter.toRoomMemberStatDetailListDTO(roomMemberStat,color);
+        return RoomMemberStatDetailConverter.toRoomMemberStatDetailListDTO(roomMemberStat, color);
     }
 
-    }
+}

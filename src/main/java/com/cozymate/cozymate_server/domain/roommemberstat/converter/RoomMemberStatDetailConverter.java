@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class RoomMemberStatDetailConverter {
 
-    public static RoomMemberStatDetailDTO toRoomMemberStatDetailDTO (Member member, Map<String, Object> stat){
+    public static RoomMemberStatDetailDTO toRoomMemberStatDetailDTO (Member member, Map<String, String> stat){
         return RoomMemberStatDetailDTO.builder()
             .memberDetail(MemberConverter.toMemberDetailResponseDTOFromEntity(member))
             .memberStat(stat)
