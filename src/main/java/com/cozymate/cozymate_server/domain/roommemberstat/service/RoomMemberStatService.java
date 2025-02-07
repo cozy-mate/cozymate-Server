@@ -56,7 +56,6 @@ public class RoomMemberStatService {
             memberStatAttribute
         );
 
-        QuestionAnswerMapper.load();
         List<RoomMemberStatDetailDTO> roomMemberStat = joinedMemberList.stream().map(
             joinedMember -> {
                 Map<String, Object> rawStatMap = new HashMap<>();
