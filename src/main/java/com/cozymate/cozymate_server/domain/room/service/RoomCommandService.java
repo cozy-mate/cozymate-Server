@@ -83,6 +83,9 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
+        // 기존 참여 요청들 삭제
+        clearOtherRoomRequests(creator.getId());
+
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPrivateRoom(request, inviteCode);
         room.enableRoom();
@@ -113,6 +116,9 @@ public class RoomCommandService {
         if (creator.getMemberStat() == null) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
         }
+
+        // 기존 참여 요청들 삭제
+        clearOtherRoomRequests(creator.getId());
 
         Gender gender = creator.getGender();
         University university = creator.getUniversity();
