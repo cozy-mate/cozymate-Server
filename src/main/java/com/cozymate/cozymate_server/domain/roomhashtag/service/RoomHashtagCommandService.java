@@ -37,7 +37,7 @@ public class RoomHashtagCommandService {
     }
 
     // 입력한 해시태그 중복 검사
-    public void validateHashtags(List<String> hashtags) {
+    private void validateHashtags(List<String> hashtags) {
         Set<String> uniqueHashtags = new HashSet<>(hashtags);
         if (uniqueHashtags.size() != hashtags.size()) {
             throw new GeneralException(ErrorStatus._DUPLICATE_HASHTAGS);
