@@ -49,7 +49,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class RoomCommandService {
 
     private static final String UPPERCASE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -73,7 +72,7 @@ public class RoomCommandService {
     private final RoleCommandService roleCommandService;
     private final TodoCommandService todoCommandService;
 
-
+    @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
         Member member) {
         Member creator = memberRepository.findById(member.getId())
@@ -99,6 +98,7 @@ public class RoomCommandService {
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }
 
+    @Transactional
     public RoomDetailResponseDTO createPublicRoom(PublicRoomCreateRequestDTO request,
         Member member) {
         Member creator = memberRepository.findById(member.getId())
@@ -134,6 +134,7 @@ public class RoomCommandService {
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }
 
+    @Transactional
     public void joinRoom(Long roomId, Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -178,6 +179,7 @@ public class RoomCommandService {
 
     }
 
+    @Transactional
     public void deleteRoom(Long roomId, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -202,6 +204,7 @@ public class RoomCommandService {
         return roomQueryService.isValidRoomName(roomName);
     }
 
+    @Transactional
     public void quitRoom(Long roomId, Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -294,6 +297,7 @@ public class RoomCommandService {
         }
     }
 
+    @Transactional
     public RoomDetailResponseDTO updateRoom(Long roomId, Long memberId,
         RoomUpdateRequestDTO request) {
 
@@ -321,6 +325,7 @@ public class RoomCommandService {
         return roomQueryService.getRoomById(roomId, memberId);
     }
 
+    @Transactional
     public void sendInvitation(Long inviteeId, Long inviterId) {
         Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -367,6 +372,7 @@ public class RoomCommandService {
                 NotificationType.ARRIVE_ROOM_INVITE, room));
     }
 
+    @Transactional
     public void respondToInvitation(Long roomId, Long inviteeId, boolean accept) {
         Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -448,6 +454,7 @@ public class RoomCommandService {
         quitRoom(roomId, targetMemberId);
     }
 
+    @Transactional
     public void cancelInvitation(Long inviteeId, Long inviterId) {
 
         memberRepository.findById(inviteeId)
@@ -471,6 +478,7 @@ public class RoomCommandService {
 
     }
 
+    @Transactional
     public void requestToJoin(Long roomId, Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -528,6 +536,7 @@ public class RoomCommandService {
         }
     }
 
+    @Transactional
     public void cancelRequestToJoin(Long roomId, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -542,6 +551,7 @@ public class RoomCommandService {
         mateRepository.delete(mate);
     }
 
+    @Transactional
     public void respondToJoinRequest(Long requesterId, boolean accept, Long managerId) {
         Member requestMember = memberRepository.findById(requesterId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -603,6 +613,7 @@ public class RoomCommandService {
         }
     }
 
+    @Transactional
     public void changeToPublicRoom(Long roomId, Long memberId) {
         Member manager = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -641,6 +652,7 @@ public class RoomCommandService {
         room.changeToPublicRoom(roomGender, roomUniversity);
     }
 
+    @Transactional
     public void changeToPrivateRoom(Long roomId, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
