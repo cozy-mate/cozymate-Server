@@ -75,16 +75,13 @@ public class RoomCommandService {
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
         Member member) {
-        Member creator = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
+        if (roomRepository.existsByMemberIdAndStatuses(member.getId(), RoomStatus.ENABLE,
             RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
         // 기존 참여 요청들 삭제
-        clearOtherRoomRequests(creator.getId());
+        clearOtherRoomRequests(member.getId());
 
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPrivateRoom(request, inviteCode);
@@ -92,7 +89,7 @@ public class RoomCommandService {
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
-        Mate mate = MateConverter.toEntity(room, creator, true);
+        Mate mate = MateConverter.toEntity(room, member, true);
         mateRepository.save(mate);
 
         Feed feed = FeedConverter.toEntity(room);
@@ -104,24 +101,22 @@ public class RoomCommandService {
     @Transactional
     public RoomDetailResponseDTO createPublicRoom(PublicRoomCreateRequestDTO request,
         Member member) {
-        Member creator = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
+        if (roomRepository.existsByMemberIdAndStatuses(member.getId(), RoomStatus.ENABLE,
             RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
         // memberStat이 null일 경우 공개방 생성 불가
-        if (creator.getMemberStat() == null) {
+        if (member.getMemberStat() == null) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
         }
 
         // 기존 참여 요청들 삭제
-        clearOtherRoomRequests(creator.getId());
+        clearOtherRoomRequests(member.getId());
 
-        Gender gender = creator.getGender();
-        University university = creator.getUniversity();
+        Gender gender = member.getGender();
+        University university = member.getUniversity();
 
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university);
@@ -131,7 +126,7 @@ public class RoomCommandService {
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
-        Mate mate = MateConverter.toEntity(room, creator, true);
+        Mate mate = MateConverter.toEntity(room, member, true);
         mateRepository.save(mate);
 
         Feed feed = FeedConverter.toEntity(room);
@@ -306,18 +301,14 @@ public class RoomCommandService {
     @Transactional
     public RoomDetailResponseDTO updateRoom(Long roomId, Long memberId,
         RoomUpdateRequestDTO request) {
-
-        memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+        Mate mate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
                 EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        if (!member.isRoomManager()) {
+        if (!mate.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
