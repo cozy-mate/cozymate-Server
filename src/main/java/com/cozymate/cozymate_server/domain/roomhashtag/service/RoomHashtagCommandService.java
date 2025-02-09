@@ -47,8 +47,4 @@ public class RoomHashtagCommandService {
     public void deleteRoomHashtags(Room room) {
         roomHashtagRepository.deleteAllByRoomId(room.getId());
     }
-
-    public void updateRoomHashtags(Room room, List<String> hashtags) {
-        createRoomHashtag(room, hashtags);
-    }
 }

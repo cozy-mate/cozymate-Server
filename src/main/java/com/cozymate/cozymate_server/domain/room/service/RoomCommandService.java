@@ -314,7 +314,7 @@ public class RoomCommandService {
 
         if (room.getRoomType() == RoomType.PUBLIC) {
             roomHashtagCommandService.deleteRoomHashtags(room);
-            roomHashtagCommandService.updateRoomHashtags(room, request.hashtagList());
+            roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         }
         room.updateRoom(request.name(), request.persona());
         roomRepository.save(room);
