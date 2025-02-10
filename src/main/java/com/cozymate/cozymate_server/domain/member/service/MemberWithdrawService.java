@@ -3,8 +3,6 @@ package com.cozymate.cozymate_server.domain.member.service;
 import com.cozymate.cozymate_server.domain.auth.repository.TokenRepository;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
-import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
-import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
 import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepository;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
@@ -14,6 +12,7 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 
+import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatpreference.repository.MemberStatPreferenceRepository;
@@ -25,6 +24,7 @@ import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.report.repository.ReportRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
+import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 
@@ -59,7 +59,8 @@ public class MemberWithdrawService {
 
     private final RoomCommandService roomCommandService;
 
-    private final FavoriteRepository favoriteRepository;
+    private final MemberFavoriteRepository memberFavoriteRepository;
+    private final RoomFavoriteRepository roomFavoriteRepository;
 
     private final InquiryRepository inquiryRepository;
 
@@ -88,9 +89,9 @@ public class MemberWithdrawService {
         mailRepository.deleteById(member.getId());
         log.debug("토큰,메일 삭제 완료");
 
+        memberFavoriteRepository.deleteByMemberOrTargetMember(member);
+        roomFavoriteRepository.deleteByMember(member);
 
-        favoriteRepository.deleteByTargetIdAndFavoriteType(member.getId(), FavoriteType.MEMBER);
-        favoriteRepository.deleteByMemberId(member.getId());
         log.debug("찜 삭제 완료");
 
         memberStatRepository.deleteByMemberId(member.getId());

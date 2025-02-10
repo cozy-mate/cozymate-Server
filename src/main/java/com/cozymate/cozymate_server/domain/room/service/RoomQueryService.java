@@ -1,8 +1,5 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
-import com.cozymate.cozymate_server.domain.favorite.Favorite;
-import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
-import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -24,6 +21,8 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
+import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
+import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -48,7 +47,7 @@ public class RoomQueryService {
     private final RoomHashtagRepository roomHashtagRepository;
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatRepository memberStatRepository;
-    private final FavoriteRepository favoriteRepository;
+    private final RoomFavoriteRepository roomFavoriteRepository;
 
     public RoomDetailResponseDTO getRoomById(Long roomId, Long memberId) {
         Room room = roomRepository.findById(roomId)
@@ -269,11 +268,11 @@ public class RoomQueryService {
     public Long isFavoritedRoom(Long memberId, Long roomId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-        roomRepository.findById(roomId).orElseThrow(
+        Room room = roomRepository.findById(roomId).orElseThrow(
             () -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-        return favoriteRepository.findByMemberAndTargetIdAndFavoriteType(member, roomId,
-                FavoriteType.ROOM)
-            .map(Favorite::getId)
+
+        return roomFavoriteRepository.findByMemberAndRoom(member, room)
+            .map(RoomFavorite::getId)
             .orElse(0L);
     }
 

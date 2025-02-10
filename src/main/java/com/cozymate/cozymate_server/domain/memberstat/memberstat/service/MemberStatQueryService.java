@@ -1,14 +1,13 @@
 package com.cozymate.cozymate_server.domain.memberstat.memberstat.service;
 
-import com.cozymate.cozymate_server.domain.favorite.Favorite;
-import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
-import com.cozymate.cozymate_server.domain.favorite.repository.FavoriteRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.memberfavorite.MemberFavorite;
+import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatDetailAndRoomIdAndEqualityResponseDTO;
@@ -43,7 +42,7 @@ public class MemberStatQueryService {
 
     private final MemberRepository memberRepository;
     private final MateRepository mateRepository;
-    private final FavoriteRepository favoriteRepository;
+    private final MemberFavoriteRepository memberFavoriteRepository;
     private final MemberStatRepository memberStatRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
@@ -91,9 +90,8 @@ public class MemberStatQueryService {
         boolean hasRequestedRoomEntry = roomId.equals(NO_ROOMMATE)
             && roomQueryService.checkInvitationStatus(viewer, mateList);
 
-        Long favoriteId = favoriteRepository.findByMemberAndTargetIdAndFavoriteType(viewer,
-                targetMemberId, FavoriteType.MEMBER)
-            .map(Favorite::getId)
+        Long favoriteId = memberFavoriteRepository.findByMemberAndTargetMember(viewer, targetMemberId)
+            .map(MemberFavorite::getId)
             .orElse(NOT_FAVORITE);
 
         return MemberStatConverter.toMemberStatDetailAndRoomIdAndEqualityResponseDTO(

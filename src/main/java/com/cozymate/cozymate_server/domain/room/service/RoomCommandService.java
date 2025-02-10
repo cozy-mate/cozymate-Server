@@ -29,6 +29,7 @@ import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseD
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
@@ -71,6 +72,7 @@ public class RoomCommandService {
     private final RoomHashtagCommandService roomHashtagCommandService;
     private final RoleCommandService roleCommandService;
     private final TodoCommandService todoCommandService;
+    private final RoomFavoriteRepository roomFavoriteRepository;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -284,6 +286,7 @@ public class RoomCommandService {
         roleRepository.deleteAllByRoomId(roomId);
         mateRepository.deleteAllByRoomId(roomId);
         ruleRepository.deleteAllByRoomId(roomId);
+        roomFavoriteRepository.deleteAllByRoomId(roomId);
 
         // 피드 삭제 로직
         if (feedRepository.existsByRoomId(roomId)) {

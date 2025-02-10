@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.converter;
 
-import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomRecommendationResponseDTO;
 import java.util.List;
