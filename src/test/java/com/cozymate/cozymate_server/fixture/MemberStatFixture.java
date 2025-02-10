@@ -11,6 +11,8 @@ import java.util.Random;
 @SuppressWarnings("NonAsciiCharacters")
 public class MemberStatFixture {
 
+    private static Long ID_GENERATOR = 0L;
+
     /**
      * 기본적인 MemberStat 객체를 생성합니다.
      * @param member Member 객체
@@ -53,6 +55,7 @@ public class MemberStatFixture {
     private static MemberStat 멤버_스탯_생성(Member member, MemberUniversityStat memberUniversityStat,
         Lifestyle lifestyle, String selfIntroduction) {
         return MemberStat.builder()
+            .id(ID_GENERATOR++)
             .member(member)
             .memberUniversityStat(memberUniversityStat)
             .lifestyle(lifestyle)
@@ -141,6 +144,7 @@ public class MemberStatFixture {
     public static List<MemberStat> 랜덤_멤버_스탯_리스트(List<Member> members, int count, Long seed) {
         List<MemberStat> memberStats = new ArrayList<>();
         Random random = (seed != null) ? new Random(seed) : new Random();
+        ID_GENERATOR = (seed != null) ? seed : 0L;
 
         for (int i = 0; i < count; i++) {
             Member member = members.get(i % members.size());
