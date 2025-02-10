@@ -5,7 +5,6 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,16 +18,10 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     List<Mate> findByRoomId(Long roomId);
 
-    void deleteByRoomId(Long roomId);
-
     @EntityGraph(attributePaths = {"member", "member.memberStat"})
     Optional<Mate> findByRoomIdAndIsRoomManager(Long roomId, boolean isRoomManager);
 
     Optional<Mate> findByRoomIdAndMemberId(Long roomId, Long memberId);
-
-    @Query("select m from Mate m where m.room.id = :roomId and m.member.id = :memberId and m.entryStatus <> :entryStatus")
-    Optional<Mate> findByRoomIdAndMemberIdAndNotEntryStatus(@Param("roomId") Long roomId,
-        @Param("memberId") Long memberId, @Param("entryStatus") EntryStatus entryStatus);
 
     @Query("SELECT COUNT(m) > 0 FROM Mate m WHERE m.member.id = :memberId AND (m.room.status = :status1 OR m.room.status = :status2)")
     boolean existsByMemberIdAndRoomStatuses(@Param("memberId") Long memberId,
@@ -57,8 +50,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     @Query("SELECT m FROM Mate m JOIN FETCH m.member WHERE m.room = :room AND m.entryStatus = :entryStatus")
     List<Mate> findFetchMemberByRoomAndEntryStatus(@Param("room") Room room, @Param("entryStatus") EntryStatus entryStatus);
 
-    List<Mate> findAllByMemberBirthDayAndEntryStatus(LocalDate birthday, EntryStatus entryStatus);
-
     // MemberBirthDay의 Localdate 값에서 Month와 Day가 같은 Member들을 찾는다.
     @Query("SELECT m FROM Mate m WHERE MONTH(m.member.birthDay) = :month AND DAY(m.member.birthDay) = :day AND m.entryStatus = :entryStatus")
     List<Mate> findAllByMemberBirthDayMonthAndDayAndEntryStatus(@Param("month") int month,
@@ -70,9 +61,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     Optional<Mate> findByMemberAndEntryStatus(Member member, EntryStatus entryStatus);
 
-    @Query("select m from Mate m join fetch m.member")
-    List<Mate> findFetchAll();
-
     @Query("select m.id from Mate m where m.member.id in :memberIds")
     Set<Long> findMateIdsByMemberIds(@Param("memberIds") Set<Long> memberIds);
 
@@ -83,8 +71,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     @Query("select m from Mate m join fetch m.member where m.room = :room and m.isRoomManager = :isRoomManager")
     Optional<Mate> findFetchByRoomAndIsRoomManager(@Param("room") Room room,
         @Param("isRoomManager") boolean isRoomManager);
-
-    List<Mate> findAllByEntryStatus(EntryStatus entryStatus);
 
     List<Mate> findAllByMemberId(Long memberId);
 
