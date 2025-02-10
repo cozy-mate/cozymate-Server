@@ -51,9 +51,6 @@ public class RoomQueryService {
     private final FavoriteRepository favoriteRepository;
 
     public RoomDetailResponseDTO getRoomById(Long roomId, Long memberId) {
-
-        memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -111,9 +108,6 @@ public class RoomQueryService {
     }
 
     public RoomDetailResponseDTO getRoomByInviteCode(String inviteCode, Long memberId) {
-        memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Room room = roomRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -149,9 +143,6 @@ public class RoomQueryService {
     }
 
     public List<MateDetailResponseDTO> getInvitedMemberList(Long roomId, Long memberId) {
-        memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
@@ -246,16 +237,10 @@ public class RoomQueryService {
 
 
     public List<RoomDetailResponseDTO> getRequestedRoomList(Long memberId) {
-        memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         return getRoomList(memberId, EntryStatus.PENDING);
     }
 
     public InvitedRoomResponseDTO getInvitedRoomList(Long memberId) {
-        memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Integer invitedCount = mateRepository.countByMemberIdAndEntryStatus(memberId,
             EntryStatus.INVITED);
         return new InvitedRoomResponseDTO(invitedCount, getRoomList(memberId, EntryStatus.INVITED));
@@ -295,7 +280,6 @@ public class RoomQueryService {
     public List<RoomSearchResponseDTO> searchRooms(String keyword, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
             () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Long universityId = member.getUniversity().getId();
         Gender gender = member.getGender();
 

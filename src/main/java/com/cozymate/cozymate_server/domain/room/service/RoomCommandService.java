@@ -49,7 +49,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class RoomCommandService {
 
     private static final String UPPERCASE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -73,16 +72,16 @@ public class RoomCommandService {
     private final RoleCommandService roleCommandService;
     private final TodoCommandService todoCommandService;
 
-
+    @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
         Member member) {
-        Member creator = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
+        if (roomRepository.existsByMemberIdAndStatuses(member.getId(), RoomStatus.ENABLE,
             RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
+
+        // 기존 참여 요청들 삭제
+        clearOtherRoomRequests(member.getId());
 
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPrivateRoom(request, inviteCode);
@@ -90,7 +89,7 @@ public class RoomCommandService {
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
-        Mate mate = MateConverter.toEntity(room, creator, true);
+        Mate mate = MateConverter.toEntity(room, member, true);
         mateRepository.save(mate);
 
         Feed feed = FeedConverter.toEntity(room);
@@ -99,23 +98,25 @@ public class RoomCommandService {
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }
 
+    @Transactional
     public RoomDetailResponseDTO createPublicRoom(PublicRoomCreateRequestDTO request,
         Member member) {
-        Member creator = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        if (roomRepository.existsByMemberIdAndStatuses(creator.getId(), RoomStatus.ENABLE,
+        if (roomRepository.existsByMemberIdAndStatuses(member.getId(), RoomStatus.ENABLE,
             RoomStatus.WAITING, EntryStatus.JOINED)) {
             throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
         }
 
         // memberStat이 null일 경우 공개방 생성 불가
-        if (creator.getMemberStat() == null) {
+        if (member.getMemberStat() == null) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
         }
 
-        Gender gender = creator.getGender();
-        University university = creator.getUniversity();
+        // 기존 참여 요청들 삭제
+        clearOtherRoomRequests(member.getId());
+
+        Gender gender = member.getGender();
+        University university = member.getUniversity();
 
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university);
@@ -125,7 +126,7 @@ public class RoomCommandService {
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
-        Mate mate = MateConverter.toEntity(room, creator, true);
+        Mate mate = MateConverter.toEntity(room, member, true);
         mateRepository.save(mate);
 
         Feed feed = FeedConverter.toEntity(room);
@@ -134,6 +135,7 @@ public class RoomCommandService {
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }
 
+    @Transactional
     public void joinRoom(Long roomId, Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -178,6 +180,7 @@ public class RoomCommandService {
 
     }
 
+    @Transactional
     public void deleteRoom(Long roomId, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -202,6 +205,7 @@ public class RoomCommandService {
         return roomQueryService.isValidRoomName(roomName);
     }
 
+    @Transactional
     public void quitRoom(Long roomId, Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -294,26 +298,23 @@ public class RoomCommandService {
         }
     }
 
+    @Transactional
     public RoomDetailResponseDTO updateRoom(Long roomId, Long memberId,
         RoomUpdateRequestDTO request) {
-
-        memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+        Mate mate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
                 EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
 
-        if (!member.isRoomManager()) {
+        if (!mate.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
         if (room.getRoomType() == RoomType.PUBLIC) {
             roomHashtagCommandService.deleteRoomHashtags(room);
-            roomHashtagCommandService.updateRoomHashtags(room, request.hashtagList());
+            roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         }
         room.updateRoom(request.name(), request.persona());
         roomRepository.save(room);
@@ -321,6 +322,7 @@ public class RoomCommandService {
         return roomQueryService.getRoomById(roomId, memberId);
     }
 
+    @Transactional
     public void sendInvitation(Long inviteeId, Long inviterId) {
         Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -367,6 +369,7 @@ public class RoomCommandService {
                 NotificationType.ARRIVE_ROOM_INVITE, room));
     }
 
+    @Transactional
     public void respondToInvitation(Long roomId, Long inviteeId, boolean accept) {
         Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -448,6 +451,7 @@ public class RoomCommandService {
         quitRoom(roomId, targetMemberId);
     }
 
+    @Transactional
     public void cancelInvitation(Long inviteeId, Long inviterId) {
 
         memberRepository.findById(inviteeId)
@@ -471,6 +475,7 @@ public class RoomCommandService {
 
     }
 
+    @Transactional
     public void requestToJoin(Long roomId, Long memberId) {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -528,6 +533,7 @@ public class RoomCommandService {
         }
     }
 
+    @Transactional
     public void cancelRequestToJoin(Long roomId, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -542,6 +548,7 @@ public class RoomCommandService {
         mateRepository.delete(mate);
     }
 
+    @Transactional
     public void respondToJoinRequest(Long requesterId, boolean accept, Long managerId) {
         Member requestMember = memberRepository.findById(requesterId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -603,6 +610,7 @@ public class RoomCommandService {
         }
     }
 
+    @Transactional
     public void changeToPublicRoom(Long roomId, Long memberId) {
         Member manager = memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
@@ -641,6 +649,7 @@ public class RoomCommandService {
         room.changeToPublicRoom(roomGender, roomUniversity);
     }
 
+    @Transactional
     public void changeToPrivateRoom(Long roomId, Long memberId) {
         memberRepository.findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));

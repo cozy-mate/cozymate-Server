@@ -17,13 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class QuestionAnswerMapper {
 
+    private static QuestionAnswerMapper instance;
     private static Map<String, List<String>> questionAnswerMap;
     private static final String JSON_FILE = "memberstat/question_answer.json";
     private static final String AM = "오전";
     private static final String PM = "오후";
 
-    public static void load() {
+    private static final List<String> MULTI_VALUE_QUESTION = List.of("personality",
+        "sleepingHabit");
 
+    static {load();}
+
+    private static void load() {
         if (questionAnswerMap == null) { // 중복 로딩 방지
             try (InputStream inputStream = QuestionAnswerMapper.class.getClassLoader()
                 .getResourceAsStream(JSON_FILE)) {
@@ -54,7 +59,6 @@ public class QuestionAnswerMapper {
         }
         return index;
     }
-
 
     public static String mapValue(String key, Integer index) {
         List<String> options = questionAnswerMap.get(key);
@@ -129,7 +133,7 @@ public class QuestionAnswerMapper {
                     Object value = entry.getValue();
 
                     if (value instanceof Integer && questionAnswerMap.containsKey(key)) {
-                        if ("personality".equals(key) || "sleepingHabit".equals(key)) {
+                        if (MULTI_VALUE_QUESTION.stream().anyMatch(q -> q.equals(key))) {
                             List<String> mappedValues = mapValues(key, (Integer) value);
                             return String.join(", ", mappedValues); // 여러 값을 콤마로 구분
                         }
