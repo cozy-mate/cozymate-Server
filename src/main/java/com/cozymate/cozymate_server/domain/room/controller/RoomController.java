@@ -116,9 +116,8 @@ public class RoomController {
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER
     })
-    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> getRoomInfo(@RequestParam String inviteCode,
-        @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomDetailResponseDTO roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode, memberDetails.member().getId());
+    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> getRoomInfo(@RequestParam String inviteCode) {
+        RoomDetailResponseDTO roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode);
         return ResponseEntity.ok(ApiResponse.onSuccess(roomJoinResponse));
     }
 

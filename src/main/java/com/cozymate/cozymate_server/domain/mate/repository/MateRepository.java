@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +21,7 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     void deleteByRoomId(Long roomId);
 
+    @EntityGraph(attributePaths = {"member", "member.memberStat"})
     Optional<Mate> findByRoomIdAndIsRoomManager(Long roomId, boolean isRoomManager);
 
     Optional<Mate> findByRoomIdAndMemberId(Long roomId, Long memberId);
