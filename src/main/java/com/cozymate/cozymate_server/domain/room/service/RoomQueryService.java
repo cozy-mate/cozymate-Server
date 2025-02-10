@@ -25,7 +25,6 @@ import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
-import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
@@ -47,7 +46,6 @@ public class RoomQueryService {
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
-    private final RoomHashtagRepository roomHashtagRepository;
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatRepository memberStatRepository;
     private final RoomFavoriteRepository roomFavoriteRepository;
@@ -114,17 +112,14 @@ public class RoomQueryService {
         );
     }
 
-    public RoomDetailResponseDTO getRoomByInviteCode(String inviteCode, Long memberId) {
+    public RoomDetailResponseDTO getRoomByInviteCode(String inviteCode) {
         Room room = roomRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
 
         Mate managerMate = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
 
-        Member manager = memberRepository.findById(managerMate.getMember().getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        return getRoomById(room.getId(), manager.getId());
+        return getRoomById(room.getId(), managerMate.getMember().getId());
     }
 
     public Boolean isValidRoomName(String roomName) {
