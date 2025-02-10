@@ -33,7 +33,7 @@ public class QuestionAnswerMapper {
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 questionAnswerMap = objectMapper.readValue(inputStream,
-                    new TypeReference<Map<String, List<String>>>() {
+                    new TypeReference<>() {
                     });
             } catch (IOException e) {
                 log.error("JSON 파일 읽기 실패 {}: {}", JSON_FILE, e.getMessage());
@@ -55,29 +55,6 @@ public class QuestionAnswerMapper {
         return index;
     }
 
-//    private static int handleLegacyCase(String key, String value) {
-//        if (key.equals("흡연여부")) {
-//            if (value.equals("전자담배")) {
-//                return 3;
-//            }
-//        }
-//        if (key.equals("물건공유")) {
-//            if (value.equals("아무것도 공유하고싶지 않아요")) {
-//                return 0;
-//            }
-//        }
-//        if(key.equals("청소빈도")){
-//            if (value.equals("이틀에 한 번 해요")){
-//                return 3;
-//            }
-//        }
-//        if(key.equals("음주빈도")){
-//            if (value.equals("아예 안 마시요")){
-//                return 0;
-//            }
-//        }
-//        return -1;
-//    }
 
     public static String mapValue(String key, Integer index) {
         List<String> options = questionAnswerMap.get(key);
