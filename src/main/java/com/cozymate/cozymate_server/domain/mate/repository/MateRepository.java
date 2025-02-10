@@ -15,6 +15,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface MateRepository extends JpaRepository<Mate, Long> {
+    @EntityGraph(attributePaths = {"member", "member.memberStat"})
+    @Query("SELECT m FROM Mate m WHERE m.room.id = :roomId AND m.entryStatus = 'JOINED'")
+    List<Mate> findJoinedMatesWithMemberAndStats(@Param("roomId") Long roomId);
+
+    @Query("SELECT m FROM Mate m WHERE m.isRoomManager = true AND m.room.id IN :roomIds")
+    List<Mate> findRoomManagers(@Param("roomIds") List<Long> roomIds);
 
     List<Mate> findByRoomId(Long roomId);
 
