@@ -52,8 +52,8 @@ public class MemberFavoriteController {
     @DeleteMapping("/{memberFavoriteId}")
     @Operation(summary = "[베로] 사용자 찜 삭제", description = "memberFavoriteId: 사용자 찜 pk")
     @SwaggerApiError({
-        ErrorStatus._MEMBER_NOT_FOUND,
-        ErrorStatus._ROOM_NOT_FOUND
+        ErrorStatus._MEMBERFAVORITE_NOT_FOUND,
+        ErrorStatus._MEMBERFAVORITE_MEMBER_MISMATCH
     })
     public ResponseEntity<ApiResponse<String>> deleteMemberFavorite(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long memberFavoriteId) {
