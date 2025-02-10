@@ -109,15 +109,16 @@ public class RoomController {
     }
 
     @GetMapping("/join")
-    @Operation(summary = "[바니] 초대코드로 방 정보 조회 기능", description = "초대코드를 입력하면 방 정보를 조회합니다. 여기서 isRoomManager는 무시부탁합니다")
+    @Operation(summary = "[바니] 초대코드로 방 정보 조회 기능", description = "초대코드를 입력하면 방 정보를 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._ROOM_MANAGER_NOT_FOUND,
         ErrorStatus._NOT_ROOM_MANAGER
     })
-    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> getRoomInfo(@RequestParam String inviteCode) {
-        RoomDetailResponseDTO roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode);
+    public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> getRoomInfo(@RequestParam String inviteCode,
+        @AuthenticationPrincipal MemberDetails memberDetails) {
+        RoomDetailResponseDTO roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode, memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(roomJoinResponse));
     }
 
