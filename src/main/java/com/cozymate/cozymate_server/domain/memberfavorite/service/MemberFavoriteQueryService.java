@@ -15,11 +15,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -31,8 +29,6 @@ public class MemberFavoriteQueryService {
 
     public List<MemberFavoriteResponseDTO> getMemberFavoriteList(Member member) {
         List<MemberFavorite> memberFavoriteList = memberFavoriteRepository.findByMember(member);
-
-        log.info("반환된 사이즈 : {}", memberFavoriteList.size());
 
         if (memberFavoriteList.isEmpty()) {
             return new ArrayList<>();
@@ -50,8 +46,6 @@ public class MemberFavoriteQueryService {
             member.getId());
 
         MemberStat memberStat = member.getMemberStat();
-
-        log.info("findTargetMemberList 사이즈 : {}", findTargetMemberList.size());
 
         List<MemberFavoriteResponseDTO> memberFavoriteResponseDTOList = findTargetMemberList.stream()
             .filter(targetMember -> Objects.nonNull(targetMember.getMemberStat()))
