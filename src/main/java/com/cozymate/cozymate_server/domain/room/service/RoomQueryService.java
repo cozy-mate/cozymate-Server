@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.hashtag.Hashtag;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -23,10 +24,12 @@ import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -86,8 +89,13 @@ public class RoomQueryService {
             .flatMap(Optional::stream)
             .toList();
 
-        //해시태그 가져오기
-        List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(roomId);
+        // 해시태그 가져오기
+        List<String> hashtags = Optional.ofNullable(room.getRoomHashtags())
+            .orElse(Collections.emptyList()) // null인 경우에 빈 리스트 반환
+            .stream()
+            .map(RoomHashtag::getHashtag)
+            .map(Hashtag::getHashtag)
+            .toList();
 
         return RoomConverter.toRoomDetailResponseDTOWithParams(room.getId(), room.getName(),
             room.getInviteCode(), room.getProfileImage(),
@@ -205,7 +213,12 @@ public class RoomQueryService {
                     joinedMates.stream().map(mate -> mate.getMember().getId())
                         .collect(Collectors.toList()));
                 Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
-                List<String> hashtags = roomHashtagRepository.findHashtagsByRoomId(room.getId());
+                List<String> hashtags = Optional.ofNullable(room.getRoomHashtags())
+                    .orElse(Collections.emptyList()) // null인 경우에 빈 리스트 반환
+                    .stream()
+                    .map(RoomHashtag::getHashtag)
+                    .map(Hashtag::getHashtag)
+                    .toList();
                 return RoomConverter.toRoomDetailResponseDTOWithParams(
                     room.getId(),
                     room.getName(),
