@@ -1,22 +1,16 @@
 package com.cozymate.cozymate_server.global.scheduler;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
-import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.role.service.RoleCommandService;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
-import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
-import com.cozymate.cozymate_server.domain.todo.service.TodoQueryService;
+import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -35,7 +29,7 @@ public class NotificationScheduler {
 
     private final RoomLogCommandService roomLogCommandService;
     private final RoomRepository roomRepository;
-    private final TodoQueryService todoQueryService;
+    private final TodoAssignmentQueryService todoAssignmentQueryService;
     private final RoleCommandService roleCommandService;
 
     // 매일 자정 반복 (해당하는 날 역할을 Todo에 추가) 작업 자정에 먼저하고 나서 시작하도록 30초로 설정
@@ -101,7 +95,7 @@ public class NotificationScheduler {
      */
     @Scheduled(cron = "00 00 21 * * *")
     public void sendReminderRoleNotification() {
-        todoQueryService.sendReminderRoleNotification();
+        todoAssignmentQueryService.sendReminderRoleNotification();
     }
 
     /**
@@ -109,7 +103,7 @@ public class NotificationScheduler {
      */
     @Scheduled(cron = "0 0 0 * * *")
     public void addReminderRoleRoomLog() {
-        todoQueryService.addReminderRoleRoomLog();
+        todoAssignmentQueryService.addReminderRoleRoomLog();
     }
 
     /**

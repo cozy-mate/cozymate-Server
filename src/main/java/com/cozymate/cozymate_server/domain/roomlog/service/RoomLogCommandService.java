@@ -7,14 +7,13 @@ import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
 import com.cozymate.cozymate_server.domain.roomlog.converter.RoomLogConverter;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.todo.Todo;
+import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,23 +68,18 @@ public class RoomLogCommandService {
 
     /**
      * 각 메이트들에게 역할 알림 로그 추가
-     *
-     * @param mateTodoMap 메이트별 할당된 투두 리스트
+     * <p>~~님이 ~~을/를 까먹은 거 같아요 ㅠㅠ</p>
      */
-    public void addRoomLogRemindingRole(Map<Long, List<Todo>> mateTodoMap) {
-        Map<Long, Mate> mateIdMap = mateRepository.findAllByIdIn(
-                mateTodoMap.keySet().stream().toList())
-            .stream().collect(Collectors.toMap(Mate::getId, mate -> mate));
+    public void addRoomLogRemindingRole(List<TodoAssignment> todoAssignmentList) {
 
-        mateTodoMap.forEach((mateId, todoList) -> {
-            Mate mate = mateIdMap.get(mateId);
-            todoList.forEach(todo -> {
-                String who = "{" + mate.getMember().getNickname() + "}님이 ";
-                String what = "[" + todo.getContent() + "]을/를 " + DEFAULT_REMINDING_ROLE_MESSAGE;
-                String content = who + what;
-                roomLogRepository.save(
-                    RoomLogConverter.toEntity(content, todo.getRoom(), null, mate));
-            });
+        todoAssignmentList.forEach(todoAssignment -> {
+            Mate mate = todoAssignment.getMate();
+            Todo todo = todoAssignment.getTodo();
+            String who = "{" + mate.getMember().getNickname() + "}님이 ";
+            String what = "[" + todo.getContent() + "]을/를 " + DEFAULT_REMINDING_ROLE_MESSAGE;
+            String content = who + what;
+            roomLogRepository.save(
+                RoomLogConverter.toEntity(content, todo.getRoom(), null, mate));
         });
     }
 

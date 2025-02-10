@@ -3,8 +3,9 @@ package com.cozymate.cozymate_server.domain.todo.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO;
-import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateResponseDTO;
+import com.cozymate.cozymate_server.domain.todo.dto.request.UpdateTodoRequestDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;
+import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.domain.todo.service.TodoQueryService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -41,7 +42,7 @@ public class TodoController {
 
     @PostMapping("/{roomId}/todos")
     @Operation(summary = "[무빗] 특정 방에 본인의 Todo 생성", description = "내 투두, 남 투두, 그룹 투두 모두 생성 가능합니다.")
-    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._TODO_OVER_MAX})
+    @SwaggerApiError({ErrorStatus._MATE_NOT_FOUND, ErrorStatus._TODO_ASSIGNED_MATE_LIMIT})
     public ResponseEntity<ApiResponse<TodoIdResponseDTO>> createTodo(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
@@ -105,7 +106,7 @@ public class TodoController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
         @PathVariable @Positive Long todoId,
-        @Valid @RequestBody CreateTodoRequestDTO requestDto
+        @Valid @RequestBody UpdateTodoRequestDTO requestDto
     ) {
         todoCommandService.updateTodoContent(memberDetails.member(), roomId, todoId,
             requestDto);
