@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +24,6 @@ public interface RoomFavoriteRepository extends JpaRepository<RoomFavorite, Long
     void deleteAllByRoomIds(@Param("roomIds") List<Long> roomIds);
 
     void deleteByMember(Member member);
+
+    Optional<RoomFavorite> findByMemberAndRoom(Member member, Room room);
 }
