@@ -11,19 +11,45 @@ import java.util.Random;
 @SuppressWarnings("NonAsciiCharacters")
 public class MemberStatFixture {
 
+    /**
+     * 기본적인 MemberStat 객체를 생성합니다.
+     * @param member Member 객체
+     * @return MemberStat 객체
+     */
     public static MemberStat 정상_1(Member member) {
         return 멤버_스탯_생성(member, 기본_대학_스탯(), 기본_라이프스타일(), "안녕하세요, 자기소개입니다.");
     }
 
+    /**
+     * 두 번째 기본 MemberStat 객체를 생성합니다.
+     * @param member Member 객체
+     * @return MemberStat 객체
+     */
     public static MemberStat 정상_2(Member member) {
         return 멤버_스탯_생성(member, 기본_대학_스탯(), 기본_라이프스타일2(), "안녕하세요, 자기소개입니다.");
     }
 
+    /**
+     * 커스텀 값을 이용하여 MemberStat 객체를 생성합니다.
+     * @param member Member 객체
+     * @param memberUniversityStat 대학 관련 통계 정보
+     * @param lifestyle 생활 패턴 정보
+     * @param selfIntroduction 자기소개
+     * @return MemberStat 객체
+     */
     public static MemberStat 정상_커스텀(Member member, MemberUniversityStat memberUniversityStat,
         Lifestyle lifestyle, String selfIntroduction) {
         return 멤버_스탯_생성(member, memberUniversityStat, lifestyle, selfIntroduction);
     }
 
+    /**
+     * MemberStat 객체를 생성하는 내부 메서드입니다.
+     * @param member Member 객체
+     * @param memberUniversityStat 대학 관련 통계 정보
+     * @param lifestyle 생활 패턴 정보
+     * @param selfIntroduction 자기소개
+     * @return MemberStat 객체
+     */
     private static MemberStat 멤버_스탯_생성(Member member, MemberUniversityStat memberUniversityStat,
         Lifestyle lifestyle, String selfIntroduction) {
         return MemberStat.builder()
@@ -34,6 +60,10 @@ public class MemberStatFixture {
             .build();
     }
 
+    /**
+     * 기본 대학 통계 정보를 생성합니다.
+     * @return MemberUniversityStat 객체
+     */
     private static MemberUniversityStat 기본_대학_스탯() {
         return MemberUniversityStat.builder()
             .admissionYear(2020)
@@ -43,6 +73,10 @@ public class MemberStatFixture {
             .build();
     }
 
+    /**
+     * 기본 생활 패턴 정보를 생성합니다.
+     * @return Lifestyle 객체
+     */
     private static Lifestyle 기본_라이프스타일() {
         return Lifestyle.builder()
             .wakeUpTime(7)
@@ -68,6 +102,10 @@ public class MemberStatFixture {
             .build();
     }
 
+    /**
+     * 두 번째 기본 생활 패턴 정보를 생성합니다.
+     * @return Lifestyle 객체
+     */
     private static Lifestyle 기본_라이프스타일2() {
         return Lifestyle.builder()
             .wakeUpTime(10)
@@ -93,9 +131,16 @@ public class MemberStatFixture {
             .build();
     }
 
-    public static List<MemberStat> 랜덤_멤버_스탯_리스트(List<Member> members, int count) {
+    /**
+     * 주어진 Member 리스트를 기반으로 랜덤 MemberStat 리스트를 생성합니다.
+     * @param members Member 객체 리스트
+     * @param count 생성할 MemberStat 객체 수
+     * @param seed 랜덤 시드 값 (null일 경우 기본 랜덤 생성)
+     * @return MemberStat 객체 리스트
+     */
+    public static List<MemberStat> 랜덤_멤버_스탯_리스트(List<Member> members, int count, Long seed) {
         List<MemberStat> memberStats = new ArrayList<>();
-        Random random = new Random();
+        Random random = (seed != null) ? new Random(seed) : new Random();
 
         for (int i = 0; i < count; i++) {
             Member member = members.get(i % members.size());
