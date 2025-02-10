@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.room.dto.response;
 
-import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
 import java.util.List;
 import lombok.Builder;
 

@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.favorite.dto.response;
+package com.cozymate.cozymate_server.domain.room.dto.response;
 
 import lombok.Builder;
 

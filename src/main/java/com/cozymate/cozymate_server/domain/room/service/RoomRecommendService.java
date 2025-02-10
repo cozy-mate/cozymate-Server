@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
-import com.cozymate.cozymate_server.domain.favorite.dto.response.PreferenceMatchCountDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
