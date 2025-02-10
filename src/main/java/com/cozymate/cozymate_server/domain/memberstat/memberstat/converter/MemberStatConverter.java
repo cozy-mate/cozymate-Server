@@ -31,7 +31,6 @@ public class MemberStatConverter {
     private static final Integer NO_EQUALITY = null;
 
     public static MemberStat toEntity(Member member, CreateMemberStatRequestDTO dto) {
-        QuestionAnswerMapper.load();
 
         return MemberStat.builder()
             .member(member)
@@ -45,7 +44,6 @@ public class MemberStatConverter {
 
     public static MemberStatDetailResponseDTO toMemberStatDetailDTOFromEntity(
         MemberStat memberStat) {
-        QuestionAnswerMapper.load();
 
         Lifestyle lifestyle = memberStat.getLifestyle();
         MemberUniversityStat memberUniversityStat = memberStat.getMemberUniversityStat();
@@ -177,7 +175,6 @@ public class MemberStatConverter {
         Map<String, Object> rawMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
             memberStat, preferences);
 
-        QuestionAnswerMapper.load();
         Map<String, String> memberStatMap = QuestionAnswerMapper.convertToStringMap(
             rawMemberStatMap);
         return memberStatMap.entrySet().stream()
@@ -196,7 +193,6 @@ public class MemberStatConverter {
             criteriaMemberStat, preferences);
 
         // Integer 값을 String으로 변환한 Map 생성
-        QuestionAnswerMapper.load();
         Map<String, String> memberStatMap = QuestionAnswerMapper.convertToStringMap(
             rawMemberStatMap);
         Map<String, String> criteriaMemberStatMap = QuestionAnswerMapper.convertToStringMap(
