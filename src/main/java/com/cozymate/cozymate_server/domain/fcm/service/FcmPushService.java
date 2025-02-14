@@ -45,21 +45,23 @@ public class FcmPushService {
     private final NotificationLogBulkRepository notificationLogBulkRepository;
 
     /**
-     * todo role 리마인더 스케줄러에서 사용중
+     * 투두 role 리마인더 스케줄러에서 사용중
      * 알림 내용에 본인 닉네임이 들어가고 본인에게 오는 알림인 경우
      */
     @Async
     public void sendNotification(OneTargetDto target) {
         Member member = target.getMember();
+        NotificationType notificationType = target.getNotificationType();
 
         if (target.getTodoContents() != null) {
-            sendNotificationToMember(member, target.getNotificationType(),
-                target.getTodoContents());
+            sendNotificationToMember(messageUtil.createMessage(member, notificationType,
+                target.getTodoContents()));
         } else if (target.getRoleContent() != null) {
-            sendNotificationToMember(member, target.getNotificationType(),
-                target.getRoleContent());
+            sendNotificationToMember(messageUtil.createMessage(member, notificationType,
+                target.getRoleContent()));
         } else {
-            sendNotificationToMember(member, target.getNotificationType());
+            sendNotificationToMember(
+                messageUtil.createMessage(member, notificationType));
         }
     }
 
@@ -74,8 +76,10 @@ public class FcmPushService {
     public void sendNotification(OneTargetReverseDto target) {
         Member contentMember = target.getContentMember();
         Member recipientMember = target.getRecipientMember();
+        NotificationType notificationType = target.getNotificationType();
 
-        sendNotificationToMember(contentMember, recipientMember, target.getNotificationType());
+        sendNotificationToMember(messageUtil.createMessage(contentMember, recipientMember,
+            notificationType));
     }
 
     /**
@@ -85,19 +89,22 @@ public class FcmPushService {
     public void sendNotification(GroupWithOutMeTargetDto target) {
         List<Member> memberList = target.getMemberList();
         Member me = target.getMe();
+        NotificationType notificationType = target.getNotificationType();
 
         memberList.forEach(member -> {
-            sendNotificationToMember(me, member, target.getNotificationType());
+            sendNotificationToMember(
+                messageUtil.createMessage(me, member, notificationType));
         });
     }
 
     @Async
     public void sendNotification(GroupTargetDto target) {
         List<Member> memberList = target.getMemberList();
+        NotificationType notificationType = target.getNotificationType();
 
         memberList.forEach(member -> {
-            sendNotificationToMember(member,
-                target.getNotificationType());
+            sendNotificationToMember(
+                messageUtil.createMessage(member, notificationType));
         });
     }
 
@@ -108,7 +115,8 @@ public class FcmPushService {
         Room room = target.getRoom();
         NotificationType notificationType = target.getNotificationType();
 
-        sendNotificationToMember(contentMember, room, recipientMember, notificationType);
+        sendNotificationToMember(
+            messageUtil.createMessage(contentMember, room, recipientMember, notificationType));
     }
 
     /**
@@ -119,9 +127,14 @@ public class FcmPushService {
         Member host = target.getHost();
         Member member = target.getMember();
         Room room = target.getRoom();
+        NotificationType hostNotificationType = target.getHostNotificationType();
+        NotificationType memberNotificationType = target.getMemberNotificationType();
 
-        sendNotificationToMember(member, room, host, target.getHostNotificationType());
-        sendNotificationToMember(host, room, member, target.getMemberNotificationType());
+        sendNotificationToMember(
+            messageUtil.createMessage(member, room, host, hostNotificationType));
+
+        sendNotificationToMember(
+            messageUtil.createMessage(host, room, member, memberNotificationType));
     }
 
     /**
@@ -133,168 +146,32 @@ public class FcmPushService {
         List<Member> memberList = target.getMemberList(); // 알림을 받을 멤버 리스트
         Member me = target.getMe(); // 알림 내용에 들어갈 멤버 (의 이름)
         Room room = target.getRoom(); // 알림 내용에 들어갈 방 (의 이름)
+        NotificationType notificationType = target.getNotificationType();
+
         memberList.forEach(member -> {
-            sendNotificationToMember(me, room, member, target.getNotificationType());
+            sendNotificationToMember(
+                messageUtil.createMessage(me, room, member, notificationType));
         });
     }
 
-    /**
-     * 공지사항 알림용
-     * 토큰 최대 500개씩 나누어 호출
-     */
-    @Async
-    public void sendMulticastNotification(List<Fcm> fcmList, String content, Long targetId) {
-        log.info("FcmPushService에서 현재 스레드 이름 (시작): {}", Thread.currentThread().getName());
-        List<String> fcmTokenList = fcmList.stream()
-            .map(Fcm::getToken)
-            .toList();
-
-        sendNotificationToMember(fcmList, content, targetId, fcmTokenList);
-        log.info("FcmPushService에서 현재 스레드 이름 (종료): {}", Thread.currentThread().getName());
-    }
-
-    private void sendNotificationToMember(Member member, NotificationType notificationType) {
-        MessageResult messageResult = messageUtil.createMessage(member, notificationType);
+    private void sendNotificationToMember(MessageResult messageResult) {
         List<Message> messages = messageResult.getMessages();
 
         if (messages.isEmpty()) {
             return;
         }
 
-        String content = messageResult.getContent();
-        Map<Message, String> messageTokenMap = messageResult.getMessageTokenMap();
-
-        BatchResponse batchResponse = sendMessageToFirebase(messages, messageTokenMap);
+        BatchResponse batchResponse = sendMessageToFirebase(messages,
+            messageResult.getMessageTokenMap());
 
         if (batchResponse != null && batchResponse.getSuccessCount() > 0) {
             log.info("알림 전송 시도 갯수: {}", messages.size());
             log.info("알림 전송 성공 갯수: {}", batchResponse.getSuccessCount());
 
-            saveNotificationLog(member, notificationType, content, null);
+            NotificationLog notificationLog = messageResult.getNotificationLog();
+            notificationLogRepository.save(notificationLog);
 
-            log.info("{}의 알림 로그 저장", member.getNickname());
-        }
-    }
-
-    private void sendNotificationToMember(Member member, NotificationType notificationType,
-        List<String> todoContents) {
-        MessageResult messageResult = messageUtil.createMessage(member, notificationType,
-            todoContents);
-        List<Message> messages = messageResult.getMessages();
-
-        if (messages.isEmpty()) {
-            return;
-        }
-
-        String content = messageResult.getContent();
-        Map<Message, String> messageTokenMap = messageResult.getMessageTokenMap();
-
-        BatchResponse batchResponse = sendMessageToFirebase(messages, messageTokenMap);
-
-        if (batchResponse != null && batchResponse.getSuccessCount() > 0) {
-            log.info("알림 전송 시도 갯수: {}", messages.size());
-            log.info("알림 전송 성공 갯수: {}", batchResponse.getSuccessCount());
-
-            saveNotificationLog(member, notificationType, content, null);
-
-            log.info("{}의 알림 로그 저장", member.getNickname());
-        }
-    }
-
-    private void sendNotificationToMember(Member member, NotificationType notificationType,
-        String roleContent) {
-        MessageResult messageResult = messageUtil.createMessage(member, notificationType,
-            roleContent);
-        List<Message> messages = messageResult.getMessages();
-
-        if (messages.isEmpty()) {
-            return;
-        }
-
-        String content = messageResult.getContent();
-        Map<Message, String> messageTokenMap = messageResult.getMessageTokenMap();
-
-        BatchResponse batchResponse = sendMessageToFirebase(messages, messageTokenMap);
-
-        if (batchResponse != null && batchResponse.getSuccessCount() > 0) {
-            log.info("알림 전송 시도 갯수: {}", messages.size());
-            log.info("알림 전송 성공 갯수: {}", batchResponse.getSuccessCount());
-
-            saveNotificationLog(member, notificationType, content, null);
-
-            log.info("{}의 알림 로그 저장", member.getNickname());
-        }
-    }
-
-    private void sendNotificationToMember(Member contentMember, Member recipientMember,
-        NotificationType notificationType) {
-        MessageResult messageResult = messageUtil.createMessage(contentMember, recipientMember,
-            notificationType);
-        List<Message> messages = messageResult.getMessages();
-
-        if (messages.isEmpty()) {
-            return;
-        }
-
-        String content = messageResult.getContent();
-        Map<Message, String> messageTokenMap = messageResult.getMessageTokenMap();
-
-        BatchResponse batchResponse = sendMessageToFirebase(messages, messageTokenMap);
-
-        if (batchResponse != null && batchResponse.getSuccessCount() > 0) {
-            log.info("알림 전송 시도 갯수: {}", messages.size());
-            log.info("알림 전송 성공 갯수: {}", batchResponse.getSuccessCount());
-
-            saveNotificationLog(recipientMember, notificationType, content, contentMember.getId());
-
-            log.info("{}의 알림 로그 저장", recipientMember.getNickname());
-        }
-    }
-
-    private void sendNotificationToMember(Member contentMember, Room room, Member recipientMember,
-        NotificationType notificationType) {
-        MessageResult messageResult = messageUtil.createMessage(contentMember, room,
-            recipientMember, notificationType);
-        List<Message> messages = messageResult.getMessages();
-
-        if (messages.isEmpty()) {
-            return;
-        }
-
-        String content = messageResult.getContent();
-        Map<Message, String> messageTokenMap = messageResult.getMessageTokenMap();
-
-        BatchResponse batchResponse = sendMessageToFirebase(messages, messageTokenMap);
-
-        if (batchResponse != null && batchResponse.getSuccessCount() > 0) {
-            log.info("알림 전송 시도 갯수: {}", messages.size());
-            log.info("알림 전송 성공 갯수: {}", batchResponse.getSuccessCount());
-
-            if (NotificationType.REJECT_ROOM_JOIN.equals(notificationType)
-                || NotificationType.ACCEPT_ROOM_JOIN.equals(notificationType)) {
-                saveNotificationLog(recipientMember, notificationType, content,
-                    contentMember.getId());
-            } else {
-                saveNotificationLog(recipientMember, notificationType, content, room.getId());
-            }
-            log.info("{}의 알림 로그 저장", recipientMember.getNickname());
-        }
-    }
-
-    private void sendNotificationToMember(List<Fcm> fcmList, String content, Long targetId,
-        List<String> fcmTokenList) {
-        MulticastMessage message = messageUtil.createMessage(fcmTokenList, content);
-        Set<String> failedTokenSet = sendMulticastMessageToFirebase(fcmTokenList, message);
-
-        List<Long> successMemberIdList = fcmList.stream()
-            .filter(fcm -> !failedTokenSet.contains(fcm.getToken()))
-            .map(Fcm::getMember)
-            .map(Member::getId)
-            .distinct()
-            .toList();
-
-        if (!successMemberIdList.isEmpty()) {
-            saveNotificationLog(content, targetId, successMemberIdList);
+            log.info("{}의 알림 로그 저장", notificationLog.getMember().getNickname());
         }
     }
 
@@ -326,10 +203,44 @@ public class FcmPushService {
                 }
             }
         } catch (FirebaseMessagingException e) {
-            log.error("FCM 에러 코드: {}", e.getMessagingErrorCode());
-            log.error("FCM 에러 메시지: {}", e.getMessage());
+            log.error("FCM 에러 코드: {}, 에러 메시지: {}", e.getMessagingErrorCode(), e.getMessage());
         }
+
         return batchResponse;
+    }
+
+    /**
+     * 공지사항 알림용 토큰 최대 500개씩 나누어 호출
+     * TODO: 아래 코드들은 호출 방식이 정해지지 않아 리팩토링에서 제외
+     */
+    @Async
+    public void sendMulticastNotification(List<Fcm> fcmList, String content, Long targetId) {
+        log.info("FcmPushService에서 현재 스레드 이름 (시작): {}", Thread.currentThread().getName());
+        List<String> fcmTokenList = fcmList.stream()
+            .map(Fcm::getToken)
+            .toList();
+
+        sendNotificationToMember(fcmList, content, targetId, fcmTokenList);
+        log.info("FcmPushService에서 현재 스레드 이름 (종료): {}", Thread.currentThread().getName());
+    }
+
+    private void sendNotificationToMember(List<Fcm> fcmList, String content, Long targetId,
+        List<String> fcmTokenList) {
+        MulticastMessage message = messageUtil.createMessage(fcmTokenList, content);
+        Set<String> failedTokenSet = sendMulticastMessageToFirebase(fcmTokenList, message);
+
+        List<Long> successMemberIdList = fcmList.stream()
+            .filter(fcm -> !failedTokenSet.contains(fcm.getToken()))
+            .map(Fcm::getMember)
+            .map(Member::getId)
+            .distinct()
+            .toList();
+
+        if (!successMemberIdList.isEmpty()) {
+            notificationLogBulkRepository.saveAll(successMemberIdList, NotificationCategory.NOTICE,
+                content, targetId);
+            log.info("공지 사항 알림 내역 저장 완료");
+        }
     }
 
     private Set<String> sendMulticastMessageToFirebase(List<String> fcmTokenList,
@@ -359,29 +270,9 @@ public class FcmPushService {
                 }
             }
         } catch (FirebaseMessagingException e) {
-            log.error("FCM 에러 코드: {}", e.getMessagingErrorCode());
-            log.error("FCM 에러 메시지: {}", e.getMessage());
+            log.error("FCM 에러 코드: {}, 에러 메시지: {}", e.getMessagingErrorCode(), e.getMessage());
         }
 
         return failedTokenSet;
-    }
-
-    private void saveNotificationLog(Member member, NotificationType notificationType,
-        String content, Long targetId) {
-        NotificationLog notificationLog = NotificationLog.builder()
-            .member(member)
-            .category(notificationType.getCategory())
-            .content(content)
-            .targetId(targetId)
-            .build();
-
-        notificationLogRepository.save(notificationLog);
-    }
-
-    private void saveNotificationLog(String content, Long noticeId,
-        List<Long> successMemberIdList) {
-        notificationLogBulkRepository.saveAll(successMemberIdList, NotificationCategory.NOTICE,
-            content, noticeId);
-        log.info("공지 사항 알림 내역 저장 완료");
     }
 }

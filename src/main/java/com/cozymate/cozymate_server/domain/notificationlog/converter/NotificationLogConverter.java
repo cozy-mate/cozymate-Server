@@ -1,11 +1,24 @@
 package com.cozymate.cozymate_server.domain.notificationlog.converter;
 
+import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.dto.response.NotificationLogResponseDTO;
+import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class NotificationLogConverter {
+
+    public static NotificationLog toEntity(Member member, NotificationCategory category,
+        String content, Long targetId) {
+        return NotificationLog.builder()
+            .member(member)
+            .category(category)
+            .content(content)
+            .targetId(targetId)
+            .build();
+    }
 
     public static NotificationLogResponseDTO toNotificationLogResponseDTO(String content,
         LocalDateTime createdAt, String category, Long targetId) {
