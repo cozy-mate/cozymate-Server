@@ -1,8 +1,5 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupRoomNameWithOutMeTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.HostAndMemberAndRoomTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetReverseDto;
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.converter.FeedConverter;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
@@ -13,7 +10,6 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
@@ -37,6 +33,7 @@ import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.domain.university.University;
+import com.cozymate.cozymate_server.domain.fcm.event.converter.EventConverter;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
@@ -169,17 +166,7 @@ public class RoomCommandService {
         }
         roomRepository.save(room);
 
-        // 푸시 알림 코드
-        List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room, EntryStatus.JOINED);
-
-        List<Member> memberList = findRoomMates.stream()
-            .map(Mate::getMember)
-            .filter(findMember -> !findMember.getId().equals(member.getId()))
-            .toList();
-
-        eventPublisher.publishEvent(GroupRoomNameWithOutMeTargetDto.create(member, memberList, room,
-            NotificationType.ROOM_IN));
-
+        eventPublisher.publishEvent(EventConverter.toJoinedRoomEvent(member, room));
     }
 
     @Transactional
@@ -247,16 +234,7 @@ public class RoomCommandService {
             return;
         }
 
-        // 푸시 알림 코드
-        List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room, EntryStatus.JOINED);
-
-        List<Member> memberList = findRoomMates.stream()
-            .map(Mate::getMember)
-            .filter(findMember -> !findMember.getId().equals(member.getId()))
-            .toList();
-
-        eventPublisher.publishEvent(GroupRoomNameWithOutMeTargetDto.create(member, memberList, room,
-            NotificationType.ROOM_OUT));
+        eventPublisher.publishEvent(EventConverter.toQuitRoomEvent(member, room));
     }
 
     private void assignNewRoomManager(Long roomId, Mate quittingMate) {
@@ -365,11 +343,8 @@ public class RoomCommandService {
             mateRepository.save(mate);
         }
 
-        // 푸시 알림 코드
         eventPublisher.publishEvent(
-            HostAndMemberAndRoomTargetDto.create(inviter.getMember(),
-                NotificationType.SEND_ROOM_INVITE, inviteeMember,
-                NotificationType.ARRIVE_ROOM_INVITE, room));
+            EventConverter.toSentInvitationEvent(inviter.getMember(), inviteeMember, room));
     }
 
     @Transactional
@@ -399,36 +374,15 @@ public class RoomCommandService {
             // 초대 요청을 수락하여 JOINED 상태로 변경
             processJoinRequest(invitee, room);
             clearOtherRoomRequests(inviteeId);
+
+            eventPublisher.publishEvent(
+                EventConverter.toAcceptedInvitationEvent(inviteeMember, room));
         } else {
             // 초대 요청을 거절하여 PENDING 상태를 삭제
             mateRepository.delete(invitee);
-        }
-        roomRepository.save(room);
-
-        // 푸시 알림 코드
-        Mate inviterMate = mateRepository.findFetchByRoomAndIsRoomManager(room, true).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MATE_NOT_FOUND)
-        );
-        Member inviterMember = inviterMate.getMember();
-
-        if (accept) {
-            eventPublisher.publishEvent(OneTargetReverseDto.create(inviteeMember, inviterMember,
-                NotificationType.ACCEPT_ROOM_INVITE));
-
-            List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room,
-                EntryStatus.JOINED);
-
-            List<Member> memberList = findRoomMates.stream()
-                .map(Mate::getMember)
-                .filter(findMember -> !findMember.getId().equals(inviteeMember.getId()))
-                .toList();
 
             eventPublisher.publishEvent(
-                GroupRoomNameWithOutMeTargetDto.create(inviteeMember, memberList, room,
-                    NotificationType.ROOM_IN));
-        } else {
-            eventPublisher.publishEvent(OneTargetReverseDto.create(inviteeMember, inviterMember,
-                NotificationType.REJECT_ROOM_INVITE));
+                EventConverter.toRejectedInvitationEvent(inviteeMember, room));
         }
     }
 
@@ -508,16 +462,7 @@ public class RoomCommandService {
             mateRepository.save(mate);
         }
 
-        // 푸시 알림 코드
-        Mate managerMate = mateRepository.findFetchByRoomAndIsRoomManager(room, true).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MATE_NOT_FOUND)
-        );
-
-        Member managerMember = managerMate.getMember();
-
-        eventPublisher.publishEvent(OneTargetReverseDto.create(member, managerMember,
-            NotificationType.ARRIVE_ROOM_JOIN_REQUEST));
-
+        eventPublisher.publishEvent(EventConverter.toRequestedJoinRoomEvent(member, room));
     }
 
     private void checkEntryStatus(Optional<Mate> existingMate) {
@@ -584,32 +529,14 @@ public class RoomCommandService {
         if (accept) {
             processJoinRequest(requester, room);
             clearOtherRoomRequests(requesterId);
+
+            eventPublisher.publishEvent(
+                EventConverter.toAcceptedJoinEvent(manager.getMember(), requestMember, room));
         } else {
             mateRepository.delete(requester); // 거절 시 요청자 삭제
-        }
-        roomRepository.save(room);
-
-        // 푸시 알림 코드
-        if (accept) {
-            eventPublisher.publishEvent(
-                OneTargetReverseDto.create(manager.getMember(), requestMember,
-                    NotificationType.ACCEPT_ROOM_JOIN));
-
-            List<Mate> findRoomMates = mateRepository.findFetchMemberByRoom(room,
-                EntryStatus.JOINED);
-
-            List<Member> memberList = findRoomMates.stream()
-                .map(Mate::getMember)
-                .filter(findMember -> !findMember.getId().equals(requestMember.getId()))
-                .toList();
 
             eventPublisher.publishEvent(
-                GroupRoomNameWithOutMeTargetDto.create(requestMember, memberList, room,
-                    NotificationType.ROOM_IN));
-        } else {
-            eventPublisher.publishEvent(
-                OneTargetReverseDto.create(manager.getMember(), requestMember,
-                    NotificationType.REJECT_ROOM_JOIN));
+                EventConverter.toRejectedJoinEvent(manager.getMember(), requestMember));
         }
     }
 
@@ -634,7 +561,8 @@ public class RoomCommandService {
             throw new GeneralException(ErrorStatus._PUBLIC_ROOM);
         }
 
-        List<Mate> mates = mateRepository.findFetchMemberByRoomAndEntryStatus(room, EntryStatus.JOINED);
+        List<Mate> mates = mateRepository.findFetchMemberByRoomAndEntryStatus(room,
+            EntryStatus.JOINED);
 
         Gender roomGender = manager.getGender();
         University roomUniversity = manager.getUniversity();
