@@ -5,10 +5,10 @@ import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushContentDto;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.fcm.dto.MessageResult;
+import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
+import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogCreateDTO;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.room.Room;
-import com.google.firebase.messaging.ApnsConfig;
-import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MulticastMessage;
 import com.google.firebase.messaging.Notification;
@@ -38,11 +38,15 @@ public class MessageUtil {
 
         String content = getContent(contentMember, room, notificationType);
 
+        NotificationLog notificationLog = notificationType.generateNotificationLog(
+            NotificationLogCreateDTO.createNotificationLogCreateDTO(recipientMember, contentMember,
+                room, content));
+
         if (NotificationType.ARRIVE_ROOM_INVITE.equals(notificationType)) {
-            return getMessageResult(fcmList, content, room, notificationType);
+            return getMessageResult(fcmList, content, room, notificationType, notificationLog);
         }
 
-        return getMessageResult(fcmList, content, notificationType);
+        return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
 
     public MessageResult createMessage(Member member, NotificationType notificationType) {
@@ -54,7 +58,10 @@ public class MessageUtil {
 
         String content = getContent(member, notificationType);
 
-        return getMessageResult(fcmList, content, notificationType);
+        NotificationLog notificationLog = notificationType.generateNotificationLog(
+            NotificationLogCreateDTO.createNotificationLogCreateDTO(member, content));
+
+        return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
 
     public MessageResult createMessage(Member contentMember, Member recipientMember,
@@ -67,7 +74,11 @@ public class MessageUtil {
 
         String content = getContent(contentMember, notificationType);
 
-        return getMessageResult(fcmList, content, notificationType);
+        NotificationLog notificationLog = notificationType.generateNotificationLog(
+            NotificationLogCreateDTO.createNotificationLogCreateDTO(recipientMember, contentMember,
+                content));
+
+        return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
 
     public MessageResult createMessage(Member member, NotificationType notificationType,
@@ -80,7 +91,10 @@ public class MessageUtil {
 
         String content = getContent(member, notificationType, todoContents);
 
-        return getMessageResult(fcmList, content, notificationType);
+        NotificationLog notificationLog = notificationType.generateNotificationLog(
+            NotificationLogCreateDTO.createNotificationLogCreateDTO(member, content));
+
+        return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
 
     public MessageResult createMessage(Member member, NotificationType notificationType,
@@ -93,7 +107,10 @@ public class MessageUtil {
 
         String content = getContent(member, notificationType, roleContent);
 
-        return getMessageResult(fcmList, content, notificationType);
+        NotificationLog notificationLog = notificationType.generateNotificationLog(
+            NotificationLogCreateDTO.createNotificationLogCreateDTO(member, content));
+
+        return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
 
     public MulticastMessage createMessage(List<String> fcmTokenValueList, String content) {
@@ -132,7 +149,8 @@ public class MessageUtil {
         return notificationType.generateContent(FcmPushContentDto.create(member, room));
     }
 
-    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Member member, NotificationType notificationType) {
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Member member,
+        NotificationType notificationType) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()
@@ -164,12 +182,12 @@ public class MessageUtil {
         MessageResult messageResult = MessageResult.builder()
             .messageTokenMap(messageTokenMap)
             .messages(messages)
-            .content(content)
             .build();
         return messageResult;
     }
 
-    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Room room, NotificationType notificationType) {
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content, Room room,
+        NotificationType notificationType, NotificationLog notificationLog) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()
@@ -201,12 +219,13 @@ public class MessageUtil {
         MessageResult messageResult = MessageResult.builder()
             .messageTokenMap(messageTokenMap)
             .messages(messages)
-            .content(content)
+            .notificationLog(notificationLog)
             .build();
         return messageResult;
     }
 
-    private MessageResult getMessageResult(List<Fcm> fcmList, String content, NotificationType notificationType) {
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content,
+        NotificationType notificationType, NotificationLog notificationLog) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()
@@ -237,7 +256,7 @@ public class MessageUtil {
         MessageResult messageResult = MessageResult.builder()
             .messageTokenMap(messageTokenMap)
             .messages(messages)
-            .content(content)
+            .notificationLog(notificationLog)
             .build();
         return messageResult;
     }

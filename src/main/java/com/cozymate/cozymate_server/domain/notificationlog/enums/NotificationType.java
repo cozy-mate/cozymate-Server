@@ -1,6 +1,9 @@
 package com.cozymate.cozymate_server.domain.notificationlog.enums;
 
 import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushContentDto;
+import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
+import com.cozymate.cozymate_server.domain.notificationlog.converter.NotificationLogConverter;
+import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogCreateDTO;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -23,6 +26,12 @@ public enum NotificationType {
                     + "님, %s Best, Worst 코지메이트를 선정해주세요!",
                 month);
         }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), null);
+        }
     },
 
     /**
@@ -37,6 +46,12 @@ public enum NotificationType {
                 + "님, 오늘 "
                 + fcmPushContentDto.getRoleContent()
                 + " 잊지 않으셨죠?";
+        }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), null);
         }
     },
 
@@ -55,20 +70,27 @@ public enum NotificationType {
                 + "님, 오늘 해야할 일이에요!"
                 + builder.toString();
         }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), null);
+        }
     },
 
     // GroupWithOutMeTarget
-    // TODO :
     COMPLETE_ALL_TODAY_TODO(NotificationCategory.COZY_HOME) {
         @Override
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
             return fcmPushContentDto.getMember().getNickname() + "님이 오늘 해야 할 일을 전부 완료했어요!";
         }
-    },
 
-    /**
-     * 여기부터 피그마 추가된 알림들
-     */
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getContentMember().getId());
+        }
+    },
 
     /**
      * GroupWithOutMeTarget
@@ -81,6 +103,12 @@ public enum NotificationType {
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
             return fcmPushContentDto.getMember().getNickname() + "님이 "
                 + fcmPushContentDto.getRoom().getName() + "에 뛰어들어왔어요!";
+        }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getRoom().getId());
         }
     },
 
@@ -96,6 +124,12 @@ public enum NotificationType {
             return fcmPushContentDto.getMember().getNickname() + "님이 "
                 + fcmPushContentDto.getRoom().getName() + "을/를 뛰쳐나갔어요!";
         }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getRoom().getId());
+        }
     },
 
     /**
@@ -109,6 +143,12 @@ public enum NotificationType {
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
             return fcmPushContentDto.getMember().getNickname()
                 + "님이 초대 요청을 거절했어요";
+        }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getContentMember().getId());
         }
     },
 
@@ -124,6 +164,12 @@ public enum NotificationType {
             return fcmPushContentDto.getMember().getNickname()
                 + "님이 방 초대 요청을 수락했어요";
         }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getContentMember().getId());
+        }
     },
 
     /**
@@ -138,6 +184,12 @@ public enum NotificationType {
             return fcmPushContentDto.getMember().getNickname() + "님에게 "
                 + fcmPushContentDto.getRoom().getName() + "으로 초대 요청을 보냈어요";
         }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getRoom().getId());
+        }
     },
 
     /**
@@ -150,6 +202,12 @@ public enum NotificationType {
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
             return fcmPushContentDto.getMember().getNickname() + "님이 "
                 + fcmPushContentDto.getRoom().getName() + "으로 나를 초대했어요";
+        }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getRoom().getId());
         }
     },
 
@@ -164,6 +222,12 @@ public enum NotificationType {
             return fcmPushContentDto.getMember().getNickname()
                 + "님이 방 참여 요청을 거절했어요";
         }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getContentMember().getId());
+        }
     },
 
     /**
@@ -176,6 +240,12 @@ public enum NotificationType {
         public String generateContent(FcmPushContentDto fcmPushContentDto) {
             return fcmPushContentDto.getMember().getNickname()
                 + "님이 방 참여 요청을 수락했어요";
+        }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getContentMember().getId());
         }
     },
 
@@ -190,12 +260,19 @@ public enum NotificationType {
             return fcmPushContentDto.getMember().getNickname()
                 + "님이 방 참여 요청을 보냈어요";
         }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getContentMember().getId());
+        }
     }
     ;
 
     private NotificationCategory category;
 
     public abstract String generateContent(FcmPushContentDto fcmPushContentDto);
+    public abstract NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO);
 
     @AllArgsConstructor
     @Getter
