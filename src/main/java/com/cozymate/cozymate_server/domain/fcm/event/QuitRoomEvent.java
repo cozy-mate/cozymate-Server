@@ -5,8 +5,8 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import lombok.Builder;
 import lombok.Getter;
 
-@Builder
 @Getter
+@Builder
 public class QuitRoomEvent {
 
     private Member member;
