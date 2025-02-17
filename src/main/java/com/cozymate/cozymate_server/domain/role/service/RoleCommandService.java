@@ -11,8 +11,6 @@ import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
-import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
-import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -21,7 +19,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -72,7 +69,7 @@ public class RoleCommandService {
 
         checkUpdatePermission(role, mate);
 
-        todoCommandService.deleteTodoByRoleId(roleId);
+        todoCommandService.deleteTodoByRoleId(role);
         roleRepository.delete(role);
     }
 
@@ -126,20 +123,14 @@ public class RoleCommandService {
     }
 
     /**
-     * 오늘 요일에 해당하는 Role을 Todo로 추가 (SCHEDULED)
+     * 오늘 요일에 해당하는 Role을 투두로 추가 (SCHEDULED)
      */
     public void addRoleToTodo() {
         DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
         int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
         List<Role> roleList = roleRepository.findAll(); // TODO 페이징 반복 처리?
         roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
-            .forEach(role ->
-                todoRepository.save(
-                    TodoConverter.toEntity(role.getRoom(), role.getMateId(),
-                        role.getAssignedMateIdList(), role.getContent(),
-                        LocalDate.now(), role, TodoType.ROLE_TODO)
-                )
-            );
+            .forEach(todoCommandService::createRoleTodo);
     }
 
     /**

@@ -11,7 +11,6 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-
 import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
@@ -27,7 +26,7 @@ import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
-
+import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -63,6 +62,7 @@ public class MemberWithdrawService {
     private final RoomFavoriteRepository roomFavoriteRepository;
 
     private final InquiryRepository inquiryRepository;
+    private final TodoCommandService todoCommandService;
 
 
     /**
@@ -91,7 +91,6 @@ public class MemberWithdrawService {
 
         memberFavoriteRepository.deleteByMemberOrTargetMember(member);
         roomFavoriteRepository.deleteByMember(member);
-
         log.debug("찜 삭제 완료");
 
         memberStatRepository.deleteByMemberId(member.getId());
@@ -168,16 +167,7 @@ public class MemberWithdrawService {
 
         log.debug("role 삭제 완료");
 
-        todoRepository.findAllByMateId(mate.getId()).forEach(todo -> {
-            todo.removeAssignee(mate.getId());
-
-            roomLogRepository.bulkDeleteTodo(todo);
-
-            if (todo.isAssignedMateListEmpty()) {
-                todoRepository.delete(todo);
-            }
-        });
-
+        todoCommandService.updateAssignedMateIfMateExitRoom(mate);
         log.debug("todo 삭제 완료");
         log.debug("mate 관련 엔티티 삭제 완료");
     }

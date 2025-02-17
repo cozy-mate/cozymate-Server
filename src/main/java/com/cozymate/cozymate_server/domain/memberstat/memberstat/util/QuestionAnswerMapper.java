@@ -38,7 +38,7 @@ public class QuestionAnswerMapper {
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 questionAnswerMap = objectMapper.readValue(inputStream,
-                    new TypeReference<Map<String, List<String>>>() {
+                    new TypeReference<>() {
                     });
             } catch (IOException e) {
                 log.error("JSON 파일 읽기 실패 {}: {}", JSON_FILE, e.getMessage());
