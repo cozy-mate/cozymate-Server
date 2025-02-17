@@ -25,11 +25,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     Optional<Room> findByInviteCode(String inviteCode);
 
-    @EntityGraph(attributePaths = {
-        "roomHashtags.hashtag"
-    })
-    Optional<Room> findById(Long roomId);
-
     @Query("SELECT DISTINCT r FROM Room r " +
         "LEFT JOIN FETCH r.roomHashtags rh " +
         "LEFT JOIN FETCH rh.hashtag " +
