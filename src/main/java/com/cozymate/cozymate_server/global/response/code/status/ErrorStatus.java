@@ -173,20 +173,24 @@ public enum ErrorStatus implements BaseErrorCode {
     _REPORT_DUPLICATE(HttpStatus.BAD_REQUEST, "REPORT401", "중복된 신고 요청입니다."),
     _REPORT_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
 
-    // Favorite 관련
-    _FAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "FAVORITE400", "이미 찜이 되어 있습니다."),
-    _FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "FAVORITE401", "찜을 찾을 수 없습니다."),
-    _FAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "FAVORITE402", "해당 찜에 대한 권한이 없습니다."),
-    _FAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "FAVORITE403", "자신에 대한 찜 관련 요청을 할 수 없습니다."),
-    _FAVORITE_CANNOT_PRIVATE_ROOM(HttpStatus.BAD_REQUEST, "FAVORITE404", "비공개 방은 찜을 할 수 없습니다."),
-    _FAVORITE_CANNOT_FULL_ROOM(HttpStatus.BAD_REQUEST, "FAVORITE405", "인원이 가득 찬 방은 찜을 할 수 없습니다."),
-    _FAVORITE_CANNOT_DISABLE_ROOM(HttpStatus.BAD_REQUEST, "FAVORITE406", "삭제된 방은 찜을 할 수 없습니다."),
-    _FAVORITE_CANNOT_MEMBER_WITHOUT_MEMBERSTAT(HttpStatus.BAD_REQUEST, "FAVORITE407", "멤버 상세정보가 없는 멤버는 찜할 수 없습니다."),
+    // MemberFavorite 관련
+    _MEMBERFAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE400", "이미 찜이 되어 있는 사용자입니다."),
+    _MEMBERFAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE401", "해당 사용자에 대한 찜을 찾을 수 없습니다."),
+    _MEMBERFAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE402", "해당 찜에 대한 권한이 없습니다."),
+    _MEMBERFAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE403", "자신에 대한 찜 관련 요청을 할 수 없습니다."),
+    _MEMBERFAVORITE_CANNOT_FAVORITE_MEMBER_WITHOUT_MEMBERSTAT(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE404", "멤버 스탯이 없는 사용자를 찜할 수 없습니다."),
+
+    // RoomFavorite 관련
+    _ROOMFAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOMFAVORITE400", "이미 찜이 되어 있는 방입니다."),
+    _ROOMFAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOMFAVORITE401", "해당 방에 대한 찜을 찾을 수 없습니다."),
+    _ROOMFAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "ROOMFAVORITE402", "해당 찜에 대한 권한이 없습니다."),
+    _ROOMFAVORITE_CANNOT_PRIVATE_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE403", "비공개 방은 찜을 할 수 없습니다."),
+    _ROOMFAVORITE_CANNOT_FULL_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE404", "인원이 가득 찬 방은 찜을 할 수 없습니다."),
+    _ROOMFAVORITE_CANNOT_DISABLE_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE405", "삭제된 방은 찜을 할 수 없습니다."),
 
     // INQUIRY 관련
     _INQUIRY_EMAIL_FORMAT_INVALID(HttpStatus.BAD_REQUEST, "INQUIRY400", "이메일 형식이 올바르지 않습니다."),
     _INQUIRY_NOT_FOUND(HttpStatus.BAD_REQUEST, "INQUIRY401", "해당 문의 내역이 존재하지 않습니다."),
-
 
     ;
 

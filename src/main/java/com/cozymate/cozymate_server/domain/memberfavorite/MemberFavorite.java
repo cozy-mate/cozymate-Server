@@ -1,12 +1,9 @@
-package com.cozymate.cozymate_server.domain.favorite;
+package com.cozymate.cozymate_server.domain.memberfavorite;
 
-import com.cozymate.cozymate_server.domain.favorite.enums.FavoriteType;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Entity
-public class Favorite extends BaseTimeEntity {
+public class MemberFavorite extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,10 +30,6 @@ public class Favorite extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @NotNull
-    @Column(nullable = false)
-    private Long targetId;
-
-    @Enumerated(EnumType.STRING)
-    private FavoriteType favoriteType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member targetMember;
 }
