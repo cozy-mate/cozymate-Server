@@ -1,8 +1,7 @@
 package com.cozymate.cozymate_server.domain.roomlog.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.roomlog.dto.RoomLogResponseDto.RoomLogDetailResponseDto;
-import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
+import com.cozymate.cozymate_server.domain.roomlog.dto.response.RoomLogDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -24,13 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/roomlog")
 public class RoomLogController {
 
-    private final RoomLogCommandService roomLogCommandService;
     private final RoomLogQueryService roomLogQueryService;
 
     @GetMapping("/{roomId}")
     @Operation(summary = "[무빗] 특정 방에 roomlog 목록 조회", description = "해당 방의 로그가 출력됩니다.")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
-    public ResponseEntity<ApiResponse<PageResponseDto<List<RoomLogDetailResponseDto>>>> getRoomLogList(
+    public ResponseEntity<ApiResponse<PageResponseDto<List<RoomLogDetailResponseDTO>>>> getRoomLogList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
         @RequestParam(defaultValue = "0") int page,

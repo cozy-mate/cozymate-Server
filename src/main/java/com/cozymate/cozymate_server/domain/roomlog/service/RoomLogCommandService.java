@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.roomlog.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
-import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
 import com.cozymate.cozymate_server.domain.roomlog.converter.RoomLogConverter;
@@ -35,7 +34,6 @@ public class RoomLogCommandService {
         "완료하여, 최고의 cozy mate가 되었어요!"
     );
     private final RoomLogRepository roomLogRepository;
-    private final MateRepository mateRepository;
 
     // TODO: 수정해야함
     // 투두 완료버튼 눌렀을 때
@@ -51,7 +49,8 @@ public class RoomLogCommandService {
         }
 
         String content = who + what + finish;
-        roomLogRepository.save(RoomLogConverter.toEntity(content, todo.getRoom(), todo, mate));
+        roomLogRepository.save(
+            RoomLogConverter.toEntity(content, todo.getRoom(), todo.getId(), mate));
     }
 
     public void deleteRoomLogFromTodo(Mate mate, Todo todo) {
