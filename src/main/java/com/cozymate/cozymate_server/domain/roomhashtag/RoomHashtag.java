@@ -7,7 +7,6 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,7 +31,7 @@ public class RoomHashtag extends BaseTimeEntity {
     @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
     private Room room;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = LAZY)
     private Hashtag hashtag;
 
 }

@@ -5,7 +5,6 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
@@ -41,7 +40,6 @@ public class RoomQueryService {
 
     private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
-    private final MemberRepository memberRepository;
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatRepository memberStatRepository;
     private final RoomFavoriteRepository roomFavoriteRepository;
@@ -55,7 +53,6 @@ public class RoomQueryService {
     public RoomDetailResponseDTO getRoomByInviteCode(String inviteCode, Long memberId) {
         Room room = roomRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
         return processRoomDetails(room, memberId);
     }
 
