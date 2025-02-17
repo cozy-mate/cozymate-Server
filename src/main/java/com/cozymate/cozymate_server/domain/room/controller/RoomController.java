@@ -376,7 +376,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<List<RoomSearchResponseDTO>>> searchRooms(
         @RequestParam String keyword, @AuthenticationPrincipal MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.searchRooms(keyword, memberDetails.member().getId())));
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.searchRooms(keyword, memberDetails.member())));
     }
 
     @GetMapping("/invited-status/{memberId}")
