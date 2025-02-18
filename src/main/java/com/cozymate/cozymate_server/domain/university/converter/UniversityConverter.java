@@ -23,8 +23,8 @@ public class UniversityConverter {
         .id(university.getId())
         .name(university.getName())
         .mailPattern(university.getMailPattern())
-        .dormitoryNames(university.getDormitoryNames())
-        .departments(university.getDepartments())
+        .dormitoryNames(university.getDormitoryNames().stream().sorted().toList())
+        .departments(university.getDepartments().stream().sorted().toList())
         .build();
   }
 
