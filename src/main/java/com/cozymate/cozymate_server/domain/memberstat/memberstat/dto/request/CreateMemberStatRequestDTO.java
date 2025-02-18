@@ -7,8 +7,10 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import lombok.Builder;
 
 
+@Builder(toBuilder = true)
 public record CreateMemberStatRequestDTO(
     @NotBlank(message = "학번은 필수입니다.")
     @Size(min = 2, max = 2, message = "학번은 2글자입니다.")
