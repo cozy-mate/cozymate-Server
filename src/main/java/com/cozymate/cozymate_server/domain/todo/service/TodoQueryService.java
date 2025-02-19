@@ -10,6 +10,7 @@ import com.cozymate.cozymate_server.domain.todo.dto.response.TodoDetailResponseD
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateListResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
+import com.cozymate.cozymate_server.domain.todo.validation.TodoValidation;
 import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -37,6 +38,7 @@ public class TodoQueryService {
 
     private final MateRepository mateRepository;
     private final TodoAssignmentQueryService todoAssignmentQueryService;
+    private final TodoValidation todoValidation;
 
     public TodoMateResponseDTO getTodo(Member member, Long roomId, LocalDate timePoint) {
         // 방에 속한 모든 mate 조회
@@ -71,7 +73,7 @@ public class TodoQueryService {
         TodoMateListResponseDTO myTodoListResponseDto = TodoConverter.toTodoMateListResponseDTO(
             currentMate.getMember(), mateTodoList.get(currentMate.getId()));
         Map<String, TodoMateListResponseDTO> mateTodoResponseDto = new HashMap<>();
-        mateList.stream().filter(mate -> isNotSameMate(currentMate, mate))
+        mateList.stream().filter(mate -> todoValidation.isNotSameMate(currentMate, mate))
             .forEach(mate -> mateTodoResponseDto.put(mate.getMember().getNickname(),
                 TodoConverter.toTodoMateListResponseDTO(mate.getMember(),
                     mateTodoList.get(mate.getId()))));
@@ -79,17 +81,6 @@ public class TodoQueryService {
         return TodoConverter.toTodoMateResponseDTO(timePoint, myTodoListResponseDto,
             mateTodoResponseDto);
 
-    }
-
-    /**
-     * 두 mate가 다른지 확인
-     *
-     * @param mate1 메이트 1
-     * @param mate2 메이트 2
-     * @return 다르면 true
-     */
-    private boolean isNotSameMate(Mate mate1, Mate mate2) {
-        return !mate1.getId().equals(mate2.getId());
     }
 
     /**
@@ -112,7 +103,7 @@ public class TodoQueryService {
      */
     private List<TodoDetailResponseDTO> sortTodoDetailResponseDTOByTodoType(
         List<TodoDetailResponseDTO> list) {
-        // Define the sorting priority for each todoType
+        // Map을 통해 입력된 todoType의 우선순위를 정함
         Map<String, Integer> priorityMap = Map.of(
             "self", PRIORITY_SELF,
             "group", PRIORITY_GROUP,
@@ -120,7 +111,7 @@ public class TodoQueryService {
             "role", PRIORITY_ROLE
         );
 
-        // Sort based on the priority defined in the map
+        // 우선순위에 따라서 정렬
         return list.stream()
             .sorted(Comparator.comparingInt(
                 o -> priorityMap.getOrDefault(o.todoType(), Integer.MAX_VALUE)))
