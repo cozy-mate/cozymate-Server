@@ -30,7 +30,7 @@ public class TodoValidation {
             .allMatch(tmpMate -> tmpMate.getRoom().getId().equals(roomId));
 
         if (!allInSameRoom) {
-            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
+            throw new GeneralException(ErrorStatus._MATE_NOT_IN_SAME_ROOM);
         }
     }
 

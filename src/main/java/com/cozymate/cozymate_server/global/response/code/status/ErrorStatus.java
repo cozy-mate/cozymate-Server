@@ -103,6 +103,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // Mate 관련
     _MATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE400", "해당하는 메이트 정보가 없습니다."),
     _MATE_OR_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE401", "해당하는 메이트나 방 정보가 없습니다."),
+    _MATE_NOT_IN_SAME_ROOM(HttpStatus.BAD_REQUEST, "MATE402", "같은 방이 아닌 메이트가 있습니다."),
 
     // Chat 관련 에러
     _CHAT_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHAT400", "쪽지를 찾을 수 없습니다."),
