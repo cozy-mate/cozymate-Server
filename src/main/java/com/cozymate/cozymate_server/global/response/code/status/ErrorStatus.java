@@ -19,7 +19,6 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // [도메인] 관련해서 아래에 계속 추가해주시면 됩니다.
 
-
     // [Member] 관련 에러
     _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "멤버를 찾을 수 없습니다."),
     _MEMBER_BINDING_FAIL(HttpStatus.BAD_REQUEST, "MEMBER401", "회원가입 요청 바인딩 실패"),
@@ -56,7 +55,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _NOT_ROOM_MATE(HttpStatus.BAD_REQUEST, "ROOM404", "해당 방의 룸메이트가 아닙니다."),
     _ROOM_ALREADY_JOINED(HttpStatus.BAD_REQUEST, "ROOM405", "이미 참가한 방입니다."),
     _ROOM_FULL(HttpStatus.BAD_REQUEST, "ROOM406", "방 정원이 꽉 찼습니다."),
-    _ROOM_WAITING(HttpStatus.BAD_REQUEST,"ROOM407","대기 중인 방입니다."),
+    _ROOM_WAITING(HttpStatus.BAD_REQUEST, "ROOM407", "대기 중인 방입니다."),
     _INVITATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM408", "존재하지 않는 초대요청입니다."),
     _INVITATION_ALREADY_SENT(HttpStatus.BAD_REQUEST, "ROOM409", "이미 초대되었습니다."),
     _CANNOT_SELF_FORCED_QUIT(HttpStatus.BAD_REQUEST, "ROOM410", "자신을 강제퇴장시킬 수 없습니다."),
@@ -82,23 +81,31 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBERSTAT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT402", "멤버 상세정보가 존재하지 않습니다."),
     _MEMBERSTAT_FILTER_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT403",
         "멤버 상세정보 filterList이 잘못되었습니다."),
-    _MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE(HttpStatus.BAD_REQUEST, "MEMBERSTAT404", "인실이 정해진 경우 인실 필터링이 불가합니다."),
+    _MEMBERSTAT_FILTER_CANNOT_FILTER_ROOMMATE(HttpStatus.BAD_REQUEST, "MEMBERSTAT404",
+        "인실이 정해진 경우 인실 필터링이 불가합니다."),
     _MEMBERSTAT_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTAT405",
         "멤버 상세정보 인자가 잘못되었습니다."),
-    _MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST(HttpStatus.BAD_REQUEST, "MEMBERSTAT406",
+    _MEMBERSTAT_NEEDS_DETAIL_NEEDS_PREFERENCES_CANNOT_COEXIST(HttpStatus.BAD_REQUEST,
+        "MEMBERSTAT406",
         "needsDetail 옵션과 needsPreferences 옵션은 공존할 수 없습니다."),
     _MEMBERSTAT_FILE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERSTAT407",
         "member stat 질의 파일을 찾을 수 없습니다."),
     _MEMBERSTAT_FILE_READ_ERROR(HttpStatus.BAD_REQUEST, "MEMBERSTAT408",
         "member stat 질의 Json 파일 파싱 실패"),
+    _MEMBERSTAT_PREFERENCE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTATPREFERENCE400",
+        "멤버 선호 항목이 존재하지 않습니다."),
+    _MEMBERSTAT_PREFERENCE_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTATPREFERENCE401",
+        "존재하지 않는 멤버 항목(들)입니다."),
 
-
-    _MEMBERSTAT_PREFERENCE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTATPREFERENCE400", "멤버 선호 항목이 존재하지 않습니다."),
-    _MEMBERSTAT_PREFERENCE_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST,"MEMBERSTATPREFERENCE401","존재하지 않는 멤버 항목(들)입니다."),
-    // ChatRoom 관련 애러
+    // ChatRoom 관련 에러
     _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
     _CHATROOM_FORBIDDEN(HttpStatus.BAD_REQUEST, "CHATROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
-    _CHATROOM_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "CHATROOM402", "해당 쪽지방의 멤버가 아닙니다."),
+    _CHATROOM_MEMBERB_REQUIRED_WHEN_MEMBERA_NULL(HttpStatus.BAD_REQUEST, "CHATROOM402",
+        "해당 쪽지방의 MemberA가 null이고, 현재 요청 Member가 ChatRoom의 MemberB가 아닙니다."),
+    _CHATROOM_MEMBERA_REQUIRED_WHEN_MEMBERB_NULL(HttpStatus.BAD_REQUEST, "CHATROOM403",
+        "해당 쪽지방의 MemberB가 null이고, 현재 요청 Member가 ChatRoom의 MemberA가 아닙니다."),
+    _CHATROOM_INVALID_MEMBER(HttpStatus.BAD_REQUEST, "CHATROOM404",
+        "해당 쪽지방의 두 Member가 모두 null이 아니고, 현재 요청 Member가 MemberA, MemberB 둘다 아닙니다."),
 
     // Mate 관련
     _MATE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE400", "해당하는 메이트 정보가 없습니다."),
@@ -151,22 +158,25 @@ public enum ErrorStatus implements BaseErrorCode {
     _POST_COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "COMMENT400", "댓글이 존재하지 않습니다."),
 
     // Mail
-    _MAIL_AUTHENTICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MAIL400","메일인증을 받아주세요."),
-    _MAIL_ADDRESS_DUPLICATED(HttpStatus.BAD_REQUEST,"MAIL401","이미 사용된 메일입니다."),
-    _MAIL_AUTHENTICATION_CODE_INCORRECT(HttpStatus.BAD_REQUEST,"MAIL402","인증 코드가 올바르지 않습니다."),
-    _MAIL_AUTHENTICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST,"MAIL403","메일 인증코드가 만료되었습니다. 다시 받아주세요"),
-    _INVALID_MAIL_ADDRESS_DOMAIN(HttpStatus.BAD_REQUEST,"MAIL404","메일 도메인이 올바르지 않습니다."),
-    _CANNOT_FIND_MAIL_FORM(HttpStatus.BAD_REQUEST,"MAIL500","메일 템플릿 리소스를 찾을 수 없습니다."),
-    _MAIL_SEND_FAIL(HttpStatus.BAD_REQUEST,"MAIL501","메일을 보내는 데 실패 했습니다."),
+    _MAIL_AUTHENTICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MAIL400", "메일인증을 받아주세요."),
+    _MAIL_ADDRESS_DUPLICATED(HttpStatus.BAD_REQUEST, "MAIL401", "이미 사용된 메일입니다."),
+    _MAIL_AUTHENTICATION_CODE_INCORRECT(HttpStatus.BAD_REQUEST, "MAIL402", "인증 코드가 올바르지 않습니다."),
+    _MAIL_AUTHENTICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "MAIL403",
+        "메일 인증코드가 만료되었습니다. 다시 받아주세요"),
+    _INVALID_MAIL_ADDRESS_DOMAIN(HttpStatus.BAD_REQUEST, "MAIL404", "메일 도메인이 올바르지 않습니다."),
+    _CANNOT_FIND_MAIL_FORM(HttpStatus.BAD_REQUEST, "MAIL500", "메일 템플릿 리소스를 찾을 수 없습니다."),
+    _MAIL_SEND_FAIL(HttpStatus.BAD_REQUEST, "MAIL501", "메일을 보내는 데 실패 했습니다."),
 
     // MemberBlock 관련
     _ALREADY_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK400", "이미 차단된 사용자입니다."),
-    _CANNOT_BLOCK_REQUEST_SELF(HttpStatus.BAD_REQUEST, "MEMBERBLOCK401", "자신에 대해 차단 관련 요청을 할 수 없습니다."),
+    _CANNOT_BLOCK_REQUEST_SELF(HttpStatus.BAD_REQUEST, "MEMBERBLOCK401",
+        "자신에 대해 차단 관련 요청을 할 수 없습니다."),
     _ALREADY_NOT_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK402", "이미 차단되지 않은 사용자입니다."),
     _REQUEST_TO_BLOCKED_MEMBER(HttpStatus.BAD_REQUEST, "MEMBERBLOCK403", "차단한 사용자에 대한 요청입니다."),
 
     // MemberStatEquality 관련
-    _MEMBERSTAT_EQUALITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERSTATEQUALITY400", "일치율이 존재하지 않습니다."),
+    _MEMBERSTAT_EQUALITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERSTATEQUALITY400",
+        "일치율이 존재하지 않습니다."),
 
     // Report 관련
     _REPORT_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT400", "신고 대상 멤버를 찾을 수 없습니다."),
@@ -174,19 +184,27 @@ public enum ErrorStatus implements BaseErrorCode {
     _REPORT_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
 
     // MemberFavorite 관련
-    _MEMBERFAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE400", "이미 찜이 되어 있는 사용자입니다."),
-    _MEMBERFAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE401", "해당 사용자에 대한 찜을 찾을 수 없습니다."),
-    _MEMBERFAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE402", "해당 찜에 대한 권한이 없습니다."),
-    _MEMBERFAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE403", "자신에 대한 찜 관련 요청을 할 수 없습니다."),
-    _MEMBERFAVORITE_CANNOT_FAVORITE_MEMBER_WITHOUT_MEMBERSTAT(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE404", "멤버 스탯이 없는 사용자를 찜할 수 없습니다."),
+    _MEMBERFAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE400",
+        "이미 찜이 되어 있는 사용자입니다."),
+    _MEMBERFAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE401",
+        "해당 사용자에 대한 찜을 찾을 수 없습니다."),
+    _MEMBERFAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE402",
+        "해당 찜에 대한 권한이 없습니다."),
+    _MEMBERFAVORITE_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE403",
+        "자신에 대한 찜 관련 요청을 할 수 없습니다."),
+    _MEMBERFAVORITE_CANNOT_FAVORITE_MEMBER_WITHOUT_MEMBERSTAT(HttpStatus.BAD_REQUEST,
+        "MEMBERFAVORITE404", "멤버 스탯이 없는 사용자를 찜할 수 없습니다."),
 
     // RoomFavorite 관련
     _ROOMFAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "ROOMFAVORITE400", "이미 찜이 되어 있는 방입니다."),
     _ROOMFAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOMFAVORITE401", "해당 방에 대한 찜을 찾을 수 없습니다."),
     _ROOMFAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "ROOMFAVORITE402", "해당 찜에 대한 권한이 없습니다."),
-    _ROOMFAVORITE_CANNOT_PRIVATE_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE403", "비공개 방은 찜을 할 수 없습니다."),
-    _ROOMFAVORITE_CANNOT_FULL_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE404", "인원이 가득 찬 방은 찜을 할 수 없습니다."),
-    _ROOMFAVORITE_CANNOT_DISABLE_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE405", "삭제된 방은 찜을 할 수 없습니다."),
+    _ROOMFAVORITE_CANNOT_PRIVATE_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE403",
+        "비공개 방은 찜을 할 수 없습니다."),
+    _ROOMFAVORITE_CANNOT_FULL_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE404",
+        "인원이 가득 찬 방은 찜을 할 수 없습니다."),
+    _ROOMFAVORITE_CANNOT_DISABLE_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE405",
+        "삭제된 방은 찜을 할 수 없습니다."),
 
     // INQUIRY 관련
     _INQUIRY_EMAIL_FORMAT_INVALID(HttpStatus.BAD_REQUEST, "INQUIRY400", "이메일 형식이 올바르지 않습니다."),
