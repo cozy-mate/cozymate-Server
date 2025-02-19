@@ -18,60 +18,105 @@ public class TodoAssignmentRepositoryService {
 
     private final TodoAssignmentRepository todoAssignmentRepository;
 
+    /**
+     * Optional을 그래도 반환하는 Assignment 조회함수, Validation에서 orElseThrow를 사용하기 위함
+     */
     public Optional<TodoAssignment> getOptionalAssignment(Mate mate, Todo todo) {
         return todoAssignmentRepository.findById(new TodoAssignmentId(todo.getId(), mate.getId()));
     }
 
+    /**
+     * Assignment 조회 함수, 없으면 에러 발생
+     *
+     * @throws GeneralException 조회된 데이터가 없으면 ErrorStatus._TODO_ASSIGNMENT_NOT_FOUND 에러 발생
+     */
     public TodoAssignment getAssignmentOrThrow(Mate mate, Todo todo) {
         return todoAssignmentRepository.findById(new TodoAssignmentId(todo.getId(), mate.getId())
         ).orElseThrow(() -> new GeneralException(ErrorStatus._TODO_ASSIGNMENT_NOT_FOUND));
     }
 
+    /**
+     * 투두에 해당하는 모든 Assignment 리스트를 조회. 빈 배열 불가능.
+     */
     public List<TodoAssignment> getAssignmentList(Todo todo) {
         return todoAssignmentRepository.findAllByTodoId(todo.getId());
     }
 
+    /**
+     * Mate에 해당하는 모든 Assignment 리스트를 조회. 빈 배열 가능
+     */
     public List<TodoAssignment> getAssignmentList(Mate mate) {
         return todoAssignmentRepository.findAllByMateId(mate.getId());
     }
 
+    /**
+     * 투두에 할당된 Assignment 개수 조회. 해당 투두의 할당자 수와 동일
+     */
     public Integer getAssignmentCount(Todo todo) {
-        return getAssignementCount(todo.getId());
+        return getAssignmentCount(todo.getId());
     }
 
-    public Integer getAssignementCount(Long todoId) {
+    public Integer getAssignmentCount(Long todoId) {
         return todoAssignmentRepository.countByTodoId(todoId);
     }
 
-    public Integer getUncompletedTodoCount(Mate mate) {
-        return todoAssignmentRepository.countByMateIdAndNotCompleted(mate.getId());
+    /**
+     * <p>Mate에 할당된 timepoint의 Assignment 중 완료되지 않은 개수 조회. Mate가 완료하지 않는 투두의 개수와 동일</p>
+     * <p>오늘 완료하지 않은 투두가 몇개인지 파악하기 위함</p>
+     */
+    public Integer getUncompletedTodoCount(Mate mate, LocalDate timePoint) {
+        return todoAssignmentRepository.countByMateIdAndNotCompleted(mate.getId(), timePoint);
     }
 
+
+    /**
+     * <p>MateIdList와 timePoint에 해당하는 Assignment 리스트 조회</p>
+     * <p>특정 방의 특정 시점에 할당된 Assignment 리스트 조회를 위함</p>
+     */
     public List<TodoAssignment> getAssignmentListByMateIdListAndTimePoint(List<Long> mateIdList,
         LocalDate timePoint) {
         return todoAssignmentRepository.findAllByMateIdInAndTodoTimePoint(mateIdList, timePoint);
     }
 
+    /**
+     * <p>Role 투두 중 특정 시점에 할당된 Assignment 객체 리스트를 조회</p>
+     * <p>Schedular에서 사용</p>
+     */
     public List<TodoAssignment> getAssignmentListByTimePointAndTodoRoleIsNotNull(
         LocalDate timePoint) {
         return todoAssignmentRepository.findByTodoTimePointAndTodoRoleIsNotNull(timePoint);
     }
 
-
+    /**
+     * Assignment 생성
+     */
     public TodoAssignment createAssignment(TodoAssignment todoAssignment) {
         return todoAssignmentRepository.save(todoAssignment);
     }
 
+    /**
+     * Assignment 삭제
+     */
     public void deleteAssignment(TodoAssignment todoAssignment) {
         todoAssignmentRepository.delete(todoAssignment);
     }
 
+    /**
+     * Assignment 리스트 삭제
+     */
     public void deleteAssignmentList(List<TodoAssignment> todoAssignmentList) {
         todoAssignmentRepository.deleteAll(todoAssignmentList);
     }
 
+    /**
+     * 투두 리스트에 할당된 Assignment 삭제
+     */
     public void deleteAllAssignmentInTodoList(List<Todo> todoList) {
-        todoAssignmentRepository.deleteAllByTodoIdIn(todoList.stream().map(Todo::getId).toList());
+        deleteAllAssignmentInTodoIdList(todoList.stream().map(Todo::getId).toList());
+    }
+
+    public void deleteAllAssignmentInTodoIdList(List<Long> todoIdList) {
+        todoAssignmentRepository.deleteAllByTodoIdIn(todoIdList);
     }
 
 

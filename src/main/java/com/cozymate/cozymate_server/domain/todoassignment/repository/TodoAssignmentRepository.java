@@ -45,9 +45,10 @@ public interface TodoAssignmentRepository extends JpaRepository<TodoAssignment, 
         FROM TodoAssignment ta
         JOIN ta.mate
         WHERE ta.mate.id = :mateId
-        AND ta.isCompleted = false 
+        AND ta.isCompleted = false
+        AND ta.todo.timePoint = :timePoint
         """)
-    int countByMateIdAndNotCompleted(@Param("mateId") Long mateId);
+    int countByMateIdAndNotCompleted(@Param("mateId") Long mateId, @Param("timePoint") LocalDate timePoint);
 
     void deleteAllByTodoIdIn(List<Long> todoIdList);
 

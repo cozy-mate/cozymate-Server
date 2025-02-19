@@ -121,12 +121,13 @@ public class TodoCommandService {
     ) {
         Mate mate = getMate(member.getId(), roomId);
         Todo todo = todoRepositoryService.getTodoOrThrow(todoId);
+        LocalDate today = LocalDate.now(clock);
         // TodoAssignment를 찾아서 업데이트
         todoAssignmentCommandService.changeCompleteStatus(mate, todo, completed);
 
         // timepoint가 오늘이고, complete가 true인 경우 mate가 오늘 할 일을 완료했는지 체크 후 FCM 전송
-        if (todo.getTimePoint().equals(LocalDate.now(clock)) && completed) {
-            allTodoCompleteNotification(mate);
+        if (todo.getTimePoint().equals(today) && completed) {
+            allTodoCompleteNotification(mate, today);
         }
     }
 
@@ -253,12 +254,12 @@ public class TodoCommandService {
     /**
      * <p>오늘 날짜의 투두가 완료되었을 때 실행됨 본인의 오늘 투두가 모두 완료되었다면 FCM 발행</p>
      */
-    private void allTodoCompleteNotification(Mate mate) {
+    private void allTodoCompleteNotification(Mate mate, LocalDate today) {
         List<Mate> mateList = mateRepository.findAllByMemberIdAndEntryStatus(mate.getRoom().getId(),
             EntryStatus.JOINED).stream().filter(m -> !m.getId().equals(mate.getId())).toList();
 
         // 본인의 오늘 할 일이 더이상 없는지 확인
-        int unCompletedCount = todoAssignmentRepositoryService.getUncompletedTodoCount(mate);
+        int unCompletedCount = todoAssignmentRepositoryService.getUncompletedTodoCount(mate, today);
         if (unCompletedCount == 0) {
             // 없으면 FCM 발행 (모든 투두를 완료했음)
             fcmPushService.sendNotification(GroupWithOutMeTargetDto.create(mate.getMember(),
