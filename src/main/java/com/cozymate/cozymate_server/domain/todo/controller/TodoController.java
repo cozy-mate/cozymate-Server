@@ -75,7 +75,7 @@ public class TodoController {
 
     @DeleteMapping("/{roomId}/todos/{todoId}")
     @Operation(summary = "[무빗] 특정 방의 특정 Todo 삭제", description = "Todo의 고유 번호로 삭제가 가능합니다.")
-    @SwaggerApiError({ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._TODO_EDIT_PERMISSION_DENIED, ErrorStatus._TODO_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> deleteTodo(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
@@ -87,7 +87,7 @@ public class TodoController {
 
     @PatchMapping("/{roomId}/todos/{todoId}/state")
     @Operation(summary = "[무빗] Todo 완료 여부를 변경", description = "boolean 값을 같이 넘겨받습니다.")
-    @SwaggerApiError({ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._TODO_EDIT_PERMISSION_DENIED, ErrorStatus._TODO_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> updateTodoCompleteState(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
@@ -101,7 +101,7 @@ public class TodoController {
 
     @PatchMapping("/{roomId}/todos/{todoId}")
     @Operation(summary = "[무빗] Todo의 내용을 수정", description = "수정할 때 Todo 데이터 전체를 넘겨주세요.(content, timePoint)")
-    @SwaggerApiError({ErrorStatus._TODO_NOT_VALID, ErrorStatus._TODO_NOT_FOUND})
+    @SwaggerApiError({ErrorStatus._TODO_EDIT_PERMISSION_DENIED, ErrorStatus._TODO_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> updateTodoContent(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,

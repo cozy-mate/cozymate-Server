@@ -115,7 +115,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 투두 관련
     _TODO_NOT_FOUND(HttpStatus.BAD_REQUEST, "TODO400", "해당하는 Todo 정보가 없습니다."),
-    _TODO_NOT_VALID(HttpStatus.BAD_REQUEST, "TODO401", "수정할 수 있는 권한이 없습니다."),
+    _TODO_EDIT_PERMISSION_DENIED(HttpStatus.BAD_REQUEST, "TODO401", "수정할 수 있는 권한이 없습니다."),
     _TODO_DAILY_LIMIT(HttpStatus.BAD_REQUEST, "TODO402", "생성할 수 있는 하루 최대 Todo 개수를 초과했습니다."),
     _TODO_NOT_IN_ROOM(HttpStatus.BAD_REQUEST, "TODO403", "해당하는 방에 해당 Todo가 없습니다."),
     _ROLE_TODO_CANNOT_DELETE(HttpStatus.BAD_REQUEST, "TODO404", "Role Todo는 삭제할 수 없습니다."),
