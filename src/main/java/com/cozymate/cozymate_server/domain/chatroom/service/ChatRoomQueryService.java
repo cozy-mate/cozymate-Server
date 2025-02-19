@@ -50,11 +50,11 @@ public class ChatRoomQueryService {
             .filter(chatRoom -> {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
                 chatRoomLastChatMap.put(chatRoom, chat);
-                if (chat == null) {
+                if (Objects.isNull(chat)) {
                     return false;
                 }
                 LocalDateTime lastDeleteAt = getLastDeleteAtByMember(chatRoom, member);
-                return lastDeleteAt == null || chat.getCreatedAt().isAfter(lastDeleteAt);
+                return Objects.isNull(lastDeleteAt) || chat.getCreatedAt().isAfter(lastDeleteAt);
             })
             .sorted((chatRoomA, chatRoomB) -> {
                 Chat chatA = chatRoomLastChatMap.get(chatRoomA);
@@ -97,12 +97,12 @@ public class ChatRoomQueryService {
             .filter(chatRoom -> {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
 
-                if (chat == null) {
+                if (Objects.isNull(chat)) {
                     return false;
                 }
 
                 LocalDateTime lastDeleteAt = getLastDeleteAtByMember(chatRoom, member);
-                return lastDeleteAt == null || chat.getCreatedAt().isAfter(lastDeleteAt);
+                return Objects.isNull(lastDeleteAt) || chat.getCreatedAt().isAfter(lastDeleteAt);
             }).toList();
 
         long chatRoomsWithNewChatCount = chatRoomList.stream()
