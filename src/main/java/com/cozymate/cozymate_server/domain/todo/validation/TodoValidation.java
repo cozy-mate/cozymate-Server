@@ -26,11 +26,12 @@ public class TodoValidation {
      */
     public void checkInSameRoom(Mate mate, List<Mate> mateList) {
         Long roomId = mate.getRoom().getId();
-        mateList.forEach(mate1 -> {
-            if (!mate1.getRoom().getId().equals(roomId)) {
-                throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
-            }
-        });
+        boolean allInSameRoom = mateList.stream()
+            .allMatch(tmpMate -> tmpMate.getRoom().getId().equals(roomId));
+
+        if (!allInSameRoom) {
+            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
+        }
     }
 
     /**
@@ -44,11 +45,12 @@ public class TodoValidation {
 
     /**
      * <p>하루에 생성할 수 있는 투두 개수 제한을 검증</p>
+     * <p>투두를 생성하기 전에 체크해야함 && 초과로 하면 최대 개수보다 1개 더 생성됨</p>
      */
     public void checkDailyTodoLimit(Mate mate, LocalDate timePoint) {
         int todoCount = todoRepository.countAllByRoomIdAndTimePoint(mate.getRoom().getId(),
             timePoint);
-        // 생성하기 전에 체크 -> 초과로 하면 최대 개수보다 1개 더 생성됨
+
         if (todoCount >= MAX_TODO_PER_DAY) {
             throw new GeneralException(ErrorStatus._TODO_DAILY_LIMIT);
         }
@@ -59,7 +61,9 @@ public class TodoValidation {
      * <p>본인이 해당 투두의 할당자라면 권한이 존재하는 것</p>
      */
     public void checkEditPermission(Mate mate, Todo todo) {
-        todoAssignmentQueryService.getAssignment(mate, todo);
+        if (todoAssignmentQueryService.getOptionalAssignment(mate, todo).isEmpty()) {
+            throw new GeneralException(ErrorStatus._TODO_EDIT_PERMISSION_DENIED);
+        }
     }
 
     /**
