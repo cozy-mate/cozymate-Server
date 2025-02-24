@@ -1,9 +1,12 @@
 package com.cozymate.cozymate_server.fixture;
 
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.Lifestyle;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberUniversityStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.request.CreateMemberStatRequestDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -39,9 +42,98 @@ public class MemberStatFixture {
      * @param selfIntroduction 자기소개
      * @return MemberStat 객체
      */
-    public static MemberStat 정상_커스텀(Member member, MemberUniversityStat memberUniversityStat,
+    public static MemberStat 커스텀(Member member, MemberUniversityStat memberUniversityStat,
         Lifestyle lifestyle, String selfIntroduction) {
         return 멤버_스탯_생성(member, memberUniversityStat, lifestyle, selfIntroduction);
+    }
+
+
+    /**
+     * 익일에 기상하는 lifestyle 을 생성합니다.
+     * @return MemberUniversityStat 객체
+     */
+    public static Lifestyle 큰_wakeUpTime(){
+        return Lifestyle.builder()
+            .wakeUpTime(25)
+            .sleepingTime(23)
+            .turnOffTime(22)
+            .smokingStatus(0)
+            .sleepingHabit(0)
+            .coolingIntensity(2)
+            .heatingIntensity(2)
+            .lifePattern(1)
+            .intimacy(1)
+            .itemSharing(2)
+            .playingGameFrequency(1)
+            .phoneCallingFrequency(1)
+            .studyingFrequency(2)
+            .eatingFrequency(3)
+            .cleannessSensitivity(3)
+            .noiseSensitivity(2)
+            .cleaningFrequency(3)
+            .drinkingFrequency(2)
+            .personality(0b000000000001)
+            .mbti(3)
+            .build();
+    }
+
+
+    public static CreateMemberStatRequestDTO 정상_생성_요청_DTO() {
+        return CreateMemberStatRequestDTO.builder()
+            .admissionYear("23")
+            .numOfRoommate(2)
+            .dormitoryName("기숙사 A")
+            .acceptance("합격")
+            .wakeUpMeridian("오전")
+            .wakeUpTime(7)
+            .sleepingMeridian("오전")
+            .sleepingTime(1)
+            .turnOffMeridian("오전")
+            .turnOffTime(12)
+            .smoking("비흡연자")
+            .sleepingHabit(List.of("코골이", "뒤척임"))
+            .airConditioningIntensity(2)
+            .heatingIntensity(2)
+            .lifePattern("아침형 인간")
+            .intimacy("어느정도 친하게 지내요")
+            .canShare("휴지정도는 빌려줄 수 있어요")
+            .isPlayGame("보이스 채팅도 해요")
+            .isPhoneCall("급한 전화만 해요")
+            .studying("매일 해요")
+            .intake("배달음식도 먹어요")
+            .cleanSensitivity(3)
+            .noiseSensitivity(3)
+            .cleaningFrequency("일주일에 한 번 해요")
+            .drinkingFrequency("한 달에 한 두번 마셔요")
+            .personality(List.of("조용해요", "부지런해요"))
+            .mbti("INTJ")
+            .selfIntroduction("안녕하세요, 저는 조용한 사람입니다.")
+            .build();
+    }
+
+
+    public static CreateMemberStatRequestDTO 실패_잘못된_학번_입력() {
+        return 정상_생성_요청_DTO().toBuilder()
+            .admissionYear("TwentyOne") // 숫자로 변환할 수 없는 값
+            .build();
+    }
+
+    public static CreateMemberStatRequestDTO 실패_잘못된_smoking() {
+        return 정상_생성_요청_DTO().toBuilder()
+            .smoking("존재하지 않는 흡연 상태") // `QuestionAnswerMapper`에서 찾을 수 없는 값
+            .build();
+    }
+
+    public static CreateMemberStatRequestDTO 실패_잘못된_lifePattern() {
+        return 정상_생성_요청_DTO().toBuilder()
+            .lifePattern("이상한 라이프스타일") // `QuestionAnswerMapper`에서 찾을 수 없는 값
+            .build();
+    }
+
+    public static CreateMemberStatRequestDTO 실패_잘못된_mbti() {
+        return 정상_생성_요청_DTO().toBuilder()
+            .mbti("XXXX") // 존재하지 않는 MBTI 값
+            .build();
     }
 
     /**
@@ -64,7 +156,7 @@ public class MemberStatFixture {
     }
 
     /**
-     * 기본 대학 통계 정보를 생성합니다.
+     * 기본 대학 스탯 정보를 생성합니다.
      * @return MemberUniversityStat 객체
      */
     private static MemberUniversityStat 기본_대학_스탯() {
