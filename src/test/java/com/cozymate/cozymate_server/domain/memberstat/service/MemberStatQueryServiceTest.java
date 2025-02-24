@@ -50,6 +50,7 @@ import org.springframework.data.domain.SliceImpl;
 @SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 public class MemberStatQueryServiceTest {
+
     @Mock
     private LifestyleMatchRateService lifestyleMatchRateService;
     @Mock
@@ -259,7 +260,6 @@ public class MemberStatQueryServiceTest {
             given(memberStatRepository.filterMemberStat(viewerMemberStat, filterList, pageable))
                 .willReturn(mockSlice);
 
-
             given(memberStatPreferenceQueryService.getPreferencesToList(viewer.getId()))
                 .willReturn(List.of("smoking", "intimacy"));
 
@@ -271,7 +271,6 @@ public class MemberStatQueryServiceTest {
             assertThat(response.page()).isEqualTo(0);
             assertThat(response.hasNext()).isFalse();
             assertThat(response.memberList()).hasSize(2);
-
 
             MemberStatPreferenceResponseDTO firstEntry =
                 (MemberStatPreferenceResponseDTO) response.memberList().get(0);
@@ -289,7 +288,8 @@ public class MemberStatQueryServiceTest {
         @DisplayName("필터링된 결과가 없을 경우 빈 페이지 반환")
         void success_when_no_filtered_result() {
             // 필터링된 결과가 없는 경우 Mock 설정
-            Slice<Map<MemberStat, Integer>> emptySlice = new SliceImpl<>(List.of(), pageable, false);
+            Slice<Map<MemberStat, Integer>> emptySlice = new SliceImpl<>(List.of(), pageable,
+                false);
 
             given(memberStatRepository.filterMemberStat(viewerMemberStat, filterList, pageable))
                 .willReturn(emptySlice);
@@ -338,15 +338,17 @@ public class MemberStatQueryServiceTest {
             assertThat(response.hasNext()).isTrue();
             assertThat(response.memberList()).hasSize(2);
         }
+
         @Test
         @DisplayName("MemberStat이 존재하지 않는 경우 예외 발생")
         void failure_when_memberStat_not_exists() {
-            // 🔹 MemberStat이 없는 경우로 설정
+            // MemberStat이 없는 경우로 설정
             given(memberStatRepository.findByMemberId(viewer.getId()))
                 .willReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> memberStatQueryService.getMemberStatList(viewer, filterList, pageable))
+            assertThatThrownBy(
+                () -> memberStatQueryService.getMemberStatList(viewer, filterList, pageable))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage(ErrorStatus._MEMBERSTAT_NOT_EXISTS.getMessage());
         }
@@ -354,7 +356,7 @@ public class MemberStatQueryServiceTest {
 
     @Nested
     @DisplayName("getNumOfSearchedAndFilteredMemberStatList 테스트")
-    class GetNumOfSearchedAndFilteredMemberStatList{
+    class GetNumOfSearchedAndFilteredMemberStatList {
 
         private Member viewer;
         private MemberStat viewerMemberStat;
@@ -384,7 +386,8 @@ public class MemberStatQueryServiceTest {
                 .willReturn(5);
 
             // when
-            Integer count = memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer, filterMap);
+            Integer count = memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer,
+                filterMap);
 
             // then
             assertThat(count).isEqualTo(5);
@@ -398,7 +401,8 @@ public class MemberStatQueryServiceTest {
                 .willReturn(0);
 
             // when
-            Integer count = memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer, filterMap);
+            Integer count = memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer,
+                filterMap);
 
             // then
             assertThat(count).isEqualTo(0);
@@ -412,7 +416,9 @@ public class MemberStatQueryServiceTest {
                 .willReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer, filterMap))
+            assertThatThrownBy(
+                () -> memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer,
+                    filterMap))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage(ErrorStatus._MEMBERSTAT_NOT_EXISTS.getMessage());
         }
@@ -461,7 +467,8 @@ public class MemberStatQueryServiceTest {
             );
 
             // 필터링된 결과 Mock 설정
-            given(memberStatRepository.filterMemberStatAdvance(viewerMemberStat, filterMap, pageable))
+            given(
+                memberStatRepository.filterMemberStatAdvance(viewerMemberStat, filterMap, pageable))
                 .willReturn(mockSlice);
 
             given(memberStatPreferenceQueryService.getPreferencesToList(viewer.getId()))
@@ -469,7 +476,8 @@ public class MemberStatQueryServiceTest {
 
             // when
             MemberStatPageResponseDTO<List<?>> response =
-                memberStatQueryService.getSearchedAndFilteredMemberStatList(viewer, filterMap, pageable);
+                memberStatQueryService.getSearchedAndFilteredMemberStatList(viewer, filterMap,
+                    pageable);
 
             // then
             assertThat(response.page()).isEqualTo(0);
@@ -481,13 +489,16 @@ public class MemberStatQueryServiceTest {
         @DisplayName("필터링된 MemberStat이 없는 경우 빈 리스트 반환")
         void success_when_no_filtered_memberStat_exists() {
             // 필터링된 결과가 없을 경우
-            Slice<Map<MemberStat, Integer>> emptySlice = new SliceImpl<>(List.of(), pageable, false);
-            given(memberStatRepository.filterMemberStatAdvance(viewerMemberStat, filterMap, pageable))
+            Slice<Map<MemberStat, Integer>> emptySlice = new SliceImpl<>(List.of(), pageable,
+                false);
+            given(
+                memberStatRepository.filterMemberStatAdvance(viewerMemberStat, filterMap, pageable))
                 .willReturn(emptySlice);
 
             // when
             MemberStatPageResponseDTO<List<?>> response =
-                memberStatQueryService.getSearchedAndFilteredMemberStatList(viewer, filterMap, pageable);
+                memberStatQueryService.getSearchedAndFilteredMemberStatList(viewer, filterMap,
+                    pageable);
 
             // then
             assertThat(response.page()).isEqualTo(0);
@@ -503,7 +514,9 @@ public class MemberStatQueryServiceTest {
                 .willReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> memberStatQueryService.getSearchedAndFilteredMemberStatList(viewer, filterMap, pageable))
+            assertThatThrownBy(
+                () -> memberStatQueryService.getSearchedAndFilteredMemberStatList(viewer, filterMap,
+                    pageable))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage(ErrorStatus._MEMBERSTAT_NOT_EXISTS.getMessage());
         }
@@ -512,7 +525,8 @@ public class MemberStatQueryServiceTest {
 
     @Nested
     @DisplayName("getRandomMemberStatWithPreferences 테스트")
-    class GetRandomMemberStatWithPreferences{
+    class GetRandomMemberStatWithPreferences {
+
         private Member viewer;
 
         @BeforeEach
@@ -572,7 +586,8 @@ public class MemberStatQueryServiceTest {
                 .willReturn(true);
 
             // when & then - 예외 발생 검증
-            assertThatThrownBy(() -> memberStatQueryService.getRandomMemberStatWithPreferences(viewer))
+            assertThatThrownBy(
+                () -> memberStatQueryService.getRandomMemberStatWithPreferences(viewer))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage(ErrorStatus._MEMBERSTAT_EXISTS.getMessage());
         }
@@ -655,7 +670,8 @@ public class MemberStatQueryServiceTest {
 
             // 정렬이 잘 되었는지 검증
             assertThat(response)
-                .isSortedAccordingTo(Comparator.comparing(MemberStatSearchResponseDTO::equality).reversed());
+                .isSortedAccordingTo(
+                    Comparator.comparing(MemberStatSearchResponseDTO::equality).reversed());
 
             assertThat(response.get(0).equality()).isEqualTo(90);
             assertThat(response.get(1).equality()).isEqualTo(70);
