@@ -9,13 +9,11 @@ import org.apache.commons.lang3.tuple.Pair;
 public class RoomRecommendConverter {
 
     public static RoomRecommendationResponseDTO toRoomRecommendationResponse(Room room,
-        Pair<Long, Integer> pair, List<PreferenceMatchCountDTO> preferenceMatchCountList) {
+        Pair<Long, Integer> pair, List<PreferenceMatchCountDTO> preferenceMatchCountList, List<String> hashtags) {
         return RoomRecommendationResponseDTO.builder()
             .roomId(pair.getLeft())
             .name(room.getName())
-            .hashtags(room.getRoomHashtags().stream()
-                .map(roomHashtag -> roomHashtag.getHashtag().getHashtag())
-                .toList())
+            .hashtags(hashtags)
             .equality(pair.getRight())
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(room.getNumOfArrival())
@@ -24,14 +22,11 @@ public class RoomRecommendConverter {
     }
 
     public static RoomRecommendationResponseDTO toRoomRecommendationResponseWhenNoMemberStat(Room room,
-        List<PreferenceMatchCountDTO> preferenceMatchCountList) {
+        List<PreferenceMatchCountDTO> preferenceMatchCountList, List<String> hashtags) {
         return RoomRecommendationResponseDTO.builder()
             .roomId(room.getId())
             .name(room.getName())
-            .hashtags(room.getRoomHashtags().stream()
-                .map(roomHashtag -> roomHashtag.getHashtag().getHashtag())
-                .toList())
-            .equality(null)
+            .hashtags(hashtags)
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(room.getNumOfArrival())
             .preferenceMatchCountList(preferenceMatchCountList)
