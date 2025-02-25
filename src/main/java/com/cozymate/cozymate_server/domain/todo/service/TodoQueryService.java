@@ -10,7 +10,7 @@ import com.cozymate.cozymate_server.domain.todo.dto.response.TodoDetailResponseD
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateListResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoMateResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.enums.TodoType;
-import com.cozymate.cozymate_server.domain.todo.validation.TodoValidation;
+import com.cozymate.cozymate_server.domain.todo.validator.TodoValidator;
 import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -38,7 +38,7 @@ public class TodoQueryService {
 
     private final MateRepository mateRepository;
     private final TodoAssignmentQueryService todoAssignmentQueryService;
-    private final TodoValidation todoValidation;
+    private final TodoValidator todoValidator;
 
     public TodoMateResponseDTO getTodo(Member member, Long roomId, LocalDate timePoint) {
         // 방에 속한 모든 mate 조회
@@ -73,7 +73,7 @@ public class TodoQueryService {
         TodoMateListResponseDTO myTodoListResponseDto = TodoConverter.toTodoMateListResponseDTO(
             currentMate.getMember(), mateTodoList.get(currentMate.getId()));
         Map<String, TodoMateListResponseDTO> mateTodoResponseDto = new HashMap<>();
-        mateList.stream().filter(mate -> todoValidation.isNotSameMate(currentMate, mate))
+        mateList.stream().filter(mate -> todoValidator.isNotSameMate(currentMate, mate))
             .forEach(mate -> mateTodoResponseDto.put(mate.getMember().getNickname(),
                 TodoConverter.toTodoMateListResponseDTO(mate.getMember(),
                     mateTodoList.get(mate.getId()))));

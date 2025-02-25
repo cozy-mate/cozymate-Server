@@ -15,7 +15,7 @@ import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO
 import com.cozymate.cozymate_server.domain.todo.dto.request.UpdateTodoRequestDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
-import com.cozymate.cozymate_server.domain.todo.validation.TodoValidation;
+import com.cozymate.cozymate_server.domain.todo.validator.TodoValidator;
 import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentCommandService;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
@@ -42,7 +42,7 @@ public class TodoCommandService {
     private final FcmPushService fcmPushService;
     private final TodoAssignmentCommandService todoAssignmentCommandService;
     private final TodoAssignmentQueryService todoAssignmentQueryService;
-    private final TodoValidation todoValidation;
+    private final TodoValidator todoValidator;
     private final Clock clock;
 
 
@@ -56,7 +56,7 @@ public class TodoCommandService {
     public TodoIdResponseDTO createTodo(Member member, Long roomId, CreateTodoRequestDTO requestDto
     ) {
         // max assignee 초과 여부 검증
-        todoValidation.checkExceedingMaxAssignee(requestDto.mateIdList());
+        todoValidator.checkExceedingMaxAssignee(requestDto.mateIdList());
 
         // 사용자의 mate 정보 조회
         Mate todoCreator = getMate(member.getId(), roomId);
@@ -64,10 +64,10 @@ public class TodoCommandService {
         List<Mate> assignedMateList = mateRepository.findAllByIdIn(requestDto.mateIdList());
 
         // 생성자와 할당자가 모두 동일한 방에 있는지 검증
-        todoValidation.checkInSameRoom(todoCreator, assignedMateList);
+        todoValidator.checkInSameRoom(todoCreator, assignedMateList);
 
         // 최대 투두 생성 개수 초과 여부 판단
-        todoValidation.checkDailyTodoLimit(todoCreator, requestDto.timePoint());
+        todoValidator.checkDailyTodoLimit(todoCreator, requestDto.timePoint());
 
         Todo todo = todoRepository.save(
             TodoConverter.toEntity(todoCreator.getRoom(), todoCreator.getId(), requestDto.content(),
@@ -96,7 +96,7 @@ public class TodoCommandService {
         List<Mate> assignedMateList = mateRepository.findAllByIdIn(role.getAssignedMateIdList());
 
         // 생성자와 할당자가 모두 동일한 방에 있는지 검증
-        todoValidation.checkInSameRoom(todoCreator, assignedMateList);
+        todoValidator.checkInSameRoom(todoCreator, assignedMateList);
 
         Todo todo = todoRepository.save(
             TodoConverter.toEntity(todoCreator.getRoom(), todoCreator.getId(), role.getContent(),
@@ -191,7 +191,7 @@ public class TodoCommandService {
         UpdateTodoRequestDTO requestDto
     ) {
         // max assignee 초과 여부 검증
-        todoValidation.checkExceedingMaxAssignee(requestDto.mateIdList());
+        todoValidator.checkExceedingMaxAssignee(requestDto.mateIdList());
 
         Mate mate = getMate(member.getId(), roomId);
         Todo todo = getTodo(todoId);
@@ -199,7 +199,7 @@ public class TodoCommandService {
         if (isRoleTodo(todo)) {
             throw new GeneralException(ErrorStatus._ROLE_TODO_CANNOT_UPDATE);
         }
-        todoValidation.checkEditPermission(mate, todo);
+        todoValidator.checkEditPermission(mate, todo);
 
         List<TodoAssignment> todoAssignmentList = todoAssignmentQueryService
             .getAssignmentList(todo);
@@ -220,7 +220,7 @@ public class TodoCommandService {
 
         // 할당해야 할 mate만 남은 List
         List<Mate> mateListToAssign = mateRepository.findAllByIdIn(mateIdListToAssign);
-        todoValidation.checkInSameRoom(mate, mateListToAssign);
+        todoValidator.checkInSameRoom(mate, mateListToAssign);
 
         addAssignedMateList(todo, mateListToAssign);
         // 할당된 사람 수와 타입 업데이트 (DB 체크)

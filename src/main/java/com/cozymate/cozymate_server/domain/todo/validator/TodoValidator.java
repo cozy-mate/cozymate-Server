@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.todo.validation;
+package com.cozymate.cozymate_server.domain.todo.validator;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.todo.Todo;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TodoValidation {
+public class TodoValidator {
 
     private static final int MAX_ASSIGNEE = 30; // 투두 하나의 최대 할당자 수
     private static final int MAX_TODO_PER_DAY = 20; // 방마다 하루에 생성할 수 있는 투두의 최대 개수
