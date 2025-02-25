@@ -61,7 +61,7 @@ public class TodoCommandService {
         // 사용자의 mate 정보 조회
         Mate todoCreator = getMate(member.getId(), roomId);
 
-        List<Mate> assignedMateList = mateRepository.findAllByIdIn(requestDto.mateIdList());
+        List<Mate> assignedMateList = getMateList(requestDto.mateIdList());
 
         // 생성자와 할당자가 모두 동일한 방에 있는지 검증
         validateSameRoom(todoCreator, assignedMateList);
@@ -358,6 +358,19 @@ public class TodoCommandService {
      */
     private void addAssignedMateList(Todo todo, List<Mate> mateList) {
         mateList.forEach(mate -> todoAssignmentCommandService.createAssignment(mate, todo));
+    }
+
+    /**
+     * <p>입력받은 mateIdList에 해당하는 모든 메이트가 존재하는지 체크하고 가져오는 함수</p>
+     */
+    private List<Mate> getMateList(List<Long> mateIdList) {
+        List<Mate> assignedMateList = mateRepository.findAllByIdIn(mateIdList);
+
+        // 할당을 위해서 입력받은 리스트가 모두 존재하지 않으면 예외 발생
+        if (assignedMateList.size() != mateIdList.size()) {
+            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
+        }
+        return assignedMateList;
     }
 
 }
