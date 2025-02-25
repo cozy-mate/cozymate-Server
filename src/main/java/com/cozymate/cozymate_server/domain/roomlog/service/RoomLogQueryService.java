@@ -6,7 +6,7 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
 import com.cozymate.cozymate_server.domain.roomlog.converter.RoomLogConverter;
-import com.cozymate.cozymate_server.domain.roomlog.dto.RoomLogResponseDto.RoomLogDetailResponseDto;
+import com.cozymate.cozymate_server.domain.roomlog.dto.response.RoomLogDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -28,7 +28,7 @@ public class RoomLogQueryService {
     private final MateRepository mateRepository;
 
 
-    public PageResponseDto<List<RoomLogDetailResponseDto>> getRoomLogList(
+    public PageResponseDto<List<RoomLogDetailResponseDTO>> getRoomLogList(
         Long roomId,
         Member member,
         int page,
@@ -44,11 +44,11 @@ public class RoomLogQueryService {
         Slice<RoomLog> roomLogSlice = roomLogRepository.findAllByRoomIdOrderByCreatedAtDesc(roomId,
             pageable);
 
-        List<RoomLogDetailResponseDto> roomLogResponseList = roomLogSlice.getContent().stream()
+        List<RoomLogDetailResponseDTO> roomLogResponseList = roomLogSlice.getContent().stream()
             .map(RoomLogConverter::toRoomLogDetailResponseDto)
             .toList();
 
-        return PageResponseDto.<List<RoomLogDetailResponseDto>>builder()
+        return PageResponseDto.<List<RoomLogDetailResponseDTO>>builder()
             .page(pageable.getPageNumber())
             .hasNext(roomLogSlice.hasNext())
             .result(roomLogResponseList)
