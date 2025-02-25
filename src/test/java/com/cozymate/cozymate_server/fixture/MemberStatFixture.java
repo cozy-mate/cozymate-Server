@@ -34,6 +34,10 @@ public class MemberStatFixture {
         return 멤버_스탯_생성(member, 기본_대학_스탯(), 기본_라이프스타일2(), "안녕하세요, 자기소개입니다.");
     }
 
+    public static MemberStat 정상_비교용(Member member){
+        return 멤버_스탯_생성(member, 기본_대학_스탯(), 기본_비교용_2개응답다름(), "안녕하세요, 자기소개입니다.");
+    }
+
     /**
      * 커스텀 값을 이용하여 MemberStat 객체를 생성합니다.
      * @param member Member 객체
@@ -178,7 +182,7 @@ public class MemberStatFixture {
             .sleepingTime(23)
             .turnOffTime(22)
             .smokingStatus(0)
-            .sleepingHabit(0)
+            .sleepingHabit(1)
             .coolingIntensity(2)
             .heatingIntensity(2)
             .lifePattern(1)
@@ -223,6 +227,36 @@ public class MemberStatFixture {
             .drinkingFrequency(2)
             .personality(0b000000000001)
             .mbti(5)
+            .build();
+    }
+
+    /**
+     * 기본 생활 패턴 정보를 생성합니다.
+     * @return Lifestyle 객체
+     */
+    public static Lifestyle 기본_비교용_2개응답다름() {
+        // 총 질문 하나당 가중치 1.5 만큼 차이나야함 :
+        return Lifestyle.builder()
+            .wakeUpTime(7)
+            .sleepingTime(22) // 취침시간 1시간 차이 가중치 1/2 만큼 차이나야함
+            .turnOffTime(22)
+            .smokingStatus(0)
+            .sleepingHabit(1)
+            .coolingIntensity(2)
+            .heatingIntensity(2)
+            .lifePattern(1)
+            .intimacy(1)
+            .itemSharing(2)
+            .playingGameFrequency(1)
+            .phoneCallingFrequency(1)
+            .studyingFrequency(1) // 가중치 만큼 차이나야함
+            .eatingFrequency(3)
+            .cleannessSensitivity(3)
+            .noiseSensitivity(2)
+            .cleaningFrequency(3)
+            .drinkingFrequency(2)
+            .personality(0b000000000001)
+            .mbti(3)
             .build();
     }
 
