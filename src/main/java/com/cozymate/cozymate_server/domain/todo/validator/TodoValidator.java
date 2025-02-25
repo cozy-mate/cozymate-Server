@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.todo.validator;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
-import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
+import com.cozymate.cozymate_server.domain.todoassignment.repository.TodoAssignmentRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
@@ -19,7 +19,7 @@ public class TodoValidator {
     private static final int MAX_TODO_PER_DAY = 20; // 방마다 하루에 생성할 수 있는 투두의 최대 개수
 
     private final TodoRepository todoRepository;
-    private final TodoAssignmentQueryService todoAssignmentQueryService;
+    private final TodoAssignmentRepositoryService todoAssignmentRepositoryService;
 
     /**
      * <p>생성자와 할당자가 모두 동일한 방에 있는지 검증</p>
@@ -61,7 +61,7 @@ public class TodoValidator {
      * <p>본인이 해당 투두의 할당자라면 권한이 존재하는 것</p>
      */
     public void checkEditPermission(Mate mate, Todo todo) {
-        if (todoAssignmentQueryService.getOptionalAssignment(mate, todo).isEmpty()) {
+        if (todoAssignmentRepositoryService.getOptionalAssignment(mate, todo).isEmpty()) {
             throw new GeneralException(ErrorStatus._TODO_EDIT_PERMISSION_DENIED);
         }
     }

@@ -17,6 +17,7 @@ import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepositoryService;
 import com.cozymate.cozymate_server.domain.todo.validator.TodoValidator;
 import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
+import com.cozymate.cozymate_server.domain.todoassignment.repository.TodoAssignmentRepositoryService;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentCommandService;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
