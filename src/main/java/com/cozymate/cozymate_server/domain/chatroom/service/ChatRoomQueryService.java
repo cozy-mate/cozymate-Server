@@ -50,11 +50,11 @@ public class ChatRoomQueryService {
             .filter(chatRoom -> {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
                 chatRoomLastChatMap.put(chatRoom, chat);
-                if (chat == null) {
+                if (Objects.isNull(chat)) {
                     return false;
                 }
                 LocalDateTime lastDeleteAt = getLastDeleteAtByMember(chatRoom, member);
-                return lastDeleteAt == null || chat.getCreatedAt().isAfter(lastDeleteAt);
+                return Objects.isNull(lastDeleteAt) || chat.getCreatedAt().isAfter(lastDeleteAt);
             })
             .sorted((chatRoomA, chatRoomB) -> {
                 Chat chatA = chatRoomLastChatMap.get(chatRoomA);
@@ -97,12 +97,12 @@ public class ChatRoomQueryService {
             .filter(chatRoom -> {
                 Chat chat = getLatestChatByChatRoom(chatRoom);
 
-                if (chat == null) {
+                if (Objects.isNull(chat)) {
                     return false;
                 }
 
                 LocalDateTime lastDeleteAt = getLastDeleteAtByMember(chatRoom, member);
-                return lastDeleteAt == null || chat.getCreatedAt().isAfter(lastDeleteAt);
+                return Objects.isNull(lastDeleteAt) || chat.getCreatedAt().isAfter(lastDeleteAt);
             }).toList();
 
         long chatRoomsWithNewChatCount = chatRoomList.stream()
@@ -168,20 +168,10 @@ public class ChatRoomQueryService {
 
         // 상대가 탈퇴한 경우
         if (Objects.isNull(chatRoom.getMemberA()) || Objects.isNull(chatRoom.getMemberB())) {
-            return ChatRoomConverter.toChatRoomDetailResponseDTO(UNKNOWN_SENDER_NICKNAME, chat.getContent(),
-                chatRoom.getId(), null, null, false);
+            return ChatRoomConverter.toChatRoomDetailResponseDTO(UNKNOWN_SENDER_NICKNAME,
+                chat.getContent(), chatRoom.getId());
         }
 
-        return ChatRoomConverter.toChatRoomDetailResponseDTO(
-            member.getNickname().equals(chatRoom.getMemberA().getNickname()) ?
-                chatRoom.getMemberB().getNickname() : chatRoom.getMemberA().getNickname(),
-            chat.getContent(),
-            chatRoom.getId(),
-            member.getNickname().equals(chatRoom.getMemberA().getNickname()) ?
-                chatRoom.getMemberB().getPersona() : chatRoom.getMemberA().getPersona(),
-            member.getNickname().equals(chatRoom.getMemberA().getNickname()) ?
-                chatRoom.getMemberB().getId() : chatRoom.getMemberA().getId(),
-            hasNewChat
-        );
+        return ChatRoomConverter.toChatRoomDetailResponseDTO(member, chat, chatRoom, hasNewChat);
     }
 }

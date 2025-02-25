@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.chatroom.converter;
 
+import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.CountChatRoomsWithNewChatDTO;
@@ -17,14 +18,30 @@ public class ChatRoomConverter {
             .build();
     }
 
-    public static ChatRoomDetailResponseDTO toChatRoomDetailResponseDTO(String nickname, String content,
-        Long chatRoomId, Integer persona, Long memberId, boolean hasNewChat) {
+    public static ChatRoomDetailResponseDTO toChatRoomDetailResponseDTO(String nickname,
+        String content, Long chatRoomId) {
         return ChatRoomDetailResponseDTO.builder()
             .nickname(nickname)
             .lastContent(content.trim())
             .chatRoomId(chatRoomId)
-            .persona(persona)
-            .memberId(memberId)
+            .persona(null)
+            .memberId(null)
+            .hasNewChat(false)
+            .build();
+    }
+
+    public static ChatRoomDetailResponseDTO toChatRoomDetailResponseDTO(Member member, Chat chat,
+        ChatRoom chatRoom, boolean hasNewChat) {
+
+        Member recipient = member.getId().equals(chatRoom.getMemberA().getId()) ?
+            chatRoom.getMemberB() : chatRoom.getMemberA();
+
+        return ChatRoomDetailResponseDTO.builder()
+            .nickname(recipient.getNickname())
+            .lastContent(chat.getContent().trim())
+            .chatRoomId(chatRoom.getId())
+            .persona(recipient.getPersona())
+            .memberId(recipient.getId())
             .hasNewChat(hasNewChat)
             .build();
     }
@@ -35,14 +52,16 @@ public class ChatRoomConverter {
             .build();
     }
 
-    public static ChatRoomSimpleDTO toChatRoomSimpleDTO(Optional<ChatRoom> chatRoom, Member recipient) {
+    public static ChatRoomSimpleDTO toChatRoomSimpleDTO(Optional<ChatRoom> chatRoom,
+        Member recipient) {
         return ChatRoomSimpleDTO.builder()
             .chatRoom(chatRoom)
             .recipient(recipient)
             .build();
     }
 
-    public static CountChatRoomsWithNewChatDTO toCountChatRoomsWithNewChatDTO(Integer chatRoomsWithNewChatCount) {
+    public static CountChatRoomsWithNewChatDTO toCountChatRoomsWithNewChatDTO(
+        Integer chatRoomsWithNewChatCount) {
         return CountChatRoomsWithNewChatDTO.builder()
             .chatRoomsWithNewChatCount(chatRoomsWithNewChatCount)
             .build();
