@@ -14,6 +14,7 @@ import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,10 @@ public class TodoAssignmentQueryService {
     private final RoomLogCommandService roomLogCommandService;
     private final FcmPushService fcmPushService;
     private final Clock clock;
+
+    public Optional<TodoAssignment> getOptionalAssignment(Mate mate, Todo todo) {
+        return todoAssignmentRepository.findById(new TodoAssignmentId(todo.getId(), mate.getId()));
+    }
 
     public TodoAssignment getAssignment(Mate mate, Todo todo) {
         return todoAssignmentRepository.findById(new TodoAssignmentId(todo.getId(), mate.getId())
