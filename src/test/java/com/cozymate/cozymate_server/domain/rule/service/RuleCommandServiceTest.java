@@ -2,7 +2,7 @@ package com.cozymate.cozymate_server.domain.rule.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.BDDMockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
@@ -40,39 +40,45 @@ public class RuleCommandServiceTest {
     private RuleRepository ruleRepository;
     @Mock
     private MateRepository mateRepository;
-
     @InjectMocks
     private RuleCommandService ruleCommandService;
+
+    // 해당 테스트에서 공통으로 사용할 데이터
+    private Member member;
+    private Room room;
+    private Mate mate;
+    private Rule rule;
+
+    @BeforeEach
+    void setup() {
+
+        member = MemberFixture.정상_1(UniversityFixture.createTestUniversity());
+        room = RoomFixture.정상_1(member);
+        mate = MateFixture.정상_1(room, member);
+        rule = RuleFixture.정상_1(room);
+
+        given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), mate.getId(),
+            EntryStatus.JOINED))
+            .willReturn(Optional.of(mate));
+    }
+
 
     @Nested
     @MockitoSettings(strictness = Strictness.LENIENT)
     class createRule {
 
-        private Room room;
-        private Member member;
-        private Mate mate;
-
         private CreateRuleRequestDTO requestDto;
-        private Rule rule;
 
         @BeforeEach
         void setUp() {
-            member = MemberFixture.정상_1(UniversityFixture.createTestUniversity()); // 기본 회원
-            room = RoomFixture.정상_1(member); // 기본 방
-            mate = MateFixture.정상_1(room, member); // 기본 방 멤버
-            // given : createRule 테스트 전체에서 공통으로 쓰이는 데이터 준비
-            rule = RuleFixture.정상_1(room); // 생성되었을 때 사용할 규칙
             requestDto = RuleFixture.정상_1_생성_요청_DTO(); // 기본 규칙 생성 요청 DTO
-
-            given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
-                EntryStatus.JOINED))
-                .willReturn(Optional.ofNullable(mate)); // 방 멤버 조회
-            given(ruleRepository.save(any()))
-                .willReturn(rule); // 규칙 생성
+            // 규칙 저장은 항상 성공적으로 실행될 것으로 가정
+            given(ruleRepository.save(any(Rule.class))) // rule은 requestDto에서 만들어진 Rule과 다른 주소의 객체임
+                .willReturn(rule); // 규칙 저장
         }
 
         @Test
-        @DisplayName("기존 규칙이 없을 때 성공한다")
+        @DisplayName("기존 규칙이 없을 때 Rule을 생성한다")
         void success_when_existed_rule_count_0() {
             // given
             given(ruleRepository.countAllByRoomId(room.getId()))
@@ -88,7 +94,7 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        @DisplayName("기존 규칙이 9개일 때 성공한다")
+        @DisplayName("기존 규칙이 9개일 때 Rule을 생성한다")
         void success_when_existed_rule_count_9() {
             // given
             given(ruleRepository.countAllByRoomId(room.getId()))
@@ -104,7 +110,7 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        @DisplayName("기존 규칙이 10개일 때 실패한다")
+        @DisplayName("기존 규칙이 10개일 때 Rule 최대 제한에 걸린다")
         void failure_when_existed_rule_over_10() {
             // given
             given(ruleRepository.countAllByRoomId(room.getId()))
@@ -121,25 +127,15 @@ public class RuleCommandServiceTest {
     @MockitoSettings(strictness = Strictness.LENIENT)
     class deleteRule {
 
-        private Room room;
-        private Member member;
-        private Mate mate;
-
-        private Rule rule;
-
         @BeforeEach
         void setUp() {
-            member = MemberFixture.정상_1(UniversityFixture.createTestUniversity()); // 기본 회원
-            room = RoomFixture.정상_1(member); // 기본 방
-            mate = MateFixture.정상_1(room, member); // 기본 방 멤버
 
-            rule = RuleFixture.정상_1(room); // 생성되었을 때 사용할 규칙
             given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
                 EntryStatus.JOINED)).willReturn(Optional.of(mate)); // 방 멤버 조회
         }
 
         @Test
-        @DisplayName("규칙이 존재하고, 멤버가 방에 속할 때 성공한다.")
+        @DisplayName("존재하는 규칙을 삭제할 때 삭제된다")
         void success_when_rule_exist() {
             // given
             given(ruleRepository.findById(rule.getId()))
@@ -156,14 +152,14 @@ public class RuleCommandServiceTest {
             // given
             Member member2 = MemberFixture.정상_2(UniversityFixture.createTestUniversity()); // 다른 멤버
             Room room2 = RoomFixture.정상_2(member2); // 다른 방
-            Rule rule2 = RuleFixture.정상_2(room2); // 생성되었을 때 사용할 규칙
+            Rule rule2 = RuleFixture.정상_1(room2); // 생성되었을 때 사용할 규칙
 
-            given(ruleRepository.findById(rule.getId()))
-                .willReturn(Optional.ofNullable(rule2)); // 규칙 조회
+            given(ruleRepository.findById(rule2.getId()))
+                .willReturn(Optional.of(rule2)); // 규칙 조회
 
             // when, then
             assertThatThrownBy(
-                () -> ruleCommandService.deleteRule(member, room.getId(), rule.getId()))
+                () -> ruleCommandService.deleteRule(member, room.getId(), rule2.getId()))
                 .isInstanceOf(GeneralException.class);
         }
     }
@@ -172,21 +168,12 @@ public class RuleCommandServiceTest {
     @MockitoSettings(strictness = Strictness.LENIENT)
     class updateRule {
 
-        private Room room;
-        private Member member;
-        private Mate mate;
-
-        private Rule rule;
         private CreateRuleRequestDTO requestDto;
 
         @BeforeEach
         void setUp() {
-            member = MemberFixture.정상_1(UniversityFixture.createTestUniversity()); // 기본 회원
-            room = RoomFixture.정상_1(member); // 기본 방
-            mate = MateFixture.정상_1(room, member); // 기본 방 멤버
-
-            rule = RuleFixture.정상_1(room); // 생성되었을 때 사용할 규칙
             requestDto = RuleFixture.정상_2_생성_요청_DTO(); // 정상_1 -> 정상_2로 변경
+
             given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), member.getId(),
                 EntryStatus.JOINED)).willReturn(Optional.of(mate)); // 방 멤버 조회
         }
@@ -212,14 +199,15 @@ public class RuleCommandServiceTest {
             // given
             Member member2 = MemberFixture.정상_2(UniversityFixture.createTestUniversity()); // 다른 멤버
             Room room2 = RoomFixture.정상_2(member2); // 다른 방
-            Rule rule2 = RuleFixture.정상_2(room2); // 생성되었을 때 사용할 규칙
+            Rule rule2 = RuleFixture.정상_1(room2); // 생성되었을 때 사용할 규칙
 
-            given(ruleRepository.findById(rule.getId()))
-                .willReturn(Optional.ofNullable(rule2)); // 규칙 조회
+            given(ruleRepository.findById(rule2.getId()))
+                .willReturn(Optional.of(rule2)); // 규칙 조회
 
             // when, then
             assertThatThrownBy(
-                () -> ruleCommandService.updateRule(member, room.getId(), rule.getId(), requestDto))
+                () -> ruleCommandService.updateRule(member, room.getId(), rule2.getId(),
+                    requestDto))
                 .isInstanceOf(GeneralException.class);
         }
     }
