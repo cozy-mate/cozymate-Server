@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.todoassignment.service;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetDTO;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
@@ -83,7 +83,7 @@ public class TodoAssignmentQueryService {
             Mate mate = todoAssignment.getMate();
             Todo todo = todoAssignment.getTodo();
             fcmPushService.sendNotification(
-                OneTargetDto.create(mate.getMember(),
+                OneTargetDTO.create(mate.getMember(),
                     NotificationType.REMINDER_ROLE,
                     todo.getContent()));
         });
