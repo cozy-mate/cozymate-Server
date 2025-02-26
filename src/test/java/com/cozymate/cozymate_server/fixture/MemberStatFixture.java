@@ -163,7 +163,7 @@ public class MemberStatFixture {
         return MemberUniversityStat.builder()
             .admissionYear(2020)
             .dormitoryName("기숙사 A")
-            .numberOfRoommate("2인실")
+            .numberOfRoommate("2")
             .acceptance("합격")
             .build();
     }
@@ -210,9 +210,9 @@ public class MemberStatFixture {
             .sleepingHabit(0b11010)
             .coolingIntensity(1)
             .heatingIntensity(1)
-            .lifePattern(2)
-            .intimacy(3)
-            .itemSharing(4)
+            .lifePattern(1)
+            .intimacy(2)
+            .itemSharing(0)
             .playingGameFrequency(2)
             .phoneCallingFrequency(2)
             .studyingFrequency(1)
