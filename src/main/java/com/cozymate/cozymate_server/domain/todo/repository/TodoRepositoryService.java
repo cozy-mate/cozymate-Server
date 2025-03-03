@@ -34,7 +34,7 @@ public class TodoRepositoryService {
     /**
      * Room에 해당하는 TimePoint 시기의 Todo 개수 조회
      */
-    public Integer countTodoByRoomIdAndTimePoint(Long roomId, LocalDate timePoint) {
+    public Integer getTodoCountByRoomIdAndTimePoint(Long roomId, LocalDate timePoint) {
         return todoRepository.countAllByRoomIdAndTimePoint(roomId, timePoint);
     }
 
@@ -55,7 +55,7 @@ public class TodoRepositoryService {
     /**
      * Role에 해당하는 모든 투두 삭제
      */
-    public void deleteAllTodoByRoleId(Long roleId) {
+    public void deleteTodoListByRoleId(Long roleId) {
         todoRepository.deleteAllByRoleId(roleId);
     }
 }

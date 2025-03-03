@@ -21,7 +21,7 @@ public class TodoAssignmentRepositoryService {
     /**
      * Optional을 그래도 반환하는 Assignment 조회함수, Validation에서 orElseThrow를 사용하기 위함
      */
-    public Optional<TodoAssignment> getOptionalAssignment(Mate mate, Todo todo) {
+    public Optional<TodoAssignment> getAssignmentOptional(Mate mate, Todo todo) {
         return todoAssignmentRepository.findById(new TodoAssignmentId(todo.getId(), mate.getId()));
     }
 
@@ -104,18 +104,18 @@ public class TodoAssignmentRepositoryService {
     /**
      * Assignment 리스트 삭제
      */
-    public void deleteAssignmentList(List<TodoAssignment> todoAssignmentList) {
+    public void deleteAssignmentListInAssignmentList(List<TodoAssignment> todoAssignmentList) {
         todoAssignmentRepository.deleteAll(todoAssignmentList);
     }
 
     /**
      * 투두 리스트에 할당된 Assignment 삭제
      */
-    public void deleteAllAssignmentInTodoList(List<Todo> todoList) {
-        deleteAllAssignmentInTodoIdList(todoList.stream().map(Todo::getId).toList());
+    public void deleteAssignmentListInTodoList(List<Todo> todoList) {
+        deleteAssignmentListInTodoIdList(todoList.stream().map(Todo::getId).toList());
     }
 
-    public void deleteAllAssignmentInTodoIdList(List<Long> todoIdList) {
+    public void deleteAssignmentListInTodoIdList(List<Long> todoIdList) {
         todoAssignmentRepository.deleteAllByTodoIdIn(todoIdList);
     }
 

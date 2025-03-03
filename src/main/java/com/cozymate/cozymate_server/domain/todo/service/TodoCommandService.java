@@ -165,7 +165,7 @@ public class TodoCommandService {
         // 그 데이터를 벌크로 삭제하기 전 투두만 List로 남겨둠
         List<Todo> todoList = todoAssignmentList.stream().map(TodoAssignment::getTodo).toList();
         // 할당 데이터 삭제
-        todoAssignmentRepositoryService.deleteAssignmentList(todoAssignmentList);
+        todoAssignmentRepositoryService.deleteAssignmentListInAssignmentList(todoAssignmentList);
         todoList.forEach(todo -> {
             todo.decreaseAssignmentCount(); // 할당자 수 감소
             deleteAssignment(todo); // type 업데이트, 할당자 수가 0이면 삭제
@@ -179,10 +179,10 @@ public class TodoCommandService {
      */
     public void deleteTodoByRoleId(Role role) {
         List<Todo> todoList = todoRepositoryService.getTodoListByRoleId(role.getId());
-        todoAssignmentRepositoryService.deleteAllAssignmentInTodoList(todoList);
+        todoAssignmentRepositoryService.deleteAssignmentListInTodoList(todoList);
         // TODO: RoomLog에서 연관을 지우고 삭제
         todoList.forEach(todo -> roomLogCommandService.changeRoomLogTodoToNull(todo.getId()));
-        todoRepositoryService.deleteAllTodoByRoleId(role.getId());
+        todoRepositoryService.deleteTodoListByRoleId(role.getId());
     }
 
     /**
