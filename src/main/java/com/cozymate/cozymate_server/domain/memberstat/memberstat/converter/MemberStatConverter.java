@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 
 @Slf4j
 public class MemberStatConverter {
@@ -340,5 +341,25 @@ public class MemberStatConverter {
             .white(otherList)
             .build();
     }
+
+    public static Slice<MemberStatPreferenceResponseDTO> toMemberStatPreferenceResponse(
+        Slice<Map<MemberStat, Integer>> filteredResult, MemberStat criteriaMemberStat,List<String> criteriaPreferences) {
+        return filteredResult.map(
+            memberStatIntegerMap -> {
+                Map.Entry<MemberStat, Integer> entry = memberStatIntegerMap.entrySet()
+                    .iterator()
+                    .next();
+                MemberStat memberStat = entry.getKey();
+                Integer equality = entry.getValue();
+                return toPreferenceResponseDTO(
+                    memberStat,
+                    toMemberStatPreferenceDetailColorDTOList(memberStat,
+                        criteriaMemberStat, criteriaPreferences),
+                    equality
+                );
+            }
+        );
+    }
+
 
 }
