@@ -2,11 +2,11 @@ package com.cozymate.cozymate_server.domain.todoassignment.repository;
 
 import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
 import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignmentId;
-import io.lettuce.core.dynamic.annotation.Param;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface TodoAssignmentRepository extends JpaRepository<TodoAssignment, TodoAssignmentId> {
 
@@ -45,9 +45,11 @@ public interface TodoAssignmentRepository extends JpaRepository<TodoAssignment, 
         FROM TodoAssignment ta
         JOIN ta.mate
         WHERE ta.mate.id = :mateId
-        AND ta.isCompleted = false 
+        AND ta.isCompleted = false
+        AND ta.todo.timePoint = :timePoint
         """)
-    int countByMateIdAndNotCompleted(@Param("mateId") Long mateId);
+    int countByMateIdAndNotCompleted(@Param("mateId") Long mateId,
+        @Param("timePoint") LocalDate timePoint);
 
     void deleteAllByTodoIdIn(List<Long> todoIdList);
 
