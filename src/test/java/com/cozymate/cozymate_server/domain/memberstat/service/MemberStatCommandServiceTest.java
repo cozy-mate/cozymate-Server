@@ -3,9 +3,7 @@ package com.cozymate.cozymate_server.domain.memberstat.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 
@@ -77,9 +75,12 @@ public class MemberStatCommandServiceTest {
 
             // then
             assertThat(memberId).isEqualTo(member.getId());
-            verify(memberStatRepository, times(1)).save(any(MemberStat.class)); // 저장 메서드 호출 확인
-            verify(lifestyleMatchRateService, times(1)).saveLifeStyleMatchRate(
-                any(MemberStat.class)); // 라이프스타일 매치율 저장 확인
+
+            then(memberStatRepository).should(times(1)).save(any(MemberStat.class));
+
+            then(lifestyleMatchRateService).should(times(1))
+                .saveLifeStyleMatchRate(any(MemberStat.class));
+
         }
 
         @Test
@@ -102,7 +103,7 @@ public class MemberStatCommandServiceTest {
             // when & then
             assertThatThrownBy(() -> MemberStatConverter.toEntity(member, requestDTO))
                 .isInstanceOf(GeneralException.class)
-                .hasMessageContaining(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
+                .hasMessage(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
         }
 
         @Test
@@ -114,7 +115,7 @@ public class MemberStatCommandServiceTest {
             // when & then
             assertThatThrownBy(() -> MemberStatConverter.toEntity(member, requestDTO))
                 .isInstanceOf(GeneralException.class)
-                .hasMessageContaining(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
+                .hasMessage(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
         }
 
         @Test
@@ -126,7 +127,7 @@ public class MemberStatCommandServiceTest {
             // when & then
             assertThatThrownBy(() -> MemberStatConverter.toEntity(member, requestDTO))
                 .isInstanceOf(GeneralException.class)
-                .hasMessageContaining(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
+                .hasMessage(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
         }
     }
 
@@ -147,7 +148,7 @@ public class MemberStatCommandServiceTest {
                 .willReturn(java.util.Optional.of(memberStat));
 
             // `saveLifeStyleMatchRate()` 실행 시 예외 발생하지 않도록 설정
-            doNothing().when(lifestyleMatchRateService)
+            willDoNothing().given(lifestyleMatchRateService)
                 .saveLifeStyleMatchRate(any(MemberStat.class));
         }
 
@@ -163,7 +164,7 @@ public class MemberStatCommandServiceTest {
             // then
             assertThat(memberId).isEqualTo(member.getId());
             assertThat(memberStat.getSelfIntroduction()).isEqualTo(requestDTO.selfIntroduction());
-            verify(lifestyleMatchRateService, times(1)).saveLifeStyleMatchRate(memberStat);
+            then(lifestyleMatchRateService).should(times(1)).saveLifeStyleMatchRate(memberStat);
         }
 
         @Test
@@ -177,7 +178,7 @@ public class MemberStatCommandServiceTest {
             // when & then
             assertThatThrownBy(() -> memberStatCommandService.modifyMemberStat(member, requestDTO))
                 .isInstanceOf(GeneralException.class)
-                .hasMessageContaining(ErrorStatus._MEMBERSTAT_NOT_EXISTS.getMessage());
+                .hasMessage(ErrorStatus._MEMBERSTAT_NOT_EXISTS.getMessage());
         }
 
         @Test
@@ -200,7 +201,7 @@ public class MemberStatCommandServiceTest {
             // when & then
             assertThatThrownBy(() -> memberStatCommandService.modifyMemberStat(member, requestDTO))
                 .isInstanceOf(GeneralException.class)
-                .hasMessageContaining(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
+                .hasMessage(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
         }
 
         @Test
@@ -212,7 +213,7 @@ public class MemberStatCommandServiceTest {
             // when & then
             assertThatThrownBy(() -> memberStatCommandService.modifyMemberStat(member, requestDTO))
                 .isInstanceOf(GeneralException.class)
-                .hasMessageContaining(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
+                .hasMessage(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
         }
 
         @Test
@@ -224,7 +225,7 @@ public class MemberStatCommandServiceTest {
             // when & then
             assertThatThrownBy(() -> memberStatCommandService.modifyMemberStat(member, requestDTO))
                 .isInstanceOf(GeneralException.class)
-                .hasMessageContaining(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
+                .hasMessage(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR.getMessage());
         }
     }
 

@@ -3,23 +3,22 @@ package com.cozymate.cozymate_server.domain.roomlog.converter;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.roomlog.RoomLog;
-import com.cozymate.cozymate_server.domain.roomlog.dto.RoomLogResponseDto.RoomLogDetailResponseDto;
-import com.cozymate.cozymate_server.domain.todo.Todo;
+import com.cozymate.cozymate_server.domain.roomlog.dto.response.RoomLogDetailResponseDTO;
 import java.util.Objects;
 
 public class RoomLogConverter {
 
-    public static RoomLog toEntity(String content, Room room, Todo todo, Mate mate) {
+    public static RoomLog toEntity(String content, Room room, Long todoId, Mate mate) {
         return RoomLog.builder()
             .content(content)
             .room(room)
-            .todo(todo)
+            .todoId(todoId)
             .mateId(Objects.isNull(mate) ? null : mate.getId())
             .build();
     }
 
-    public static RoomLogDetailResponseDto toRoomLogDetailResponseDto(RoomLog roomLog) {
-        return RoomLogDetailResponseDto.builder()
+    public static RoomLogDetailResponseDTO toRoomLogDetailResponseDto(RoomLog roomLog) {
+        return RoomLogDetailResponseDTO.builder()
             .content(roomLog.getContent())
             .createdAt(roomLog.getCreatedAt())
             .build();

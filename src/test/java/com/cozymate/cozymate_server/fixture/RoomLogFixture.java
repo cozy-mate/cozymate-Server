@@ -17,7 +17,7 @@ public class RoomLogFixture {
             .id(1L)
             .room(room)
             .content("{코지메이트 우심방}의 역사적인 하루가 시작됐어요!")
-            .todo(null)
+            .todoId(null)
             .mateId(null)
             .build();
     }
@@ -28,7 +28,7 @@ public class RoomLogFixture {
             .id(2L)
             .room(room)
             .content("11월의 Best, Worst 코지메이트를 선정해주세요!")
-            .todo(null)
+            .todoId(null)
             .mateId(null)
             .build();
     }
@@ -39,7 +39,7 @@ public class RoomLogFixture {
             .id(3L)
             .room(room)
             .content("12월 29일은 우기님의 생일이에요! 모두 축하해주세요!")
-            .todo(null)
+            .todoId(null)
             .mateId(mate.getId())
             .build();
     }
@@ -50,7 +50,7 @@ public class RoomLogFixture {
             .id(4L)
             .room(room)
             .content("{리원}님이 [개발하기]을/를 완료하여, cozy room을 만드는데 기여했어요!")
-            .todo(todo)
+            .todoId(todo.getId())
             .mateId(mate.getId())
             .build();
     }
@@ -61,7 +61,7 @@ public class RoomLogFixture {
             .id(5L)
             .room(room)
             .content("{리원}님이 [내일투두]을/를 완료했어요!")
-            .todo(todo)
+            .todoId(todo.getId())
             .mateId(mate.getId())
             .build();
     }
@@ -72,7 +72,7 @@ public class RoomLogFixture {
             .id(6L)
             .room(room)
             .content("{눈꽃}님이 [말즈 밥주기]을/를 완료하여, 최고의 cozy mate가 되었어요!")
-            .todo(todo)
+            .todoId(todo.getId())
             .mateId(mate.getId())
             .build();
     }
@@ -83,7 +83,7 @@ public class RoomLogFixture {
             .id(7L)
             .room(room)
             .content("{델로}님이 [팀원들을 칭찬해주기]을/를 까먹은 거 같아요 ㅠㅠ")
-            .todo(todo)
+            .todoId(todo.getId())
             .mateId(mate.getId())
             .build();
     }
@@ -94,7 +94,7 @@ public class RoomLogFixture {
             .id(8L)
             .room(room)
             .content("")
-            .todo(null)
+            .todoId(null)
             .mateId(null)
             .build();
     }
@@ -105,7 +105,7 @@ public class RoomLogFixture {
             .id(9L)
             .room(room)
             .content(null)
-            .todo(null)
+            .todoId(null)
             .mateId(null)
             .build();
     }
@@ -116,7 +116,7 @@ public class RoomLogFixture {
             .id(10L)
             .room(null)
             .content(null)
-            .todo(null)
+            .todoId(null)
             .mateId(null)
             .build();
     }
@@ -130,7 +130,7 @@ public class RoomLogFixture {
                 .id((long) i + 11) // 기존에 존재한 10개의 roomLog와 겹치지 않도록 id를 11부터 시작
                 .room(room)
                 .content("테스트 룸로그 " + i + " 입니다.")
-                .todo(todo)
+                .todoId(todo.getId())
                 .mateId(mate.getId())
                 .build()
             ));

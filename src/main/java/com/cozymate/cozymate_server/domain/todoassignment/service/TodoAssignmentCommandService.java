@@ -5,9 +5,8 @@ import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService
 import com.cozymate.cozymate_server.domain.todo.Todo;
 import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
 import com.cozymate.cozymate_server.domain.todoassignment.converter.TodoAssignmentConverter;
-import com.cozymate.cozymate_server.domain.todoassignment.repository.TodoAssignmentRepository;
+import com.cozymate.cozymate_server.domain.todoassignment.repository.TodoAssignmentRepositoryService;
 import java.time.Clock;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TodoAssignmentCommandService {
 
-    private final TodoAssignmentQueryService todoAssignmentQueryService;
     private final TodoAssignmentConverter todoAssignmentConverter;
-    private final TodoAssignmentRepository todoAssignmentRepository;
+    private final TodoAssignmentRepositoryService todoAssignmentRepositoryService;
     private final RoomLogCommandService roomLogCommandService;
     private final Clock clock;
 
@@ -28,14 +26,15 @@ public class TodoAssignmentCommandService {
      */
     public TodoAssignment createAssignment(Mate mate, Todo todo) {
         TodoAssignment todoAssignment = todoAssignmentConverter.toEntity(mate, todo);
-        return todoAssignmentRepository.save(todoAssignment);
+        return todoAssignmentRepositoryService.createAssignment(todoAssignment);
     }
 
     /**
      * 투두와 Mate가 주어졌을 때 해당 할당 데이터에서 완료하거나 취소 완료되면
      */
     public void changeCompleteStatus(Mate mate, Todo todo, boolean completed) {
-        TodoAssignment todoAssignment = todoAssignmentQueryService.getAssignment(mate, todo);
+        TodoAssignment todoAssignment = todoAssignmentRepositoryService.getAssignmentOrThrow(mate,
+            todo);
 
         if (completed) {
             todoAssignment.complete(clock);
@@ -47,20 +46,9 @@ public class TodoAssignmentCommandService {
     }
 
     public void deleteAssignment(Mate mate, Todo todo) {
-        TodoAssignment todoAssignment = todoAssignmentQueryService.getAssignment(mate, todo);
-        deleteAssignment(todoAssignment);
-    }
-
-    public void deleteAssignment(TodoAssignment todoAssignment) {
-        todoAssignmentRepository.delete(todoAssignment);
-    }
-
-    public void deleteAssignmentList(List<TodoAssignment> todoAssignmentList) {
-        todoAssignmentRepository.deleteAll(todoAssignmentList);
-    }
-
-    public void deleteAllAssignment(List<Todo> todoList) {
-        todoAssignmentRepository.deleteAllByTodoIdIn(todoList.stream().map(Todo::getId).toList());
+        TodoAssignment todoAssignment = todoAssignmentRepositoryService.getAssignmentOrThrow(mate,
+            todo);
+        todoAssignmentRepositoryService.deleteAssignment(todoAssignment);
     }
 
 

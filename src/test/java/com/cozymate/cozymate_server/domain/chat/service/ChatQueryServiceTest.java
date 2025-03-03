@@ -156,7 +156,7 @@ class ChatQueryServiceTest {
             assertThatThrownBy(
                 () -> chatQueryService.getChatList(memberC, chatRoom.getId()))
                 .isInstanceOf(GeneralException.class)
-                .hasMessage(ErrorStatus._CHATROOM_MEMBER_MISMATCH.getMessage());
+                .hasMessage(ErrorStatus._CHATROOM_INVALID_MEMBER.getMessage());
             assertThat(chatRoom.getMemberA().getNickname()).isEqualTo(memberA.getNickname());
             assertThat(chatRoom.getMemberB().getNickname()).isEqualTo(memberB.getNickname());
         }
@@ -172,7 +172,7 @@ class ChatQueryServiceTest {
             assertThatThrownBy(
                 () -> chatQueryService.getChatList(memberC, chatRoom.getId()))
                 .isInstanceOf(GeneralException.class)
-                .hasMessage(ErrorStatus._CHATROOM_MEMBER_MISMATCH.getMessage());
+                .hasMessage(ErrorStatus._CHATROOM_MEMBERB_REQUIRED_WHEN_MEMBERA_NULL.getMessage());
             assertThat(chatRoom.getMemberA()).isNull();
             assertThat(chatRoom.getMemberB().getNickname()).isEqualTo(memberB.getNickname());
         }
@@ -188,7 +188,7 @@ class ChatQueryServiceTest {
             assertThatThrownBy(
                 () -> chatQueryService.getChatList(memberC, chatRoom.getId()))
                 .isInstanceOf(GeneralException.class)
-                .hasMessage(ErrorStatus._CHATROOM_MEMBER_MISMATCH.getMessage());
+                .hasMessage(ErrorStatus._CHATROOM_MEMBERA_REQUIRED_WHEN_MEMBERB_NULL.getMessage());
             assertThat(chatRoom.getMemberA().getNickname()).isEqualTo(memberA.getNickname());
             assertThat(chatRoom.getMemberB()).isNull();
         }

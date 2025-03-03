@@ -20,26 +20,6 @@ public class RuleFixture {
             .build();
     }
 
-    // 정상 더미데이터, content와 memo가 둘 다 존재하는 경우
-    public static Rule 정상_2(Room room) {
-        return Rule.builder()
-            .id(2L)
-            .room(room)
-            .content("친구를 데려오지말자")
-            .memo("데려올거면 미리 허락받기")
-            .build();
-    }
-
-    // 정상 더미데이터, content와 memo가 둘 다 존재하는 경우
-    public static Rule 정상_3(Room room) {
-        return Rule.builder()
-            .id(3L)
-            .room(room)
-            .content("배달음식은 모두의 동의를 받고 같이 먹기")
-            .memo("같이 안먹으면 배고프니까")
-            .build();
-    }
-
     // 정상 더미데이터, content는 존재하는데, memo가 없는 경우
     public static Rule 정상_4(Room room) {
         return Rule.builder()

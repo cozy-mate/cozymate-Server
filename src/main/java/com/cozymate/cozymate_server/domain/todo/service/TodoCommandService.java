@@ -14,8 +14,10 @@ import com.cozymate.cozymate_server.domain.todo.converter.TodoConverter;
 import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.request.UpdateTodoRequestDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;
-import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
+import com.cozymate.cozymate_server.domain.todo.repository.TodoRepositoryService;
+import com.cozymate.cozymate_server.domain.todo.validator.TodoValidator;
 import com.cozymate.cozymate_server.domain.todoassignment.TodoAssignment;
+import com.cozymate.cozymate_server.domain.todoassignment.repository.TodoAssignmentRepositoryService;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentCommandService;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -33,16 +35,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TodoCommandService {
 
-    private static final int MAX_ASSIGNEE = 30; // 투두 하나의 최대 할당자 수
-    private static final int MAX_TODO_PER_DAY = 20; // 방마다 하루에 생성할 수 있는 투두의 최대 개수
     private static final Role EMPTY_ROLE = null;
 
     private final MateRepository mateRepository;
-    private final TodoRepository todoRepository;
+    private final TodoRepositoryService todoRepositoryService;
     private final RoomLogCommandService roomLogCommandService;
     private final FcmPushService fcmPushService;
+    private final TodoAssignmentRepositoryService todoAssignmentRepositoryService;
     private final TodoAssignmentCommandService todoAssignmentCommandService;
     private final TodoAssignmentQueryService todoAssignmentQueryService;
+    private final TodoValidator todoValidator;
     private final Clock clock;
 
 
@@ -56,20 +58,20 @@ public class TodoCommandService {
     public TodoIdResponseDTO createTodo(Member member, Long roomId, CreateTodoRequestDTO requestDto
     ) {
         // max assignee 초과 여부 검증
-        validateExceedingMaxAssignee(requestDto.mateIdList());
+        todoValidator.checkExceedingMaxAssignee(requestDto.mateIdList());
 
         // 사용자의 mate 정보 조회
         Mate todoCreator = getMate(member.getId(), roomId);
 
-        List<Mate> assignedMateList = mateRepository.findAllByIdIn(requestDto.mateIdList());
+        List<Mate> assignedMateList = getMateList(requestDto.mateIdList());
 
         // 생성자와 할당자가 모두 동일한 방에 있는지 검증
-        validateSameRoom(todoCreator, assignedMateList);
+        todoValidator.checkInSameRoom(todoCreator, assignedMateList);
 
         // 최대 투두 생성 개수 초과 여부 판단
-        validateDailyTodoLimit(todoCreator, requestDto.timePoint());
+        todoValidator.checkDailyTodoLimit(todoCreator, requestDto.timePoint());
 
-        Todo todo = todoRepository.save(
+        Todo todo = todoRepositoryService.createTodo(
             TodoConverter.toEntity(todoCreator.getRoom(), todoCreator.getId(), requestDto.content(),
                 requestDto.timePoint(), EMPTY_ROLE)
         );
@@ -96,9 +98,9 @@ public class TodoCommandService {
         List<Mate> assignedMateList = mateRepository.findAllByIdIn(role.getAssignedMateIdList());
 
         // 생성자와 할당자가 모두 동일한 방에 있는지 검증
-        validateSameRoom(todoCreator, assignedMateList);
+        todoValidator.checkInSameRoom(todoCreator, assignedMateList);
 
-        Todo todo = todoRepository.save(
+        Todo todo = todoRepositoryService.createTodo(
             TodoConverter.toEntity(todoCreator.getRoom(), todoCreator.getId(), role.getContent(),
                 LocalDate.now(clock), role)
         );
@@ -119,13 +121,14 @@ public class TodoCommandService {
     public void updateTodoCompleteState(Member member, Long roomId, Long todoId, boolean completed
     ) {
         Mate mate = getMate(member.getId(), roomId);
-        Todo todo = getTodo(todoId);
+        Todo todo = todoRepositoryService.getTodoOrThrow(todoId);
+        LocalDate today = LocalDate.now(clock);
         // TodoAssignment를 찾아서 업데이트
         todoAssignmentCommandService.changeCompleteStatus(mate, todo, completed);
 
         // timepoint가 오늘이고, complete가 true인 경우 mate가 오늘 할 일을 완료했는지 체크 후 FCM 전송
-        if (todo.getTimePoint().equals(LocalDate.now(clock)) && completed) {
-            allTodoCompleteNotification(mate);
+        if (todo.getTimePoint().equals(today) && completed) {
+            allTodoCompleteNotification(mate, today);
         }
     }
 
@@ -137,7 +140,7 @@ public class TodoCommandService {
      */
     public void deleteTodo(Member member, Long roomId, Long todoId) {
         Mate mate = getMate(member.getId(), roomId);
-        Todo todo = getTodo(todoId);
+        Todo todo = todoRepositoryService.getTodoOrThrow(todoId);
 
         if (isRoleTodo(todo)) {
             throw new GeneralException(ErrorStatus._ROLE_TODO_CANNOT_DELETE);
@@ -157,12 +160,12 @@ public class TodoCommandService {
 
         // 할당자 수가 0이면 체크하고 삭제
         // 본인에게 할당된 투두 할당자 테이블 데이터를 가져옴
-        List<TodoAssignment> todoAssignmentList = todoAssignmentQueryService.getAssignmentList(
+        List<TodoAssignment> todoAssignmentList = todoAssignmentRepositoryService.getAssignmentList(
             mate);
         // 그 데이터를 벌크로 삭제하기 전 투두만 List로 남겨둠
         List<Todo> todoList = todoAssignmentList.stream().map(TodoAssignment::getTodo).toList();
         // 할당 데이터 삭제
-        todoAssignmentCommandService.deleteAssignmentList(todoAssignmentList);
+        todoAssignmentRepositoryService.deleteAssignmentListInAssignmentList(todoAssignmentList);
         todoList.forEach(todo -> {
             todo.decreaseAssignmentCount(); // 할당자 수 감소
             deleteAssignment(todo); // type 업데이트, 할당자 수가 0이면 삭제
@@ -175,11 +178,11 @@ public class TodoCommandService {
      * <p>이후 룸로그를 삭제하고 투두를 벌크로 삭제</p>
      */
     public void deleteTodoByRoleId(Role role) {
-        List<Todo> todoList = todoRepository.findAllByRoleId(role.getId());
-        todoAssignmentCommandService.deleteAllAssignment(todoList);
+        List<Todo> todoList = todoRepositoryService.getTodoListByRoleId(role.getId());
+        todoAssignmentRepositoryService.deleteAssignmentListInTodoList(todoList);
         // TODO: RoomLog에서 연관을 지우고 삭제
         todoList.forEach(todo -> roomLogCommandService.changeRoomLogTodoToNull(todo.getId()));
-        todoRepository.deleteAllByRoleId(role.getId());
+        todoRepositoryService.deleteTodoListByRoleId(role.getId());
     }
 
     /**
@@ -191,17 +194,17 @@ public class TodoCommandService {
         UpdateTodoRequestDTO requestDto
     ) {
         // max assignee 초과 여부 검증
-        validateExceedingMaxAssignee(requestDto.mateIdList());
+        todoValidator.checkExceedingMaxAssignee(requestDto.mateIdList());
 
         Mate mate = getMate(member.getId(), roomId);
-        Todo todo = getTodo(todoId);
+        Todo todo = todoRepositoryService.getTodoOrThrow(todoId);
 
         if (isRoleTodo(todo)) {
             throw new GeneralException(ErrorStatus._ROLE_TODO_CANNOT_UPDATE);
         }
-        validateEditPermission(mate, todo);
+        todoValidator.checkEditPermission(mate, todo);
 
-        List<TodoAssignment> todoAssignmentList = todoAssignmentQueryService
+        List<TodoAssignment> todoAssignmentList = todoAssignmentRepositoryService
             .getAssignmentList(todo);
 
         List<Long> mateIdListToAssign = new ArrayList<>(requestDto.mateIdList());
@@ -210,17 +213,17 @@ public class TodoCommandService {
             Long mateId = todoAssignment.getMate().getId();
             // 이미 할당된 사람 중 수정된 할당자 리스트에 없으면 할당자에서 제거
             if (!mateIdListToAssign.contains(mateId)) {
-                todoAssignmentCommandService.deleteAssignment(todoAssignment);
+                todoAssignmentRepositoryService.deleteAssignment(todoAssignment);
             }
             // 수정된 할당자 리스트 중 이미 할당된 사람은 빼고 추가해야함
             else {
-                mateIdListToAssign.remove(mateId); // ✅ 일치하면 리스트에서 제거
+                mateIdListToAssign.remove(mateId);
             }
         });
 
         // 할당해야 할 mate만 남은 List
         List<Mate> mateListToAssign = mateRepository.findAllByIdIn(mateIdListToAssign);
-        validateSameRoom(mate, mateListToAssign);
+        todoValidator.checkInSameRoom(mate, mateListToAssign);
 
         addAssignedMateList(todo, mateListToAssign);
         // 할당된 사람 수와 타입 업데이트 (DB 체크)
@@ -241,15 +244,6 @@ public class TodoCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
     }
 
-    /**
-     * <p>투두를 가져오는 함수</p>
-     *
-     * @throws GeneralException 투두가 없는 경우 ErrorStatus._TODO_NOT_FOUND 반환
-     */
-    private Todo getTodo(Long todoId) {
-        return todoRepository.findById(todoId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._TODO_NOT_FOUND));
-    }
 
     /**
      * <p>TodoType이 roleTodo인지 여부를 반환</p>
@@ -261,59 +255,18 @@ public class TodoCommandService {
     /**
      * <p>오늘 날짜의 투두가 완료되었을 때 실행됨 본인의 오늘 투두가 모두 완료되었다면 FCM 발행</p>
      */
-    private void allTodoCompleteNotification(Mate mate) {
+    private void allTodoCompleteNotification(Mate mate, LocalDate today) {
         List<Mate> mateList = mateRepository.findAllByMemberIdAndEntryStatus(mate.getRoom().getId(),
             EntryStatus.JOINED).stream().filter(m -> !m.getId().equals(mate.getId())).toList();
 
         // 본인의 오늘 할 일이 더이상 없는지 확인
-        int unCompletedCount = todoAssignmentQueryService.getUncompletedTodoCount(mate);
+        int unCompletedCount = todoAssignmentRepositoryService.getUncompletedTodoCount(mate, today);
         if (unCompletedCount == 0) {
             // 없으면 FCM 발행 (모든 투두를 완료했음)
             fcmPushService.sendNotification(GroupWithOutMeTargetDto.create(mate.getMember(),
                 mateList.stream().map(Mate::getMember).toList(),
                 NotificationType.COMPLETE_ALL_TODAY_TODO));
         }
-    }
-
-    /**
-     * <p>생성자와 할당자가 모두 동일한 방에 있는지 검증</p>
-     */
-    private void validateSameRoom(Mate mate, List<Mate> mateList) {
-        Long roomId = mate.getRoom().getId();
-        mateList.forEach(mate1 -> {
-            if (!mate1.getRoom().getId().equals(roomId)) {
-                throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
-            }
-        });
-    }
-
-    /**
-     * <p>최대 할당자 수 제한을 초과하는 검증</p>
-     */
-    private void validateExceedingMaxAssignee(List<Long> mateIdList) {
-        if (mateIdList.size() > MAX_ASSIGNEE) {
-            throw new GeneralException(ErrorStatus._TODO_ASSIGNED_MATE_LIMIT);
-        }
-    }
-
-    /**
-     * <p>하루에 생성할 수 있는 투두 개수 제한을 검증</p>
-     */
-    private void validateDailyTodoLimit(Mate mate, LocalDate timePoint) {
-        int todoCount = todoRepository.countAllByRoomIdAndTimePoint(mate.getRoom().getId(),
-            timePoint);
-        // 생성하기 전에 체크 -> 초과로 하면 최대 개수보다 1개 더 생성됨
-        if (todoCount >= MAX_TODO_PER_DAY) {
-            throw new GeneralException(ErrorStatus._TODO_DAILY_LIMIT);
-        }
-    }
-
-    /**
-     * <p>해당 투두를 수정하거나 삭제할 권한이 있는지 검증</p>
-     * <p>본인이 해당 투두의 할당자라면 권한이 존재하는 것</p>
-     */
-    private void validateEditPermission(Mate mate, Todo todo) {
-        todoAssignmentQueryService.getAssignment(mate, todo);
     }
 
     /**
@@ -331,12 +284,12 @@ public class TodoCommandService {
         }
 
         // 할당자 수가 0이면 투두 삭제 - 실제 DB의 값도 확인
-        int todoAssignmentCount = todoAssignmentQueryService.getAssignmentCount(todo);
+        int todoAssignmentCount = todoAssignmentRepositoryService.getAssignmentCount(todo);
 
         // assignmentCount와 DB의 할당자 수가 일치하면 투두 삭제
         if (todoAssignmentCount == 0) {
             roomLogCommandService.changeRoomLogTodoToNull(todo.getId());
-            todoRepository.delete(todo);
+            todoRepositoryService.deleteTodo(todo);
             return;
         }
 
@@ -349,7 +302,7 @@ public class TodoCommandService {
      * <p>투두의 할당자 수를 검사해서 업데이트 (DB 체크)</p>
      */
     private void updateTodoAssignmentCountAndType(Todo todo) {
-        todo.updateAssignmentCount(todoAssignmentQueryService.getAssignmentCount(todo));
+        todo.updateAssignmentCount(todoAssignmentRepositoryService.getAssignmentCount(todo));
         todo.updateTodoType();
     }
 
@@ -358,6 +311,19 @@ public class TodoCommandService {
      */
     private void addAssignedMateList(Todo todo, List<Mate> mateList) {
         mateList.forEach(mate -> todoAssignmentCommandService.createAssignment(mate, todo));
+    }
+
+    /**
+     * <p>입력받은 mateIdList에 해당하는 모든 메이트가 존재하는지 체크하고 가져오는 함수</p>
+     */
+    private List<Mate> getMateList(List<Long> mateIdList) {
+        List<Mate> assignedMateList = mateRepository.findAllByIdIn(mateIdList);
+
+        // 할당을 위해서 입력받은 리스트가 모두 존재하지 않으면 예외 발생
+        if (assignedMateList.size() != mateIdList.size()) {
+            throw new GeneralException(ErrorStatus._MATE_NOT_FOUND);
+        }
+        return assignedMateList;
     }
 
 }

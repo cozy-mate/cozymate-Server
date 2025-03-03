@@ -31,13 +31,11 @@ public class RoomLog extends BaseTimeEntity {
 
     private String content;
 
-    // TODO: 연관 없애기
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Todo todo;
+    private Long todoId;
 
     private Long mateId;
 
     public void changeTodoToNull() {
-        this.todo = null;
+        this.todoId = null;
     }
 }

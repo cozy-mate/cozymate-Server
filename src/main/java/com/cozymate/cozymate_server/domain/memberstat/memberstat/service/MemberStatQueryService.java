@@ -23,6 +23,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -236,10 +237,11 @@ public class MemberStatQueryService {
 
     private List<MemberStat> shuffleAndExtractMemberStatList(
         List<MemberStat> memberStatList) {
-        Collections.shuffle(memberStatList);
+        List<MemberStat> mutableList = new ArrayList<>(memberStatList);
+        Collections.shuffle(mutableList);
 
-        return memberStatList.subList(0,
-            Math.min(RECOMMEND_MEMBER_SIZE, memberStatList.size()));
+        return mutableList.subList(0,
+            Math.min(RECOMMEND_MEMBER_SIZE, mutableList.size()));
     }
 
     private MemberStat getCriteriaMemberStat(Member member) {

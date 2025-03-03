@@ -29,11 +29,11 @@ public class Lifestyle {
     @Range(min = 0, max = 3)
     private Integer smokingStatus;
 
-    @Range(min = 0, max = 31)
+    @Range(min = 1, max = 62)
     private Integer sleepingHabit;
     /**
      * 중복 선택 가능
-     *     0 : 잠버릇 없음
+     *     1 : 잠버릇 없음
      *     코골이, 이갈이, 몽유병, 잠꼬대, 뒤척임 비트별로 관리
      */
 
