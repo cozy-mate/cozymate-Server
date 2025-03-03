@@ -21,6 +21,7 @@ import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class RoomQueryService {
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatRepository memberStatRepository;
     private final RoomFavoriteRepository roomFavoriteRepository;
+    private final RoomHashtagRepository roomHashtagRepository;
 
     public RoomDetailResponseDTO getRoomById(Long roomId, Long memberId) {
         Room room = validateRoom(roomId);
@@ -112,7 +114,10 @@ public class RoomQueryService {
 
     public List<RoomDetailResponseDTO> getRoomList(Long memberId, EntryStatus entryStatus) {
         // 해당 memberId와 entryStatus에 맞는 방을 가져옴
-        List<Room> rooms = roomRepository.findRoomsWithMatesAndHashtags(memberId, entryStatus);
+        List<Room> rooms = roomRepository.findRoomsWithMates(memberId, entryStatus);
+
+        // 방 해시태그 정보 저장
+        Map<Long, List<String>> roomHashtagsMap = getRoomHashtagsMap(rooms);
 
         // 방장 정보를 맵으로 저장해둠
         Map<Long, Mate> managerMap = mateRepository.findRoomManagers(rooms.stream().map(Room::getId).toList())
@@ -128,7 +133,7 @@ public class RoomQueryService {
                     joinedMates.stream().map(mate -> mate.getMember().getId())
                         .collect(Collectors.toList()));
                 Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
-                List<String> hashtags = extractHashtags(room);
+                List<String> hashtags = extractHashtags(room, roomHashtagsMap);
                 Mate managerMate = managerMap.get(room.getId());
                 return RoomConverter.toRoomDetailResponseDTOWithParams(
                     room.getId(),
@@ -307,7 +312,8 @@ public class RoomQueryService {
                 return RoomConverter.toMateDetailListResponse(mate, mateEquality);
             }).toList();
 
-        List<String> hashtags = extractHashtags(room);
+        Map<Long, List<String>> roomHashtagsMap = getRoomHashtagsMap(List.of(room));
+        List<String> hashtags = extractHashtags(room, roomHashtagsMap);
 
         return RoomConverter.toRoomDetailResponseDTOWithParams(
             room.getId(),
@@ -343,10 +349,18 @@ public class RoomQueryService {
         );
     }
 
-    private List<String> extractHashtags(Room room) {
-        return room.getRoomHashtags().stream()
-            .map(rh -> rh.getHashtag().getHashtag())
-            .toList();
+    private Map<Long, List<String>> getRoomHashtagsMap(List<Room> rooms) {
+        return roomHashtagRepository.findByRoomIds(
+                rooms.stream().map(Room::getId).toList()
+            ).stream()
+            .collect(Collectors.groupingBy(
+                roomHashtag -> roomHashtag.getRoom().getId(),
+                Collectors.mapping(roomHashtag -> roomHashtag.getHashtag().getHashtag(), Collectors.toList())
+            ));
+    }
+
+    private List<String> extractHashtags(Room room, Map<Long, List<String>> roomHashtagsMap) {
+        return roomHashtagsMap.getOrDefault(room.getId(), List.of());
     }
 
     private Room validateRoom(Long roomId) {

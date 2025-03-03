@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.fcm.event.converter.EventConverter;
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.converter.FeedConverter;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
@@ -26,6 +27,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
@@ -33,7 +35,6 @@ import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.fcm.event.converter.EventConverter;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.transaction.Transactional;
@@ -70,6 +71,7 @@ public class RoomCommandService {
     private final RoleCommandService roleCommandService;
     private final TodoCommandService todoCommandService;
     private final RoomFavoriteRepository roomFavoriteRepository;
+    private final RoomHashtagRepository roomHashtagRepository;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -265,6 +267,7 @@ public class RoomCommandService {
         mateRepository.deleteAllByRoomId(roomId);
         ruleRepository.deleteAllByRoomId(roomId);
         roomFavoriteRepository.deleteAllByRoomId(roomId);
+        roomHashtagRepository.deleteAllByRoomId(roomId);
 
         // 피드 삭제 로직
         if (feedRepository.existsByRoomId(roomId)) {
