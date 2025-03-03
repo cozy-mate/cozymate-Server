@@ -1,24 +1,23 @@
 package com.cozymate.cozymate_server.domain.room.service;
 
+import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
+
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.converter.RoomRecommendConverter;
-import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomRecommendationResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
-import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
-import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import jakarta.transaction.Transactional;
 import java.util.Comparator;
@@ -43,8 +42,6 @@ public class RoomRecommendService {
     private final MemberStatRepository memberStatRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
     private final LifestyleMatchRateService lifestyleMatchRateService;
-    private final RoomHashtagRepository roomHashtagRepository;
-    private final RoomHashtagQueryService roomHashtagQueryService;
 
     public PageResponseDto<List<RoomRecommendationResponseDTO>> getRecommendationList(Member member,
         int size, int page, RoomSortType sortType) {
@@ -74,9 +71,6 @@ public class RoomRecommendService {
         Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, member,
             roomMateMap);
 
-        // 방 해시태그 조회
-        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(roomList);
-
         // null을 가장 후순위로 처리
         List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
             roomMap, sortType, page, size);
@@ -84,7 +78,7 @@ public class RoomRecommendService {
         sortedRoomList = sortedRoomList.stream().limit(size).toList();
 
         List<RoomRecommendationResponseDTO> roomRecommendationResponseDTOList = buildRoomRecommendationResponseList(
-            member, sortedRoomList, roomMateMap, roomList, memberPreferenceList, roomHashtagsMap);
+            member, sortedRoomList, roomMateMap, roomList, memberPreferenceList);
 
         return PageResponseDto.<List<RoomRecommendationResponseDTO>>builder()
             .page(page)
@@ -147,29 +141,26 @@ public class RoomRecommendService {
 
     private List<RoomRecommendationResponseDTO> buildRoomRecommendationResponseList(
         Member member, List<Pair<Long, Integer>> sortedRoomList, Map<Long, List<Mate>> roomMateMap,
-        List<Room> roomList, List<String> preferenceList, Map<Long, List<String>> roomHashtagsMap) {
+        List<Room> roomList, List<String> preferenceList) {
 
         Map<Long, Room> roomMap = roomList.stream()
             .collect(Collectors.toMap(Room::getId, room -> room));
 
         return sortedRoomList.stream()
             .map(pair -> createRoomRecommendationResponse(member, pair, roomMap.get(pair.getLeft()),
-                roomMateMap, preferenceList, roomHashtagsMap))
+                roomMateMap, preferenceList))
             .toList();
     }
 
     private RoomRecommendationResponseDTO createRoomRecommendationResponse(
         Member member, Pair<Long, Integer> pair, Room room, Map<Long, List<Mate>> roomMateMap,
-        List<String> preferenceList, Map<Long, List<String>> roomHashtagsMap) {
+        List<String> preferenceList) {
 
         List<PreferenceMatchCountDTO> preferenceStatsMatchCounts = RoomStatUtil.getPreferenceStatsMatchCounts(
             member, preferenceList, roomMateMap.get(room.getId()), member.getMemberStat());
 
-        // roomHashtagsMap에서 해시태그 가져오기
-        List<String> hashtags = roomHashtagsMap.getOrDefault(room.getId(), List.of());
-
         return RoomRecommendConverter.toRoomRecommendationResponse(room, pair,
-            preferenceStatsMatchCounts, hashtags);
+            preferenceStatsMatchCounts);
     }
 
     private List<Pair<Long, Integer>> getSortedRoomListBySortType(
@@ -216,14 +207,11 @@ public class RoomRecommendService {
         List<PreferenceMatchCountDTO> preferenceMatchCountDTOList = RoomStatUtil.getPreferenceStatsMatchCountsWithoutMemberStat(
             memberPreferenceList);
 
-        // 방 해시태그 조회
-        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(roomList);
-
         List<RoomRecommendationResponseDTO> responseList =
             roomList.stream()
                 .map(
                     room -> RoomRecommendConverter.toRoomRecommendationResponseWhenNoMemberStat(
-                        room, preferenceMatchCountDTOList, roomHashtagsMap.getOrDefault(room.getId(), List.of())
+                        room, preferenceMatchCountDTOList
                     ))
                 .skip((long) page * size)
                 .limit(size)

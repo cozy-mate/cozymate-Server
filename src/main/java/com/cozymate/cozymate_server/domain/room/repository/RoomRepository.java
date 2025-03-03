@@ -26,9 +26,11 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     Optional<Room> findByInviteCode(String inviteCode);
 
     @Query("SELECT DISTINCT r FROM Room r " +
+        "LEFT JOIN FETCH r.roomHashtags rh " +
+        "LEFT JOIN FETCH rh.hashtag " +
         "WHERE r.id IN (SELECT m.room.id FROM Mate m " +
         "WHERE m.member.id = :memberId AND m.entryStatus = :status)")
-    List<Room> findRoomsWithMates(Long memberId, EntryStatus status);
+    List<Room> findRoomsWithMatesAndHashtags(Long memberId, EntryStatus status);
 
     /**
      * 사용자에게 방 추천을 해줄 때 조회할 수 있는 방 목록을 보는 쿼리
