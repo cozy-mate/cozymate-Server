@@ -21,7 +21,7 @@ public class RoomHashtagQueryService {
             .stream()
             .collect(Collectors.groupingBy(
                 roomHashtag -> roomHashtag.getRoom().getId(),
-                Collectors.mapping(roomHashtag -> roomHashtag.getHashtag().getName(), Collectors.toList())
+                Collectors.mapping(roomHashtag -> roomHashtag.getHashtag().getHashtag(), Collectors.toList())
             ));
     }
 

@@ -28,7 +28,7 @@ public class RoomHashtagCommandService {
         validateHashtags(hashtags);
 
         for (String tag : hashtags) {
-            Hashtag hashtag = hashtagRepository.findByName(tag)
+            Hashtag hashtag = hashtagRepository.findByHashtag(tag)
                 .orElseGet( ()-> hashtagRepository.save(HashtagConverter.toHashtag(tag)));
 
             RoomHashtag roomHashtag = RoomHashtagConverter.toRoomHashtag(room, hashtag);
