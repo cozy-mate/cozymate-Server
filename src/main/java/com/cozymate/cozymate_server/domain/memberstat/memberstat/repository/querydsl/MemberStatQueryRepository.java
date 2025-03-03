@@ -9,17 +9,17 @@ import org.springframework.data.domain.Slice;
 
 public interface MemberStatQueryRepository {
 
-    Slice<Map<MemberStat, Integer>> filterMemberStat(MemberStat criteriaMemberStat,
+    Slice<Map<MemberStat, Integer>> filterMemberStatBasic(MemberStat criteriaMemberStat,
         List<String> filterList, Pageable pageable);
 
     // 상세 필터링 (key:value)
     Slice<Map<MemberStat, Integer>> filterMemberStatAdvance(
         MemberStat criteriaMemberStat,
-        HashMap<String, List<?>> filterMap, Pageable pageable);
+        Map<String, List<?>> filterMap, Pageable pageable);
 
     // 상세 개수 필터링
     int countAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
-        HashMap<String, List<?>> filterMap);
+        Map<String, List<?>> filterMap);
 
     Map<MemberStat, Integer> getMemberStatsWithKeywordAndMatchRate(MemberStat criteriaMemberStat,String substring);
 

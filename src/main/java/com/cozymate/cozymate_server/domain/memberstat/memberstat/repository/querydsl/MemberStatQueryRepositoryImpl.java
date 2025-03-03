@@ -44,83 +44,28 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private static final String NUM_OF_ROOMMATE = "numOfRoommate";
 
     @Override
-    public Slice<Map<MemberStat, Integer>> filterMemberStat(
+    public Slice<Map<MemberStat, Integer>> filterMemberStatBasic(
         MemberStat criteriaMemberStat,
         List<String> filterList, Pageable pageable) {
 
-        // pageSize + 1만큼 데이터를 조회하여 다음 페이지 여부 확인
-        List<Tuple> results = createBaseQuery(criteriaMemberStat)
-            .where(applyFilters(filterList, criteriaMemberStat))
-            .orderBy(lifestyleMatchRate.matchRate.desc(),
-                member.nickname.asc(),
-                memberStat.id.asc()) // equality 기준으로 정렬
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize() + 1) // 다음 페이지 확인을 위해 추가 데이터 조회
-            .fetch();
-
-        // results 크기를 기준으로 hasNext 계산
-        boolean hasNext = results.size() > pageable.getPageSize();
-
-        // 결과 리스트에서 초과된 요소를 제거하여 현재 페이지 데이터만 유지
-        if (hasNext) {
-            results.remove(results.size() - 1);
-        }
-
-        // 결과를 Map<MemberStat, Integer> 형식으로 변환
-        List<Map<MemberStat, Integer>> resultList = results.stream()
-            .map(tuple -> {
-                MemberStat stat = tuple.get(memberStat);
-                Integer equality = tuple.get(lifestyleMatchRate.matchRate);
-                Map<MemberStat, Integer> statMap = new HashMap<>();
-                statMap.put(stat, equality != null ? equality : 0);
-                return statMap;
-            })
-            .collect(Collectors.toList());
-
-        return new SliceImpl<>(resultList, pageable, hasNext);
+        return filterMemberStat(criteriaMemberStat,
+            applyFilters(filterList, criteriaMemberStat), pageable);
     }
 
     @Override
     public Slice<Map<MemberStat, Integer>> filterMemberStatAdvance(
         MemberStat criteriaMemberStat,
-        HashMap<String, List<?>> filterMap, Pageable pageable) {
+        Map<String, List<?>> filterMap, Pageable pageable) {
 
-        // pageSize + 1만큼 데이터를 조회하여 다음 페이지 여부 확인
-        List<Tuple> results = createBaseQuery(criteriaMemberStat)
-            .where(applyFilters(filterMap, criteriaMemberStat))
-            .orderBy(lifestyleMatchRate.matchRate.desc(),
-                member.nickname.asc(),
-                memberStat.id.asc()) // equality 기준으로 정렬
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize() + 1) // 다음 페이지 확인을 위해 추가 데이터 조회
-            .fetch();
+        return filterMemberStat(criteriaMemberStat,
+            applyFilters(filterMap, criteriaMemberStat), pageable);
 
-        // results 크기를 기준으로 hasNext 계산
-        boolean hasNext = results.size() > pageable.getPageSize();
-
-        // 결과 리스트에서 초과된 요소를 제거하여 현재 페이지 데이터만 유지
-        if (hasNext) {
-            results.remove(results.size() - 1);
-        }
-
-        // 결과를 Map<MemberStat, Integer> 형식으로 변환
-        List<Map<MemberStat, Integer>> resultList = results.stream()
-            .map(tuple -> {
-                MemberStat stat = tuple.get(memberStat);
-                Integer equality = tuple.get(lifestyleMatchRate.matchRate);
-                Map<MemberStat, Integer> statMap = new HashMap<>();
-                statMap.put(stat, equality != null ? equality : 0);
-                return statMap;
-            })
-            .collect(Collectors.toList());
-
-        return new SliceImpl<>(resultList, pageable, hasNext);
     }
 
     // 상세 검색 필터링에 대한 멤버 개수 표시
     @Override
     public int countAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
-        HashMap<String, List<?>> filterMap) {
+        Map<String, List<?>> filterMap) {
         return createBaseQuery(criteriaMemberStat)
             .where(applyFilters(filterMap, criteriaMemberStat))
             .fetch()
@@ -151,6 +96,39 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             ));
     }
 
+    private Slice<Map<MemberStat, Integer>> filterMemberStat(
+        MemberStat criteriaMemberStat, BooleanBuilder filters, Pageable pageable) {
+
+        // pageSize + 1만큼 데이터를 조회하여 다음 페이지 여부 확인
+        List<Tuple> results = createBaseQuery(criteriaMemberStat)
+            .where(filters)
+            .orderBy(lifestyleMatchRate.matchRate.desc(), member.nickname.asc(),
+                memberStat.id.asc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize() + 1) // 다음 페이지 확인을 위해 추가 데이터 조회
+            .fetch();
+
+        // hasNext 계산 및 초과 데이터 제거
+        boolean hasNext = results.size() > pageable.getPageSize();
+        if (hasNext) {
+            results.remove(results.size() - 1);
+        }
+
+        // 결과를 Map<MemberStat, Integer> 형식으로 변환
+        List<Map<MemberStat, Integer>> resultList = results.stream()
+            .map(tuple -> {
+                MemberStat stat = tuple.get(memberStat);
+                Integer matchRate = tuple.get(lifestyleMatchRate.matchRate);
+                Map<MemberStat, Integer> statMap = new HashMap<>();
+                statMap.put(stat, matchRate != null ? matchRate : 0);
+                return statMap;
+            })
+            .collect(Collectors.toList());
+
+        return new SliceImpl<>(resultList, pageable, hasNext);
+
+    }
+
     private JPAQuery<Tuple> createBaseQuery(MemberStat criteriaMemberStat) {
         return queryFactory
             .select(memberStat, lifestyleMatchRate.matchRate)
@@ -158,13 +136,12 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .join(memberStat.member, member)
             .leftJoin(lifestyleMatchRate)
             .on(
-                (lifestyleMatchRate.id.memberA.eq(memberStat.member.id)
-                    .and(lifestyleMatchRate.id.memberB.eq(criteriaMemberStat.getMember().getId())))
-                    .or(
-                        lifestyleMatchRate.id.memberB.eq(memberStat.member.id)
-                            .and(lifestyleMatchRate.id.memberA.eq(
-                                criteriaMemberStat.getMember().getId()))
-                    )
+                (lifestyleMatchRate.id.memberA.eq(memberStat.member.id).and(
+                    lifestyleMatchRate.id.memberB.eq(criteriaMemberStat.getMember().getId()))).or(
+                    lifestyleMatchRate.id.memberB.eq(memberStat.member.id)
+                        .and(lifestyleMatchRate.id.memberA.eq(
+                            criteriaMemberStat.getMember().getId()))
+                )
             )
             .where(initDefaultQuery(criteriaMemberStat));
     }
@@ -190,36 +167,41 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         BooleanBuilder builder = new BooleanBuilder();
 
         // filterList가 주어진 경우에만 필터링 수행
-        if (filterList != null) {
-            filterList.forEach(filter -> {
-
-                // 필터링 key가 잘못되었으면 null 반환
-                Path<?> path = getPathByKey(filter);
-                // key에 대한 value가 없어도 null 반환
-                Object criteriaValue = getFieldValueByKey(criteriaMemberStat, filter);
-                // FIXME: exception을 여기서 걸어줘야하는지 판단이 안 서네요
-                if (path != null && criteriaValue != null) {
-                    applyFilter(builder, filter, criteriaValue, criteriaMemberStat);
-                }
-
-            });
+        if (filterList == null) {
+            return builder;
         }
+
+        filterList.forEach(filter -> {
+
+            // 필터링 key가 잘못되었으면 null 반환
+            Path<?> path = getPathByKey(filter);
+            // key에 대한 value가 없어도 null 반환
+            Object criteriaValue = getFieldValueByKey(criteriaMemberStat, filter);
+            // FIXME: exception을 여기서 걸어줘야하는지 판단이 안 서네요
+            if (path != null && criteriaValue != null) {
+                applyFilter(builder, filter, criteriaValue, criteriaMemberStat);
+            }
+        });
+
         return builder;
     }
 
     // 단순 필터링하는 필터 (기준 멤버 스탯과 각 필드의 값이 일치하는지 확인)
     // 상세 검색 필터들을 iteration하며 필터를 적용하는 메서드 (key : value)
-    private BooleanBuilder applyFilters(HashMap<String, List<?>> filterMap,
+    private BooleanBuilder applyFilters(Map<String, List<?>> filterMap,
         MemberStat criteriaMemberStat) {
         BooleanBuilder builder = new BooleanBuilder();
-        if (filterMap != null) {
-            filterMap.forEach((key, value) -> {
-                // value가 빈 배열이 아닐때만 적용
-                if (value != null && !value.isEmpty()) {
-                    applyFilter(builder, key, value, criteriaMemberStat);
-                }
-            });
+        if (filterMap == null) {
+            return builder;
         }
+
+        filterMap.forEach((key, value) -> {
+            // value가 빈 배열이 아닐때만 적용
+            if (value != null && !value.isEmpty()) {
+                applyFilter(builder, key, value, criteriaMemberStat);
+            }
+        });
+
         return builder;
     }
 
@@ -278,7 +260,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         if (filterValue instanceof Integer value) {
             // filterValue가 1일 경우, 1번 비트만 켜진 값들을 반환
             return Expressions.booleanTemplate("{0} & {1} = {1}", path, value);
-        } else if (filterValue instanceof List<?> values) {
+        }
+        if (filterValue instanceof List<?> values) {
             // filterValue가 [1, 4]와 같은 리스트일 경우
             Integer bitmask = 0;
             for (Object val : values) {
@@ -304,7 +287,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             }
             // "0"이 아닌 값이면 해당 값과 일치하는 값만 보여줌
             return path.eq(value);  // numOfRoommate 값이 일치하는 것만 필터링
-        } else if (filterValue instanceof List<?> values) {
+        }
+        if (filterValue instanceof List<?> values) {
             // 리스트일 경우, 사용자가 '미정'을 선택한 경우에만 다중 선택 가능
             if (criteriaMemberStat.getMemberUniversityStat().getNumberOfRoommate()
                 .equals(NUM_OF_ROOMMATE_NOT_DETERMINED)) {
@@ -321,7 +305,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private BooleanExpression handleStringFilter(StringPath path, Object filterValue) {
         if (filterValue instanceof String value) {
             return path.eq(value);
-        } else if (filterValue instanceof List<?> values) {
+        }
+        if (filterValue instanceof List<?> values) {
             return path.in((List<String>) values);
         }
         return null;
@@ -332,7 +317,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 
         if (filterValue instanceof Integer value) {
             return path.eq(value);
-        } else if (filterValue instanceof List<?> values) {
+        }
+        if (filterValue instanceof List<?> values) {
             return path.in((List<Integer>) values);
         }
         return null;
@@ -342,7 +328,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private BooleanExpression handleBooleanFilter(BooleanPath path, Object filterValue) {
         if (filterValue instanceof Boolean value) {
             return path.eq(value);
-        } else if (filterValue instanceof List<?> values) {
+        }
+        if (filterValue instanceof List<?> values) {
             return path.in((List<Boolean>) values);
         }
         return null;
@@ -352,9 +339,11 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private BooleanExpression handleDateFilter(DatePath<LocalDate> path, Object filterValue) {
         if (filterValue instanceof Integer value) {
             return Expressions.numberTemplate(Integer.class, "year({0})", path).eq(value);
-        } else if (filterValue instanceof LocalDate value) {
+        }
+        if (filterValue instanceof LocalDate value) {
             return Expressions.numberTemplate(Integer.class, "year({0})", path).eq(value.getYear());
-        } else if (filterValue instanceof List<?> values) {
+        }
+        if (filterValue instanceof List<?> values) {
             List<Integer> value = values.stream()
                 .map(Integer.class::cast)
                 .toList();
