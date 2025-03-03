@@ -15,7 +15,7 @@ import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.converter.RoomFavoriteConverter;
 import com.cozymate.cozymate_server.domain.roomfavorite.dto.response.RoomFavoriteResponseDTO;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
-import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class RoomFavoriteQueryService {
     private final MateRepository mateRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
     private final LifestyleMatchRateService lifestyleMatchRateService;
-    private final RoomHashtagRepository roomHashtagRepository;
+    private final RoomHashtagQueryService roomHashtagQueryService;
 
 
     public List<RoomFavoriteResponseDTO> getFavoriteRoomList(Member member) {
@@ -97,12 +97,7 @@ public class RoomFavoriteQueryService {
                         .toList()
                 );
 
-                Map<Long, List<String>> roomHashtagsMap = roomHashtagRepository.findByRoomIds(responseRoomList.stream().map(Room::getId).toList())
-                    .stream()
-                    .collect(Collectors.groupingBy(
-                        roomHashtag -> roomHashtag.getRoom().getId(),
-                        Collectors.mapping(roomHashtag -> roomHashtag.getHashtag().getHashtag(), Collectors.toList())
-                    ));
+                Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(responseRoomList);
 
                 // 로그인 사용자와 방 일치율 계산
                 Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);

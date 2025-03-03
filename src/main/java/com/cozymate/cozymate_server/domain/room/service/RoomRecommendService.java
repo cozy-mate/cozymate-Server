@@ -18,6 +18,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
+import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import jakarta.transaction.Transactional;
 import java.util.Comparator;
@@ -43,6 +44,7 @@ public class RoomRecommendService {
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final RoomHashtagRepository roomHashtagRepository;
+    private final RoomHashtagQueryService roomHashtagQueryService;
 
     public PageResponseDto<List<RoomRecommendationResponseDTO>> getRecommendationList(Member member,
         int size, int page, RoomSortType sortType) {
@@ -73,13 +75,7 @@ public class RoomRecommendService {
             roomMateMap);
 
         // 방 해시태그 조회
-        Map<Long, List<String>> roomHashtagsMap = roomHashtagRepository.findByRoomIds(
-                roomList.stream().map(Room::getId).toList())
-            .stream()
-            .collect(Collectors.groupingBy(
-                roomHashtag -> roomHashtag.getRoom().getId(),
-                Collectors.mapping(roomHashtag -> roomHashtag.getHashtag().getHashtag(), Collectors.toList())
-            ));
+        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(roomList);
 
         // null을 가장 후순위로 처리
         List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
@@ -221,13 +217,7 @@ public class RoomRecommendService {
             memberPreferenceList);
 
         // 방 해시태그 조회
-        Map<Long, List<String>> roomHashtagsMap = roomHashtagRepository.findByRoomIds(
-                roomList.stream().map(Room::getId).toList())
-            .stream()
-            .collect(Collectors.groupingBy(
-                roomHashtag -> roomHashtag.getRoom().getId(),
-                Collectors.mapping(roomHashtag -> roomHashtag.getHashtag().getHashtag(), Collectors.toList())
-            ));
+        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(roomList);
 
         List<RoomRecommendationResponseDTO> responseList =
             roomList.stream()
