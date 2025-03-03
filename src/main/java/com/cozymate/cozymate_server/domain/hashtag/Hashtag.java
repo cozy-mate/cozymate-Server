@@ -22,6 +22,6 @@ public class Hashtag extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String hashtag;
+    private String name;
 
 }

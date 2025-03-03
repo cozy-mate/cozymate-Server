@@ -1,9 +1,5 @@
 package com.cozymate.cozymate_server.domain.roomfavorite.service;
 
-import com.cozymate.cozymate_server.domain.roomfavorite.converter.RoomFavoriteConverter;
-import com.cozymate.cozymate_server.domain.roomfavorite.dto.response.RoomFavoriteResponseDTO;
-import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
-import com.cozymate.cozymate_server.domain.hashtag.Hashtag;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -12,11 +8,14 @@ import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
+import com.cozymate.cozymate_server.domain.roomfavorite.converter.RoomFavoriteConverter;
+import com.cozymate.cozymate_server.domain.roomfavorite.dto.response.RoomFavoriteResponseDTO;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
-import com.cozymate.cozymate_server.domain.roomhashtag.RoomHashtag;
+import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ public class RoomFavoriteQueryService {
     private final MateRepository mateRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
     private final LifestyleMatchRateService lifestyleMatchRateService;
+    private final RoomHashtagQueryService roomHashtagQueryService;
 
 
     public List<RoomFavoriteResponseDTO> getFavoriteRoomList(Member member) {
@@ -97,15 +97,13 @@ public class RoomFavoriteQueryService {
                         .toList()
                 );
 
+                Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(responseRoomList);
+
                 // 로그인 사용자와 방 일치율 계산
                 Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
 
                 // 방 해시태그 조회
-                List<RoomHashtag> roomHashtags = room.getRoomHashtags();
-                List<String> roomHashTags = roomHashtags.stream()
-                    .map(RoomHashtag::getHashtag)
-                    .map(Hashtag::getHashtag)
-                    .toList();
+                List<String> roomHashTags = roomHashtagsMap.getOrDefault(room.getId(), List.of());
 
                 return RoomFavoriteConverter.toRoomFavoriteResponseDTO(
                     roomFavoriteIdMap.get(room), room, roomEquality,
