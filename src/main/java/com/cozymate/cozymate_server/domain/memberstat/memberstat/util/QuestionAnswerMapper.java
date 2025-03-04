@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class QuestionAnswerMapper {
 
-    private static QuestionAnswerMapper instance;
     private static Map<String, List<String>> questionAnswerMap;
     private static final String JSON_FILE = "memberstat/question_answer.json";
     private static final String AM = "오전";
@@ -26,7 +25,12 @@ public class QuestionAnswerMapper {
     private static final List<String> MULTI_VALUE_QUESTION = List.of("personality",
         "sleepingHabit");
 
-    static {load();}
+    private static final List<String> NOT_LIFESTYLE = List.of("birthYear", "acceptance",
+        "admissionYear", "major", "dormitoryName");
+
+    static {
+        load();
+    }
 
     private static void load() {
         if (questionAnswerMap == null) { // 중복 로딩 방지
@@ -145,5 +149,35 @@ public class QuestionAnswerMapper {
                 }
             ));
     }
+
+    public static Map<String, List<?>> convertFilterMap(Map<String, List<?>> filterMap) {
+        return filterMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> {
+                    String key = entry.getKey();
+                    List<?> values = entry.getValue();
+
+                    // 라이프스타일 질문이 아닌 경우
+                    if (NOT_LIFESTYLE.contains(key)) {
+                        return values; // 그대로 유지
+                    }
+
+                    // 다중 선택 질문 (personality, sleepingHabit) → BitMask(Integer) 변환
+                    if (QuestionAnswerMapper.MULTI_VALUE_QUESTION.contains(key)) {
+                        return List.of(QuestionAnswerMapper.convertBitMaskToInteger(
+                            key, values.stream().map(Object::toString).toList()
+                        ));
+                    }
+
+                    // 일반적인 라이프스타일 값 → Index(Integer) 변환
+                    return values.stream()
+                        .map(value -> QuestionAnswerMapper.getIndex(key, value.toString()))
+                        .toList();
+                }
+            ));
+    }
+
+
 }
 
