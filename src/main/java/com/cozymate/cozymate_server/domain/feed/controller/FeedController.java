@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,25 +29,6 @@ public class FeedController {
 
     private final FeedCommandService feedCommandService;
     private final FeedQueryService feedQueryService;
-
-    @Deprecated
-    @Operation(
-        summary = "[포비] 피드 정보 등록하기",
-        description = "해당 API는 더 이상 사용하지 않습니다"
-    )
-    @SwaggerApiError({
-        ErrorStatus._ROOM_NOT_FOUND,
-        ErrorStatus._MATE_OR_ROOM_NOT_FOUND,
-        ErrorStatus._FEED_EXISTS
-    })
-    @PostMapping("")
-    public ResponseEntity<ApiResponse<Long>> createFeedInfo(
-        @AuthenticationPrincipal MemberDetails memberDetails,
-        @Valid @RequestBody FeedRequestDTO feedRequestDTO) {
-        return ResponseEntity.ok(
-            ApiResponse.onSuccess(
-                feedCommandService.createFeedInfo(memberDetails.member(), feedRequestDTO)));
-    }
 
     @Operation(
         summary = "[포비] 피드 정보 수정하기",
@@ -81,6 +61,6 @@ public class FeedController {
         @PathVariable Long roomId) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                feedQueryService.getFeedInfo(memberDetails.member(),roomId)));
+                feedQueryService.getFeedInfo(memberDetails.member(), roomId)));
     }
 }

@@ -37,8 +37,8 @@ public class Feed extends BaseTimeEntity {
     private String description;
 
     public void update(FeedRequestDTO feedRequestDTO) {
-        this.name = feedRequestDTO.getName();
-        this.description = feedRequestDTO.getDescription();
+        this.name = feedRequestDTO.name();
+        this.description = feedRequestDTO.description();
     }
 
 
