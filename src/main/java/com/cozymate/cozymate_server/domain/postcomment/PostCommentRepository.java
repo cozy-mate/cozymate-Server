@@ -11,6 +11,9 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
 
     List<PostComment> findByPostIdOrderByCreatedAt(Long postId);
 
-    void deleteAllByPostId(Long postId);
+    @Modifying
+    @Query("DELETE FROM PostComment pc WHERE pc.post.id = :postId")
+    void deleteAllByPostId(@Param("postId") Long postId);
+
     void deleteAllByCommenterId(Long commenterId);
 }
