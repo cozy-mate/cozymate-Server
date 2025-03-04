@@ -84,17 +84,17 @@ public class RoomCommandService {
         // 기존 참여 요청들 삭제
         clearOtherRoomRequests(member.getId());
 
+        // 피드 생성
+        Feed feed = feedRepository.save(FeedConverter.toEntity());
+
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toPrivateRoom(request, inviteCode);
+        Room room = RoomConverter.toPrivateRoom(request, inviteCode, feed);
         room.enableRoom();
         room = roomRepository.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
         Mate mate = MateConverter.toEntity(room, member, true);
         mateRepository.save(mate);
-
-        Feed feed = FeedConverter.toEntity(room);
-        feedRepository.save(feed);
 
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }
@@ -116,11 +116,14 @@ public class RoomCommandService {
         // 기존 참여 요청들 삭제
         clearOtherRoomRequests(member.getId());
 
+        // 피드 생성
+        Feed feed = feedRepository.save(FeedConverter.toEntity());
+
         Gender gender = member.getGender();
         University university = member.getUniversity();
 
         String inviteCode = generateUniqueUppercaseKey();
-        Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university);
+        Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university, feed);
 
         // 해시태그 저장 과정
         roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
@@ -129,9 +132,6 @@ public class RoomCommandService {
 
         Mate mate = MateConverter.toEntity(room, member, true);
         mateRepository.save(mate);
-
-        Feed feed = FeedConverter.toEntity(room);
-        feedRepository.save(feed);
 
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }

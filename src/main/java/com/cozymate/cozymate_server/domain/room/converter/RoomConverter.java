@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.converter;
 
+import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class RoomConverter {
 
-    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode) {
+    public static Room toPrivateRoom(PrivateRoomCreateRequestDTO request, String inviteCode, Feed feed) {
         return Room.builder()
             .name(request.name())
             .profileImage(request.persona())
@@ -27,10 +28,11 @@ public class RoomConverter {
             .status(RoomStatus.ENABLE)
             .roomType(RoomType.PRIVATE)
             .numOfArrival(1)
+            .feed(feed)
             .build();
     }
 
-    public static Room toPublicRoom(PublicRoomCreateRequestDTO request, String inviteCode, Gender gender, University university) {
+    public static Room toPublicRoom(PublicRoomCreateRequestDTO request, String inviteCode, Gender gender, University university, Feed feed) {
         return Room.builder()
             .name(request.name())
             .profileImage(request.persona())
@@ -41,6 +43,7 @@ public class RoomConverter {
             .numOfArrival(1)
             .gender(gender)
             .university(university)
+            .feed(feed)
             .build();
     }
 
