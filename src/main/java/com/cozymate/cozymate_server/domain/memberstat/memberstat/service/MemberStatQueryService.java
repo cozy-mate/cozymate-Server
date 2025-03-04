@@ -150,13 +150,16 @@ public class MemberStatQueryService {
      * @param filterMap 필터 조건을 포함한 맵
      * @return 필터링된 MemberStat 개수
      */
+    @Transactional(readOnly = true)
     public Integer getNumberOfSearchedAndFilteredMemberStatList(Member member,
         Map<String, List<?>> filterMap) {
         MemberStat criteriaMemberStat = memberStatRepositoryService.getMemberStatOrThrow(
             member.getId());
 
+        Map<String, List<?>> convertedFilter = QuestionAnswerMapper.convertFilterMap(filterMap);
+
         return memberStatRepositoryService.getCountFilteredMemberStat(
-            criteriaMemberStat, filterMap
+            criteriaMemberStat, convertedFilter
         );
     }
 
