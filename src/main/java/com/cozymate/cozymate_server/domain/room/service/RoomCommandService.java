@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.fcm.event.converter.EventConverter;
 import com.cozymate.cozymate_server.domain.feed.Feed;
 import com.cozymate.cozymate_server.domain.feed.converter.FeedConverter;
 import com.cozymate.cozymate_server.domain.feed.repository.FeedRepository;
+import com.cozymate.cozymate_server.domain.feed.service.FeedCommandService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.converter.MateConverter;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
@@ -12,10 +13,6 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.domain.post.Post;
-import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
-import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
-import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.role.service.RoleCommandService;
 import com.cozymate.cozymate_server.domain.room.Room;
@@ -42,6 +39,7 @@ import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -59,11 +57,9 @@ public class RoomCommandService {
     private final TodoRepository todoRepository;
     private final RuleRepositoryService ruleRepositoryService;
     private final RoomLogRepository roomLogRepository;
-    private final PostRepository postRepository;
-    private final PostCommentRepository postCommentRepository;
-    private final PostImageRepository postImageRepository;
     private final RoleRepository roleRepository;
     private final FeedRepository feedRepository;
+    private final FeedCommandService feedCommandService;
     private final RoomQueryService roomQueryService;
     private final RoomLogCommandService roomLogCommandService;
     private final ApplicationEventPublisher eventPublisher;
@@ -166,8 +162,8 @@ public class RoomCommandService {
         roomValidator.checkRoomManager(mate);
 
         // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
-        deleteRoomDatas(roomId);
-        roomRepositoryService.delete(room);
+        deleteRoomDatas(room);
+        roomRepository.delete(room);
     }
 
     public Boolean checkRoomName(String roomName) {
@@ -201,8 +197,8 @@ public class RoomCommandService {
         // 방이 비었다면 방 삭제
         if (room.getNumOfArrival() == 0) {
             // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
-            deleteRoomDatas(roomId);
-            roomRepositoryService.delete(room);
+            deleteRoomDatas(room);
+            roomRepository.delete(room);
             return;
         }
 
@@ -225,26 +221,22 @@ public class RoomCommandService {
         newManager.setRoomManager();
     }
 
-    private void deleteRoomDatas(Long roomId) {
-        roomLogRepository.deleteAllByRoomId(roomId);
-        todoRepository.deleteAllByRoomId(roomId);
-        roleRepository.deleteAllByRoomId(roomId);
-        mateRepository.deleteAllByRoomId(roomId);
-        ruleRepositoryService.deleteRuleListByRoomId(roomId);
-        roomFavoriteRepository.deleteAllByRoomId(roomId);
-        roomHashtagRepository.deleteAllByRoomId(roomId);
-
-        // 피드 삭제 로직
-        if (feedRepository.existsByRoomId(roomId)) {
-            Feed feed = feedRepository.findByRoomId(roomId);
-            List<Post> posts = postRepository.findByFeedId(feed.getId());
-            for (Post post : posts) {
-                postCommentRepository.deleteAllByPostId(post.getId());
-                postImageRepository.deleteAllByPostId(post.getId());
-            }
-            postRepository.deleteByFeedId(feed.getId());
-            feedRepository.deleteByRoomId(roomId);
+    private void deleteRoomDatas(Room room) {
+        List<Mate> mates = mateRepository.findByRoomId(room.getId());
+//        for (Mate mate : mates) {
+//            roleRepository.deleteByMateId(mate.getId());
+//            todoRepository.deleteByMateId(mate.getId());
+//        }
+        roomLogRepository.deleteAllByRoomId(room.getId());
+        todoRepository.deleteAllByRoomId(room.getId());
+        roleRepository.deleteAllByRoomId(room.getId());
+        ruleRepository.deleteAllByRoomId(room.getId());
+        roomFavoriteRepository.deleteAllByRoomId(room.getId());
+        roomHashtagRepository.deleteAllByRoomId(room.getId());
+        if (Objects.nonNull(room.getFeed())) {
+            feedCommandService.deleteFeed(room.getFeed());
         }
+        mateRepository.deleteAllByRoomId(room.getId());
     }
 
     @Transactional
