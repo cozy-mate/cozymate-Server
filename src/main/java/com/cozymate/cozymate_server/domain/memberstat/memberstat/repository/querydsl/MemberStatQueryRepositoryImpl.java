@@ -26,7 +26,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -255,25 +257,36 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 
 
     // 다중 선택 요소들의 필터(성격, 잠버릇)
-    private BooleanExpression handleMultiAnswersContentFilter(NumberPath<Integer> path,
-        Object filterValue) {
+    private BooleanExpression handleMultiAnswersContentFilter(NumberPath<Integer> path, Object filterValue) {
         if (filterValue instanceof Integer value) {
-            // filterValue가 1일 경우, 1번 비트만 켜진 값들을 반환
-            return Expressions.booleanTemplate("{0} & {1} = {1}", path, value);
+            List<Integer> matchingValues = getMatchingValues(value);
+            return matchingValues.isEmpty() ? Expressions.TRUE : path.in(matchingValues);
         }
+
         if (filterValue instanceof List<?> values) {
-            // filterValue가 [1, 4]와 같은 리스트일 경우
-            Integer bitmask = 0;
-            for (Object val : values) {
-                if (val instanceof Integer) {
-                    bitmask |= (Integer) val; // 각 비트 값을 OR 연산하여 하나의 비트마스크 생성
-                }
-            }
-            // 생성된 비트마스크와 path의 비트 AND 연산을 하여, 해당 비트들이 모두 켜진 값들을 반환
-            return Expressions.booleanTemplate("{0} & {1} = {1}", path, bitmask);
+            Set<Integer> matchingValuesSet = values.stream()
+                .filter(Integer.class::isInstance)
+                .map(Integer.class::cast)
+                .flatMap(bitValue -> getMatchingValues(bitValue).stream())
+                .collect(Collectors.toSet());
+
+            return matchingValuesSet.isEmpty() ? Expressions.TRUE : path.in(matchingValuesSet);
         }
-        return null;
+
+        return Expressions.TRUE;
     }
+
+    /**
+     * 특정 비트가 켜져 있는 값들을 미리 계산하여 반환
+     */
+    private List<Integer> getMatchingValues(int bitmask) {
+        return IntStream.rangeClosed(0, 4095)
+            .filter(i -> (i & bitmask) != 0)
+            .boxed()
+            .collect(Collectors.toList());
+    }
+
+
 
 
     // 인실에 대한 필터(예외 경우의 수 처리)
