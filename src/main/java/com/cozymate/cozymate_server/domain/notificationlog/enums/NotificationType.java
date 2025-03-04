@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.notificationlog.enums;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushContentDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.content.FcmPushContentDTO;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.converter.NotificationLogConverter;
 import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogCreateDTO;
@@ -17,12 +17,12 @@ public enum NotificationType {
     // OneTarget, 스케줄러
     SELECT_COZY_MATE(NotificationCategory.COZY_HOME) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
             LocalDateTime now = LocalDateTime.now();
             String month = now.format(DateTimeFormatter.ofPattern("M월"));
 
             return String.format(
-                fcmPushContentDto.getMember().getNickname()
+                fcmPushContentDTO.member().getNickname()
                     + "님, %s Best, Worst 코지메이트를 선정해주세요!",
                 month);
         }
@@ -41,10 +41,10 @@ public enum NotificationType {
     // OneTarget, 스케줄러
     REMINDER_ROLE(NotificationCategory.COZY_ROLE) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname()
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname()
                 + "님, 오늘 "
-                + fcmPushContentDto.getRoleContent()
+                + fcmPushContentDTO.roleContent()
                 + " 잊지 않으셨죠?";
         }
 
@@ -58,15 +58,15 @@ public enum NotificationType {
     // OneTarget, 스케줄러
     TODO_LIST(NotificationCategory.COZY_ROLE) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
             StringBuilder builder = new StringBuilder();
 
-            List<String> todoContents = fcmPushContentDto.getTodoContents();
+            List<String> todoContents = fcmPushContentDTO.todoContents();
             todoContents.forEach(
                 todoContent -> builder.append("\n• ").append(todoContent)
             );
 
-            return fcmPushContentDto.getMember().getNickname()
+            return fcmPushContentDTO.member().getNickname()
                 + "님, 오늘 해야할 일이에요!"
                 + builder.toString();
         }
@@ -81,8 +81,8 @@ public enum NotificationType {
     // GroupWithOutMeTarget
     COMPLETE_ALL_TODAY_TODO(NotificationCategory.COZY_HOME) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님이 오늘 해야 할 일을 전부 완료했어요!";
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname() + "님이 오늘 해야 할 일을 전부 완료했어요!";
         }
 
         @Override
@@ -100,9 +100,9 @@ public enum NotificationType {
      */
     ROOM_IN(NotificationCategory.ROOM) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님이 "
-                + fcmPushContentDto.getRoom().getName() + "에 뛰어들어왔어요!";
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname() + "님이 "
+                + fcmPushContentDTO.room().getName() + "에 뛰어들어왔어요!";
         }
 
         @Override
@@ -120,9 +120,9 @@ public enum NotificationType {
      */
     ROOM_OUT(NotificationCategory.ROOM) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님이 "
-                + fcmPushContentDto.getRoom().getName() + "을/를 뛰쳐나갔어요!";
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname() + "님이 "
+                + fcmPushContentDTO.room().getName() + "을/를 뛰쳐나갔어요!";
         }
 
         @Override
@@ -140,8 +140,8 @@ public enum NotificationType {
      */
     REJECT_ROOM_INVITE(NotificationCategory.ROOM_INVITE_REQUEST) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname()
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname()
                 + "님이 초대 요청을 거절했어요";
         }
 
@@ -160,8 +160,8 @@ public enum NotificationType {
      */
     ACCEPT_ROOM_INVITE(NotificationCategory.ROOM_INVITE_REQUEST) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname()
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname()
                 + "님이 방 초대 요청을 수락했어요";
         }
 
@@ -180,9 +180,9 @@ public enum NotificationType {
      */
     SEND_ROOM_INVITE(NotificationCategory.ROOM_INVITE_REQUEST) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님에게 "
-                + fcmPushContentDto.getRoom().getName() + "으로 초대 요청을 보냈어요";
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname() + "님에게 "
+                + fcmPushContentDTO.room().getName() + "으로 초대 요청을 보냈어요";
         }
 
         @Override
@@ -199,9 +199,9 @@ public enum NotificationType {
      */
     ARRIVE_ROOM_INVITE(NotificationCategory.ROOM_INVITE_REQUEST) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname() + "님이 "
-                + fcmPushContentDto.getRoom().getName() + "으로 나를 초대했어요";
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname() + "님이 "
+                + fcmPushContentDTO.room().getName() + "으로 나를 초대했어요";
         }
 
         @Override
@@ -218,8 +218,8 @@ public enum NotificationType {
      */
     REJECT_ROOM_JOIN(NotificationCategory.ROOM_JOIN_REQUEST) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname()
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname()
                 + "님이 방 참여 요청을 거절했어요";
         }
 
@@ -237,8 +237,8 @@ public enum NotificationType {
      */
     ACCEPT_ROOM_JOIN(NotificationCategory.ROOM_JOIN_REQUEST) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname()
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname()
                 + "님이 방 참여 요청을 수락했어요";
         }
 
@@ -256,8 +256,8 @@ public enum NotificationType {
      */
     ARRIVE_ROOM_JOIN_REQUEST(NotificationCategory.ROOM_JOIN_REQUEST) {
         @Override
-        public String generateContent(FcmPushContentDto fcmPushContentDto) {
-            return fcmPushContentDto.getMember().getNickname()
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname()
                 + "님이 방 참여 요청을 보냈어요";
         }
 
@@ -271,7 +271,7 @@ public enum NotificationType {
 
     private NotificationCategory category;
 
-    public abstract String generateContent(FcmPushContentDto fcmPushContentDto);
+    public abstract String generateContent(FcmPushContentDTO fcmPushContentDTO);
     public abstract NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO);
 
     @AllArgsConstructor

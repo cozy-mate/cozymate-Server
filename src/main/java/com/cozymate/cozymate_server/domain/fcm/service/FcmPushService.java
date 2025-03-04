@@ -1,10 +1,13 @@
 package com.cozymate.cozymate_server.domain.fcm.service;
 
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupRoomNameWithOutMeTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.HostAndMemberAndRoomTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetReverseWithRoomName;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupRoomNameWithOutMeTargetDTO;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupTargetDTO;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupWithOutMeTargetDTO;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.HostAndMemberAndRoomTargetDTO;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetDTO;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetReverseDTO;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetReverseWithRoomNameDTO;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.fcm.dto.MessageResult;
@@ -13,9 +16,6 @@ import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationTyp
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogBulkRepository;
 import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepository;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupTargetDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetReverseDto;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.OneTargetDto;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -49,22 +49,36 @@ public class FcmPushService {
      * 알림 내용에 본인 닉네임이 들어가고 본인에게 오는 알림인 경우
      */
     @Async
-    public void sendNotification(OneTargetDto target) {
-        Member member = target.getMember();
-        NotificationType notificationType = target.getNotificationType();
+    public void sendNotification(OneTargetDTO target) {
+        Member member = target.member();
+        NotificationType notificationType = target.notificationType();
 
-        if (target.getTodoContents() != null) {
+        if (target.todoContents() != null) {
             sendNotificationToMember(messageUtil.createMessage(member, notificationType,
-                target.getTodoContents()));
-        } else if (target.getRoleContent() != null) {
+                target.todoContents()));
+        } else if (target.roleContent() != null) {
             sendNotificationToMember(messageUtil.createMessage(member, notificationType,
-                target.getRoleContent()));
+                target.roleContent()));
         } else {
             sendNotificationToMember(
                 messageUtil.createMessage(member, notificationType));
         }
     }
 
+    /**
+     * 자신의 오늘의 todo를 모두 완료하면 메이트들에게 알림
+     */
+    @Async
+    public void sendNotification(GroupWithOutMeTargetDTO target) {
+        List<Member> memberList = target.memberList();
+        Member me = target.me();
+        NotificationType notificationType = target.notificationType();
+
+        memberList.forEach(member -> {
+            sendNotificationToMember(
+                messageUtil.createMessage(me, member, notificationType));
+        });
+    }
 
     /**
      * ex) xx님이 초대 요청을 거절했어요 REJECT_ROOM_INVITE
@@ -73,62 +87,25 @@ public class FcmPushService {
      * (그 사람은 아무 self 알림도 안바듬)
      */
     @Async
-    public void sendNotification(OneTargetReverseDto target) {
-        Member contentMember = target.getContentMember();
-        Member recipientMember = target.getRecipientMember();
-        NotificationType notificationType = target.getNotificationType();
+    public void sendNotification(OneTargetReverseDTO target) {
+        Member contentMember = target.contentMember();
+        Member recipientMember = target.recipientMember();
+        NotificationType notificationType = target.notificationType();
 
         sendNotificationToMember(messageUtil.createMessage(contentMember, recipientMember,
             notificationType));
     }
 
     /**
-     * 자신의 오늘의 todo를 모두 완료하면 메이트들에게 알림
-     */
-    @Async
-    public void sendNotification(GroupWithOutMeTargetDto target) {
-        List<Member> memberList = target.getMemberList();
-        Member me = target.getMe();
-        NotificationType notificationType = target.getNotificationType();
-
-        memberList.forEach(member -> {
-            sendNotificationToMember(
-                messageUtil.createMessage(me, member, notificationType));
-        });
-    }
-
-    @Async
-    public void sendNotification(GroupTargetDto target) {
-        List<Member> memberList = target.getMemberList();
-        NotificationType notificationType = target.getNotificationType();
-
-        memberList.forEach(member -> {
-            sendNotificationToMember(
-                messageUtil.createMessage(member, notificationType));
-        });
-    }
-
-    @Async
-    public void sendNotification(OneTargetReverseWithRoomName target) {
-        Member contentMember = target.getContentMember();
-        Member recipientMember = target.getRecipientMember();
-        Room room = target.getRoom();
-        NotificationType notificationType = target.getNotificationType();
-
-        sendNotificationToMember(
-            messageUtil.createMessage(contentMember, room, recipientMember, notificationType));
-    }
-
-    /**
      * ex) 더기님에게 xx방으로 초대 요청을 보냈어요 SEND_ROOM_INVITE <-> 델로님이 xx방으로 나를 초대했어요 ARRIVE_ROOM_INVITE
      */
     @Async
-    public void sendNotification(HostAndMemberAndRoomTargetDto target) {
-        Member host = target.getHost();
-        Member member = target.getMember();
-        Room room = target.getRoom();
-        NotificationType hostNotificationType = target.getHostNotificationType();
-        NotificationType memberNotificationType = target.getMemberNotificationType();
+    public void sendNotification(HostAndMemberAndRoomTargetDTO target) {
+        Member host = target.host();
+        Member member = target.member();
+        Room room = target.room();
+        NotificationType hostNotificationType = target.hostNotificationType();
+        NotificationType memberNotificationType = target.memberNotificationType();
 
         sendNotificationToMember(
             messageUtil.createMessage(member, room, host, hostNotificationType));
@@ -142,16 +119,38 @@ public class FcmPushService {
      * xx님이 xx에 뛰어들어왔요! ROOM_IN
      */
     @Async
-    public void sendNotification(GroupRoomNameWithOutMeTargetDto target) {
-        List<Member> memberList = target.getMemberList(); // 알림을 받을 멤버 리스트
-        Member me = target.getMe(); // 알림 내용에 들어갈 멤버 (의 이름)
-        Room room = target.getRoom(); // 알림 내용에 들어갈 방 (의 이름)
-        NotificationType notificationType = target.getNotificationType();
+    public void sendNotification(GroupRoomNameWithOutMeTargetDTO target) {
+        List<Member> memberList = target.memberList(); // 알림을 받을 멤버 리스트
+        Member me = target.me(); // 알림 내용에 들어갈 멤버 (의 이름)
+        Room room = target.room(); // 알림 내용에 들어갈 방 (의 이름)
+        NotificationType notificationType = target.notificationType();
 
         memberList.forEach(member -> {
             sendNotificationToMember(
                 messageUtil.createMessage(me, room, member, notificationType));
         });
+    }
+
+    @Async
+    public void sendNotification(GroupTargetDTO target) {
+        List<Member> memberList = target.memberList();
+        NotificationType notificationType = target.notificationType();
+
+        memberList.forEach(member -> {
+            sendNotificationToMember(
+                messageUtil.createMessage(member, notificationType));
+        });
+    }
+
+    @Async
+    public void sendNotification(OneTargetReverseWithRoomNameDTO target) {
+        Member contentMember = target.contentMember();
+        Member recipientMember = target.recipientMember();
+        Room room = target.room();
+        NotificationType notificationType = target.notificationType();
+
+        sendNotificationToMember(
+            messageUtil.createMessage(contentMember, room, recipientMember, notificationType));
     }
 
     private void sendNotificationToMember(MessageResult messageResult) {

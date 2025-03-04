@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.todo.service;
 
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushTargetDto.GroupWithOutMeTargetDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupWithOutMeTargetDTO;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
@@ -263,7 +263,7 @@ public class TodoCommandService {
         int unCompletedCount = todoAssignmentRepositoryService.getUncompletedTodoCount(mate, today);
         if (unCompletedCount == 0) {
             // 없으면 FCM 발행 (모든 투두를 완료했음)
-            fcmPushService.sendNotification(GroupWithOutMeTargetDto.create(mate.getMember(),
+            fcmPushService.sendNotification(GroupWithOutMeTargetDTO.create(mate.getMember(),
                 mateList.stream().map(Mate::getMember).toList(),
                 NotificationType.COMPLETE_ALL_TODAY_TODO));
         }

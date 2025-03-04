@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.fcm.service;
 
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
-import com.cozymate.cozymate_server.domain.fcm.dto.FcmPushContentDto;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.content.FcmPushContentDTO;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.fcm.dto.MessageResult;
@@ -132,21 +132,21 @@ public class MessageUtil {
     }
 
     private String getContent(Member member, NotificationType notificationType) {
-        return notificationType.generateContent(FcmPushContentDto.create(member));
+        return notificationType.generateContent(FcmPushContentDTO.create(member));
     }
 
     private String getContent(Member member, NotificationType notificationType,
         String roleContent) {
-        return notificationType.generateContent(FcmPushContentDto.create(member, roleContent));
+        return notificationType.generateContent(FcmPushContentDTO.create(member, roleContent));
     }
 
     private String getContent(Member member, NotificationType notificationType,
         List<String> todoContents) {
-        return notificationType.generateContent(FcmPushContentDto.create(member, todoContents));
+        return notificationType.generateContent(FcmPushContentDTO.create(member, todoContents));
     }
 
     private String getContent(Member member, Room room, NotificationType notificationType) {
-        return notificationType.generateContent(FcmPushContentDto.create(member, room));
+        return notificationType.generateContent(FcmPushContentDTO.create(member, room));
     }
 
     private MessageResult getMessageResult(List<Fcm> fcmList, String content, Member member,
