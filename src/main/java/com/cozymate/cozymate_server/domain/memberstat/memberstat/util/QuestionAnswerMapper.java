@@ -28,6 +28,10 @@ public class QuestionAnswerMapper {
     private static final List<String> NOT_LIFESTYLE = List.of("birthYear", "acceptance",
         "admissionYear", "major", "dormitoryName");
 
+    private static final List<String> DIRECTLY_STORED_KEYS = List.of(
+        "airConditioningIntensity", "heatingIntensity", "cleanSensitivity", "noiseSensitivity"
+    );
+
     static {
         load();
     }
@@ -158,26 +162,27 @@ public class QuestionAnswerMapper {
                     String key = entry.getKey();
                     List<?> values = entry.getValue();
 
-                    // 라이프스타일 질문이 아닌 경우
-                    if (NOT_LIFESTYLE.contains(key)) {
-                        return values; // 그대로 유지
+                    // 요청이 정수로 들어오는 값은 변환 없이 그대로 저장
+                    if (DIRECTLY_STORED_KEYS.contains(key)) {
+                        return values;
                     }
 
-                    // 다중 선택 질문 (personality, sleepingHabit) → BitMask(Integer) 변환
-                    if (QuestionAnswerMapper.MULTI_VALUE_QUESTION.contains(key)) {
-                        return List.of(QuestionAnswerMapper.convertBitMaskToInteger(
+                    if (NOT_LIFESTYLE.contains(key)) {
+                        return values;
+                    }
+
+                    if (MULTI_VALUE_QUESTION.contains(key)) {
+                        return List.of(convertBitMaskToInteger(
                             key, values.stream().map(Object::toString).toList()
                         ));
                     }
 
-                    // 일반적인 라이프스타일 값 → Index(Integer) 변환
                     return values.stream()
-                        .map(value -> QuestionAnswerMapper.getIndex(key, value.toString()))
+                        .map(value -> getIndex(key, value.toString()))
                         .toList();
                 }
             ));
     }
-
 
 }
 

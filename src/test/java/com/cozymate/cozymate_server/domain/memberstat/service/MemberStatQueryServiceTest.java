@@ -20,6 +20,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.Me
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.service.MemberStatQueryService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAnswerMapper;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
@@ -111,7 +112,7 @@ public class MemberStatQueryServiceTest {
 
     @Nested
     @DisplayName("getMemberStatWithId 테스트")
-    class GetMemberStatWithIdTests {
+    class GetMemberStatWithId {
 
         private Member viewer;
         private Member targetMember1;
@@ -357,12 +358,14 @@ public class MemberStatQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("getNumOfSearchedAndFilteredMemberStatList 테스트")
-    class GetNumOfSearchedAndFilteredMemberStatList {
+    @DisplayName("getNumberOfSearchedAndFilteredMemberStatList 테스트")
+    class GetNumberOfSearchedAndFilteredMemberStatList {
 
         private Member viewer;
         private MemberStat viewerMemberStat;
         private HashMap<String, List<?>> filterMap;
+        private HashMap<String, List<?>> convertedFilterMap;
+
 
         @BeforeEach
         void setUp() {
@@ -373,7 +376,9 @@ public class MemberStatQueryServiceTest {
             // 필터링 조건 설정 (예시: 흡연 상태와 청결도 기준 필터링)
             filterMap = new HashMap<>();
             filterMap.put("smoking", List.of("비흡연자"));
-            filterMap.put("cleanSensitivity", List.of(3));
+            filterMap.put("cleanSensitivity", List.of(2));
+
+            convertedFilterMap = new HashMap<>(QuestionAnswerMapper.convertFilterMap(filterMap));
 
             // MemberStat 조회 Mock 설정
             given(memberStatRepositoryService.getMemberStatOrThrow(viewer.getId()))
@@ -385,7 +390,7 @@ public class MemberStatQueryServiceTest {
         void success_when_filtered_memberStat_count_is_returned() {
             // 필터링된 MemberStat 개수 설정 (예: 5명)
             given(
-                memberStatRepositoryService.getCountFilteredMemberStat(viewerMemberStat, filterMap))
+                memberStatRepositoryService.getCountFilteredMemberStat(viewerMemberStat, convertedFilterMap))
                 .willReturn(5);
 
             // when
@@ -401,7 +406,7 @@ public class MemberStatQueryServiceTest {
         void success_when_no_filtered_memberStat_exists() {
             // 필터링된 결과가 없을 경우
             given(
-                memberStatRepositoryService.getCountFilteredMemberStat(viewerMemberStat, filterMap))
+                memberStatRepositoryService.getCountFilteredMemberStat(viewerMemberStat, convertedFilterMap))
                 .willReturn(0);
 
             // when
@@ -435,6 +440,7 @@ public class MemberStatQueryServiceTest {
         private Member viewer;
         private MemberStat viewerMemberStat;
         private HashMap<String, List<?>> filterMap;
+        private HashMap<String, List<?>> convertedFilterMap;
         private Pageable pageable;
 
         @BeforeEach
@@ -448,6 +454,8 @@ public class MemberStatQueryServiceTest {
             filterMap = new HashMap<>();
             filterMap.put("smoking", List.of("비흡연자"));
             filterMap.put("cleanSensitivity", List.of(3));
+
+            convertedFilterMap = new HashMap<>(QuestionAnswerMapper.convertFilterMap(filterMap));
 
             // MemberStat 조회 Mock 설정
             given(memberStatRepositoryService.getMemberStatOrThrow(viewer.getId()))
@@ -473,7 +481,7 @@ public class MemberStatQueryServiceTest {
             // 필터링된 결과 Mock 설정
             given(
                 memberStatRepositoryService.getAdvancedFilteredMemberStatList(viewerMemberStat,
-                    filterMap, pageable))
+                    convertedFilterMap, pageable))
                 .willReturn(mockSlice);
 
             given(memberStatPreferenceQueryService.getPreferencesToList(viewer.getId()))
@@ -498,7 +506,7 @@ public class MemberStatQueryServiceTest {
                 false);
             given(
                 memberStatRepositoryService.getAdvancedFilteredMemberStatList(viewerMemberStat,
-                    filterMap, pageable))
+                    convertedFilterMap, pageable))
                 .willReturn(emptySlice);
 
             // when
