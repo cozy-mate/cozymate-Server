@@ -269,7 +269,7 @@ public class MemberStatController {
 
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(
+                memberStatQueryService.getNumberOfSearchedAndFilteredMemberStatList(
                     memberDetails.member(), filterMap)
             )
         );
