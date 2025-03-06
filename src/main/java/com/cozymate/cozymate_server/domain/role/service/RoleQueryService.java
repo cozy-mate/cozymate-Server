@@ -8,13 +8,13 @@ import com.cozymate.cozymate_server.domain.role.Role;
 import com.cozymate.cozymate_server.domain.role.converter.RoleConverter;
 import com.cozymate.cozymate_server.domain.role.dto.MateIdNameDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
+import com.cozymate.cozymate_server.domain.role.repository.RoleRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RoleQueryService {
 
-    private final RoleRepository roleRepository;
+    private final RoleRepositoryService roleRepositoryService;
     private final MateRepository mateRepository;
     private final RoleCommandService roleCommandService;
 
@@ -33,14 +33,15 @@ public class RoleQueryService {
         List<Mate> mateList = mateRepository.findAllByRoomIdAndEntryStatus(roomId,
             EntryStatus.JOINED);
 
-        Map<Long, String> mateNameMap = new HashMap<>();
-        mateList.forEach(mate -> mateNameMap.put(mate.getId(), mate.getMember().getNickname()));
+        Map<Long, String> mateNameMap = mateList.stream()
+            .collect(Collectors.toMap(Mate::getId, mate -> mate.getMember().getNickname()));
 
         Mate currentMate = mateList.stream()
             .filter(mate -> Objects.equals(mate.getMember().getId(), member.getId())).findFirst()
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND));
 
-        List<Role> roleList = roleRepository.findAllByRoomId(currentMate.getRoom().getId());
+        List<Role> roleList = roleRepositoryService.getRoleListByRoomId(
+            currentMate.getRoom().getId());
 
         return roleList.stream()
             .map(role -> {
