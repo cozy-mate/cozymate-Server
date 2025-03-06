@@ -130,11 +130,12 @@ public class MemberStatQueryService {
         MemberStat criteriaMemberStat = memberStatRepositoryService.getMemberStatOrThrow(
             member.getId());
 
-        Slice<Map<MemberStat, Integer>> filteredResult = memberStatRepositoryService.getFilteredMemberStatList(
-            criteriaMemberStat,
-            filterList,
-            pageable
-        );
+        Slice<Map<MemberStat, Integer>> filteredResult =
+            memberStatRepositoryService.getMemberStatListByAttributeList(
+                criteriaMemberStat,
+                filterList,
+                pageable
+            );
         return getPageResponseOrEmpty(
             filteredResult,
             pageable,
@@ -156,10 +157,10 @@ public class MemberStatQueryService {
         MemberStat criteriaMemberStat = memberStatRepositoryService.getMemberStatOrThrow(
             member.getId());
 
-        Map<String, List<?>> convertedFilter = QuestionAnswerMapper.convertFilterMap(filterMap);
+        Map<String, List<?>> convertedMapFilter = QuestionAnswerMapper.convertFilterMap(filterMap);
 
-        return memberStatRepositoryService.getCountFilteredMemberStat(
-            criteriaMemberStat, convertedFilter
+        return memberStatRepositoryService.getNumberOfMemberStatAttributeAndValuesMap(
+            criteriaMemberStat, convertedMapFilter
         );
     }
 
@@ -178,10 +179,12 @@ public class MemberStatQueryService {
         MemberStat criteriaMemberStat = memberStatRepositoryService.getMemberStatOrThrow(
             member.getId());
 
-        Map<String, List<?>> convertedFilter = QuestionAnswerMapper.convertFilterMap(filterMap);
-        Slice<Map<MemberStat, Integer>> filteredResult = memberStatRepositoryService.getAdvancedFilteredMemberStatList(
-            criteriaMemberStat, convertedFilter,
-            pageable);
+        Map<String, List<?>> convertedMapFilter = QuestionAnswerMapper.convertFilterMap(filterMap);
+        Slice<Map<MemberStat, Integer>> filteredResult =
+            memberStatRepositoryService.getMemberStatListByAttributeAndValuesMap(
+                criteriaMemberStat,
+                convertedMapFilter,
+                pageable);
 
         return getPageResponseOrEmpty(
             filteredResult,

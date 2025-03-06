@@ -255,7 +255,7 @@ public class MemberStatQueryServiceTest {
 
             // 필터링된 결과 Mock 설정
             given(
-                memberStatRepositoryService.getFilteredMemberStatList(viewerMemberStat, filterList,
+                memberStatRepositoryService.getMemberStatListByAttributeList(viewerMemberStat, filterList,
                     pageable))
                 .willReturn(mockSlice);
 
@@ -291,7 +291,7 @@ public class MemberStatQueryServiceTest {
                 false);
 
             given(
-                memberStatRepositoryService.getFilteredMemberStatList(viewerMemberStat, filterList,
+                memberStatRepositoryService.getMemberStatListByAttributeList(viewerMemberStat, filterList,
                     pageable))
                 .willReturn(emptySlice);
 
@@ -325,7 +325,7 @@ public class MemberStatQueryServiceTest {
 
             // 필터링된 결과 Mock 설정
             given(
-                memberStatRepositoryService.getFilteredMemberStatList(viewerMemberStat, filterList,
+                memberStatRepositoryService.getMemberStatListByAttributeList(viewerMemberStat, filterList,
                     pageable))
                 .willReturn(mockSlice);
 
@@ -390,7 +390,7 @@ public class MemberStatQueryServiceTest {
         void success_when_filtered_memberStat_count_is_returned() {
             // 필터링된 MemberStat 개수 설정 (예: 5명)
             given(
-                memberStatRepositoryService.getCountFilteredMemberStat(viewerMemberStat, convertedFilterMap))
+                memberStatRepositoryService.getNumberOfMemberStatAttributeAndValuesMap(viewerMemberStat, convertedFilterMap))
                 .willReturn(5);
 
             // when
@@ -406,7 +406,7 @@ public class MemberStatQueryServiceTest {
         void success_when_no_filtered_memberStat_exists() {
             // 필터링된 결과가 없을 경우
             given(
-                memberStatRepositoryService.getCountFilteredMemberStat(viewerMemberStat, convertedFilterMap))
+                memberStatRepositoryService.getNumberOfMemberStatAttributeAndValuesMap(viewerMemberStat, convertedFilterMap))
                 .willReturn(0);
 
             // when
@@ -480,7 +480,7 @@ public class MemberStatQueryServiceTest {
 
             // 필터링된 결과 Mock 설정
             given(
-                memberStatRepositoryService.getAdvancedFilteredMemberStatList(viewerMemberStat,
+                memberStatRepositoryService.getMemberStatListByAttributeAndValuesMap(viewerMemberStat,
                     convertedFilterMap, pageable))
                 .willReturn(mockSlice);
 
@@ -505,7 +505,7 @@ public class MemberStatQueryServiceTest {
             Slice<Map<MemberStat, Integer>> emptySlice = new SliceImpl<>(List.of(), pageable,
                 false);
             given(
-                memberStatRepositoryService.getAdvancedFilteredMemberStatList(viewerMemberStat,
+                memberStatRepositoryService.getMemberStatListByAttributeAndValuesMap(viewerMemberStat,
                     convertedFilterMap, pageable))
                 .willReturn(emptySlice);
 

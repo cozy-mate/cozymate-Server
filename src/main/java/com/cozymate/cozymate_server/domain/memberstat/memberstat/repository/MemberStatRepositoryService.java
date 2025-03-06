@@ -45,38 +45,50 @@ public class MemberStatRepositoryService {
     }
 
     /**
-     * 특정 필터 조건을 적용한 MemberStat 목록 조회
+     * 기본 필터링: 사용자의 라이프스타일 값(예: "흡연여부")을 기준으로 일치하는 MemberStat 가져오기
+     *
+     * @param criteriaMemberStat   기준이 되는 MemberStat
+     * @param attributeList        라이프스타일 필터 리스트 (예: ["흡연여부","기상시간"])
+     * @param pageable             페이징 정보
+     * @return 필터링된 MemberStat과 매칭 점수의 Slice
      */
-    public Slice<Map<MemberStat, Integer>> getFilteredMemberStatList(
-        MemberStat criteriaMemberStat, List<String> filterList, Pageable pageable) {
-        return memberStatRepository.filterMemberStatBasic(criteriaMemberStat, filterList, pageable);
+    public Slice<Map<MemberStat, Integer>> getMemberStatListByAttributeList(
+        MemberStat criteriaMemberStat, List<String> attributeList, Pageable pageable) {
+        return memberStatRepository.filterByLifestyleAttributeList(criteriaMemberStat,
+            attributeList,
+            pageable);
     }
 
     /**
-     * 키워드 기반 MemberStat 조회 및 매칭률 반환
+     * 키워드 기반 MemberStat 조회 및 일치율 반환
      */
     public Map<MemberStat, Integer> getMemberStatByKeywordWithMatchRate(
         MemberStat criteriaMemberStat, String keyword) {
         return memberStatRepository.getMemberStatsWithKeywordAndMatchRate(criteriaMemberStat,
             keyword);
     }
-
     /**
-     * 특정 조건을 적용하여 필터링된 MemberStat 개수 반환
+     * 고급 필터링: 사용자가 선택한 라이프스타일 값(예: {"흠연여부" :["연초", "전자담배"]})을 기준으로 일치하는 MemberStat List 조회
+     *
+     * @param criteriaMemberStat   기준이 되는 MemberStat
+     * @param attributeAndValuesMap 여러 라이프스타일 필터 맵 (예: {"흡연여부": ["연초", "전자담배"],"가상시간" :{"9","10"}})
+     * @param pageable             페이징 정보
+     * @return 필터링된 MemberStat과 매칭 점수의 Slice
      */
-    public Integer getCountFilteredMemberStat(MemberStat criteriaMemberStat,
-        Map<String, List<?>> filterMap) {
-        return memberStatRepository.countAdvancedFilteredMemberStat(criteriaMemberStat, filterMap);
-    }
-
-    /**
-     * 특정 조건을 적용하여 필터링된 MemberStat 목록 조회 (Slice 적용)
-     */
-    public Slice<Map<MemberStat, Integer>> getAdvancedFilteredMemberStatList(
-        MemberStat criteriaMemberStat, Map<String, List<?>> filterMap, Pageable pageable) {
-        return memberStatRepository.filterMemberStatAdvance(criteriaMemberStat, filterMap,
+    public Slice<Map<MemberStat, Integer>> getMemberStatListByAttributeAndValuesMap(
+        MemberStat criteriaMemberStat, Map<String, List<?>> attributeAndValuesMap, Pageable pageable) {
+        return memberStatRepository.filterByLifestyleValueMap(criteriaMemberStat, attributeAndValuesMap,
             pageable);
     }
+
+    /**
+     * 사용자가 선택한 라이프스타일 값(예: {"흠연여부" :["연초", "전자담배"]})을 기준으로 일치하는 MemberStat 개수 조회
+     */
+    public Integer getNumberOfMemberStatAttributeAndValuesMap(MemberStat criteriaMemberStat,
+        Map<String, List<?>> attributeAndValueMap) {
+        return memberStatRepository.countAdvancedFilteredMemberStat(criteriaMemberStat, attributeAndValueMap);
+    }
+
 
     public List<MemberStat> getMemberStatListByUniversityAndGenderWithoutSelf(Gender gender,
         Long universityId, Long memberId) {

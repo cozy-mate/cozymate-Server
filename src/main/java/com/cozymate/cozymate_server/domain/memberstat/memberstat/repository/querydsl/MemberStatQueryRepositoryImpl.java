@@ -46,7 +46,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private static final String NUM_OF_ROOMMATE = "numOfRoommate";
 
     @Override
-    public Slice<Map<MemberStat, Integer>> filterMemberStatBasic(
+    public Slice<Map<MemberStat, Integer>> filterByLifestyleAttributeList(
         MemberStat criteriaMemberStat,
         List<String> filterList, Pageable pageable) {
 
@@ -55,13 +55,12 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     }
 
     @Override
-    public Slice<Map<MemberStat, Integer>> filterMemberStatAdvance(
+    public Slice<Map<MemberStat, Integer>> filterByLifestyleValueMap(
         MemberStat criteriaMemberStat,
         Map<String, List<?>> filterMap, Pageable pageable) {
 
         return filterMemberStat(criteriaMemberStat,
             applyFilters(filterMap, criteriaMemberStat), pageable);
-
     }
 
     // 상세 검색 필터링에 대한 멤버 개수 표시
