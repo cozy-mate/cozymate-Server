@@ -10,6 +10,7 @@ import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.CountChatRoomsWithNewChatDTO;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.chatroom.validator.ChatRoomValidator;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.fixture.ChatFixture;
@@ -28,8 +29,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 class ChatRoomQueryServiceTest {
 
@@ -39,6 +43,8 @@ class ChatRoomQueryServiceTest {
     ChatRepository chatRepository;
     @Mock
     MemberRepository memberRepository;
+    @Spy
+    ChatRoomValidator chatRoomValidator = new ChatRoomValidator(Mockito.mock(ChatRepository.class));
     @InjectMocks
     ChatRoomQueryService chatRoomQueryService;
 
@@ -138,9 +144,8 @@ class ChatRoomQueryServiceTest {
 
             then(chatRepository).should(times(2))
                 .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
-            then(chatRepository).should(times(2))
-                .existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(any(Member.class),
-                    any(ChatRoom.class), any());
+            then(chatRoomValidator).should(times(2))
+                .existNewChat(any(Member.class), any(ChatRoom.class), any());
         }
 
         @Test
@@ -180,9 +185,8 @@ class ChatRoomQueryServiceTest {
 
             then(chatRepository).should(times(2))
                 .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
-            then(chatRepository).should(times(2))
-                .existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(any(Member.class),
-                    any(ChatRoom.class), any());
+            then(chatRoomValidator).should(times(2))
+                .existNewChat(any(Member.class), any(ChatRoom.class), any());
         }
 
         @Test
@@ -199,10 +203,10 @@ class ChatRoomQueryServiceTest {
             abChatRoom.updateMemberALastSeenAt();
             acChatRoom.updateMemberALastSeenAt();
 
-            given(chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-                memberB, abChatRoom, abChatRoom.getMemberALastSeenAt())).willReturn(true);
-            given(chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-                memberC, acChatRoom, acChatRoom.getMemberALastSeenAt())).willReturn(false);
+            given(chatRoomValidator.existNewChat(memberB, abChatRoom,
+                abChatRoom.getMemberALastSeenAt())).willReturn(true);
+            given(chatRoomValidator.existNewChat(memberC, acChatRoom,
+                acChatRoom.getMemberALastSeenAt())).willReturn(false);
 
             // when
             List<ChatRoomDetailResponseDTO> result = chatRoomQueryService.getChatRoomList(memberA);
@@ -216,9 +220,8 @@ class ChatRoomQueryServiceTest {
 
             then(chatRepository).should(times(2))
                 .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
-            then(chatRepository).should(times(2))
-                .existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(any(Member.class),
-                    any(ChatRoom.class), any(LocalDateTime.class));
+            then(chatRoomValidator).should(times(2))
+                .existNewChat(any(Member.class), any(ChatRoom.class), any(LocalDateTime.class));
         }
 
         @Test
@@ -259,9 +262,8 @@ class ChatRoomQueryServiceTest {
 
             then(chatRepository).should(times(2))
                 .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
-            then(chatRepository).should(times(1))
-                .existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(any(Member.class),
-                    any(ChatRoom.class), any());
+            then(chatRoomValidator).should(times(1))
+                .existNewChat(any(Member.class), any(ChatRoom.class), any());
         }
     }
 
@@ -342,10 +344,10 @@ class ChatRoomQueryServiceTest {
                 Optional.of(memberAToMemberBChat2));
             given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
                 Optional.of(memberCToMemberAChat2));
-            given(chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-                memberB, abChatRoom, abChatRoom.getMemberALastSeenAt())).willReturn(false);
-            given(chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-                memberC, acChatRoom, acChatRoom.getMemberALastSeenAt())).willReturn(false);
+            given(chatRoomValidator.existNewChat(memberB, abChatRoom,
+                abChatRoom.getMemberALastSeenAt())).willReturn(false);
+            given(chatRoomValidator.existNewChat(memberC, acChatRoom,
+                acChatRoom.getMemberALastSeenAt())).willReturn(false);
 
             // when
             CountChatRoomsWithNewChatDTO result = chatRoomQueryService.countChatRoomsWithNewChat(
@@ -365,10 +367,10 @@ class ChatRoomQueryServiceTest {
                 Optional.of(memberAToMemberBChat2));
             given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
                 Optional.of(memberCToMemberAChat2));
-            given(chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-                memberB, abChatRoom, abChatRoom.getMemberALastSeenAt())).willReturn(true);
-            given(chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-                memberC, acChatRoom, acChatRoom.getMemberALastSeenAt())).willReturn(false);
+            given(chatRoomValidator.existNewChat(memberB, abChatRoom,
+                abChatRoom.getMemberALastSeenAt())).willReturn(true);
+            given(chatRoomValidator.existNewChat(memberC, acChatRoom,
+                acChatRoom.getMemberALastSeenAt())).willReturn(false);
 
             // when
             CountChatRoomsWithNewChatDTO result = chatRoomQueryService.countChatRoomsWithNewChat(
@@ -388,8 +390,8 @@ class ChatRoomQueryServiceTest {
                 Optional.of(senderIsNullChat));
             given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
                 Optional.of(memberCToMemberAChat2));
-            given(chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-                memberC, acChatRoom, acChatRoom.getMemberALastSeenAt())).willReturn(true);
+            given(chatRoomValidator.existNewChat(memberC, acChatRoom,
+                acChatRoom.getMemberALastSeenAt())).willReturn(true);
 
             // when
             CountChatRoomsWithNewChatDTO result = chatRoomQueryService.countChatRoomsWithNewChat(
@@ -398,9 +400,8 @@ class ChatRoomQueryServiceTest {
             // then
             assertThat(result.chatRoomsWithNewChatCount()).isEqualTo(1);
 
-            then(chatRepository).should(times(1))
-                .existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-                    any(Member.class), any(ChatRoom.class), any());
+            then(chatRoomValidator).should(times(1))
+                .existNewChat(any(Member.class), any(ChatRoom.class), any());
         }
     }
 }

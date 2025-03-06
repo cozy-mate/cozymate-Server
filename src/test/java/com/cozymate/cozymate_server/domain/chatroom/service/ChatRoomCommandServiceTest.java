@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.chatroom.validator.ChatRoomValidator;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.fixture.ChatFixture;
 import com.cozymate.cozymate_server.fixture.ChatRoomFixture;
@@ -24,16 +25,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("NonAsciiCharacters")
+@ExtendWith(MockitoExtension.class)
 class ChatRoomCommandServiceTest {
 
     @Mock
     ChatRoomRepository chatRoomRepository;
     @Mock
     ChatRepository chatRepository;
+    @Spy
+    ChatRoomValidator chatRoomValidator = new ChatRoomValidator(Mockito.mock(ChatRepository.class));
     @InjectMocks
     ChatRoomCommandService chatRoomCommandService;
 
@@ -122,14 +127,15 @@ class ChatRoomCommandServiceTest {
             // given
             given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
             chatRoom.updateMemberBLastDeleteAt(memberAChat2.getCreatedAt().minusMinutes(1));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
-                Optional.of(memberAChat2));
+            given(chatRoomValidator.isDeletableHard(any(LocalDateTime.class), any(LocalDateTime.class), any(ChatRoom.class)))
+                .willReturn(false);
 
             // when
             chatRoomCommandService.deleteChatRoom(memberA, chatRoom.getId());
 
             // then
-            then(chatRepository).should(times(1)).findTopByChatRoomOrderByIdDesc(chatRoom);
+            then(chatRoomValidator).should(times(1)).isDeletableHard(any(LocalDateTime.class), any(
+                LocalDateTime.class), any(ChatRoom.class));
             then(chatRepository).should(times(0)).deleteAllByChatRoom(chatRoom);
             then(chatRoomRepository).should(times(0)).delete(chatRoom);
         }
@@ -140,14 +146,15 @@ class ChatRoomCommandServiceTest {
             // given
             given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
             chatRoom.updateMemberALastDeleteAt(memberAChat2.getCreatedAt().minusMinutes(1));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
-                Optional.of(memberAChat2));
+            given(chatRoomValidator.isDeletableHard(any(LocalDateTime.class), any(LocalDateTime.class), any(ChatRoom.class)))
+                .willReturn(false);
 
             // when
             chatRoomCommandService.deleteChatRoom(memberB, chatRoom.getId());
 
             // then
-            then(chatRepository).should(times(1)).findTopByChatRoomOrderByIdDesc(chatRoom);
+            then(chatRoomValidator).should(times(1)).isDeletableHard(any(LocalDateTime.class), any(
+                LocalDateTime.class), any(ChatRoom.class));
             then(chatRepository).should(times(0)).deleteAllByChatRoom(chatRoom);
             then(chatRoomRepository).should(times(0)).delete(chatRoom);
         }
@@ -158,14 +165,15 @@ class ChatRoomCommandServiceTest {
             // given
             given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
             chatRoom.updateMemberBLastDeleteAt(LocalDateTime.now().minusMinutes(9));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
-                Optional.of(memberAChat2));
+            given(chatRoomValidator.isDeletableHard(any(LocalDateTime.class), any(LocalDateTime.class), any(ChatRoom.class)))
+                .willReturn(true);
 
             // when
             chatRoomCommandService.deleteChatRoom(memberA, chatRoom.getId());
 
             // then
-            then(chatRepository).should(times(1)).findTopByChatRoomOrderByIdDesc(chatRoom);
+            then(chatRoomValidator).should(times(1)).isDeletableHard(any(LocalDateTime.class), any(
+                LocalDateTime.class), any(ChatRoom.class));
             then(chatRepository).should(times(1)).deleteAllByChatRoom(chatRoom);
             then(chatRoomRepository).should(times(1)).delete(chatRoom);
         }
@@ -176,14 +184,15 @@ class ChatRoomCommandServiceTest {
             // given
             given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
             chatRoom.updateMemberALastDeleteAt(LocalDateTime.now().minusMinutes(9));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)).willReturn(
-                Optional.of(memberAChat2));
+            given(chatRoomValidator.isDeletableHard(any(LocalDateTime.class), any(LocalDateTime.class), any(ChatRoom.class)))
+                .willReturn(true);
 
             // when
             chatRoomCommandService.deleteChatRoom(memberB, chatRoom.getId());
 
             // then
-            then(chatRepository).should(times(1)).findTopByChatRoomOrderByIdDesc(chatRoom);
+            then(chatRoomValidator).should(times(1)).isDeletableHard(any(LocalDateTime.class), any(
+                LocalDateTime.class), any(ChatRoom.class));
             then(chatRepository).should(times(1)).deleteAllByChatRoom(chatRoom);
             then(chatRoomRepository).should(times(1)).delete(chatRoom);
         }
