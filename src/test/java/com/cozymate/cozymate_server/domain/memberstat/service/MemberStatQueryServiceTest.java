@@ -390,7 +390,7 @@ public class MemberStatQueryServiceTest {
         void success_when_filtered_memberStat_count_is_returned() {
             // 필터링된 MemberStat 개수 설정 (예: 5명)
             given(
-                memberStatRepositoryService.getNumberOfMemberStatAttributeAndValuesMap(viewerMemberStat, convertedFilterMap))
+                memberStatRepositoryService.getNumberOfMemberStatByAttributeAndValuesMap(viewerMemberStat, convertedFilterMap))
                 .willReturn(5);
 
             // when
@@ -406,7 +406,7 @@ public class MemberStatQueryServiceTest {
         void success_when_no_filtered_memberStat_exists() {
             // 필터링된 결과가 없을 경우
             given(
-                memberStatRepositoryService.getNumberOfMemberStatAttributeAndValuesMap(viewerMemberStat, convertedFilterMap))
+                memberStatRepositoryService.getNumberOfMemberStatByAttributeAndValuesMap(viewerMemberStat, convertedFilterMap))
                 .willReturn(0);
 
             // when

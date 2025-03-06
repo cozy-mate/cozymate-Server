@@ -84,7 +84,7 @@ public class MemberStatRepositoryService {
     /**
      * 사용자가 선택한 라이프스타일 값(예: {"흠연여부" :["연초", "전자담배"]})을 기준으로 일치하는 MemberStat 개수 조회
      */
-    public Integer getNumberOfMemberStatAttributeAndValuesMap(MemberStat criteriaMemberStat,
+    public Integer getNumberOfMemberStatByAttributeAndValuesMap(MemberStat criteriaMemberStat,
         Map<String, List<?>> attributeAndValueMap) {
         return memberStatRepository.countAdvancedFilteredMemberStat(criteriaMemberStat, attributeAndValueMap);
     }

@@ -159,7 +159,7 @@ public class MemberStatQueryService {
 
         Map<String, List<?>> convertedMapFilter = QuestionAnswerMapper.convertFilterMap(filterMap);
 
-        return memberStatRepositoryService.getNumberOfMemberStatAttributeAndValuesMap(
+        return memberStatRepositoryService.getNumberOfMemberStatByAttributeAndValuesMap(
             criteriaMemberStat, convertedMapFilter
         );
     }
