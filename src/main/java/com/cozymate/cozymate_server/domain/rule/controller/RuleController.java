@@ -47,7 +47,7 @@ public class RuleController {
     @Operation(
         summary = "[무빗] 특정 방의 Rule 생성",
         description = "rule 내용은 필수, memo는 선택입니다.")
-    @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._RULE_OVER_MAX})
+    @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._RULE_MAX_LIMIT})
     public ResponseEntity<ApiResponse<RuleIdResponseDTO>> createRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
@@ -94,7 +94,7 @@ public class RuleController {
         summary = "[무빗] 특정 Rule 삭제",
         description = "rule의 고유 번호로 삭제가 가능합니다.")
     @SwaggerApiError({ErrorStatus._MATE_OR_ROOM_NOT_FOUND, ErrorStatus._RULE_NOT_FOUND,
-        ErrorStatus._RULE_MATE_MISMATCH})
+        ErrorStatus._RULE_PERMISSION_DEMIED})
     public ResponseEntity<ApiResponse<String>> deleteRule(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @Positive Long roomId,
@@ -118,7 +118,7 @@ public class RuleController {
     @Operation(
         summary = "[무빗] 특정 Rule 수정",
         description = "rule의 고유 번호로 수정이 가능합니다.")
-    @SwaggerApiError({ErrorStatus._RULE_NOT_FOUND, ErrorStatus._RULE_MATE_MISMATCH,
+    @SwaggerApiError({ErrorStatus._RULE_NOT_FOUND, ErrorStatus._RULE_PERMISSION_DEMIED,
         ErrorStatus._MATE_OR_ROOM_NOT_FOUND})
     public ResponseEntity<ApiResponse<String>> updateRule(
         @AuthenticationPrincipal MemberDetails memberDetails,

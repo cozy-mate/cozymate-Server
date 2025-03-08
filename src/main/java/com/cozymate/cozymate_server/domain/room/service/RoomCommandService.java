@@ -31,7 +31,7 @@ import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRep
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagCommandService;
 import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
-import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
+import com.cozymate.cozymate_server.domain.rule.repository.RuleRepositoryService;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.domain.university.University;
@@ -57,7 +57,7 @@ public class RoomCommandService {
     private final MateRepository mateRepository;
     private final MemberRepository memberRepository;
     private final TodoRepository todoRepository;
-    private final RuleRepository ruleRepository;
+    private final RuleRepositoryService ruleRepositoryService;
     private final RoomLogRepository roomLogRepository;
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
@@ -265,7 +265,7 @@ public class RoomCommandService {
         todoRepository.deleteAllByRoomId(roomId);
         roleRepository.deleteAllByRoomId(roomId);
         mateRepository.deleteAllByRoomId(roomId);
-        ruleRepository.deleteAllByRoomId(roomId);
+        ruleRepositoryService.deleteRuleListByRoomId(roomId);
         roomFavoriteRepository.deleteAllByRoomId(roomId);
         roomHashtagRepository.deleteAllByRoomId(roomId);
 
