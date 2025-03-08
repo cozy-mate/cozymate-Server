@@ -70,7 +70,7 @@ public class RuleCommandServiceTest {
 
 
     @Nested
-    @MockitoSettings(strictness = Strictness.LENIENT)
+    @MockitoSettings(strictness = Strictness.LENIENT) // 규칙 수정에서는 권한 검증만 테스트하므로 느슨한 검증 설정
     class createRule {
 
         private CreateRuleRequestDTO requestDto;
@@ -115,7 +115,6 @@ public class RuleCommandServiceTest {
     }
 
     @Nested
-    @MockitoSettings(strictness = Strictness.LENIENT)
     class deleteRule {
 
         @BeforeEach
@@ -158,7 +157,7 @@ public class RuleCommandServiceTest {
     }
 
     @Nested
-    @MockitoSettings(strictness = Strictness.LENIENT)
+    @MockitoSettings(strictness = Strictness.LENIENT) // 규칙 수정에서는 권한 검증만 테스트하므로 느슨한 검증 설정
     class updateRule {
 
         private CreateRuleRequestDTO requestDto;
