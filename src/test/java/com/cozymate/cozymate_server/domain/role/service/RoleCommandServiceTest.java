@@ -84,14 +84,16 @@ public class RoleCommandServiceTest {
     @MockitoSettings(strictness = Strictness.LENIENT)
     class createRole {
 
-        Member memberOfMate = mate.getMember();
-        Long roomId = room.getId();
+        Member memberOfMate;
+        Long roomId;
         private CreateRoleRequestDTO requestDTO;
 
         @BeforeEach
         void setUp() {
             Member member2 = MemberFixture.정상_2(UniversityFixture.createTestUniversity());
             Mate mate2 = MateFixture.정상_2(room, member2);
+            memberOfMate = mate.getMember();
+            roomId = room.getId();;
 
             role = RoleFixture.정상_1(room, mate, List.of(mate, mate2));
             requestDTO = new CreateRoleRequestDTO(
