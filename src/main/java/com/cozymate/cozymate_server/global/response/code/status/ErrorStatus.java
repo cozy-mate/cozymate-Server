@@ -118,7 +118,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Rule 관련
     _RULE_NOT_FOUND(HttpStatus.BAD_REQUEST, "RULE400", "해당하는 Rule이 없습니다."),
-    _RULE_PERMISSION_DEMIED(HttpStatus.BAD_REQUEST, "RULE401", "Mate에게 해당 Rule을 삭제할 권한이 없습니다."),
+    _RULE_PERMISSION_DENIED(HttpStatus.BAD_REQUEST, "RULE401", "Mate에게 해당 Rule을 삭제할 권한이 없습니다."),
     _RULE_MAX_LIMIT(HttpStatus.BAD_REQUEST, "RULE402", "생성할 수 있는 Rule 개수를 초과했습니다."),
 
     // 투두 관련

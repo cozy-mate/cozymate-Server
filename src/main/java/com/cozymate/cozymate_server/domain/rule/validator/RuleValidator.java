@@ -31,7 +31,7 @@ public class RuleValidator {
      */
     public void checkUpdatePermission(Mate mate, Rule rule) {
         if (!rule.getRoom().getId().equals(mate.getRoom().getId())) {
-            throw new GeneralException(ErrorStatus._RULE_PERMISSION_DEMIED);
+            throw new GeneralException(ErrorStatus._RULE_PERMISSION_DENIED);
         }
     }
 }
