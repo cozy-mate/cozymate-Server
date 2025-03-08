@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
 import com.cozymate.cozymate_server.domain.rule.dto.request.CreateRuleRequestDTO;
 import com.cozymate.cozymate_server.domain.rule.dto.response.RuleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
+import com.cozymate.cozymate_server.domain.rule.repository.RuleRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class RuleCommandService {
     // Rule 최대 개수
     private static final int MAX_RULE_COUNT = 10;
 
-    private final RuleRepository ruleRepository;
+    private final RuleRepositoryService ruleRepositoryService;
     private final MateRepository mateRepository;
 
     /**
@@ -42,7 +43,7 @@ public class RuleCommandService {
         checkMaxRuleCount(roomId);
 
         // 규칙 생성
-        Rule rule = ruleRepository.save(
+        Rule rule = ruleRepositoryService.createRule(
             RuleConverter.toEntity(requestDto.content(), requestDto.memo(), mate.getRoom())
         );
 
@@ -59,8 +60,7 @@ public class RuleCommandService {
      */
     public void deleteRule(Member member, Long roomId, Long ruleId) {
         // Rule 조회
-        Rule rule = ruleRepository.findById(ruleId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._RULE_NOT_FOUND));
+        Rule rule = ruleRepositoryService.getRuleOrThrow(ruleId);
 
         // Mate 조회 - 해당 조회 기능을 위해 roomId가 필요함
         Mate mate = findMateByMemberIdAndRoomId(member, roomId);
@@ -68,14 +68,13 @@ public class RuleCommandService {
         // Rule 접근 권한 확인
         validateRulePermission(mate, rule);
 
-        ruleRepository.delete(rule);
+        ruleRepositoryService.deleteRule(rule);
     }
 
     public void updateRule(Member member, Long roomId, Long ruleId,
         CreateRuleRequestDTO requestDto) {
         // Rule 조회
-        Rule rule = ruleRepository.findById(ruleId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._RULE_NOT_FOUND));
+        Rule rule = ruleRepositoryService.getRuleOrThrow(ruleId);
 
         // Mate 조회 - 해당 조회 기능을 위해 roomId가 필요함
         Mate mate = findMateByMemberIdAndRoomId(member, roomId);
@@ -93,7 +92,7 @@ public class RuleCommandService {
      * @param roomId 확인하려는 방 Id
      */
     private void checkMaxRuleCount(Long roomId) {
-        int ruleCount = ruleRepository.countAllByRoomId(roomId);
+        int ruleCount = ruleRepositoryService.getRuleCountByRoomId(roomId);
         if (ruleCount >= MAX_RULE_COUNT) {
             throw new GeneralException(ErrorStatus._RULE_OVER_MAX);
         }
