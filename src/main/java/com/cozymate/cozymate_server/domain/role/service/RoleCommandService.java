@@ -42,13 +42,16 @@ public class RoleCommandService {
         CreateRoleRequestDTO requestDto) {
         Mate mate = getMate(member.getId(), roomId);
 
-        // TODO role max 개수 제한 추가
-        int repeatDayBitmast = RoleConverter.convertDayListToBitmask(requestDto.repeatDayList());
+        roleValidator.checkRoleMaxLimit(roomId);
+
+        int repeatDayBitmask = RoleConverter.convertDayListToBitmask(requestDto.repeatDayList());
 
         List<Long> mateIdList = getMateIdListInMateIdNameList(requestDto.mateIdNameList());
 
+        roleValidator.checkMateIdListInSameRoom(mateIdList, roomId);
+
         Role role = roleRepositoryService.createRole(
-            RoleConverter.toEntity(mate, mateIdList, requestDto.content(), repeatDayBitmast)
+            RoleConverter.toEntity(mate, mateIdList, requestDto.content(), repeatDayBitmask)
         );
         return RoleConverter.toRoleSimpleResponseDTOWithEntity(role);
     }
@@ -122,6 +125,7 @@ public class RoleCommandService {
             .forEach(todoCommandService::createRoleTodo);
     }
 
+    // mate의 name과 id가 일치하는지 여부 체크
     private List<Long> getMateIdListInMateIdNameList(List<MateIdNameDTO> mateIdNameList) {
         return mateIdNameList.stream()
             .map(MateIdNameDTO::mateId)

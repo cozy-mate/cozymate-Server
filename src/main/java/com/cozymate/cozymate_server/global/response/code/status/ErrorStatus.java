@@ -147,6 +147,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // Role 관련
     _ROLE_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROLE400", "역할을 찾을 수 없습니다."),
     _ROLE_NOT_VALID(HttpStatus.BAD_REQUEST, "ROLE401", "Role을 수정할 권한이 없습니다."),
+    _ROLE_MAX_LIMIT(HttpStatus.BAD_REQUEST, "ROLE402", "Role을 생성할 수 있는 최대 개수를 초과했습니다."),
 
     // Feed 관련 에러
     _FEED_EXISTS(HttpStatus.BAD_REQUEST, "FEED400", "피드 정보가 이미 존재합니다."),

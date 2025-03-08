@@ -1,6 +1,5 @@
 package com.cozymate.cozymate_server.domain.role.repository;
 
-import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.role.Role;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,9 +11,9 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 
     List<Role> findAllByRoomId(Long roomId);
 
-    void deleteByMateId(Long mateId);
-
     List<Role> findAllByMateId(Long mateId);
+
+    int countAllByRoomId(Long roomId);
 
     @Modifying
     @Query("DELETE FROM Role r WHERE r.room.id  = :roomId")

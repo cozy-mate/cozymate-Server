@@ -34,5 +34,9 @@ public class RoleRepositoryService {
         return roleRepository.findAllByRoomId(roomId);
     }
 
+    public int getRoleCountByRoomId(Long roomId) {
+        return roleRepository.countAllByRoomId(roomId);
+    }
+
 
 }
