@@ -23,9 +23,10 @@ import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateReq
 import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.request.RoomUpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.room.repository.RoomRepositoryService;
+import com.cozymate.cozymate_server.domain.room.validator.RoomValidator;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagCommandService;
@@ -72,14 +73,13 @@ public class RoomCommandService {
     private final TodoCommandService todoCommandService;
     private final RoomFavoriteRepository roomFavoriteRepository;
     private final RoomHashtagRepository roomHashtagRepository;
+    private final RoomValidator roomValidator;
+    private final RoomRepositoryService roomRepositoryService;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
         Member member) {
-        if (roomRepository.existsByMemberIdAndStatuses(member.getId(), RoomStatus.ENABLE,
-            RoomStatus.WAITING, EntryStatus.JOINED)) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-        }
+        roomValidator.isAlreadyJoinedRoom(member.getId());
 
         // 기존 참여 요청들 삭제
         clearOtherRoomRequests(member.getId());
@@ -87,7 +87,7 @@ public class RoomCommandService {
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPrivateRoom(request, inviteCode);
         room.enableRoom();
-        room = roomRepository.save(room);
+        room = roomRepositoryService.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
         Mate mate = MateConverter.toEntity(room, member, true);
@@ -103,10 +103,7 @@ public class RoomCommandService {
     public RoomDetailResponseDTO createPublicRoom(PublicRoomCreateRequestDTO request,
         Member member) {
 
-        if (roomRepository.existsByMemberIdAndStatuses(member.getId(), RoomStatus.ENABLE,
-            RoomStatus.WAITING, EntryStatus.JOINED)) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-        }
+        roomValidator.isAlreadyJoinedRoom(member.getId());
 
         // memberStat이 null일 경우 공개방 생성 불가
         if (member.getMemberStat() == null) {
@@ -124,7 +121,7 @@ public class RoomCommandService {
 
         // 해시태그 저장 과정
         roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
-        room = roomRepository.save(room);
+        room = roomRepositoryService.save(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
         Mate mate = MateConverter.toEntity(room, member, true);
@@ -137,91 +134,64 @@ public class RoomCommandService {
     }
 
     @Transactional
-    public void joinRoom(Long roomId, Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+    public void joinRoom(Long roomId, Member member) {
 
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
-        Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(roomId, memberId);
-        checkEntryStatus(existingMate);
+        Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(roomId, member.getId());
+        roomValidator.checkEntryStatus(existingMate);
 
-        if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE,
-            RoomStatus.WAITING, EntryStatus.JOINED)) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-        }
-
-        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL); // 방이 가득 찼을 경우 예외 처리
-        }
+        roomValidator.isAlreadyJoinedRoom(member.getId());
+        roomValidator.isRoomFull(room);
 
         if (existingMate.isPresent()) {
             // 재입장 처리
             processJoinRequest(existingMate.get(), room);
-            clearOtherRoomRequests(memberId);
+            clearOtherRoomRequests(member.getId());
         } else {
             Mate mate = MateConverter.toEntity(room, member, false);
             mateRepository.save(mate);
             room.arrive();
             room.isRoomFull();
         }
-        roomRepository.save(room);
+        roomRepositoryService.save(room);
 
         eventPublisher.publishEvent(EventConverter.toJoinedRoomEvent(member, room));
     }
 
     @Transactional
     public void deleteRoom(Long roomId, Long memberId) {
-        memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
-
-        if (!member.isRoomManager()) {
-            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
-        }
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
+        roomValidator.checkRoomMember(roomId, memberId);
+        roomValidator.checkRoomManager(roomId, memberId);
 
         // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
         deleteRoomDatas(roomId);
-        roomRepository.delete(room);
+        roomRepositoryService.delete(room);
     }
 
     public Boolean checkRoomName(String roomName) {
-        return roomQueryService.isValidRoomName(roomName);
+        return roomValidator.isValidRoomName(roomName);
     }
 
     @Transactional
     public void quitRoom(Long roomId, Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        Mate quittingMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
+        Mate quittingMate = roomValidator.checkRoomMember(roomId, memberId);
 
         // 이미 나간 방에 대한 예외 처리
         if (quittingMate.getEntryStatus() == EntryStatus.EXITED) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MATE);
         }
 
-        // 방을 나갈 때 Role과 투두 삭제\
-
+        // 방을 나갈 때 Role과 투두 삭제
         todoCommandService.updateAssignedMateIfMateExitRoom(quittingMate);
         roleCommandService.removeMateFromAssignedList(quittingMate, roomId);
 
         quittingMate.quit();
         mateRepository.save(quittingMate);
         room.quit();
-        roomRepository.save(room);
+        roomRepositoryService.save(room);
 
         // 방장일 경우 가장 먼저 들어온 룸메이트에게 방장 위임
         if (quittingMate.isRoomManager()) {
@@ -232,11 +202,11 @@ public class RoomCommandService {
         if (room.getNumOfArrival() == 0) {
             // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
             deleteRoomDatas(roomId);
-            roomRepository.delete(room);
+            roomRepositoryService.delete(room);
             return;
         }
 
-        eventPublisher.publishEvent(EventConverter.toQuitRoomEvent(member, room));
+        eventPublisher.publishEvent(EventConverter.toQuitRoomEvent(quittingMate.getMember(), room));
     }
 
     private void assignNewRoomManager(Long roomId, Mate quittingMate) {
@@ -256,11 +226,6 @@ public class RoomCommandService {
     }
 
     private void deleteRoomDatas(Long roomId) {
-        List<Mate> mates = mateRepository.findByRoomId(roomId);
-//        for (Mate mate : mates) {
-//            roleRepository.deleteByMateId(mate.getId());
-//            todoRepository.deleteByMateId(mate.getId());
-//        }
         roomLogRepository.deleteAllByRoomId(roomId);
         todoRepository.deleteAllByRoomId(roomId);
         roleRepository.deleteAllByRoomId(roomId);
@@ -285,12 +250,9 @@ public class RoomCommandService {
     @Transactional
     public RoomDetailResponseDTO updateRoom(Long roomId, Long memberId,
         RoomUpdateRequestDTO request) {
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
-        Mate mate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+        Mate mate = roomValidator.checkRoomMember(roomId, memberId);
 
         if (!mate.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
@@ -301,41 +263,30 @@ public class RoomCommandService {
             roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         }
         room.updateRoom(request.name(), request.persona());
-        roomRepository.save(room);
+        roomRepositoryService.save(room);
 
         return roomQueryService.getRoomById(roomId, memberId);
     }
 
     @Transactional
-    public void sendInvitation(Long inviteeId, Long inviterId) {
-        Member inviteeMember = memberRepository.findById(inviteeId)
+    public void sendInvitation(Long inviteeId, Member inviteeMember) {
+        memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
         // 방장이 속한 방의 정보
-        Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).roomId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        Room room = roomRepositoryService.getRoomOrThrow(roomQueryService.getExistRoom(inviteeMember.getId()).roomId());
 
         // 초대한 사용자가 방장인지 검증
-        Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        if (!inviter.getMember().getId().equals(inviterId)) {
-            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
-        }
+        Mate inviter = roomValidator.checkRoomManager(room.getId(), inviteeMember.getId());
 
         // 이미 참가한 방인지 검사
         Optional<Mate> invitee = mateRepository.findByRoomIdAndMemberId(room.getId(), inviteeId);
-        checkEntryStatus(invitee);
+        roomValidator.checkEntryStatus(invitee);
 
         // 초대하려는 사용자가 속한 방이 있는지 검사
-        if (roomRepository.existsByMemberIdAndStatuses(inviteeId, RoomStatus.ENABLE,
-            RoomStatus.WAITING, EntryStatus.JOINED)) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-        }
+        roomValidator.isAlreadyJoinedRoom(inviteeId);
 
         // 방 정원 검사
-        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL); // 방이 가득 찼을 경우 예외 처리
-        }
+        roomValidator.isRoomFull(room);
 
         if (invitee.isPresent()) {
             Mate mate = invitee.get();
@@ -351,32 +302,23 @@ public class RoomCommandService {
     }
 
     @Transactional
-    public void respondToInvitation(Long roomId, Long inviteeId, boolean accept) {
-        Member inviteeMember = memberRepository.findById(inviteeId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+    public void respondToInvitation(Long roomId, Member inviteeMember, boolean accept) {
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
         // 초대 상태가 아니면 예외
-        Mate invitee = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, inviteeId,
-                EntryStatus.INVITED)
+        Mate invitee = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId,
+                inviteeMember.getId(), EntryStatus.INVITED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
 
         // 만약 WAITING 또는 ENABLE 상태의 방에 이미 참여했다면 예외 발생
-        if (mateRepository.existsByMemberIdAndEntryStatusAndRoomStatusIn(
-            inviteeId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING))) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-        }
+        roomValidator.isAlreadyJoinedRoom(inviteeMember.getId());
 
-        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL);
-        }
+        roomValidator.isRoomFull(room);
 
         if (accept) {
             // 초대 요청을 수락하여 JOINED 상태로 변경
             processJoinRequest(invitee, room);
-            clearOtherRoomRequests(inviteeId);
+            clearOtherRoomRequests(inviteeMember.getId());
 
             eventPublisher.publishEvent(
                 EventConverter.toAcceptedInvitationEvent(inviteeMember, room));
@@ -389,72 +331,48 @@ public class RoomCommandService {
         }
     }
 
-    public void forceQuitRoom(Long roomId, Long targetMemberId, Long managerId) {
-        // 방장이 본인을 퇴장시킬 수 없음
-        if (managerId.equals(targetMemberId)) {
-            throw new GeneralException(ErrorStatus._CANNOT_SELF_FORCED_QUIT);
-        }
-        memberRepository.findById(managerId)
+    public void forceQuitRoom(Long roomId, Long targetMemberId, Member manager) {
+        memberRepository.findById(targetMemberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        Mate managerMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, managerId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
-
-        // 방장이 아니면 예외 발생
-        if (!managerMate.isRoomManager()) {
-            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
+        // 방장이 본인을 퇴장시킬 수 없음
+        if (manager.getId().equals(targetMemberId)) {
+            throw new GeneralException(ErrorStatus._CANNOT_SELF_FORCED_QUIT);
         }
+
+        roomValidator.checkRoomManager(roomId, manager.getId());
+
         quitRoom(roomId, targetMemberId);
     }
 
     @Transactional
-    public void cancelInvitation(Long inviteeId, Long inviterId) {
-
+    public void cancelInvitation(Long inviteeId, Member inviter) {
         memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        Room room = roomRepository.findById(roomQueryService.getExistRoom(inviterId).roomId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        Room room = roomRepositoryService.getRoomOrThrow(roomQueryService.getExistRoom(inviter.getId()).roomId());
 
         // 초대한 사용자가 방장인지 검증
-        Mate inviter = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        if (!inviter.getMember().getId().equals(inviterId)) {
-            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
-        }
+        roomValidator.checkRoomManager(room.getId(), inviter.getId());
 
         Mate invitee = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), inviteeId,
                 EntryStatus.INVITED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._INVITATION_NOT_FOUND));
 
         mateRepository.delete(invitee);
-
     }
 
     @Transactional
-    public void requestToJoin(Long roomId, Long memberId) {
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+    public void requestToJoin(Long roomId, Member member) {
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        if (roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE,
-            RoomStatus.WAITING, EntryStatus.JOINED)) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-        }
+        roomValidator.isAlreadyJoinedRoom(member.getId());
 
         Optional<Mate> existingMate = mateRepository.findByRoomIdAndMemberId(room.getId(),
-            memberId);
-        checkEntryStatus(existingMate);
+            member.getId());
+        roomValidator.checkEntryStatus(existingMate);
 
-        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL);
-        }
+        roomValidator.isRoomFull(room);
 
         if (existingMate.isPresent()) {
             Mate mate = existingMate.get();
@@ -468,31 +386,11 @@ public class RoomCommandService {
         eventPublisher.publishEvent(EventConverter.toRequestedJoinRoomEvent(member, room));
     }
 
-    private void checkEntryStatus(Optional<Mate> existingMate) {
-        if (existingMate.isPresent()) {
-            EntryStatus status = existingMate.get().getEntryStatus();
-            switch (status) {
-                case JOINED:
-                    throw new GeneralException(ErrorStatus._ROOM_ALREADY_JOINED);
-                case PENDING:
-                    throw new GeneralException(ErrorStatus._REQUEST_ALREADY_SENT);
-                case INVITED:
-                    throw new GeneralException(ErrorStatus._INVITATION_ALREADY_SENT);
-                default:
-                    break;
-            }
-        }
-    }
-
     @Transactional
-    public void cancelRequestToJoin(Long roomId, Long memberId) {
-        memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+    public void cancelRequestToJoin(Long roomId, Member member) {
+        roomRepositoryService.getRoomOrThrow(roomId);
 
-        roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        Mate mate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
+        Mate mate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, member.getId(),
                 EntryStatus.PENDING)
             .orElseThrow(() -> new GeneralException(ErrorStatus._REQUEST_NOT_FOUND));
 
@@ -505,29 +403,19 @@ public class RoomCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         // 방장이 속한 방의 정보
-        Room room = roomRepository.findById(roomQueryService.getExistRoom(managerId).roomId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        Room room = roomRepositoryService.getRoomOrThrow(roomQueryService.getExistRoom(managerId).roomId());
 
         // 방장인지 검증
-        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-        if (!manager.getMember().getId().equals(managerId)) {
-            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
-        }
+        Mate manager = roomValidator.checkRoomManager(room.getId(), managerId);
 
         // 만약 WAITING 또는 ENABLE 상태의 방에 이미 참여했다면 예외 발생
-        if (mateRepository.existsByMemberIdAndEntryStatusAndRoomStatusIn(
-            requesterId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING))) {
-            throw new GeneralException(ErrorStatus._ROOM_ALREADY_EXISTS);
-        }
+        roomValidator.isAlreadyJoinedRoom(requesterId);
 
         Mate requester = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(),
                 requesterId, EntryStatus.PENDING)
             .orElseThrow(() -> new GeneralException(ErrorStatus._REQUEST_NOT_FOUND));
 
-        if (room.getNumOfArrival() >= room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOM_FULL); // 방이 가득 찼을 경우 예외 처리
-        }
+        roomValidator.isRoomFull(room);
 
         if (accept) {
             processJoinRequest(requester, room);
@@ -544,16 +432,10 @@ public class RoomCommandService {
     }
 
     @Transactional
-    public void changeToPublicRoom(Long roomId, Long memberId) {
-        Member manager = memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+    public void changeToPublicRoom(Long roomId, Member manager) {
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-
-        Mate managerMate = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+        Mate managerMate = roomValidator.checkRoomMember(roomId, manager.getId());
 
         // 방장이 아니면 예외 발생
         if (!managerMate.isRoomManager()) {
@@ -585,17 +467,11 @@ public class RoomCommandService {
 
     @Transactional
     public void changeToPrivateRoom(Long roomId, Long memberId) {
-        memberRepository.findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        Mate mate = roomValidator.checkRoomMember(roomId, memberId);
 
-        Mate member = mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
-                EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
-
-        if (!member.isRoomManager()) {
+        if (!mate.isRoomManager()) {
             throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
         }
 
@@ -629,7 +505,7 @@ public class RoomCommandService {
     }
 
     private boolean isKeyUnique(String key) {
-        return !roomRepository.existsByInviteCode(key);
+        return !roomRepositoryService.existsRoomByInviteCode(key);
     }
 
     private String generateUppercaseKey() {
