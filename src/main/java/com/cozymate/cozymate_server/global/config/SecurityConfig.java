@@ -90,7 +90,7 @@ public class SecurityConfig {
             .authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config",
                     "/swagger-resources/**").permitAll()
-                .requestMatchers("/", "/members/sign-in").permitAll()
+                .requestMatchers("/", "/members/sign-in", "/actuator/health").permitAll()
                 .anyRequest()
                 .authenticated());
 
