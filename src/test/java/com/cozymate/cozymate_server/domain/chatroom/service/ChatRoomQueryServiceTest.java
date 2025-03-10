@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
@@ -45,7 +44,7 @@ class ChatRoomQueryServiceTest {
     @Mock
     MemberRepository memberRepository;
     @Spy
-    ChatRoomValidator chatRoomValidator = new ChatRoomValidator(Mockito.mock(ChatRepository.class));
+    ChatRoomValidator chatRoomValidator = new ChatRoomValidator(Mockito.mock(ChatRepositoryService.class));
     @InjectMocks
     ChatRoomQueryService chatRoomQueryService;
 
