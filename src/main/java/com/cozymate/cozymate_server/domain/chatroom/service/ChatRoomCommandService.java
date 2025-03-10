@@ -1,10 +1,10 @@
 package com.cozymate.cozymate_server.domain.chatroom.service;
 
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
-import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.validator.ChatRoomValidator;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -19,13 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatRoomCommandService {
 
-    private final ChatRoomRepository chatRoomRepository;
-    private final ChatRepository chatRepository;
+    private final ChatRoomRepositoryService chatRoomRepositoryService;
+    private final ChatRepositoryService chatRepositoryService;
     private final ChatRoomValidator chatRoomValidator;
 
     public void deleteChatRoom(Member member, Long chatRoomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
+        ChatRoom chatRoom = chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoomId);
 
         softDeleteChatRoom(chatRoom, member);
 
@@ -35,9 +34,9 @@ public class ChatRoomCommandService {
     public ChatRoomIdResponseDTO saveChatRoom(Member member, Member recipient) {
         ChatRoom chatRoom = ChatRoomConverter.toEntity(member, recipient);
 
-        ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
+        chatRoom = chatRoomRepositoryService.createChatRoom(chatRoom);
 
-        return ChatRoomConverter.toChatRoomIdResponseDTO(savedChatRoom.getId());
+        return ChatRoomConverter.toChatRoomIdResponseDTO(chatRoom.getId());
     }
 
     private void softDeleteChatRoom(ChatRoom chatRoom, Member member) {
@@ -74,7 +73,7 @@ public class ChatRoomCommandService {
     }
 
     private void hardDeleteChatRoom(ChatRoom chatRoom) {
-        chatRepository.deleteAllByChatRoom(chatRoom);
-        chatRoomRepository.delete(chatRoom);
+        chatRepositoryService.deleteChatByChatRoom(chatRoom);
+        chatRoomRepositoryService.deleteChatRoom(chatRoom);
     }
 }
