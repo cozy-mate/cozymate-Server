@@ -6,10 +6,10 @@ import static org.mockito.BDDMockito.*;
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.dto.response.ChatContentResponseDTO;
 import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO;
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService;
 import com.cozymate.cozymate_server.domain.chat.validator.ChatValidator;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
-import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.fixture.ChatFixture;
 import com.cozymate.cozymate_server.fixture.ChatRoomFixture;
@@ -19,7 +19,6 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,9 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ChatQueryServiceTest {
 
     @Mock
-    ChatRepository chatRepository;
+    ChatRepositoryService chatRepositoryService;
     @Mock
-    ChatRoomRepository chatRoomRepository;
+    ChatRoomRepositoryService chatRoomRepositoryService;
     @Spy
     ChatValidator chatValidator;
     @InjectMocks
@@ -71,8 +70,8 @@ class ChatQueryServiceTest {
         @DisplayName("쪽지방의 멤버 둘다 해당 쪽지방을 삭제한 적이 없는 경우 모든 Chat 조회에 성공한다.")
         void success_when_both_members_have_not_deleted_chatroom() {
             // given
-            given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
-            given(chatRepository.findAllByChatRoom(chatRoom)).willReturn(chatList);
+            given(chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoom.getId())).willReturn(chatRoom);
+            given(chatRepositoryService.getChatListByChatRoom(chatRoom)).willReturn(chatList);
 
             // when
             ChatListResponseDTO result = chatQueryService.getChatList(memberA, chatRoom.getId());
@@ -96,8 +95,8 @@ class ChatQueryServiceTest {
         @DisplayName("특정 사용자가 해당 쪽지방을 삭제한 이후 다시 쪽지가 이루어진 경우, 이전 쪽지 내용은 제외하고 조회에 성공한다.")
         void success_when_one_member_sends_message_after_deleting_chatroom() {
             // given
-            given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
-            given(chatRepository.findAllByChatRoom(chatRoom)).willReturn(chatList);
+            given(chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoom.getId())).willReturn(chatRoom);
+            given(chatRepositoryService.getChatListByChatRoom(chatRoom)).willReturn(chatList);
             chatRoom.updateMemberALastDeleteAt(LocalDateTime.now().plusMinutes(25));
 
             // when
@@ -115,10 +114,10 @@ class ChatQueryServiceTest {
         void success_when_recipient_is_withdrawn_member() {
             // given
             chatRoom = ChatRoomFixture.정상_4(memberA);
-            given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
+            given(chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoom.getId())).willReturn(chatRoom);
             memberBChat1 = ChatFixture.정상_4(chatRoom);
             chatList = List.of(memberAChat1, memberBChat1, memberAChat2);
-            given(chatRepository.findAllByChatRoom(chatRoom)).willReturn(chatList);
+            given(chatRepositoryService.getChatListByChatRoom(chatRoom)).willReturn(chatList);
 
             // when
             ChatListResponseDTO result = chatQueryService.getChatList(memberA, chatRoom.getId());
@@ -138,23 +137,10 @@ class ChatQueryServiceTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 ChatRoomId로 요청한 경우 예외가 발생한다.")
-        void failure_when_chatroom_does_not_exist() {
-            // given
-            given(chatRoomRepository.findById(any(Long.class))).willReturn(Optional.empty());
-
-            // when-then
-            assertThatThrownBy(
-                () -> chatQueryService.getChatList(memberA, 1L))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage(ErrorStatus._CHATROOM_NOT_FOUND.getMessage());
-        }
-
-        @Test
         @DisplayName("ChatRoom의 두 Member가 모두 null(탈퇴 회원)이 아닌 경우, 현재 요청 Member가 MemberA, MemberB 둘다 아닌 경우 예외가 발생한다.")
         void failure_when_member_is_not_part_of_chatroom() {
             // given
-            given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
+            given(chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoom.getId())).willReturn(chatRoom);
 
             // when-then
             assertThatThrownBy(
@@ -170,7 +156,7 @@ class ChatQueryServiceTest {
         void failure_when_member_is_not_part_of_chatroom_with_null_member_a() {
             // given
             chatRoom = ChatRoomFixture.정상_5(memberB);
-            given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
+            given(chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoom.getId())).willReturn(chatRoom);
 
             // when-then
             assertThatThrownBy(
@@ -186,7 +172,7 @@ class ChatQueryServiceTest {
         void failure_when_member_is_not_part_of_chatroom_with_null_member_b() {
             // given
             chatRoom = ChatRoomFixture.정상_4(memberA);
-            given(chatRoomRepository.findById(chatRoom.getId())).willReturn(Optional.of(chatRoom));
+            given(chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoom.getId())).willReturn(chatRoom);
 
             // when-then
             assertThatThrownBy(
