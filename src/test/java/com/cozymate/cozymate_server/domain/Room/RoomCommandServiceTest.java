@@ -300,7 +300,7 @@ class RoomCommandServiceTest {
                 .willReturn(false);
 
             // When
-            roomCommandService.sendInvitation(invitee.getId(), inviter.getId());
+            roomCommandService.sendInvitation(invitee.getId(), inviter);
 
             // Then
             verify(mateRepository).save(any(Mate.class));
@@ -320,7 +320,7 @@ class RoomCommandServiceTest {
             given(mateRepository.findByRoomIdAndIsRoomManager(room.getId(), true)).willReturn(Optional.empty());
 
             // When & Then
-            assertThrows(GeneralException.class, () -> roomCommandService.sendInvitation(invitee.getId(), inviter.getId()));
+            assertThrows(GeneralException.class, () -> roomCommandService.sendInvitation(invitee.getId(), inviter));
         }
 
     }
