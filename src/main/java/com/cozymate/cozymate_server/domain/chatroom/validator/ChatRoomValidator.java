@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.chatroom.validator;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.time.LocalDateTime;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ChatRoomValidator {
 
-    private final ChatRepository chatRepository;
+    private final ChatRepositoryService chatRepositoryService;
 
     public boolean isChatNull(Chat chat) {
         return Objects.isNull(chat);
@@ -38,10 +38,14 @@ public class ChatRoomValidator {
 
     public boolean isDeletableHard(LocalDateTime memberALastDeleteAt,
         LocalDateTime memberBLastDeleteAt, ChatRoom chatRoom) {
-        return chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)
-            .map(chat -> chat.getCreatedAt().isBefore(memberALastDeleteAt) && chat.getCreatedAt()
-                .isBefore(memberBLastDeleteAt))
-            .orElse(true);
+        Chat chat = chatRepositoryService.getLastChatByChatRoomOrNull(chatRoom);
+
+        if (Objects.isNull(chat)) {
+            return true;
+        }
+
+        return chat.getCreatedAt().isBefore(memberALastDeleteAt) && chat.getCreatedAt()
+            .isBefore(memberBLastDeleteAt);
     }
 
     public boolean isSameMember(Member member, Member requestMember) {
@@ -49,7 +53,6 @@ public class ChatRoomValidator {
     }
 
     public boolean existNewChat(Member recipient, ChatRoom chatRoom, LocalDateTime lastSeenAt) {
-        return chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
-            recipient, chatRoom, lastSeenAt);
+        return chatRepositoryService.existNewChat(recipient, chatRoom, lastSeenAt);
     }
 }

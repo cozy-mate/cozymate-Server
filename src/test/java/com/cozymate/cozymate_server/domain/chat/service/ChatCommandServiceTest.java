@@ -5,10 +5,10 @@ import static org.mockito.BDDMockito.*;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO;
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
-import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.fixture.ChatFixture;
@@ -32,11 +32,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ChatCommandServiceTest {
 
     @Mock
-    ChatRepository chatRepository;
+    ChatRepositoryService chatRepositoryService;
+    @Mock
+    ChatRoomRepositoryService chatRoomRepositoryService;
     @Mock
     MemberRepository memberRepository;
-    @Mock
-    ChatRoomRepository chatRoomRepository;
     @InjectMocks
     ChatCommandService chatCommandService;
 
@@ -64,9 +64,10 @@ class ChatCommandServiceTest {
             // given
             given(memberRepository.findById(recipient.getId()))
                 .willReturn(Optional.of(recipient));
-            given(chatRoomRepository.findByMemberAAndMemberB(sender, recipient)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomByMemberAAndMemberBOptional(sender,
+                recipient)).willReturn(
                 Optional.of(chatRoom));
-            given(chatRepository.save(any(Chat.class))).willReturn(chat);
+            willDoNothing().given(chatRepositoryService).createChat(any(Chat.class));
 
             // when
             ChatRoomIdResponseDTO result = chatCommandService.createChat(createChatRequestDTO,
@@ -74,7 +75,7 @@ class ChatCommandServiceTest {
 
             // then
             assertThat(result.chatRoomId()).isEqualTo(chatRoom.getId());
-            then(chatRoomRepository).should(times(0)).save(any(ChatRoom.class));
+            then(chatRoomRepositoryService).should(times(0)).createChatRoom(any(ChatRoom.class));
         }
 
         @Test
@@ -83,10 +84,12 @@ class ChatCommandServiceTest {
             // given
             given(memberRepository.findById(recipient.getId()))
                 .willReturn(Optional.of(recipient));
-            given(chatRoomRepository.findByMemberAAndMemberB(sender, recipient)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomByMemberAAndMemberBOptional(sender,
+                recipient)).willReturn(
                 Optional.empty());
-            given(chatRoomRepository.save(any(ChatRoom.class))).willReturn(chatRoom);
-            given(chatRepository.save(any(Chat.class))).willReturn(chat);
+            given(chatRoomRepositoryService.createChatRoom(any(ChatRoom.class))).willReturn(
+                chatRoom);
+            willDoNothing().given(chatRepositoryService).createChat(any(Chat.class));
 
             // when
             ChatRoomIdResponseDTO result = chatCommandService.createChat(createChatRequestDTO,
@@ -94,7 +97,7 @@ class ChatCommandServiceTest {
 
             // then
             assertThat(result.chatRoomId()).isEqualTo(chatRoom.getId());
-            then(chatRoomRepository).should(times(1)).save(any(ChatRoom.class));
+            then(chatRoomRepositoryService).should(times(1)).createChatRoom(any(ChatRoom.class));
         }
 
         @Test

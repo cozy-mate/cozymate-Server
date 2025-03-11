@@ -17,7 +17,9 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     Optional<Chat> findTopByChatRoomOrderByIdDesc(ChatRoom chatRoom);
 
-    void deleteAllByChatRoom(ChatRoom chatRoom);
+    @Modifying
+    @Query("delete from Chat c where c.chatRoom = :chatRoom")
+    void deleteAllByChatRoom(@Param("chatRoom") ChatRoom chatRoom);
 
     @Query("select c from Chat c where c.chatRoom = :chatRoom")
     List<Chat> findAllByChatRoom(@Param("chatRoom") ChatRoom chatRoom);
