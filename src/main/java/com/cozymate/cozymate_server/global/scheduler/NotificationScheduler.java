@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogCommandService;
 import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todoassignment.service.TodoAssignmentQueryService;
+import io.sentry.spring.jakarta.checkin.SentryCheckIn;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -109,6 +110,7 @@ public class NotificationScheduler {
     /**
      * 매일 자정 반복 (해당하는 날 역할을 Todo에 추가)
      */
+    @SentryCheckIn("createtodobyrole")
     @Scheduled(cron = "0 0 0 * * *")
     public void addRoleToTodo() {
         roleCommandService.addRoleToTodo();
