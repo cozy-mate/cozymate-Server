@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.AccessLevel;
@@ -34,6 +35,7 @@ public class Role extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Room room;
 
+    @Positive
     private Long mateId;
 
     @Type(JsonType.class)
@@ -56,8 +58,9 @@ public class Role extends BaseTimeEntity {
     public void removeAssignee(Long assigneeId) {
         int index = this.assignedMateIdList.indexOf(assigneeId);
         if (index != -1) { // 해당 할당자가 있는지 확인
-            this.assignedMateIdList.remove(assigneeId);
-        }
+            this.assignedMateIdList = this.assignedMateIdList.stream()
+                .filter(assignee -> !assignee.equals(assigneeId))
+                .toList();        }
     }
 
     public boolean isAssignedMateListEmpty() {

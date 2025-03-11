@@ -10,11 +10,12 @@ import com.cozymate.cozymate_server.domain.role.dto.MateIdNameDTO;
 import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
-import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
-import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
+import com.cozymate.cozymate_server.domain.role.repository.RoleRepositoryService;
+import com.cozymate.cozymate_server.domain.role.validator.RoleValidator;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -29,76 +30,69 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class RoleCommandService {
 
-    private final RoleRepository roleRepository;
+    private final RoleRepositoryService roleRepositoryService;
     private final MateRepository mateRepository;
-    private final TodoRepository todoRepository;
     private final TodoCommandService todoCommandService;
+    private final RoleValidator roleValidator;
+
+    private final Clock clock;
 
     /**
-     * Role 생성
-     *
-     * @param member     사용자
-     * @param roomId     방 Id
-     * @param requestDto Role 생성 요청 DTO
+     * <p>Role 생성</p>
+     * <p>Role Max 개수 제한 필요</p>
      */
     public RoleIdResponseDTO createRole(Member member, Long roomId,
         CreateRoleRequestDTO requestDto) {
-        // 해당 방의 mate가 맞는지 확인
         Mate mate = getMate(member.getId(), roomId);
 
-        // TODO role max 개수 제한 추가
-        int repeatDayBitmast = getDayBitmask(requestDto.repeatDayList());
+        roleValidator.checkRoleMaxLimit(roomId);
+
+        int repeatDayBitmask = RoleConverter.convertDayListToBitmask(requestDto.repeatDayList());
 
         List<Long> mateIdList = getMateIdListInMateIdNameList(requestDto.mateIdNameList());
 
-        Role role = roleRepository.save(
-            RoleConverter.toEntity(mate, mateIdList, requestDto.content(),
-                repeatDayBitmast));
+        roleValidator.checkMateIdListInSameRoom(mateIdList, roomId);
+
+        Role role = roleRepositoryService.createRole(
+            RoleConverter.toEntity(mate, mateIdList, requestDto.content(), repeatDayBitmask)
+        );
         return RoleConverter.toRoleSimpleResponseDTOWithEntity(role);
     }
 
     /**
-     * Role 삭제
-     *
-     * @param member 사용자 본인것만 삭제가능
-     * @param roleId Role Id
+     * <p>Role 삭제</p>
+     * <p>Role에 대해서 수정할 수 있는 권한이 있어야 함</p>
      */
     public void deleteRole(Member member, Long roomId, Long roleId) {
-        Role role = getRole(roleId);
+        Role role = roleRepositoryService.getRoleOrThrow(roleId);
         Mate mate = getMate(member.getId(), roomId);
 
-        checkUpdatePermission(role, mate);
+        roleValidator.checkUpdatePermission(role, mate);
 
         todoCommandService.deleteTodoByRoleId(role);
-        roleRepository.delete(role);
+        roleRepositoryService.deleteRole(role);
     }
 
     /**
-     * 메이트가 방에서 나갔을 때 Role에서 할당 해제 + Todo에서도 할당 해제
-     *
-     * @param mate
-     * @param roomId
+     * 메이트가 방에서 나갔을 때 Role에서 할당 해제 + 투두에서도 할당 해제
      */
-    public void updateAssignedMateIfMateExitRoom(Mate mate, Long roomId) {
-        List<Role> roleList = roleRepository.findAllByRoomId(roomId);
+    public void removeMateFromAssignedList(Mate mate, Long roomId) {
+        List<Role> roleList = roleRepositoryService.getRoleListByRoomId(roomId);
         roleList.forEach(role -> {
             if (role.isAssigneeIn(mate.getId())) {
+                role.removeAssignee(mate.getId());
                 if (role.isAssignedMateListEmpty()) {
-                    roleRepository.delete(role);
-                } else {
-                    role.removeAssignee(mate.getId());
+                    roleRepositoryService.deleteRole(role);
                 }
             }
         });
     }
 
     /**
-     * Role을 조회할 때 유효한 할당자가 없으면 해당 Role을 삭제함 추후 삭제 예정 """다른곳에서 사용 금지"""
-     *
-     * @param role
+     * Role을 조회할 때 유효한 할당자가 없으면 해당 Role을 삭제함 TODO: 추후 삭제 예정 """다른곳에서 사용 금지"""
      */
     public void deleteRoleIfMateEmpty(Role role) {
-        roleRepository.delete(role);
+        roleRepositoryService.deleteRole(role);
     }
 
     /**
@@ -110,39 +104,34 @@ public class RoleCommandService {
      */
     public void updateRole(Member member, Long roomId, Long roleId,
         CreateRoleRequestDTO requestDto) {
-        Role role = getRole(roleId);
+        Role role = roleRepositoryService.getRoleOrThrow(roleId);
         Mate mate = getMate(member.getId(), roomId);
 
-        checkUpdatePermission(role, mate);
+        roleValidator.checkUpdatePermission(role, mate);
 
         List<Long> mateIdList = getMateIdListInMateIdNameList(requestDto.mateIdNameList());
 
         // role 수정
         role.updateEntity(mateIdList, requestDto.content(),
-            getDayBitmask(requestDto.repeatDayList()));
+            RoleConverter.convertDayListToBitmask(requestDto.repeatDayList()));
     }
 
     /**
      * 오늘 요일에 해당하는 Role을 투두로 추가 (SCHEDULED)
      */
     public void addRoleToTodo() {
-        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
+        DayOfWeek dayOfWeek = LocalDate.now(clock).getDayOfWeek();
         int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
-        List<Role> roleList = roleRepository.findAll(); // TODO 페이징 반복 처리?
+        List<Role> roleList = roleRepositoryService.getRoleList();
         roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
             .forEach(todoCommandService::createRoleTodo);
     }
 
-    /**
-     * 요일 문자열 리스트를 비트마스크로 변환
-     *
-     * @param repeatDayStringList 요일 리스트
-     * @return 비트마스크 값
-     */
-    private int getDayBitmask(List<String> repeatDayStringList) {
-        List<DayListBitmask> repeatDayEnumList = repeatDayStringList.stream()
-            .map(DayListBitmask::valueOf).toList();
-        return RoleConverter.convertDayListToBitmask(repeatDayEnumList);
+    // mate의 name과 id가 일치하는지 여부 체크
+    private List<Long> getMateIdListInMateIdNameList(List<MateIdNameDTO> mateIdNameList) {
+        return mateIdNameList.stream()
+            .map(MateIdNameDTO::mateId)
+            .toList();
     }
 
     /**
@@ -156,34 +145,5 @@ public class RoleCommandService {
         return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
                 EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
-    }
-
-    /**
-     * Role 가져오기
-     *
-     * @param roleId 가져올 Role
-     * @return Role
-     */
-    private Role getRole(Long roleId) {
-        return roleRepository.findById(roleId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROLE_NOT_FOUND));
-    }
-
-    /**
-     * Role 수정 가능한지 권한 확인
-     *
-     * @param role 수정할 Role
-     * @param mate Mate
-     */
-    private void checkUpdatePermission(Role role, Mate mate) {
-        if (!role.getAssignedMateIdList().contains(mate.getId())) {
-            throw new GeneralException(ErrorStatus._ROLE_NOT_VALID);
-        }
-    }
-
-    private List<Long> getMateIdListInMateIdNameList(List<MateIdNameDTO> mateIdNameList) {
-        return mateIdNameList.stream()
-            .map(MateIdNameDTO::mateId)
-            .toList();
     }
 }

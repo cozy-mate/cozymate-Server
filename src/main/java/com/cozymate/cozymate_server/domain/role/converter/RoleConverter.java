@@ -6,7 +6,7 @@ import com.cozymate.cozymate_server.domain.role.dto.MateIdNameDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.role.enums.DayListBitmask;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RoleConverter {
@@ -24,24 +24,23 @@ public class RoleConverter {
             .build();
     }
 
-    // Day List → Bitmask
-    public static int convertDayListToBitmask(List<DayListBitmask> dayList) {
-        int bitmask = 0;
-        for (DayListBitmask dayBitMask : dayList) {
-            bitmask |= dayBitMask.getValue();
-        }
-        return bitmask;
+    /**
+     * 요일 문자열 리스트를 비트마스크로 변환
+     */
+    public static int convertDayListToBitmask(List<String> dayNames) {
+        return dayNames.stream()
+            .map(DayListBitmask::valueOf)
+            .mapToInt(DayListBitmask::getValue)
+            .sum();  // 이미 비트마스크 형태로 ENUM에 존재하므로 sum으로 해도 충분
     }
 
-    // Bitmask → Day List
+    /**
+     * 요일 비트마스크를 DayListBitmask Enum List로 변환
+     */
     public static List<DayListBitmask> convertBitmaskToDayList(int bitmask) {
-        List<DayListBitmask> dayList = new ArrayList<>();
-        for (DayListBitmask day : DayListBitmask.values()) {
-            if ((bitmask & day.getValue()) != 0) {
-                dayList.add(day);
-            }
-        }
-        return dayList;
+        return Arrays.stream(DayListBitmask.values())
+            .filter(day -> (bitmask & day.getValue()) != 0)
+            .toList();
     }
 
     public static RoleIdResponseDTO toRoleSimpleResponseDTOWithEntity(Role role) {

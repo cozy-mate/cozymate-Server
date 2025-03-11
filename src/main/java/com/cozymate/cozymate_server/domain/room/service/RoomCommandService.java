@@ -216,7 +216,7 @@ public class RoomCommandService {
         // 방을 나갈 때 Role과 투두 삭제\
 
         todoCommandService.updateAssignedMateIfMateExitRoom(quittingMate);
-        roleCommandService.updateAssignedMateIfMateExitRoom(quittingMate, roomId);
+        roleCommandService.removeMateFromAssignedList(quittingMate, roomId);
 
         quittingMate.quit();
         mateRepository.save(quittingMate);
