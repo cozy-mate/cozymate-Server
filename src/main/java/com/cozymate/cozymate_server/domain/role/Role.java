@@ -47,7 +47,7 @@ public class Role extends BaseTimeEntity {
     private String content;
 
     @Range(min = 0, max = 127)
-    private int repeatDays = 0;
+    private int repeatDays;
 
     public void updateEntity(List<Long> assignedMateIdList, String content, int repeatDays) {
         this.assignedMateIdList = assignedMateIdList;
@@ -60,7 +60,8 @@ public class Role extends BaseTimeEntity {
         if (index != -1) { // 해당 할당자가 있는지 확인
             this.assignedMateIdList = this.assignedMateIdList.stream()
                 .filter(assignee -> !assignee.equals(assigneeId))
-                .toList();        }
+                .toList();
+        }
     }
 
     public boolean isAssignedMateListEmpty() {
