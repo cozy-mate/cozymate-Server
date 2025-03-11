@@ -21,7 +21,7 @@ public class RuleFixture {
     }
 
     // 정상 더미데이터, content는 존재하는데, memo가 없는 경우
-    public static Rule 정상_4(Room room) {
+    public static Rule 정상_2(Room room) {
         return Rule.builder()
             .id(4L)
             .room(room)

@@ -7,7 +7,6 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.rule.Rule;
 import com.cozymate.cozymate_server.domain.rule.converter.RuleConverter;
 import com.cozymate.cozymate_server.domain.rule.dto.response.RuleDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.rule.repository.RuleRepository;
 import com.cozymate.cozymate_server.domain.rule.repository.RuleRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
