@@ -7,7 +7,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.LifestyleMatchRate;
-import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.LifestyleMatchRate.LifestyleMatchRateId;
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
@@ -19,7 +20,6 @@ import com.cozymate.cozymate_server.fixture.UniversityFixture;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class LifestyleMatchRateServiceTest {
 
     @Mock
-    private LifestyleMatchRateRepository lifestyleMatchRateRepository;
+    private LifestyleMatchRateRepositoryService lifestyleMatchRateRepositoryService;
     @Mock
     private MemberStatRepository memberStatRepository;
     @Mock
@@ -74,7 +74,8 @@ class LifestyleMatchRateServiceTest {
             // given
             LifestyleMatchRate matchRate = new LifestyleMatchRate(memberA.getId(), memberB.getId(),
                 85);
-            given(lifestyleMatchRateRepository.findByIdList(idList)).willReturn(List.of(matchRate));
+            given(lifestyleMatchRateRepositoryService.getLifestyleMatchRateListByIdList(
+                idList)).willReturn(List.of(matchRate));
 
             // when
             Map<Long, Integer> result = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
@@ -93,7 +94,8 @@ class LifestyleMatchRateServiceTest {
                 .map(member -> new LifestyleMatchRate(memberA.getId(), member.getId(), 80))
                 .toList();
 
-            given(lifestyleMatchRateRepository.findByIdList(idList)).willReturn(matchRates);
+            given(lifestyleMatchRateRepositoryService.getLifestyleMatchRateListByIdList(
+                idList)).willReturn(matchRates);
 
             // when
             Map<Long, Integer> result = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
@@ -131,7 +133,8 @@ class LifestyleMatchRateServiceTest {
             // given
             LifestyleMatchRate matchRate = new LifestyleMatchRate(memberA.getId(), memberB.getId(),
                 75);
-            given(lifestyleMatchRateRepository.findBySingleMemberId(memberA.getId())).willReturn(
+            given(lifestyleMatchRateRepositoryService.getLifestyleMatchRateListBySingleMemberId(
+                memberA.getId())).willReturn(
                 List.of(matchRate));
 
             // when
@@ -150,7 +153,8 @@ class LifestyleMatchRateServiceTest {
                 .map(member -> new LifestyleMatchRate(memberA.getId(), member.getId(), 75))
                 .toList();
 
-            given(lifestyleMatchRateRepository.findBySingleMemberId(memberA.getId())).willReturn(
+            given(lifestyleMatchRateRepositoryService.getLifestyleMatchRateListBySingleMemberId(
+                memberA.getId())).willReturn(
                 matchRates);
 
             // when
@@ -187,12 +191,13 @@ class LifestyleMatchRateServiceTest {
         @DisplayName("두 멤버 간의 일치율 반환")
         void success_should_return_match_rate_between_two_members() {
             // given
-            LifestyleMatchRate matchRate = new LifestyleMatchRate(memberA.getId(), memberB.getId(),
+            LifestyleMatchRateId lifestyleMatchRateId = new LifestyleMatchRateId(memberA.getId(),
+                memberB.getId());
+            LifestyleMatchRate matchRate = new LifestyleMatchRate(lifestyleMatchRateId,
                 90);
-            given(lifestyleMatchRateRepository.findById(
-                new LifestyleMatchRate.LifestyleMatchRateId(memberA.getId(), memberB.getId())))
-                .willReturn(Optional.of(matchRate));
-
+            given(lifestyleMatchRateRepositoryService.getLifestyleMatchRateByIdOrNoMatchRate(
+                lifestyleMatchRateId))
+                .willReturn(matchRate);
             // when
             Integer result = lifestyleMatchRateService.getSingleMatchRate(memberA.getId(),
                 memberB.getId());
@@ -200,32 +205,6 @@ class LifestyleMatchRateServiceTest {
             // then
             assertThat(result).isEqualTo(90);
         }
-
-        @Test
-        @DisplayName("여러 명의 멤버에 대해 일치율을 계산하고 저장")
-        void success_should_calculate_and_save_match_rate_for_multiple_members() {
-            // given
-            given(memberStatRepository.findByMemberUniversityAndGenderWithoutSelf(
-                memberStatA.getMember().getGender(),
-                memberStatA.getMember().getUniversity().getId(),
-                memberStatA.getMember().getId()))
-                .willReturn(targetMemberStats);
-
-            targetMemberStats.forEach(targetStat -> {
-                given(lifestyleMatchRateRepository.findById(
-                    new LifestyleMatchRate.LifestyleMatchRateId(
-                        memberStatA.getMember().getId(), targetStat.getMember().getId())))
-                    .willReturn(Optional.empty());
-            });
-
-            // when
-            lifestyleMatchRateService.saveLifeStyleMatchRate(memberStatA);
-
-            // then
-            verify(lifestyleMatchRateRepository, times(targetMemberStats.size())).save(
-                any(LifestyleMatchRate.class));
-        }
-
     }
 
     @Nested
@@ -263,15 +242,26 @@ class LifestyleMatchRateServiceTest {
                 memberStatA.getMember().getId()))
                 .willReturn(List.of(memberStatB));
 
-            given(lifestyleMatchRateRepository.findById(new LifestyleMatchRate.LifestyleMatchRateId(
-                memberStatA.getMember().getId(), memberStatB.getMember().getId())))
-                .willReturn(Optional.empty());
-
             // when
             lifestyleMatchRateService.saveLifeStyleMatchRate(memberStatA);
 
             // then
-            verify(lifestyleMatchRateRepository, times(1)).save(any(LifestyleMatchRate.class));
+            ArgumentCaptor<List<LifestyleMatchRate>> captor = ArgumentCaptor.forClass(List.class);
+            verify(lifestyleMatchRateRepositoryService, times(1))
+                .createAndUpdateLifestyleMatchRateList(captor.capture());
+
+            // 검증: 저장된 리스트가 예상대로 들어갔는지 확인
+            List<LifestyleMatchRate> savedRates = captor.getValue();
+            assertThat(savedRates.size()).isEqualTo(1);
+
+            // 첫 번째 요소가 올바르게 저장되었는지 검증
+            LifestyleMatchRate savedRate = savedRates.get(0);
+            assertThat(savedRate.getMatchRate()).isNotNull();
+            assertThat(savedRate.getId()).isNotNull();
+            assertThat(savedRate.getId().getMemberA()).isEqualTo(
+                Math.min(memberStatA.getMember().getId(), memberStatB.getMember().getId()));
+            assertThat(savedRate.getId().getMemberB()).isEqualTo(
+                Math.max(memberStatA.getMember().getId(), memberStatB.getMember().getId()));
         }
 
         @Test
@@ -284,20 +274,25 @@ class LifestyleMatchRateServiceTest {
                 memberStatA.getMember().getId()))
                 .willReturn(List.of(memberStatB));
 
-            given(lifestyleMatchRateRepository.findById(new LifestyleMatchRate.LifestyleMatchRateId(
-                memberStatA.getMember().getId(), memberStatB.getMember().getId())))
-                .willReturn(Optional.empty());
-
             // when
             lifestyleMatchRateService.saveLifeStyleMatchRate(memberStatA);
 
             // then
-            ArgumentCaptor<LifestyleMatchRate> captor = ArgumentCaptor.forClass(
-                LifestyleMatchRate.class);
-            verify(lifestyleMatchRateRepository, times(1)).save(captor.capture());
+            ArgumentCaptor<List<LifestyleMatchRate>> captor = ArgumentCaptor.forClass(List.class);
+            verify(lifestyleMatchRateRepositoryService, times(1))
+                .createAndUpdateLifestyleMatchRateList(captor.capture());
 
-            LifestyleMatchRate savedRate = captor.getValue();
+            // 저장된 리스트 검증
+            List<LifestyleMatchRate> savedRates = captor.getValue();
+            assertThat(savedRates.size()).isEqualTo(1);
+
+            LifestyleMatchRate savedRate = savedRates.get(0);
             assertThat(savedRate.getMatchRate()).isEqualTo(100);
+            assertThat(savedRate.getId()).isNotNull();
+            assertThat(savedRate.getId().getMemberA()).isEqualTo(
+                Math.min(memberStatA.getMember().getId(), memberStatB.getMember().getId()));
+            assertThat(savedRate.getId().getMemberB()).isEqualTo(
+                Math.max(memberStatA.getMember().getId(), memberStatB.getMember().getId()));
         }
 
         @Test
@@ -312,24 +307,30 @@ class LifestyleMatchRateServiceTest {
                 memberStatA.getMember().getId()))
                 .willReturn(List.of(partialMatchedStat));
 
-            given(lifestyleMatchRateRepository.findById(new LifestyleMatchRate.LifestyleMatchRateId(
-                memberStatA.getMember().getId(), partialMatchedStat.getMember().getId())))
-                .willReturn(Optional.empty());
-
             // 예상되는 일치율 (테스트 데이터를 기반으로 변경 가능)
-            int expectedMatchRate = 91; // 응답 개수
+            int expectedMatchRate = 91;
 
             // when
             lifestyleMatchRateService.saveLifeStyleMatchRate(memberStatA);
 
             // then
-            ArgumentCaptor<LifestyleMatchRate> captor = ArgumentCaptor.forClass(
-                LifestyleMatchRate.class);
-            verify(lifestyleMatchRateRepository, times(1)).save(captor.capture());
+            ArgumentCaptor<List<LifestyleMatchRate>> captor = ArgumentCaptor.forClass(List.class);
+            verify(lifestyleMatchRateRepositoryService, times(1))
+                .createAndUpdateLifestyleMatchRateList(captor.capture());
 
-            LifestyleMatchRate savedRate = captor.getValue();
+            // 저장된 리스트 검증
+            List<LifestyleMatchRate> savedRates = captor.getValue();
+            assertThat(savedRates.size()).isEqualTo(1);
+
+            LifestyleMatchRate savedRate = savedRates.get(0);
             assertThat(savedRate.getMatchRate()).isEqualTo(expectedMatchRate);
+            assertThat(savedRate.getId()).isNotNull();
+            assertThat(savedRate.getId().getMemberA()).isEqualTo(
+                Math.min(memberStatA.getMember().getId(), partialMatchedStat.getMember().getId()));
+            assertThat(savedRate.getId().getMemberB()).isEqualTo(
+                Math.max(memberStatA.getMember().getId(), partialMatchedStat.getMember().getId()));
         }
+
 
         @Test
         @DisplayName("여러 명의 멤버에 대해 일치율을 계산하고 저장")
@@ -341,19 +342,30 @@ class LifestyleMatchRateServiceTest {
                 memberStatA.getMember().getId()))
                 .willReturn(targetMemberStats);
 
-            targetMemberStats.forEach(targetStat -> {
-                given(lifestyleMatchRateRepository.findById(
-                    new LifestyleMatchRate.LifestyleMatchRateId(
-                        memberStatA.getMember().getId(), targetStat.getMember().getId())))
-                    .willReturn(Optional.empty());
-            });
-
             // when
             lifestyleMatchRateService.saveLifeStyleMatchRate(memberStatA);
 
             // then
-            verify(lifestyleMatchRateRepository, times(targetMemberStats.size())).save(
-                any(LifestyleMatchRate.class));
+            ArgumentCaptor<List<LifestyleMatchRate>> captor = ArgumentCaptor.forClass(List.class);
+            verify(lifestyleMatchRateRepositoryService, times(1))
+                .createAndUpdateLifestyleMatchRateList(captor.capture());
+
+            // 검증: 저장된 리스트가 예상대로 들어갔는지 확인
+            List<LifestyleMatchRate> savedRates = captor.getValue();
+            assertThat(savedRates.size()).isEqualTo(targetMemberStats.size());
+
+            // 각 저장된 요소가 예상된 값을 가지는지 확인
+            for (int i = 0; i < targetMemberStats.size(); i++) {
+                LifestyleMatchRate savedRate = savedRates.get(i);
+                MemberStat targetStat = targetMemberStats.get(i);
+
+                assertThat(savedRate.getMatchRate()).isNotNull();
+                assertThat(savedRate.getId()).isNotNull();
+                assertThat(savedRate.getId().getMemberA()).isEqualTo(
+                    Math.min(memberStatA.getMember().getId(), targetStat.getMember().getId()));
+                assertThat(savedRate.getId().getMemberB()).isEqualTo(
+                    Math.max(memberStatA.getMember().getId(), targetStat.getMember().getId()));
+            }
         }
 
     }
@@ -363,14 +375,19 @@ class LifestyleMatchRateServiceTest {
     class CalculateAllLifeStyleMatchRate {
 
         private University university;
-        private List<MemberStat> memberStats;
+        private List<MemberStat> maleMemberStats;
+        private List<MemberStat> femaleMemberStats;
 
         @BeforeEach
         void setUp() {
             university = UniversityFixture.createTestUniversity();
-            List<Member> members = MemberFixture.리스트_커스텀(university, 5, Gender.MALE,
+            List<Member> maleMembers = MemberFixture.리스트_커스텀(university, 5, Gender.MALE,
                 LocalDate.now(), "경영학과");
-            memberStats = MemberStatFixture.랜덤_멤버_스탯_리스트(members, 5, 1234L);
+            List<Member> femaleMembers = MemberFixture.리스트_커스텀(university, 5, Gender.FEMALE,
+                LocalDate.now(), "심리학과");
+
+            maleMemberStats = MemberStatFixture.랜덤_멤버_스탯_리스트(maleMembers, 5, 1234L);
+            femaleMemberStats = MemberStatFixture.랜덤_멤버_스탯_리스트(femaleMembers, 5, 5678L);
         }
 
         @Test
@@ -380,14 +397,36 @@ class LifestyleMatchRateServiceTest {
             given(universityRepository.findAll()).willReturn(List.of(university));
             given(memberStatRepository.findByMemberUniversityAndGender(Gender.MALE,
                 university.getId()))
-                .willReturn(memberStats);
+                .willReturn(maleMemberStats);
+            given(memberStatRepository.findByMemberUniversityAndGender(Gender.FEMALE,
+                university.getId()))
+                .willReturn(femaleMemberStats);
 
             // when
             lifestyleMatchRateService.calculateAllLifeStyleMatchRate();
 
             // then
-            verify(lifestyleMatchRateRepository, atLeastOnce()).save(any(LifestyleMatchRate.class));
+            ArgumentCaptor<List<LifestyleMatchRate>> captor = ArgumentCaptor.forClass(List.class);
+            verify(lifestyleMatchRateRepositoryService, times(2))
+                .createAndUpdateLifestyleMatchRateList(captor.capture());
+
+            // 캡처된 리스트 두 개 가져오기 (남/녀 각각)
+            List<List<LifestyleMatchRate>> savedRatesList = captor.getAllValues();
+
+            // 검증: 리스트가 두 개 존재해야 함 (남성/여성 각각)
+            assertThat(savedRatesList.size()).isEqualTo(2);
+
+            // 남성 리스트 검증
+            List<LifestyleMatchRate> maleSavedRates = savedRatesList.get(0);
+            assertThat(maleSavedRates).isNotNull();
+            assertThat(maleSavedRates.size()).isEqualTo(maleMemberStats.size() * (maleMemberStats.size() - 1) / 2);
+
+            // 여성 리스트 검증
+            List<LifestyleMatchRate> femaleSavedRates = savedRatesList.get(1);
+            assertThat(femaleSavedRates).isNotNull();
+            assertThat(femaleSavedRates.size()).isEqualTo(femaleMemberStats.size() * (femaleMemberStats.size() - 1) / 2);
         }
     }
+
 
 }
