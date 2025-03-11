@@ -58,8 +58,9 @@ public class Role extends BaseTimeEntity {
     public void removeAssignee(Long assigneeId) {
         int index = this.assignedMateIdList.indexOf(assigneeId);
         if (index != -1) { // 해당 할당자가 있는지 확인
-            this.assignedMateIdList.remove(assigneeId);
-        }
+            this.assignedMateIdList = this.assignedMateIdList.stream()
+                .filter(assignee -> !assignee.equals(assigneeId))
+                .toList();        }
     }
 
     public boolean isAssignedMateListEmpty() {
