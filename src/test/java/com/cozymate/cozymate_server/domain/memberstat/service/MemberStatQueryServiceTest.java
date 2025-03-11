@@ -18,8 +18,9 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.Me
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatPreferenceResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatSearchResponseDTO;
-import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.service.MemberStatQueryService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAnswerMapper;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
@@ -56,7 +57,7 @@ public class MemberStatQueryServiceTest {
     @Mock
     private RoomQueryService roomQueryService;
     @Mock
-    private MemberStatRepository memberStatRepository;
+    private MemberStatRepositoryService memberStatRepositoryService;
     @Mock
     private MemberRepository memberRepository;
 
@@ -81,17 +82,13 @@ public class MemberStatQueryServiceTest {
         void setUp() {
             member = MemberFixture.정상_1(UniversityFixture.createTestUniversity());
             memberStat = MemberStatFixture.정상_1(member);
-
-            // `findByMemberId()`가 저장된 `memberStat`을 반환하도록 설정
-            given(memberStatRepository.findByMemberId(member.getId()))
-                .willReturn(java.util.Optional.of(memberStat));
         }
 
         @Test
         @DisplayName("존재하는 MemberStat 조회 성공")
         void success_when_memberStat_exists() {
-            given(memberStatRepository.findByMemberId(member.getId()))
-                .willReturn(Optional.of(memberStat));
+            given(memberStatRepositoryService.getMemberStatOrThrow(member.getId()))
+                .willReturn(memberStat);
 
             MemberStatDetailWithMemberDetailResponseDTO response
                 = memberStatQueryService.getMemberStat(member);
@@ -103,8 +100,8 @@ public class MemberStatQueryServiceTest {
         @Test
         @DisplayName("존재하지 않는 MemberStat 조회 시 예외 발생")
         void failure_when_memberStat_not_exists() {
-            given(memberStatRepository.findByMemberId(member.getId()))
-                .willReturn(Optional.empty());
+            given(memberStatRepositoryService.getMemberStatOrThrow(member.getId()))
+                .willThrow(new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
 
             assertThatThrownBy(() -> memberStatQueryService.getMemberStat(member))
                 .isInstanceOf(GeneralException.class)
@@ -115,7 +112,7 @@ public class MemberStatQueryServiceTest {
 
     @Nested
     @DisplayName("getMemberStatWithId 테스트")
-    class GetMemberStatWithIdTests {
+    class GetMemberStatWithId {
 
         private Member viewer;
         private Member targetMember1;
@@ -136,8 +133,8 @@ public class MemberStatQueryServiceTest {
             targetMemberStat1 = MemberStatFixture.정상_1(targetMember1);
 
             // 공통적으로 사용되는 Mock 설정 (targetMember1)
-            given(memberStatRepository.findByMemberId(targetMember1.getId()))
-                .willReturn(Optional.of(targetMemberStat1));
+            given(memberStatRepositoryService.getMemberStatOrThrow(targetMember1.getId()))
+                .willReturn(targetMemberStat1);
         }
 
         @Test
@@ -172,11 +169,11 @@ public class MemberStatQueryServiceTest {
         }
 
         @Test
-        @DisplayName("MemberStat이 존재하지 않는 경우 예외 발생")
+        @DisplayName("targetMember MemberStat이 존재하지 않는 경우 예외 발생")
         void failure_when_memberStat_not_exists() {
             // given
-            given(memberStatRepository.findByMemberId(targetMember1.getId()))
-                .willReturn(Optional.empty());
+            given(memberStatRepositoryService.getMemberStatOrThrow(targetMember1.getId()))
+                .willThrow(new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
 
             // when & then
             assertThatThrownBy(
@@ -237,8 +234,8 @@ public class MemberStatQueryServiceTest {
             pageable = PageRequest.of(0, 10);
             filterList = List.of("smoking", "intimacy");
 
-            given(memberStatRepository.findByMemberId(viewer.getId()))
-                .willReturn(Optional.of(viewerMemberStat));
+            given(memberStatRepositoryService.getMemberStatOrThrow(viewer.getId()))
+                .willReturn(viewerMemberStat);
         }
 
         @Test
@@ -257,7 +254,9 @@ public class MemberStatQueryServiceTest {
             );
 
             // 필터링된 결과 Mock 설정
-            given(memberStatRepository.filterMemberStat(viewerMemberStat, filterList, pageable))
+            given(
+                memberStatRepositoryService.getMemberStatListByAttributeList(viewerMemberStat, filterList,
+                    pageable))
                 .willReturn(mockSlice);
 
             given(memberStatPreferenceQueryService.getPreferencesToList(viewer.getId()))
@@ -291,7 +290,9 @@ public class MemberStatQueryServiceTest {
             Slice<Map<MemberStat, Integer>> emptySlice = new SliceImpl<>(List.of(), pageable,
                 false);
 
-            given(memberStatRepository.filterMemberStat(viewerMemberStat, filterList, pageable))
+            given(
+                memberStatRepositoryService.getMemberStatListByAttributeList(viewerMemberStat, filterList,
+                    pageable))
                 .willReturn(emptySlice);
 
             // when
@@ -323,7 +324,9 @@ public class MemberStatQueryServiceTest {
             );
 
             // 필터링된 결과 Mock 설정
-            given(memberStatRepository.filterMemberStat(viewerMemberStat, filterList, pageable))
+            given(
+                memberStatRepositoryService.getMemberStatListByAttributeList(viewerMemberStat, filterList,
+                    pageable))
                 .willReturn(mockSlice);
 
             given(memberStatPreferenceQueryService.getPreferencesToList(viewer.getId()))
@@ -340,11 +343,11 @@ public class MemberStatQueryServiceTest {
         }
 
         @Test
-        @DisplayName("MemberStat이 존재하지 않는 경우 예외 발생")
+        @DisplayName("viewer MemberStat이 존재하지 않는 경우 예외 발생")
         void failure_when_memberStat_not_exists() {
             // MemberStat이 없는 경우로 설정
-            given(memberStatRepository.findByMemberId(viewer.getId()))
-                .willReturn(Optional.empty());
+            given(memberStatRepositoryService.getMemberStatOrThrow(viewer.getId()))
+                .willThrow(new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
 
             // when & then
             assertThatThrownBy(
@@ -355,12 +358,14 @@ public class MemberStatQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("getNumOfSearchedAndFilteredMemberStatList 테스트")
-    class GetNumOfSearchedAndFilteredMemberStatList {
+    @DisplayName("getNumberOfSearchedAndFilteredMemberStatList 테스트")
+    class GetNumberOfSearchedAndFilteredMemberStatList {
 
         private Member viewer;
         private MemberStat viewerMemberStat;
         private HashMap<String, List<?>> filterMap;
+        private HashMap<String, List<?>> convertedFilterMap;
+
 
         @BeforeEach
         void setUp() {
@@ -371,22 +376,25 @@ public class MemberStatQueryServiceTest {
             // 필터링 조건 설정 (예시: 흡연 상태와 청결도 기준 필터링)
             filterMap = new HashMap<>();
             filterMap.put("smoking", List.of("비흡연자"));
-            filterMap.put("cleanSensitivity", List.of(3));
+            filterMap.put("cleanSensitivity", List.of(2));
+
+            convertedFilterMap = new HashMap<>(QuestionAnswerMapper.convertFilterMap(filterMap));
 
             // MemberStat 조회 Mock 설정
-            given(memberStatRepository.findByMemberId(viewer.getId()))
-                .willReturn(Optional.of(viewerMemberStat));
+            given(memberStatRepositoryService.getMemberStatOrThrow(viewer.getId()))
+                .willReturn(viewerMemberStat);
         }
 
         @Test
         @DisplayName("필터링된 MemberStat 개수가 정상적으로 반환되는 경우")
         void success_when_filtered_memberStat_count_is_returned() {
             // 필터링된 MemberStat 개수 설정 (예: 5명)
-            given(memberStatRepository.countAdvancedFilteredMemberStat(viewerMemberStat, filterMap))
+            given(
+                memberStatRepositoryService.getNumberOfMemberStatByAttributeAndValuesMap(viewerMemberStat, convertedFilterMap))
                 .willReturn(5);
 
             // when
-            Integer count = memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer,
+            Integer count = memberStatQueryService.getNumberOfSearchedAndFilteredMemberStatList(viewer,
                 filterMap);
 
             // then
@@ -397,11 +405,12 @@ public class MemberStatQueryServiceTest {
         @DisplayName("필터링된 MemberStat이 없는 경우 0 반환")
         void success_when_no_filtered_memberStat_exists() {
             // 필터링된 결과가 없을 경우
-            given(memberStatRepository.countAdvancedFilteredMemberStat(viewerMemberStat, filterMap))
+            given(
+                memberStatRepositoryService.getNumberOfMemberStatByAttributeAndValuesMap(viewerMemberStat, convertedFilterMap))
                 .willReturn(0);
 
             // when
-            Integer count = memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer,
+            Integer count = memberStatQueryService.getNumberOfSearchedAndFilteredMemberStatList(viewer,
                 filterMap);
 
             // then
@@ -409,15 +418,15 @@ public class MemberStatQueryServiceTest {
         }
 
         @Test
-        @DisplayName("조회 대상 MemberStat이 존재하지 않는 경우 예외 발생")
+        @DisplayName("viewer의 MemberStat이 존재하지 않는 경우 예외 발생")
         void failure_when_criteria_memberStat_not_exists() {
             // MemberStat이 존재하지 않는 경우
-            given(memberStatRepository.findByMemberId(viewer.getId()))
-                .willReturn(Optional.empty());
+            given(memberStatRepositoryService.getMemberStatOrThrow(viewer.getId()))
+                .willThrow(new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
 
             // when & then
             assertThatThrownBy(
-                () -> memberStatQueryService.getNumOfSearchedAndFilteredMemberStatList(viewer,
+                () -> memberStatQueryService.getNumberOfSearchedAndFilteredMemberStatList(viewer,
                     filterMap))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage(ErrorStatus._MEMBERSTAT_NOT_EXISTS.getMessage());
@@ -431,6 +440,7 @@ public class MemberStatQueryServiceTest {
         private Member viewer;
         private MemberStat viewerMemberStat;
         private HashMap<String, List<?>> filterMap;
+        private HashMap<String, List<?>> convertedFilterMap;
         private Pageable pageable;
 
         @BeforeEach
@@ -445,9 +455,11 @@ public class MemberStatQueryServiceTest {
             filterMap.put("smoking", List.of("비흡연자"));
             filterMap.put("cleanSensitivity", List.of(3));
 
+            convertedFilterMap = new HashMap<>(QuestionAnswerMapper.convertFilterMap(filterMap));
+
             // MemberStat 조회 Mock 설정
-            given(memberStatRepository.findByMemberId(viewer.getId()))
-                .willReturn(Optional.of(viewerMemberStat));
+            given(memberStatRepositoryService.getMemberStatOrThrow(viewer.getId()))
+                .willReturn(viewerMemberStat);
         }
 
         @Test
@@ -468,7 +480,8 @@ public class MemberStatQueryServiceTest {
 
             // 필터링된 결과 Mock 설정
             given(
-                memberStatRepository.filterMemberStatAdvance(viewerMemberStat, filterMap, pageable))
+                memberStatRepositoryService.getMemberStatListByAttributeAndValuesMap(viewerMemberStat,
+                    convertedFilterMap, pageable))
                 .willReturn(mockSlice);
 
             given(memberStatPreferenceQueryService.getPreferencesToList(viewer.getId()))
@@ -492,7 +505,8 @@ public class MemberStatQueryServiceTest {
             Slice<Map<MemberStat, Integer>> emptySlice = new SliceImpl<>(List.of(), pageable,
                 false);
             given(
-                memberStatRepository.filterMemberStatAdvance(viewerMemberStat, filterMap, pageable))
+                memberStatRepositoryService.getMemberStatListByAttributeAndValuesMap(viewerMemberStat,
+                    convertedFilterMap, pageable))
                 .willReturn(emptySlice);
 
             // when
@@ -507,11 +521,11 @@ public class MemberStatQueryServiceTest {
         }
 
         @Test
-        @DisplayName("조회 대상 MemberStat이 존재하지 않는 경우 예외 발생")
+        @DisplayName("viewer의 MemberStat이 존재하지 않는 경우 예외 발생")
         void failure_when_criteria_memberStat_not_exists() {
             // MemberStat이 존재하지 않는 경우
-            given(memberStatRepository.findByMemberId(viewer.getId()))
-                .willReturn(Optional.empty());
+            given(memberStatRepositoryService.getMemberStatOrThrow(viewer.getId()))
+                .willThrow(new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
 
             // when & then
             assertThatThrownBy(
@@ -548,7 +562,7 @@ public class MemberStatQueryServiceTest {
             );
 
             // 성별 & 대학 필터링 후 가져올 수 있는 MemberStat 리스트 반환
-            given(memberStatRepository.findByMemberUniversityAndGenderWithoutSelf(
+            given(memberStatRepositoryService.getMemberStatListByUniversityAndGenderWithoutSelf(
                 viewer.getGender(),
                 viewer.getUniversity().getId(),
                 viewer.getId()
@@ -582,7 +596,7 @@ public class MemberStatQueryServiceTest {
         @DisplayName("멤버가 이미 MemberStat을 가지고 있는 경우 예외 발생")
         void failure_when_member_already_has_memberStat() {
             // given - viewer가 이미 MemberStat을 가지고 있도록 설정
-            given(memberStatRepository.existsByMemberId(viewer.getId()))
+            given(memberStatRepositoryService.existsMemberStat(viewer.getId()))
                 .willReturn(true);
 
             // when & then - 예외 발생 검증
@@ -600,21 +614,19 @@ public class MemberStatQueryServiceTest {
 
         private Member searchingMember;
         private MemberStat searchingMemberStat;
-        private String keyword;
 
         @BeforeEach
         void setUp() {
             University university = UniversityFixture.createTestUniversity();
             searchingMember = MemberFixture.정상_1(university);
             searchingMemberStat = MemberStatFixture.정상_1(searchingMember);
-            keyword = "테스트";
         }
 
         @Test
         @DisplayName("검색한 멤버가 MemberStat을 가지고 있지 않은 경우, 일치율 없이 결과 반환")
         void success_when_searchingMember_has_no_memberStat() {
             // given
-            given(memberStatRepository.findByMemberId(searchingMember.getId()))
+            given(memberStatRepositoryService.getMemberStatOptional(searchingMember.getId()))
                 .willReturn(Optional.empty());
 
             Member targetMember1 = MemberFixture.정상_2(searchingMember.getUniversity());
@@ -623,7 +635,7 @@ public class MemberStatQueryServiceTest {
             List<Member> matchedMembers = List.of(targetMember1, targetMember2);
 
             given(memberRepository.findMembersWithMatchingCriteria(
-                keyword,
+                "keyword",
                 searchingMember.getUniversity().getId(),
                 searchingMember.getGender(),
                 searchingMember.getId()
@@ -631,7 +643,7 @@ public class MemberStatQueryServiceTest {
 
             // when
             List<MemberStatSearchResponseDTO> response =
-                memberStatQueryService.getMemberSearchResponse(searchingMember, keyword);
+                memberStatQueryService.getMemberSearchResponse(searchingMember, "keyword");
 
             // then
             assertThat(response).hasSize(2);
@@ -643,7 +655,7 @@ public class MemberStatQueryServiceTest {
         @DisplayName("검색한 멤버가 MemberStat을 가지고 있는 경우, 일치율 포함하여 결과 반환")
         void success_when_searchingMember_has_memberStat() {
             // given
-            given(memberStatRepository.findByMemberId(searchingMember.getId()))
+            given(memberStatRepositoryService.getMemberStatOptional(searchingMember.getId()))
                 .willReturn(Optional.of(searchingMemberStat));
 
             Member targetMember1 = MemberFixture.정상_2(searchingMember.getUniversity());
@@ -657,13 +669,13 @@ public class MemberStatQueryServiceTest {
             matchRateMap.put(targetMemberStat1, 90); // 높은 일치율
             matchRateMap.put(targetMemberStat2, 70); // 낮은 일치율
 
-            given(memberStatRepository.getMemberStatsWithKeywordAndMatchRate(
-                searchingMemberStat, keyword
+            given(memberStatRepositoryService.getMemberStatByKeywordWithMatchRate(
+                searchingMemberStat, "keyword"
             )).willReturn(matchRateMap);
 
             // when
             List<MemberStatSearchResponseDTO> response =
-                memberStatQueryService.getMemberSearchResponse(searchingMember, keyword);
+                memberStatQueryService.getMemberSearchResponse(searchingMember, "keyword");
 
             // then
             assertThat(response).hasSize(2);

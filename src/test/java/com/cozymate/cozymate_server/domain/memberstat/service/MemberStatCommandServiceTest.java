@@ -11,7 +11,7 @@ import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.request.CreateMemberStatRequestDTO;
-import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.service.MemberStatCommandService;
 import com.cozymate.cozymate_server.fixture.MemberFixture;
 import com.cozymate.cozymate_server.fixture.MemberStatFixture;
@@ -38,7 +38,7 @@ public class MemberStatCommandServiceTest {
     private LifestyleMatchRateService lifestyleMatchRateService;
 
     @Mock
-    private MemberStatRepository memberStatRepository;
+    private MemberStatRepositoryService memberStatRepositoryService;
 
     @InjectMocks
     private MemberStatCommandService memberStatCommandService;
@@ -56,7 +56,7 @@ public class MemberStatCommandServiceTest {
             memberStat = MemberStatFixture.정상_1(member);
 
             // `save()`가 저장된 `memberStat`을 반환하도록 설정
-            given(memberStatRepository.save(any(MemberStat.class)))
+            given(memberStatRepositoryService.createMemberStat(any(MemberStat.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
 
             // `lifestyleMatchRateService.saveLifeStyleMatchRate()` 실행 시 예외 발생하지 않도록 설정
@@ -76,7 +76,7 @@ public class MemberStatCommandServiceTest {
             // then
             assertThat(memberId).isEqualTo(member.getId());
 
-            then(memberStatRepository).should(times(1)).save(any(MemberStat.class));
+            then(memberStatRepositoryService).should(times(1)).createMemberStat(any(MemberStat.class));
 
             then(lifestyleMatchRateService).should(times(1))
                 .saveLifeStyleMatchRate(any(MemberStat.class));
@@ -144,8 +144,8 @@ public class MemberStatCommandServiceTest {
             memberStat = MemberStatFixture.정상_1(member);
 
             // `findByMemberId()`가 저장된 `memberStat`을 반환하도록 설정
-            given(memberStatRepository.findByMemberId(member.getId()))
-                .willReturn(java.util.Optional.of(memberStat));
+            given(memberStatRepositoryService.getMemberStatOrThrow(member.getId()))
+                .willReturn(memberStat);
 
             // `saveLifeStyleMatchRate()` 실행 시 예외 발생하지 않도록 설정
             willDoNothing().given(lifestyleMatchRateService)
@@ -172,8 +172,8 @@ public class MemberStatCommandServiceTest {
         void failure_when_memberStat_not_exists() {
             // given
             CreateMemberStatRequestDTO requestDTO = MemberStatFixture.정상_생성_요청_DTO();
-            given(memberStatRepository.findByMemberId(member.getId()))
-                .willReturn(java.util.Optional.empty());
+            given(memberStatRepositoryService.getMemberStatOrThrow(member.getId()))
+                .willThrow(new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
 
             // when & then
             assertThatThrownBy(() -> memberStatCommandService.modifyMemberStat(member, requestDTO))

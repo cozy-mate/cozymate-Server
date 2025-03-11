@@ -28,7 +28,7 @@ public interface MemberStatRepository extends JpaRepository<MemberStat, Long>,
         "JOIN ms.member m " +
         "WHERE m.gender = :gender " +
         "AND m.university.id = :universityId ")
-        // 본인을 제와한 같은 학교 같은 성별을 추출하는 메소드
+        // 같은 학교 같은 성별을 추출하는 메소드
     List<MemberStat> findByMemberUniversityAndGender(
         @Param("gender") Gender gender,
         @Param("universityId") Long universityId);

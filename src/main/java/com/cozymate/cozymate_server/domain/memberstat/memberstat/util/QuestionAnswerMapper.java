@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class QuestionAnswerMapper {
 
-    private static QuestionAnswerMapper instance;
     private static Map<String, List<String>> questionAnswerMap;
     private static final String JSON_FILE = "memberstat/question_answer.json";
     private static final String AM = "오전";
@@ -26,7 +25,16 @@ public class QuestionAnswerMapper {
     private static final List<String> MULTI_VALUE_QUESTION = List.of("personality",
         "sleepingHabit");
 
-    static {load();}
+    private static final List<String> NOT_LIFESTYLE = List.of("birthYear", "acceptance",
+        "admissionYear", "major", "dormitoryName");
+
+    private static final List<String> DIRECTLY_STORED_KEYS = List.of(
+        "airConditioningIntensity", "heatingIntensity", "cleanSensitivity", "noiseSensitivity"
+    );
+
+    static {
+        load();
+    }
 
     private static void load() {
         if (questionAnswerMap == null) { // 중복 로딩 방지
@@ -145,5 +153,36 @@ public class QuestionAnswerMapper {
                 }
             ));
     }
+
+    public static Map<String, List<?>> convertFilterMap(Map<String, List<?>> filterMap) {
+        return filterMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> {
+                    String key = entry.getKey();
+                    List<?> values = entry.getValue();
+
+                    // 요청이 정수로 들어오는 값은 변환 없이 그대로 저장
+                    if (DIRECTLY_STORED_KEYS.contains(key)) {
+                        return values;
+                    }
+
+                    if (NOT_LIFESTYLE.contains(key)) {
+                        return values;
+                    }
+
+                    if (MULTI_VALUE_QUESTION.contains(key)) {
+                        return List.of(convertBitMaskToInteger(
+                            key, values.stream().map(Object::toString).toList()
+                        ));
+                    }
+
+                    return values.stream()
+                        .map(value -> getIndex(key, value.toString()))
+                        .toList();
+                }
+            ));
+    }
+
 }
 
