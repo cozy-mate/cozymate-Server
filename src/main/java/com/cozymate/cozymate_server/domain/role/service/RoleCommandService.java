@@ -15,6 +15,7 @@ import com.cozymate.cozymate_server.domain.role.validator.RoleValidator;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -33,6 +34,8 @@ public class RoleCommandService {
     private final MateRepository mateRepository;
     private final TodoCommandService todoCommandService;
     private final RoleValidator roleValidator;
+
+    private final Clock clock;
 
     /**
      * <p>Role 생성</p>
@@ -73,21 +76,20 @@ public class RoleCommandService {
     /**
      * 메이트가 방에서 나갔을 때 Role에서 할당 해제 + 투두에서도 할당 해제
      */
-    public void updateAssignedMateIfMateExitRoom(Mate mate, Long roomId) {
+    public void removeMateFromAssignedList(Mate mate, Long roomId) {
         List<Role> roleList = roleRepositoryService.getRoleListByRoomId(roomId);
         roleList.forEach(role -> {
             if (role.isAssigneeIn(mate.getId())) {
+                role.removeAssignee(mate.getId());
                 if (role.isAssignedMateListEmpty()) {
                     roleRepositoryService.deleteRole(role);
-                } else {
-                    role.removeAssignee(mate.getId());
                 }
             }
         });
     }
 
     /**
-     * Role을 조회할 때 유효한 할당자가 없으면 해당 Role을 삭제함 추후 삭제 예정 """다른곳에서 사용 금지"""
+     * Role을 조회할 때 유효한 할당자가 없으면 해당 Role을 삭제함 TODO: 추후 삭제 예정 """다른곳에서 사용 금지"""
      */
     public void deleteRoleIfMateEmpty(Role role) {
         roleRepositoryService.deleteRole(role);
@@ -118,7 +120,7 @@ public class RoleCommandService {
      * 오늘 요일에 해당하는 Role을 투두로 추가 (SCHEDULED)
      */
     public void addRoleToTodo() {
-        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
+        DayOfWeek dayOfWeek = LocalDate.now(clock).getDayOfWeek();
         int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
         List<Role> roleList = roleRepositoryService.getRoleList();
         roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
