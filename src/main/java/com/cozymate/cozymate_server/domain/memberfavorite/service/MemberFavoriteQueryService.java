@@ -4,7 +4,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberfavorite.MemberFavorite;
 import com.cozymate.cozymate_server.domain.memberfavorite.converter.MemberFavoriteConverter;
 import com.cozymate.cozymate_server.domain.memberfavorite.dto.response.MemberFavoriteResponseDTO;
-import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
+import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
@@ -23,15 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberFavoriteQueryService {
 
-    private final MemberFavoriteRepository memberFavoriteRepository;
+    private final MemberFavoriteRepositoryService memberFavoriteRepositoryService;
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
     public List<MemberFavoriteResponseDTO> getMemberFavoriteList(Member member) {
-        List<MemberFavorite> memberFavoriteList = memberFavoriteRepository.findByMember(member);
+        List<MemberFavorite> memberFavoriteList = memberFavoriteRepositoryService.getMemberFavoriteListByMember(
+            member);
 
         if (memberFavoriteList.isEmpty()) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         Map<Member, Long> targetMemberFavoriteIdMap = memberFavoriteList.stream()
@@ -39,7 +40,8 @@ public class MemberFavoriteQueryService {
 
         List<Member> findTargetMemberList = new ArrayList<>(targetMemberFavoriteIdMap.keySet());
 
-        Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(member.getId(),
+        Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
+            member.getId(),
             findTargetMemberList.stream().map(Member::getId).toList());
 
         List<String> criteriaPreferences = memberStatPreferenceQueryService.getPreferencesToList(
