@@ -18,12 +18,12 @@ public class FcmCommandService {
 
     public void createFcm(Member member, FcmRequestDTO fcmRequestDTO) {
         fcmRepositoryService.getFcmOptionalByClientId(member.getClientId())
-                .ifPresentOrElse(
-                    fcm -> fcm.updateToken(fcmRequestDTO.token()),
-                    () -> {
-                        Fcm fcm = FcmConverter.toEntity(member, fcmRequestDTO);
-                        fcmRepositoryService.createFcm(fcm);
-                    }
-                );
+            .ifPresentOrElse(
+                fcm -> fcm.updateToken(fcmRequestDTO.token()),
+                () -> {
+                    Fcm fcm = FcmConverter.toEntity(member, fcmRequestDTO);
+                    fcmRepositoryService.createFcm(fcm);
+                }
+            );
     }
 }
