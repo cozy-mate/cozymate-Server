@@ -4,10 +4,10 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberfavorite.MemberFavorite;
 import com.cozymate.cozymate_server.domain.memberfavorite.converter.MemberFavoriteConverter;
-import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
+import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepositoryService;
+import com.cozymate.cozymate_server.domain.memberfavorite.validator.MemberFavoriteValidator;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,43 +17,29 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MemberFavoriteCommandService {
 
-    private final MemberFavoriteRepository memberFavoriteRepository;
     private final MemberRepository memberRepository;
+    private final MemberFavoriteRepositoryService memberFavoriteRepositoryService;
+    private final MemberFavoriteValidator memberFavoriteValidator;
 
     public void saveMemberFavorite(Member member, Long targetMemberId) {
-        if (targetMemberId.equals(member.getId())) {
-            throw new GeneralException(ErrorStatus._MEMBERFAVORITE_CANNOT_REQUEST_SELF);
-        }
+        memberFavoriteValidator.checkSameMember(member, targetMemberId);
 
-        Member targetMember = validMember(targetMemberId);
+        Member targetMember = memberRepository.findById(targetMemberId).orElseThrow(
+            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        if (memberFavoriteRepository.existsByMemberAndTargetMember(member, targetMember)) {
-            throw new GeneralException(ErrorStatus._MEMBERFAVORITE_ALREADY_EXISTS);
-        }
+        memberFavoriteValidator.checkMemberStatIsNull(targetMember);
+        memberFavoriteValidator.checkDuplicateMemberFavorite(member, targetMember);
 
-        memberFavoriteRepository.save(MemberFavoriteConverter.toEntity(member, targetMember));
+        memberFavoriteRepositoryService.createMemberFavorite(
+            MemberFavoriteConverter.toEntity(member, targetMember));
     }
 
     public void deleteMemberFavorite(Member member, Long memberFavoriteId) {
-        MemberFavorite memberFavorite = memberFavoriteRepository.findById(memberFavoriteId)
-            .orElseThrow(
-                () -> new GeneralException(ErrorStatus._MEMBERFAVORITE_NOT_FOUND));
+        MemberFavorite memberFavorite = memberFavoriteRepositoryService.getMemberFavoriteByIdOrThrow(
+            memberFavoriteId);
 
-        if (!memberFavorite.getMember().getId().equals(member.getId())) {
-            throw new GeneralException(ErrorStatus._MEMBERFAVORITE_MEMBER_MISMATCH);
-        }
+        memberFavoriteValidator.checkDeletePermission(memberFavorite, member);
 
-        memberFavoriteRepository.delete(memberFavorite);
-    }
-
-    private Member validMember(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
-            () -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-
-        if (Objects.isNull(member.getMemberStat())) {
-            throw new GeneralException(ErrorStatus._MEMBERFAVORITE_CANNOT_FAVORITE_MEMBER_WITHOUT_MEMBERSTAT);
-        }
-
-        return member;
+        memberFavoriteRepositoryService.deleteMemberFavorite(memberFavorite);
     }
 }
