@@ -4,8 +4,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.converter.NotificationLogConverter;
 import com.cozymate.cozymate_server.domain.notificationlog.dto.response.NotificationLogResponseDTO;
-import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
-import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepository;
+import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepositoryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,13 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class NotificationLogQueryService {
 
-    private final NotificationLogRepository notificationLogRepository;
+    private final NotificationLogRepositoryService notificationLogRepositoryService;
 
     public List<NotificationLogResponseDTO> getNotificationLogList(Member member) {
-        List<NotificationLog> notificationLogs = notificationLogRepository.findByMemberAndCategoryNotInOrderByIdDesc(
-            member, List.of(NotificationCategory.COZY_HOME, NotificationCategory.COZY_ROLE));
+        List<NotificationLog> notificationLogList = notificationLogRepositoryService.getNotificationLogListByMember(
+            member);
 
-        List<NotificationLogResponseDTO> notificationLogResponseDTOList = notificationLogs.stream()
+        List<NotificationLogResponseDTO> notificationLogResponseDTOList = notificationLogList.stream()
             .map(notificationLog -> NotificationLogConverter.toNotificationLogResponseDTO(
                 notificationLog.getContent(),
                 notificationLog.getCreatedAt(),

@@ -8,14 +8,12 @@ import com.cozymate.cozymate_server.domain.fcm.dto.push.target.HostAndMemberAndR
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetDTO;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetReverseDTO;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetReverseWithRoomNameDTO;
-import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
+import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.fcm.dto.MessageResult;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
-import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
-import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogBulkRepository;
-import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepository;
+import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepositoryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -38,11 +36,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FcmPushService {
 
-    private final FirebaseMessaging firebaseMessaging;
-    private final NotificationLogRepository notificationLogRepository;
-    private final FcmRepository fcmRepository;
     private final MessageUtil messageUtil;
-    private final NotificationLogBulkRepository notificationLogBulkRepository;
+    private final FirebaseMessaging firebaseMessaging;
+    private final FcmRepositoryService fcmRepositoryService;
+    private final NotificationLogRepositoryService notificationLogRepositoryService;
 
     /**
      * 투두 role 리마인더 스케줄러에서 사용중
@@ -168,7 +165,7 @@ public class FcmPushService {
             log.info("알림 전송 성공 갯수: {}", batchResponse.getSuccessCount());
 
             NotificationLog notificationLog = messageResult.getNotificationLog();
-            notificationLogRepository.save(notificationLog);
+            notificationLogRepositoryService.createNotificationLog(notificationLog);
 
             log.info("{}의 알림 로그 저장", notificationLog.getMember().getNickname());
         }
@@ -195,7 +192,7 @@ public class FcmPushService {
                         log.error("알림 전송 실패 - 토큰: {}, 에러 코드: {}", token, errorCode);
 
                         if (errorCode == MessagingErrorCode.UNREGISTERED) {
-                            fcmRepository.updateValidByToken(token); // 해당 토큰을 비활성화
+                            fcmRepositoryService.updateFcmValidToFalseByToken(token); // 해당 토큰을 비활성화
                             log.info("비활성화된 FCM 토큰: {}", token);
                         }
                     }
@@ -236,7 +233,7 @@ public class FcmPushService {
             .toList();
 
         if (!successMemberIdList.isEmpty()) {
-            notificationLogBulkRepository.saveAll(successMemberIdList, NotificationCategory.NOTICE,
+            notificationLogRepositoryService.createNoticeNotificationLog(successMemberIdList,
                 content, targetId);
             log.info("공지 사항 알림 내역 저장 완료");
         }
@@ -262,7 +259,7 @@ public class FcmPushService {
                         log.error("알림 전송 실패 - 토큰: {}, 에러 코드: {}", token, errorCode);
 
                         if (errorCode == MessagingErrorCode.UNREGISTERED) {
-                            fcmRepository.updateValidByToken(token); // 해당 토큰을 비활성화
+                            fcmRepositoryService.updateFcmValidToFalseByToken(token); // 해당 토큰을 비활성화
                             log.info("비활성화된 FCM 토큰: {}", token);
                         }
                     }
