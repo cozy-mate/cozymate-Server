@@ -21,6 +21,8 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.Memb
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAnswerMapper;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
+import com.cozymate.cozymate_server.domain.room.enums.RoomType;
+import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
@@ -52,6 +54,8 @@ public class MemberStatQueryService {
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final RoomQueryService roomQueryService;
 
+    private final RoomRepository roomRepository;
+
 
     private static final Long NO_ROOMMATE = 0L;
     private static final Long NOT_FAVORITE = 0L;
@@ -78,6 +82,8 @@ public class MemberStatQueryService {
      * @param targetMemberId 조회 대상 사용자의 ID
      * @return MemberStat과 룸메이트 정보, 선호 여부 등을 포함한 DTO
      * @throws GeneralException MEMBERSTAT_NOT_EXISTS 예외 발생 가능
+     *
+     * todo: 개선 필요 쿼리가 너무 여러개임
      */
     @Transactional(readOnly = true)
     public MemberStatDetailAndRoomIdAndEqualityResponseDTO getMemberStatWithId(Member viewer,
@@ -91,12 +97,14 @@ public class MemberStatQueryService {
 
         Long roomId = getRoomIdByMateList(mateList);
 
+        boolean isRoomPublic = roomRepository.findById(roomId).get().getRoomType().equals(RoomType.PUBLIC);
+
         boolean hasRequestedRoomEntry = hasRequestedRoomEntry(roomId, viewer, mateList);
 
         Long favoriteId = getFavoriteId(viewer, targetMemberId);
 
         return MemberStatConverter.toMemberStatDetailAndRoomIdAndEqualityResponseDTO(
-            memberStat, matchRate, roomId, hasRequestedRoomEntry, favoriteId
+            memberStat, matchRate, roomId, isRoomPublic, hasRequestedRoomEntry, favoriteId
         );
     }
 

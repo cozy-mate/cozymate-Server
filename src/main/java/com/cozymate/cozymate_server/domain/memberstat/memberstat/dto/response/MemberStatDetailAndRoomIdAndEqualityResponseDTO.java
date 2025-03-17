@@ -9,6 +9,7 @@ public record MemberStatDetailAndRoomIdAndEqualityResponseDTO(
     MemberStatDetailResponseDTO memberStatDetail,
     Integer equality,
     Long roomId,
+    Boolean isRoomPublic,
     Boolean hasRequestedRoomEntry,
     Long favoriteId
 

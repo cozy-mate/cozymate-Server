@@ -115,6 +115,7 @@ public class MemberStatConverter {
         MemberStat memberStat,
         Integer matchRate,
         Long roomId,
+        Boolean isRoomPublic,
         Boolean hasRequestedRoomEntry,
         Long favoriteId) {
         return MemberStatDetailAndRoomIdAndEqualityResponseDTO.builder()
@@ -124,6 +125,7 @@ public class MemberStatConverter {
             .memberStatDetail(toMemberStatDetailDTOFromEntity(memberStat))
             .equality(matchRate)
             .roomId(roomId)
+            .isRoomPublic(isRoomPublic)
             .hasRequestedRoomEntry(hasRequestedRoomEntry)
             .favoriteId(favoriteId)
             .build();
