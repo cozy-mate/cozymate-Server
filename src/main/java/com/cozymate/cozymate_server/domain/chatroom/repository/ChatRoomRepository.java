@@ -13,11 +13,11 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     @Query("""
        select cr from ChatRoom cr
-       where (cr.memberA = :sender and cr.memberB = :recipient)
-       or (cr.memberA = :recipient and cr.memberB = :sender)
+       where (cr.memberA = :memberA and cr.memberB = :memberB)
+       or (cr.memberA = :memberB and cr.memberB = :memberA)
       """)
-    Optional<ChatRoom> findByMemberAAndMemberB(@Param("sender") Member sender,
-        @Param("recipient") Member recipient);
+    Optional<ChatRoom> findByMemberAAndMemberB(@Param("memberA") Member memberA,
+        @Param("memberB") Member memberB);
 
     @Query("select cr from ChatRoom cr where cr.memberA = :member or cr.memberB = :member")
     List<ChatRoom> findAllByMember(@Param("member") Member member);

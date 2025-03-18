@@ -3,8 +3,10 @@ package com.cozymate.cozymate_server.domain.room.service;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
+import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
@@ -16,9 +18,9 @@ import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseD
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
-import com.cozymate.cozymate_server.domain.room.enums.RoomType;
-import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.room.repository.RoomRepositoryService;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
+import com.cozymate.cozymate_server.domain.room.validator.RoomValidator;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
@@ -39,27 +41,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RoomQueryService {
 
-    private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatRepository memberStatRepository;
     private final RoomFavoriteRepository roomFavoriteRepository;
     private final RoomHashtagRepository roomHashtagRepository;
+    private final MemberRepository memberRepository;
+    private final RoomValidator roomValidator;
+    private final RoomRepositoryService roomRepositoryService;
+    private final MateRepositoryService mateRepositoryService;
 
     public RoomDetailResponseDTO getRoomById(Long roomId, Long memberId) {
-        Room room = validateRoom(roomId);
-        validateRoomAccess(room, memberId);
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
+        roomValidator.checkRoomAccess(room, memberId);
         return processRoomDetails(room, memberId);
     }
 
     public RoomDetailResponseDTO getRoomByInviteCode(String inviteCode, Long memberId) {
-        Room room = roomRepository.findByInviteCode(inviteCode)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+        Room room = roomRepositoryService.getRoomByInviteCodeOrThrow(inviteCode);
         return processRoomDetails(room, memberId);
-    }
-
-    public Boolean isValidRoomName(String roomName) {
-        return !roomRepository.existsByName(roomName);
     }
 
     public RoomIdResponseDTO getExistRoom(Long memberId) {
@@ -72,12 +72,14 @@ public class RoomQueryService {
     }
 
     public RoomIdResponseDTO getExistRoom(Long otherMemberId, Long memberId) {
+        memberRepository.findById(otherMemberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         return getExistRoom(otherMemberId);
     }
 
     public List<MateDetailResponseDTO> getInvitedMemberList(Long roomId, Long memberId) {
-        Room room = validateRoom(roomId);
-        validateRoomMember(room.getId(), memberId);
+        Room room = roomRepositoryService.getRoomOrThrow(roomId);
+        mateRepositoryService.getJoinedMateOrThrow(room.getId(), memberId);
         List<Mate> invitedMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(),
             EntryStatus.INVITED);
 
@@ -87,10 +89,11 @@ public class RoomQueryService {
 
     public List<MateDetailResponseDTO> getPendingMemberList(Long managerId) {
         // 방장이 속한 방의 정보
-        Room room = validateRoom(getExistRoom(managerId).roomId());
+        Room room = roomRepositoryService.getRoomOrThrow(getExistRoom(managerId).roomId());
+        Mate manager = mateRepositoryService.getJoinedMateOrThrow(room.getId(), managerId);
 
         // 방장인지 검증
-        validateRoomManager(room.getId(), managerId);
+        roomValidator.checkRoomManager(manager);
 
         List<Mate> pendingMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(),
             EntryStatus.PENDING);
@@ -114,7 +117,7 @@ public class RoomQueryService {
 
     public List<RoomDetailResponseDTO> getRoomList(Long memberId, EntryStatus entryStatus) {
         // 해당 memberId와 entryStatus에 맞는 방을 가져옴
-        List<Room> rooms = roomRepository.findRoomsWithMates(memberId, entryStatus);
+        List<Room> rooms = roomRepositoryService.getRoomListByMemberIdAndEntryStatus(memberId, entryStatus);
 
         // 방 해시태그 정보 저장
         Map<Long, List<String>> roomHashtagsMap = getRoomHashtagsMap(rooms);
@@ -186,26 +189,6 @@ public class RoomQueryService {
             .orElse(0L);
     }
 
-    private void validateRoomAccess(Room room, Long memberId) {
-        if (room.getRoomType() == RoomType.PRIVATE) {
-            validateRoomMember(room.getId(), memberId);
-        }
-    }
-
-    private void validateRoomMember(Long roomId, Long memberId) {
-        mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
-    }
-
-    private void validateRoomManager(Long roomId, Long managerId) {
-        Mate manager = mateRepository.findByRoomIdAndIsRoomManager(roomId, true)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_MANAGER_NOT_FOUND));
-
-        if (!manager.getMember().getId().equals(managerId)) {
-            throw new GeneralException(ErrorStatus._NOT_ROOM_MANAGER);
-        }
-    }
-
     public List<RoomSearchResponseDTO> searchRooms(String keyword, Member member) {
         Long universityId = member.getUniversity().getId();
         Gender gender = member.getGender();
@@ -220,7 +203,7 @@ public class RoomQueryService {
 //            );
 
         // 학교, 성별로만 필터링
-        List<Room> roomList = roomRepository.findMatchingPublicRooms(
+        List<Room> roomList = roomRepositoryService.getRoomListByKeywordAndUniversityAndGender(
             keyword,
             universityId,
             gender
@@ -274,18 +257,22 @@ public class RoomQueryService {
                 .isPresent());
     }
 
-    public Boolean isMemberInEntryStatus(Long memberId, Long managerId, EntryStatus entryStatus) {
-        Room room = validateRoom(getExistRoom(managerId).roomId());
+    public Boolean isMemberInEntryStatus(Long memberId, Member manager, EntryStatus entryStatus) {
+        memberRepository.findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+
+        Room room = roomRepositoryService.getRoomOrThrow(getExistRoom(manager.getId()).roomId());
+        Mate managerMate = mateRepositoryService.getJoinedMateOrThrow(room.getId(), manager.getId());
 
         // 방장인지 검증
-        validateRoomManager(room.getId(), managerId);
+        roomValidator.checkRoomManager(managerMate);
 
         return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId,
             entryStatus);
     }
 
     public Boolean isEntryStatusToRoom(Long roomId, Long memberId, EntryStatus entryStatus) {
-        validateRoom(roomId);
+        roomRepositoryService.getRoomOrThrow(roomId);
         return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
             entryStatus);
     }
@@ -363,8 +350,4 @@ public class RoomQueryService {
         return roomHashtagsMap.getOrDefault(room.getId(), List.of());
     }
 
-    private Room validateRoom(Long roomId) {
-        return roomRepository.findById(roomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
-    }
 }

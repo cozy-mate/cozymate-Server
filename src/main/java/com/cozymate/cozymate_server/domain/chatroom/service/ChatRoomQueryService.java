@@ -1,13 +1,13 @@
 package com.cozymate.cozymate_server.domain.chatroom.service;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.CountChatRoomsWithNewChatDTO;
-import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.chatroom.converter.ChatRoomConverter;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.validator.ChatRoomValidator;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
@@ -27,8 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatRoomQueryService {
 
-    private final ChatRoomRepository chatRoomRepository;
-    private final ChatRepository chatRepository;
+    private final ChatRoomRepositoryService chatRoomRepositoryService;
+    private final ChatRepositoryService chatRepositoryService;
     private final MemberRepository memberRepository;
     private final ChatRoomValidator chatRoomValidator;
 
@@ -36,7 +36,7 @@ public class ChatRoomQueryService {
     private static final String UNKNOWN_SENDER_NICKNAME = "(알수없음)";
 
     public List<ChatRoomDetailResponseDTO> getChatRoomList(Member member) {
-        List<ChatRoom> findChatRoomList = chatRoomRepository.findAllByMember(member);
+        List<ChatRoom> findChatRoomList = chatRoomRepositoryService.getChatRoomListByMember(member);
 
         if (findChatRoomList.isEmpty()) {
             return List.of();
@@ -87,7 +87,7 @@ public class ChatRoomQueryService {
     }
 
     public CountChatRoomsWithNewChatDTO countChatRoomsWithNewChat(Member member) {
-        List<ChatRoom> findChatRoomList = chatRoomRepository.findAllByMember(member);
+        List<ChatRoom> findChatRoomList = chatRoomRepositoryService.getChatRoomListByMember(member);
 
         if (findChatRoomList.isEmpty()) {
             return ChatRoomConverter.toCountChatRoomsWithNewChatDTO(NO_NEW_CHAT_ROOMS);
@@ -130,15 +130,14 @@ public class ChatRoomQueryService {
         Member recipient = memberRepository.findById(recipientId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        Optional<ChatRoom> findChatRoom = chatRoomRepository.findByMemberAAndMemberB(member,
-            recipient);
+        Optional<ChatRoom> findChatRoom = chatRoomRepositoryService.getChatRoomByMemberAAndMemberBOptional(
+            member, recipient);
 
         return ChatRoomConverter.toChatRoomSimpleDTO(findChatRoom, recipient);
     }
 
     private Chat getLatestChatByChatRoom(ChatRoom chatRoom) {
-        return chatRepository.findTopByChatRoomOrderByIdDesc(chatRoom)
-            .orElse(null);
+        return chatRepositoryService.getLastChatByChatRoomOrNull(chatRoom);
     }
 
     private LocalDateTime getLastDeleteAtByMember(ChatRoom chatRoom, Member member) {

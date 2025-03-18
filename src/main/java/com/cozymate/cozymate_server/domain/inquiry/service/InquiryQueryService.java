@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.inquiry.service;
 import com.cozymate.cozymate_server.domain.inquiry.Inquiry;
 import com.cozymate.cozymate_server.domain.inquiry.converter.InquiryConverter;
 import com.cozymate.cozymate_server.domain.inquiry.dto.response.InquiryDetailResponseDTO;
-import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepository;
+import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class InquiryQueryService {
 
-    private final InquiryRepository inquiryRepository;
+    private final InquiryRepositoryService inquiryRepositoryService;
 
     public List<InquiryDetailResponseDTO> getInquiryList(Member member) {
-        List<Inquiry> inquiryList = inquiryRepository.findByMemberOrderByCreatedAtDesc(member);
+        List<Inquiry> inquiryList = inquiryRepositoryService.getInquiryListByMember(member);
 
         return inquiryList.stream()
             .map(inquiry -> InquiryConverter.toInquiryDetailResponseDTO(inquiry))
@@ -26,6 +26,6 @@ public class InquiryQueryService {
     }
 
     public Boolean getInquiryRecord(Member member) {
-        return inquiryRepository.existsByMember(member);
+        return inquiryRepositoryService.existInquiryByMember(member);
     }
 }

@@ -4,13 +4,11 @@ import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chat.converter.ChatConverter;
 import com.cozymate.cozymate_server.domain.chat.dto.response.ChatContentResponseDTO;
 import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO;
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService;
 import com.cozymate.cozymate_server.domain.chat.validator.ChatValidator;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
-import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
-import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatQueryService {
 
-    private final ChatRepository chatRepository;
-    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRepositoryService chatRepositoryService;
+    private final ChatRoomRepositoryService chatRoomRepositoryService;
     private final ChatValidator chatValidator;
 
     private static final String UNKNOWN_SENDER_NICKNAME = "(알수없음)";
@@ -31,8 +29,7 @@ public class ChatQueryService {
 
     @Transactional
     public ChatListResponseDTO getChatList(Member member, Long chatRoomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._CHATROOM_NOT_FOUND));
+        ChatRoom chatRoom = chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoomId);
 
         chatValidator.checkMemberMisMatch(member, chatRoom);
 
@@ -53,7 +50,8 @@ public class ChatQueryService {
     }
 
     private List<Chat> getFilteredChatList(ChatRoom chatRoom, Member member) {
-        List<Chat> findChatList = chatRepository.findAllByChatRoom(chatRoom);
+        List<Chat> findChatList = chatRepositoryService.getChatListByChatRoom(chatRoom);
+
         LocalDateTime memberLastDeleteAt = getMemberLastDeleteAt(chatRoom, member);
         if (chatValidator.isDeleteAtNull(memberLastDeleteAt)) {
             return findChatList;

@@ -19,7 +19,7 @@ public interface RoomFavoriteRepository extends JpaRepository<RoomFavorite, Long
     List<RoomFavorite> findByMember(Member member);
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query("delete from RoomFavorite rf where rf.room.id in :roomIds")
     void deleteAllByRoomIds(@Param("roomIds") List<Long> roomIds);
 

@@ -3,7 +3,9 @@ package com.cozymate.cozymate_server.domain.rule.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
@@ -20,6 +22,7 @@ import com.cozymate.cozymate_server.fixture.MemberFixture;
 import com.cozymate.cozymate_server.fixture.RoomFixture;
 import com.cozymate.cozymate_server.fixture.RuleFixture;
 import com.cozymate.cozymate_server.fixture.UniversityFixture;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,13 +66,11 @@ public class RuleCommandServiceTest {
         given(mateRepository.findByRoomIdAndMemberIdAndEntryStatus(room.getId(), mate.getId(),
             EntryStatus.JOINED))
             .willReturn(Optional.of(mate));
-        willDoNothing().given(ruleValidator).checkRuleMaxLimit(any(Long.class));
-        willDoNothing().given(ruleValidator).checkUpdatePermission(any(Mate.class), any(Rule.class));
     }
 
 
     @Nested
-    @MockitoSettings(strictness = Strictness.LENIENT)
+    @MockitoSettings(strictness = Strictness.LENIENT) // 규칙 수정에서는 권한 검증만 테스트하므로 느슨한 검증 설정
     class createRule {
 
         private CreateRuleRequestDTO requestDto;
@@ -84,11 +85,11 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        @DisplayName("기존 규칙이 없을 때 Rule을 생성한다")
-        void success_when_existed_rule_count_0() {
-            // given
-            given(ruleRepositoryService.getRuleCountByRoomId(room.getId()))
-                .willReturn(0); // 기존에 규칙이 없는 경우
+        @DisplayName("최대 개수 제한에 걸리지 않으면 생성한다")
+        void success_when_under_rule_max_limit() {
+            // given - 최대 개수 제한 예외 발생하지 않음
+            willDoNothing()
+                .given(ruleValidator).checkRuleMaxLimit(any(Long.class));
 
             // when
             RuleIdResponseDTO responseDto = ruleCommandService.createRule(member, room.getId(),
@@ -100,37 +101,20 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        @DisplayName("기존 규칙이 9개일 때 Rule을 생성한다")
-        void success_when_existed_rule_count_9() {
-            // given
-            given(ruleRepositoryService.getRuleCountByRoomId(room.getId()))
-                .willReturn(9); // 기존에 규칙이 9개인 경우
+        @DisplayName("최대 개수 제한에 걸리면 에러가 발생한다.")
+        void failure_when_over_rule_max_limit() {
+            // given - 최대 개수 제한 예외 발생
+            willThrow(new GeneralException(ErrorStatus._RULE_MAX_LIMIT))
+                .given(ruleValidator).checkRuleMaxLimit(any(Long.class));
 
-            // when
-            RuleIdResponseDTO responseDto = ruleCommandService.createRule(member, room.getId(),
-                requestDto);
-
-            // then
-            assertThat(responseDto.ruleId()).isEqualTo(rule.getId());
-
+            // when, then
+            assertThatThrownBy(
+                () -> ruleCommandService.createRule(member, room.getId(), requestDto))
+                .isInstanceOf(GeneralException.class);
         }
-
-//        @Test
-//        @DisplayName("기존 규칙이 10개일 때 Rule 최대 제한에 걸린다")
-//        void failure_when_existed_rule_over_10() {
-//            // given
-//            given(ruleRepositoryService.getRuleCountByRoomId(room.getId()))
-//                .willReturn(10); // 기존에 규칙이 10개인 경우
-//
-//            // when, then
-//            assertThatThrownBy(
-//                () -> ruleCommandService.createRule(member, room.getId(), requestDto))
-//                .isInstanceOf(GeneralException.class);
-//        }
     }
 
     @Nested
-    @MockitoSettings(strictness = Strictness.LENIENT)
     class deleteRule {
 
         @BeforeEach
@@ -141,37 +125,39 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        @DisplayName("존재하는 규칙을 삭제할 때 삭제된다")
-        void success_when_rule_exist() {
+        @DisplayName("권한이 있는 Mate가 규칙을 삭제할 수 있다")
+        void success_when_has_permission() {
             // given
             given(ruleRepositoryService.getRuleOrThrow(rule.getId()))
                 .willReturn(rule); // 규칙 조회
+            // Mate가 Rule에 대한 권한을 가짐
+            willDoNothing().given(ruleValidator)
+                .checkUpdatePermission(any(Mate.class), any(Rule.class));
 
             // when
             ruleCommandService.deleteRule(member, room.getId(), rule.getId());
             // then void
         }
 
-//        @Test
-//        @DisplayName("Rule의 방 정보가 Room과 일치하지 않으면 실패한다.")
-//        void failure_when_member_not_in_room() {
-//            // given
-//            Member member2 = MemberFixture.정상_2(UniversityFixture.createTestUniversity()); // 다른 멤버
-//            Room room2 = RoomFixture.정상_2(member2); // 다른 방
-//            Rule rule2 = RuleFixture.정상_1(room2); // 생성되었을 때 사용할 규칙
-//
-//            given(ruleRepositoryService.getRuleOrThrow(rule2.getId()))
-//                .willReturn(rule2); // 규칙 조회
-//
-//            // when, then
-//            assertThatThrownBy(
-//                () -> ruleCommandService.deleteRule(member, room.getId(), rule2.getId()))
-//                .isInstanceOf(GeneralException.class);
-//        }
+        @Test
+        @DisplayName("권한이 없는 Mate가 규칙을 삭제할 수 없다.")
+        void failure_when_has_not_permission() {
+            // given
+            given(ruleRepositoryService.getRuleOrThrow(rule.getId()))
+                .willReturn(rule); // 규칙 조회
+            // Mate가 Rule에 대한 권한을 가지지 않음
+            willThrow(new GeneralException(ErrorStatus._RULE_PERMISSION_DENIED))
+                .given(ruleValidator).checkUpdatePermission(any(Mate.class), any(Rule.class));
+
+            // when, then
+            assertThatThrownBy(
+                () -> ruleCommandService.deleteRule(member, room.getId(), rule.getId()))
+                .isInstanceOf(GeneralException.class);
+        }
     }
 
     @Nested
-    @MockitoSettings(strictness = Strictness.LENIENT)
+    @MockitoSettings(strictness = Strictness.LENIENT) // 규칙 수정에서는 권한 검증만 테스트하므로 느슨한 검증 설정
     class updateRule {
 
         private CreateRuleRequestDTO requestDto;
@@ -185,11 +171,14 @@ public class RuleCommandServiceTest {
         }
 
         @Test
-        @DisplayName("규칙이 존재하고, 멤버가 방에 속할 때 성공한다.")
-        void success_when_rule_exist() {
+        @DisplayName("권한을 가진 Mate가 규칙을 수정할 수 있다.")
+        void success_when_has_permission() {
             // given
             given(ruleRepositoryService.getRuleOrThrow(rule.getId()))
                 .willReturn(rule); // 규칙 조회
+            // Mate가 Rule에 대한 권한을 가짐
+            willDoNothing().given(ruleValidator)
+                .checkUpdatePermission(any(Mate.class), any(Rule.class));
 
             // when
             ruleCommandService.updateRule(member, room.getId(), rule.getId(), requestDto);
@@ -199,22 +188,20 @@ public class RuleCommandServiceTest {
             assertThat(rule.getMemo()).isEqualTo(requestDto.memo());
         }
 
-//        @Test
-//        @DisplayName("Rule의 방 정보가 Room과 일치하지 않으면 실패한다.")
-//        void failure_when_member_not_in_room() {
-//            // given
-//            Member member2 = MemberFixture.정상_2(UniversityFixture.createTestUniversity()); // 다른 멤버
-//            Room room2 = RoomFixture.정상_2(member2); // 다른 방
-//            Rule rule2 = RuleFixture.정상_1(room2); // 생성되었을 때 사용할 규칙
-//
-//            given(ruleRepositoryService.getRuleOrThrow(rule2.getId()))
-//                .willReturn(rule2); // 규칙 조회
-//
-//            // when, then
-//            assertThatThrownBy(
-//                () -> ruleCommandService.updateRule(member, room.getId(), rule2.getId(),
-//                    requestDto))
-//                .isInstanceOf(GeneralException.class);
-//        }
+        @Test
+        @DisplayName("권한을 가지지 않은 Mate는 규칙을 수정할 수 없다.")
+        void failure_when_has_not_permission() {
+            // given
+            given(ruleRepositoryService.getRuleOrThrow(rule.getId()))
+                .willReturn(rule); // 규칙 조회
+            willThrow(new GeneralException(ErrorStatus._RULE_PERMISSION_DENIED))
+                .given(ruleValidator).checkUpdatePermission(any(Mate.class), any(Rule.class));
+
+            // when, then
+            assertThatThrownBy(
+                () -> ruleCommandService.updateRule(member, room.getId(), rule.getId(),
+                    requestDto))
+                .isInstanceOf(GeneralException.class);
+        }
     }
 }

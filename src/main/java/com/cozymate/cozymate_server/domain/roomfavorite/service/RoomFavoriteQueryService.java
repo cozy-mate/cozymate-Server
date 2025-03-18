@@ -14,7 +14,7 @@ import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.converter.RoomFavoriteConverter;
 import com.cozymate.cozymate_server.domain.roomfavorite.dto.response.RoomFavoriteResponseDTO;
-import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
+import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepositoryService;
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,18 +30,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RoomFavoriteQueryService {
 
-    private final RoomFavoriteRepository roomFavoriteRepository;
     private final MateRepository mateRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final RoomHashtagQueryService roomHashtagQueryService;
-
+    private final RoomFavoriteRepositoryService roomFavoriteRepositoryService;
 
     public List<RoomFavoriteResponseDTO> getFavoriteRoomList(Member member) {
-        List<RoomFavorite> roomFavoriteList = roomFavoriteRepository.findByMember(member);
+        List<RoomFavorite> roomFavoriteList = roomFavoriteRepositoryService.getRoomFavoriteListByMember(
+            member);
 
         if (roomFavoriteList.isEmpty()) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         Map<Room, Long> roomFavoriteIdMap = roomFavoriteList.stream()
@@ -78,6 +78,9 @@ public class RoomFavoriteQueryService {
         // 로그인 사용자의 member stat
         MemberStat memberStat = member.getMemberStat();
 
+        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(
+            responseRoomList);
+
         List<RoomFavoriteResponseDTO> favoriteRoomResponseList = responseRoomList.stream()
             .map(room -> {
                 List<Mate> mates = roomIdMatesMap.get(room.getId());
@@ -97,8 +100,6 @@ public class RoomFavoriteQueryService {
                         .toList()
                 );
 
-                Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(responseRoomList);
-
                 // 로그인 사용자와 방 일치율 계산
                 Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
 
@@ -113,8 +114,7 @@ public class RoomFavoriteQueryService {
             .toList();
 
         // 조회 조건에 맞지 않는 방 찜 삭제 처리
-        deleteFavoriteRoom(partitionedRoomStatusMap.get(false),
-            partitionedMateNumMap.get(false));
+        deleteFavoriteRoom(partitionedRoomStatusMap.get(false), partitionedMateNumMap.get(false));
 
         return favoriteRoomResponseList;
     }
@@ -140,7 +140,7 @@ public class RoomFavoriteQueryService {
 
         // deletedRoomIdList에 들어 있는 roomId에 해당하는 방 찜 삭제 처리
         if (!deleteTargetRoomIdList.isEmpty()) {
-            roomFavoriteRepository.deleteAllByRoomIds(deleteTargetRoomIdList);
+            roomFavoriteRepositoryService.deleteRoomFavoriteByRoomIds(deleteTargetRoomIdList);
         }
     }
 }
