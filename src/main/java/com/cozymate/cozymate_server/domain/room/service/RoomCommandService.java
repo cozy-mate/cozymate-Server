@@ -171,7 +171,7 @@ public class RoomCommandService {
     }
 
     public Boolean checkRoomName(String roomName) {
-        return roomValidator.isDuplicatedRoomName(roomName);
+        return roomValidator.isUniqueRoomName(roomName);
     }
 
     @Transactional

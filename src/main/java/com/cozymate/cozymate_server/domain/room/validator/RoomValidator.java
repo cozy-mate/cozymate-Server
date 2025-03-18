@@ -19,7 +19,7 @@ public class RoomValidator {
     private final RoomRepositoryService roomRepositoryService;
 
     // 방 이름 중복 검사
-    public Boolean isDuplicatedRoomName(String roomName) {
+    public Boolean isUniqueRoomName(String roomName) {
         return !roomRepositoryService.getRoomNameExists(roomName);
     }
 
