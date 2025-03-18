@@ -32,9 +32,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     /**
      * 사용자에게 방 추천을 해줄 때 조회할 수 있는 방 목록을 보는 쿼리
-     * roomHashtags, hashtag로 인한 N+1 문제를 해결하기 위해 EntityGraph 사용
      */
-    @EntityGraph(attributePaths = {"roomHashtags", "roomHashtags.hashtag"})
     @Query("""
         SELECT distinct r FROM Room r
         WHERE r.roomType = :roomType
