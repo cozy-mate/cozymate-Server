@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.request.Cre
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberStatCommandService {
 
     private final LifestyleMatchRateService lifestyleMatchRateService;
-    private final MemberStatRepository memberStatRepository;
+    private final MemberStatRepositoryService memberStatRepositoryService;
 
     @Transactional
     public Long createMemberStat(
         Member member, CreateMemberStatRequestDTO createMemberStatRequestDTO) {
-        MemberStat memberStat = memberStatRepository.save(
+        MemberStat memberStat = memberStatRepositoryService.createMemberStat(
             MemberStatConverter.toEntity(member, createMemberStatRequestDTO));
 
         lifestyleMatchRateService.saveLifeStyleMatchRate(memberStat);
@@ -37,8 +38,7 @@ public class MemberStatCommandService {
     @Transactional
     public Long modifyMemberStat(
         Member member, CreateMemberStatRequestDTO createMemberStatRequestDTO) {
-        MemberStat memberStat = memberStatRepository.findByMemberId(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS));
+        MemberStat memberStat = memberStatRepositoryService.getMemberStatOrThrow(member.getId());
 
         memberStat.update(
             MemberStatConverter.toMemberUniversityStatFromDto(createMemberStatRequestDTO),
