@@ -29,27 +29,27 @@ public class RoomRepositoryService {
     }
 
     // 방 이름 중복 검사
-    public boolean existsByRoomName(String roomName) {
+    public boolean getRoomNameExists(String roomName) {
         return roomRepository.existsByName(roomName);
     }
 
-    public List<Room> getRoomsWithMates(Long memberId, EntryStatus entryStatus) {
-        return roomRepository.findRoomsWithMates(memberId, entryStatus);
-    }
-
-    public List<Room> getMatchingPublicRooms(String keyword, Long universityId, Gender gender) {
-        return roomRepository.findMatchingPublicRooms(keyword, universityId, gender);
-    }
-
     // 초대 코드 중복 체크
-    public boolean existsRoomByInviteCode(String inviteCode) {
+    public boolean getRoomInviteCodeExists(String inviteCode) {
         return roomRepository.existsByInviteCode(inviteCode);
     }
 
-    // 방에 참여중인지 검사
-    public boolean existsByMemberIdAndStatuses(Long memberId) {
+    // 참여 중인 방이 있는지 검사
+    public boolean getRoomParticipationExistsByMemberId(Long memberId) {
         return roomRepository.existsByMemberIdAndStatuses(memberId, RoomStatus.ENABLE,
             RoomStatus.WAITING, EntryStatus.JOINED);
+    }
+
+    public List<Room> getRoomListByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus) {
+        return roomRepository.findRoomsWithMates(memberId, entryStatus);
+    }
+
+    public List<Room> getRoomListByKeywordAndUniversityAndGender(String keyword, Long universityId, Gender gender) {
+        return roomRepository.findMatchingPublicRooms(keyword, universityId, gender);
     }
 
     // 방 저장

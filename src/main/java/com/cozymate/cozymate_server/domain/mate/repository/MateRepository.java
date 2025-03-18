@@ -24,16 +24,10 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     @Query("SELECT m FROM Mate m WHERE m.isRoomManager = true AND m.room.id IN :roomIds")
     List<Mate> findRoomManagers(@Param("roomIds") List<Long> roomIds);
 
-    List<Mate> findByRoomId(Long roomId);
-
     @EntityGraph(attributePaths = {"member", "member.memberStat"})
     Optional<Mate> findByRoomIdAndIsRoomManager(Long roomId, boolean isRoomManager);
 
     Optional<Mate> findByRoomIdAndMemberId(Long roomId, Long memberId);
-
-    @Query("SELECT COUNT(m) > 0 FROM Mate m WHERE m.member.id = :memberId AND (m.room.status = :status1 OR m.room.status = :status2)")
-    boolean existsByMemberIdAndRoomStatuses(@Param("memberId") Long memberId,
-        @Param("status1") RoomStatus status1, @Param("status2") RoomStatus status2);
 
     Optional<Mate> findByRoomIdAndMemberIdAndEntryStatus(Long roomId, Long memberId,
         EntryStatus status);
@@ -41,9 +35,6 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     boolean existsByRoomIdAndMemberIdAndEntryStatus(Long roomId, Long memberId, EntryStatus status);
 
     List<Mate> findAllByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus);
-
-    boolean existsByMemberIdAndEntryStatusAndRoomStatusIn(Long memberId, EntryStatus entryStatus,
-        List<RoomStatus> roomStatuses);
 
     boolean existsByMemberIdAndRoomId(Long MemberId, Long RoomId);
 

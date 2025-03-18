@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.room.service;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
+import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
@@ -17,7 +18,6 @@ import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseD
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
-import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepositoryService;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.room.validator.RoomValidator;
@@ -41,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RoomQueryService {
 
-    private final RoomRepository roomRepository;
     private final MateRepository mateRepository;
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatRepository memberStatRepository;
@@ -50,6 +49,7 @@ public class RoomQueryService {
     private final MemberRepository memberRepository;
     private final RoomValidator roomValidator;
     private final RoomRepositoryService roomRepositoryService;
+    private final MateRepositoryService mateRepositoryService;
 
     public RoomDetailResponseDTO getRoomById(Long roomId, Long memberId) {
         Room room = roomRepositoryService.getRoomOrThrow(roomId);
@@ -79,7 +79,7 @@ public class RoomQueryService {
 
     public List<MateDetailResponseDTO> getInvitedMemberList(Long roomId, Long memberId) {
         Room room = roomRepositoryService.getRoomOrThrow(roomId);
-        roomValidator.checkRoomMember(room.getId(), memberId);
+        mateRepositoryService.getJoinedMateOrThrow(room.getId(), memberId);
         List<Mate> invitedMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(),
             EntryStatus.INVITED);
 
@@ -90,9 +90,10 @@ public class RoomQueryService {
     public List<MateDetailResponseDTO> getPendingMemberList(Long managerId) {
         // 방장이 속한 방의 정보
         Room room = roomRepositoryService.getRoomOrThrow(getExistRoom(managerId).roomId());
+        Mate manager = mateRepositoryService.getJoinedMateOrThrow(room.getId(), managerId);
 
         // 방장인지 검증
-        roomValidator.checkRoomManager(room.getId(), managerId);
+        roomValidator.checkRoomManager(manager);
 
         List<Mate> pendingMates = mateRepository.findByRoomIdAndEntryStatus(room.getId(),
             EntryStatus.PENDING);
@@ -116,7 +117,7 @@ public class RoomQueryService {
 
     public List<RoomDetailResponseDTO> getRoomList(Long memberId, EntryStatus entryStatus) {
         // 해당 memberId와 entryStatus에 맞는 방을 가져옴
-        List<Room> rooms = roomRepositoryService.getRoomsWithMates(memberId, entryStatus);
+        List<Room> rooms = roomRepositoryService.getRoomListByMemberIdAndEntryStatus(memberId, entryStatus);
 
         // 방 해시태그 정보 저장
         Map<Long, List<String>> roomHashtagsMap = getRoomHashtagsMap(rooms);
@@ -202,7 +203,7 @@ public class RoomQueryService {
 //            );
 
         // 학교, 성별로만 필터링
-        List<Room> roomList = roomRepositoryService.getMatchingPublicRooms(
+        List<Room> roomList = roomRepositoryService.getRoomListByKeywordAndUniversityAndGender(
             keyword,
             universityId,
             gender
@@ -261,9 +262,10 @@ public class RoomQueryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         Room room = roomRepositoryService.getRoomOrThrow(getExistRoom(manager.getId()).roomId());
+        Mate managerMate = mateRepositoryService.getJoinedMateOrThrow(room.getId(), manager.getId());
 
         // 방장인지 검증
-        roomValidator.checkRoomManager(room.getId(), manager.getId());
+        roomValidator.checkRoomManager(managerMate);
 
         return mateRepository.existsByRoomIdAndMemberIdAndEntryStatus(room.getId(), memberId,
             entryStatus);
