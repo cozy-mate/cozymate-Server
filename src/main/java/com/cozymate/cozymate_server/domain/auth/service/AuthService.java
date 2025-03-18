@@ -7,7 +7,7 @@ import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.auth.userdetails.TemporaryMember;
 import com.cozymate.cozymate_server.domain.auth.utils.AuthConverter;
 import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
-import com.cozymate.cozymate_server.domain.member.service.MemberQueryService;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 
@@ -30,7 +30,7 @@ public class AuthService implements UserDetailsService {
 
     public static final String MEMBER_TOKEN_MESSAGE = "기존 사용자 토큰 발급 성공";
     private final JwtUtil jwtUtil;
-    private final MemberQueryService memberQueryService;
+    private final MemberRepositoryService memberRepositoryService;
     private final TokenRepository tokenRepository;
 
     public TokenResponseDTO reissue(String refreshToken) {
@@ -81,7 +81,7 @@ public class AuthService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String clientId) {
         // 기존회원인 경우
-        if (memberQueryService.isPresent(clientId)) {
+        if (memberRepositoryService.getExistenceByClientId(clientId)) {
             return loadMember(clientId);
         }
         // 임시 회원인 경우
@@ -92,7 +92,7 @@ public class AuthService implements UserDetailsService {
     // 기존회원인 경우
     // 회원을 찾아 그 정보로 MemberDetails 만드는 함수
     public MemberDetails loadMember(String clientId) {
-        return new MemberDetails(memberQueryService.findByClientId(clientId));
+        return new MemberDetails(memberRepositoryService.getMemberByClientIdOrThrow(clientId));
     }
 
     // 임시 회원인 경우

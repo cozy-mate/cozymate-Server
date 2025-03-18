@@ -3,10 +3,11 @@ package com.cozymate.cozymate_server.domain.member.controller;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
+import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
-import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
+import com.cozymate.cozymate_server.domain.member.service.MemberService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
@@ -28,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/members")
 public class MemberController {
 
-    private final MemberCommandService memberCommandService;
+    private final MemberService memberService;
 
     @PostMapping("/sign-in")
     @Operation(summary = "[말즈] 로그인",
@@ -54,7 +56,7 @@ public class MemberController {
         @Valid @RequestBody SignInRequestDTO signInRequestDTO
     ) {
 
-        SignInResponseDTO signInResponseDTO = memberCommandService.signIn(signInRequestDTO);
+        SignInResponseDTO signInResponseDTO = memberService.signIn(signInRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
     }
@@ -64,7 +66,7 @@ public class MemberController {
         description = "false : 사용 불가, true : 사용 가능")
     ResponseEntity<ApiResponse<Boolean>> checkNickname(
         @RequestParam @Length(min = 2, max = 10) String nickname) {
-        Boolean isValid = memberCommandService.checkNickname(nickname);
+        Boolean isValid = memberService.checkNickname(nickname);
 
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
             .body(ApiResponse.onSuccess(isValid));
@@ -85,7 +87,7 @@ public class MemberController {
         @RequestAttribute("client_id") String clientId,
         @RequestBody @Valid SignUpRequestDTO signUpRequestDTO) {
 
-        SignInResponseDTO signInResponseDTO = memberCommandService.signUp(clientId,
+        SignInResponseDTO signInResponseDTO = memberService.signUp(clientId,
             signUpRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
@@ -102,7 +104,7 @@ public class MemberController {
     ResponseEntity<ApiResponse<MemberDetailResponseDTO>> getMemberInfo(
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        MemberDetailResponseDTO memberDetailResponseDTO = memberCommandService.getMemberDetailInfo(
+        MemberDetailResponseDTO memberDetailResponseDTO = memberService.getMemberDetailInfo(
             memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(memberDetailResponseDTO));
@@ -124,7 +126,7 @@ public class MemberController {
         @RequestParam String nickname,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberCommandService.updateNickname(memberDetails.member(), nickname);
+        memberService.updateNickname(memberDetails.member(), nickname);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
 
@@ -137,7 +139,7 @@ public class MemberController {
         Integer persona,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberCommandService.updatePersona(memberDetails.member(), persona);
+        memberService.updatePersona(memberDetails.member(), persona);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
 
@@ -150,7 +152,7 @@ public class MemberController {
         LocalDate localDate,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberCommandService.updateBirthday(memberDetails.member(), localDate);
+        memberService.updateBirthday(memberDetails.member(), localDate);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
 
@@ -164,20 +166,33 @@ public class MemberController {
         String majorName,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberCommandService.updateMajor(memberDetails.member(), majorName);
+        memberService.updateMajor(memberDetails.member(), majorName);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
 
+    @PatchMapping("/update")
+    @Operation(summary = "[말즈] 사용자 정보 수정",
+        description = "사용자의 기본정보를 수정합니다."
+            + "<br>닉네임 : `nickname=말즈`"
+            + "<br>프로필 이미지 : `persona=3`"
+            + "<br>생일 : `birthDay=2000-01-01`"
+            + "<br>학과명 : `majorName=컴퓨터공학과`")
+    ResponseEntity<ApiResponse<Boolean>> update(
+        @RequestBody @Valid UpdateRequestDTO requestDTO,
+        @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        memberService.update(memberDetails.member(), requestDTO);
+        return ResponseEntity.ok(ApiResponse.onSuccess(true));
+    }
 
     @Operation(summary = "[말즈] 회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
     @DeleteMapping("/withdraw")
     public ResponseEntity<ApiResponse<String>> withdraw(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid WithdrawRequestDTO withdrawRequestDTO) {
-        memberCommandService.withdraw(withdrawRequestDTO,memberDetails);
+        memberService.withdraw(withdrawRequestDTO,memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
-
 
 }

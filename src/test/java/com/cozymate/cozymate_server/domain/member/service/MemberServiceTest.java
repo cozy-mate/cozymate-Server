@@ -2,12 +2,13 @@ package com.cozymate.cozymate_server.domain.member.service;
 
 
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
+import com.cozymate.cozymate_server.domain.member.validator.MemberValidator;
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import com.cozymate.cozymate_server.fixture.MemberFixture;
 
 import com.cozymate.cozymate_server.fixture.UniversityFixture;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
-import com.cozymate.cozymate_server.domain.member.service.MemberQueryService;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -34,19 +34,19 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
-public class MemberCommandServiceTest {
+public class MemberServiceTest {
 
     @Mock
-    private MemberRepository memberRepository;
+    private UniversityRepositoryService universityRepositoryService;
 
     @Mock
-    private UniversityRepository universityRepository;
+    private MemberRepositoryService memberRepositoryService;
 
     @Mock
-    private MemberQueryService memberQueryService;
+    private MemberValidator memberValidator;
 
     @InjectMocks
-    private MemberCommandService memberCommandService;
+    private MemberService memberService;
 
     private Member testMember;
     private Member testMember2;
@@ -56,17 +56,16 @@ public class MemberCommandServiceTest {
     @BeforeEach
     void setUp() {
         University university = UniversityFixture.createTestUniversity();
-        universityRepository.save(university);
+        universityRepositoryService.createUniversity(university);
 
-        when(universityRepository.save(university)).thenReturn(university);
-        when(universityRepository.findById(anyLong())).thenReturn(Optional.of(university));
+        when(universityRepositoryService.createUniversity(university)).thenReturn(university);
 
         List<Member> members = MemberFixture.정상_남성_리스트(university, 2);
         testMember = members.get(0);
         testMember2 = members.get(1);
 
-        when(memberRepository.findById(testMember.getId())).thenReturn(Optional.of(testMember));
-        when(memberRepository.save(testMember)).thenReturn(testMember);
+        when(memberRepositoryService.getMemberByIdOrThrow(testMember.getId())).thenReturn(testMember);
+        when(memberRepositoryService.createMember(testMember)).thenReturn(testMember);
     }
 
     @Nested
@@ -78,14 +77,14 @@ public class MemberCommandServiceTest {
         void success_when_nickname_is_valid() {
             // given
             String newNickname = "newTestUser";
-            doNothing().when(memberQueryService).isValidNickName(VALID_NICKNAME);
+            doNothing().when(memberValidator).checkNickname(newNickname);
 
             // when
-            memberCommandService.updateNickname(testMember, newNickname);
+            memberService.updateNickname(testMember, newNickname);
 
             // then
             assertThat(testMember.getNickname()).isEqualTo(newNickname);
-            verify(memberRepository, times(1)).findById(testMember.getId());
+            verify(memberRepositoryService, times(1)).getMemberByIdOrThrow(testMember.getId());
         }
 
         @Test
@@ -94,11 +93,11 @@ public class MemberCommandServiceTest {
             // given
             String duplicateNickname = testMember2.getNickname();
             doThrow(new GeneralException(ErrorStatus._NICKNAME_EXISTING))
-                .when(memberQueryService)
-                .isValidNickName(duplicateNickname);
+                .when(memberValidator)
+                .checkNickname(duplicateNickname);
 
             // when & then
-            assertThatThrownBy(() -> memberCommandService.updateNickname(testMember, duplicateNickname))
+            assertThatThrownBy(() -> memberService.updateNickname(testMember, duplicateNickname))
                 .isInstanceOf(GeneralException.class);
         }
     }
@@ -114,11 +113,11 @@ public class MemberCommandServiceTest {
             int newPersona = 10;
 
             // when
-            memberCommandService.updatePersona(testMember, newPersona);
+            memberService.updatePersona(testMember, newPersona);
 
             // then
             assertThat(testMember.getPersona()).isEqualTo(newPersona);
-            verify(memberRepository, times(1)).findById(testMember.getId());
+            verify(memberRepositoryService, times(1)).getMemberByIdOrThrow(testMember.getId());
         }
     }
 
@@ -133,11 +132,11 @@ public class MemberCommandServiceTest {
             LocalDate newBirthday = LocalDate.of(1999, 12, 31);
 
             // when
-            memberCommandService.updateBirthday(testMember, newBirthday);
+            memberService.updateBirthday(testMember, newBirthday);
 
             // then
             assertThat(testMember.getBirthDay()).isEqualTo(newBirthday);
-            verify(memberRepository, times(1)).findById(testMember.getId());
+            verify(memberRepositoryService, times(1)).getMemberByIdOrThrow(testMember.getId());
         }
     }
 
@@ -152,11 +151,11 @@ public class MemberCommandServiceTest {
             String newMajor = "전자공학과";
 
             // when
-            memberCommandService.updateMajor(testMember, newMajor);
+            memberService.updateMajor(testMember, newMajor);
 
             // then
             assertThat(testMember.getMajorName()).isEqualTo(newMajor);
-            verify(memberRepository, times(1)).findById(testMember.getId());
+            verify(memberRepositoryService, times(1)).getMemberByIdOrThrow(testMember.getId());
         }
     }
 }
