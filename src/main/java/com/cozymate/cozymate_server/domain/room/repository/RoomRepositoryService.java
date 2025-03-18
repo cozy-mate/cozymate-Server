@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,10 @@ public class RoomRepositoryService {
     public Room getRoomOrThrow(Long roomId) {
         return roomRepository.findById(roomId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROOM_NOT_FOUND));
+    }
+
+    public Optional<Room> getRoomOptional(Long roomId){
+        return roomRepository.findById(roomId);
     }
 
     // 초대 코드로 방 조회
