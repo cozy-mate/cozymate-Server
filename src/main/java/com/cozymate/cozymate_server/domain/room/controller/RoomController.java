@@ -133,7 +133,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<String>> joinRoom(@PathVariable Long roomId,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        roomCommandService.joinRoom(roomId, memberDetails.member().getId());
+        roomCommandService.joinRoom(roomId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 참여 완료"));
     }
 
@@ -159,7 +159,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<String>> inviteCozymate(
         @PathVariable Long inviteeId, @AuthenticationPrincipal MemberDetails inviterDetails) {
-        roomCommandService.sendInvitation(inviteeId, inviterDetails.member().getId());
+        roomCommandService.sendInvitation(inviteeId, inviterDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 초대 요청 완료"));
     }
 
@@ -174,7 +174,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<String>> respondToInvitation(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails inviteeDetails, @RequestParam boolean accept) {
-        roomCommandService.respondToInvitation(roomId, inviteeDetails.member().getId(), accept);
+        roomCommandService.respondToInvitation(roomId, inviteeDetails.member(), accept);
         return ResponseEntity.ok(ApiResponse.onSuccess(accept ? "초대 요청 수락 완료" : "초대 요청 거절 완료"));
     }
 
@@ -226,7 +226,7 @@ public class RoomController {
     public ResponseEntity<ApiResponse<String>> forceQuitRoom(
         @PathVariable Long roomId, @PathVariable Long memberId,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        roomCommandService.forceQuitRoom(roomId, memberId, memberDetails.member().getId());
+        roomCommandService.forceQuitRoom(roomId, memberId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("강제 퇴장 완료"));
     }
 
@@ -242,7 +242,7 @@ public class RoomController {
     public ResponseEntity<ApiResponse<String>> cancelInvitation(
         @PathVariable Long inviteeId,
         @AuthenticationPrincipal MemberDetails inviterDetails) {
-        roomCommandService.cancelInvitation(inviteeId, inviterDetails.member().getId());
+        roomCommandService.cancelInvitation(inviteeId, inviterDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("초대 취소 완료"));
     }
 
@@ -259,7 +259,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<String>> requestToJoin(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        roomCommandService.requestToJoin(roomId, memberDetails.member().getId());
+        roomCommandService.requestToJoin(roomId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 참여 요청 완료"));
     }
 
@@ -272,7 +272,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<String>> cancelRequestToJoin(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        roomCommandService.cancelRequestToJoin(roomId, memberDetails.member().getId());
+        roomCommandService.cancelRequestToJoin(roomId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("방 참여 요청 취소 완료"));
     }
 
@@ -350,7 +350,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<String>> convertToPublicRoom(
         @PathVariable Long roomId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        roomCommandService.changeToPublicRoom(roomId, memberDetails.member().getId());
+        roomCommandService.changeToPublicRoom(roomId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("공개방 전환 완료"));
     }
 
@@ -389,7 +389,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<Boolean>> isInvitedMember(
         @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.isMemberInEntryStatus(memberId, memberDetails.member().getId(), EntryStatus.INVITED)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.isMemberInEntryStatus(memberId, memberDetails.member(), EntryStatus.INVITED)));
     }
 
     @GetMapping("pending-status/{memberId}")
@@ -402,7 +402,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<Boolean>> isPendingMember(
         @PathVariable Long memberId, @AuthenticationPrincipal MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.isMemberInEntryStatus(memberId, memberDetails.member().getId(), EntryStatus.PENDING)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.isMemberInEntryStatus(memberId, memberDetails.member(), EntryStatus.PENDING)));
     }
 
     @GetMapping("/{roomId}/invited-status")
