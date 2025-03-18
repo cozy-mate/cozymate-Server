@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
+import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.ChatRoomSimpleDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.CountChatRoomsWithNewChatDTO;
-import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.chatroom.validator.ChatRoomValidator;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
@@ -38,13 +38,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ChatRoomQueryServiceTest {
 
     @Mock
-    ChatRoomRepository chatRoomRepository;
+    ChatRoomRepositoryService chatRoomRepositoryService;
     @Mock
-    ChatRepository chatRepository;
+    ChatRepositoryService chatRepositoryService;
     @Mock
     MemberRepository memberRepository;
     @Spy
-    ChatRoomValidator chatRoomValidator = new ChatRoomValidator(Mockito.mock(ChatRepository.class));
+    ChatRoomValidator chatRoomValidator = new ChatRoomValidator(Mockito.mock(ChatRepositoryService.class));
     @InjectMocks
     ChatRoomQueryService chatRoomQueryService;
 
@@ -94,7 +94,7 @@ class ChatRoomQueryServiceTest {
         @DisplayName("조회된 ChatRoom이 없는 경우 빈 리스트를 반환한다.")
         void success_when_no_chatrooms_exist() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(List.of());
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(List.of());
 
             // when
             List<ChatRoomDetailResponseDTO> result = chatRoomQueryService.getChatRoomList(memberA);
@@ -102,23 +102,22 @@ class ChatRoomQueryServiceTest {
             // then
             assertThat(result).isEmpty();
 
-            then(chatRepository).should(times(0))
-                .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
-            then(chatRepository).should(times(0))
-                .existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(any(Member.class),
-                    any(ChatRoom.class), any());
+            then(chatRepositoryService).should(times(0))
+                .getLastChatByChatRoomOrNull(any(ChatRoom.class));
+            then(chatRoomValidator).should(times(0))
+                .existNewChat(any(Member.class), any(ChatRoom.class), any());
         }
 
         @Test
         @DisplayName("memberA 조회 기준 두 ChatRoom의 가장 최근 Chat이 abChatRoom인 경우 abChatRoom, acChatRoom 순으로 조회된다.")
         void success_when_latest_chat_is_abChatRoom() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(
                 List.of(abChatRoom, acChatRoom));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(abChatRoom)).willReturn(
-                Optional.of(memberAToMemberBChat2));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
-                Optional.of(memberCToMemberAChat2));
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(abChatRoom)).willReturn(
+                memberAToMemberBChat2);
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(acChatRoom)).willReturn(
+                memberCToMemberAChat2);
 
             // when
             List<ChatRoomDetailResponseDTO> result = chatRoomQueryService.getChatRoomList(memberA);
@@ -142,8 +141,8 @@ class ChatRoomQueryServiceTest {
             assertThat(acChatRoomResult.chatRoomId()).isEqualTo(acChatRoom.getId());
             assertThat(acChatRoomResult.memberId()).isEqualTo(memberC.getId());
 
-            then(chatRepository).should(times(2))
-                .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
+            then(chatRepositoryService).should(times(2))
+                .getLastChatByChatRoomOrNull(any(ChatRoom.class));
             then(chatRoomValidator).should(times(2))
                 .existNewChat(any(Member.class), any(ChatRoom.class), any());
         }
@@ -152,12 +151,12 @@ class ChatRoomQueryServiceTest {
         @DisplayName("memberA 조회 기준 두 ChatRoom의 가장 최근 Chat이 acChatRoom인 경우 acChatRoom, abChatRoom 순으로 조회된다.")
         void success_success_when_latest_chat_is_acChatRoom() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(
                 List.of(abChatRoom, acChatRoom));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(abChatRoom)).willReturn(
-                Optional.of(memberAToMemberBChat2));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
-                Optional.of(memberCToMemberAChat2));
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(abChatRoom)).willReturn(
+                memberAToMemberBChat2);
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(acChatRoom)).willReturn(
+                memberCToMemberAChat2);
             memberCToMemberAChat2.setCreatedAtForTest(LocalDateTime.now());
             memberAToMemberBChat2.setCreatedAtForTest(LocalDateTime.now().minusMinutes(1));
 
@@ -183,8 +182,8 @@ class ChatRoomQueryServiceTest {
             assertThat(abChatRoomResult.chatRoomId()).isEqualTo(abChatRoom.getId());
             assertThat(abChatRoomResult.memberId()).isEqualTo(memberB.getId());
 
-            then(chatRepository).should(times(2))
-                .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
+            then(chatRepositoryService).should(times(2))
+                .getLastChatByChatRoomOrNull(any(ChatRoom.class));
             then(chatRoomValidator).should(times(2))
                 .existNewChat(any(Member.class), any(ChatRoom.class), any());
         }
@@ -193,12 +192,12 @@ class ChatRoomQueryServiceTest {
         @DisplayName("새로운 Chat이 존재하는 ChatRoom의 hasNewChat은 true, 존재하지 않는 경우 false를 반환한다.")
         void success_when_chatroom_has_new_chat_flag_is_set_correctly() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(
                 List.of(abChatRoom, acChatRoom));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(abChatRoom)).willReturn(
-                Optional.of(memberBToMemberAChat1));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
-                Optional.of(memberCToMemberAChat2));
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(abChatRoom)).willReturn(
+                memberBToMemberAChat1);
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(acChatRoom)).willReturn(
+                memberCToMemberAChat2);
 
             abChatRoom.updateMemberALastSeenAt();
             acChatRoom.updateMemberALastSeenAt();
@@ -218,8 +217,8 @@ class ChatRoomQueryServiceTest {
             assertThat(abChatRoomResult.hasNewChat()).isTrue();
             assertThat(acChatRoomResult.hasNewChat()).isFalse();
 
-            then(chatRepository).should(times(2))
-                .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
+            then(chatRepositoryService).should(times(2))
+                .getLastChatByChatRoomOrNull(any(ChatRoom.class));
             then(chatRoomValidator).should(times(2))
                 .existNewChat(any(Member.class), any(ChatRoom.class), any(LocalDateTime.class));
         }
@@ -228,12 +227,12 @@ class ChatRoomQueryServiceTest {
         @DisplayName("상대가 탈퇴한 ChatRoom이 존재하는 경우 탈퇴한 상대의 ChatRoom에 대해서는 (알수없음)으로 조회한다.")
         void success_when_chatroom_has_null_member() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(
                 List.of(memberBIsNullChatRoom, acChatRoom));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(memberBIsNullChatRoom)).willReturn(
-                Optional.of(senderIsNullChat));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
-                Optional.of(memberCToMemberAChat2)); // -10분
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(memberBIsNullChatRoom)).willReturn(
+                senderIsNullChat);
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(acChatRoom)).willReturn(
+                memberCToMemberAChat2); // -10분
 
             // when
             List<ChatRoomDetailResponseDTO> result = chatRoomQueryService.getChatRoomList(memberA);
@@ -260,8 +259,8 @@ class ChatRoomQueryServiceTest {
             assertThat(acChatRoomResult.chatRoomId()).isEqualTo(acChatRoom.getId());
             assertThat(acChatRoomResult.memberId()).isEqualTo(memberC.getId());
 
-            then(chatRepository).should(times(2))
-                .findTopByChatRoomOrderByIdDesc(any(ChatRoom.class));
+            then(chatRepositoryService).should(times(2))
+                .getLastChatByChatRoomOrNull(any(ChatRoom.class));
             then(chatRoomValidator).should(times(1))
                 .existNewChat(any(Member.class), any(ChatRoom.class), any());
         }
@@ -275,7 +274,7 @@ class ChatRoomQueryServiceTest {
         void success_when_exists_recipient_and_exists_chatroom() {
             // given
             given(memberRepository.findById(memberB.getId())).willReturn(Optional.of(memberB));
-            given(chatRoomRepository.findByMemberAAndMemberB(memberA, memberB)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomByMemberAAndMemberBOptional(memberA, memberB)).willReturn(
                 Optional.of(abChatRoom));
 
             // when
@@ -292,7 +291,7 @@ class ChatRoomQueryServiceTest {
         void success_when_exists_recipient_and_does_not_exists_chatroom() {
             // given
             given(memberRepository.findById(memberB.getId())).willReturn(Optional.of(memberB));
-            given(chatRoomRepository.findByMemberAAndMemberB(memberA, memberB)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomByMemberAAndMemberBOptional(memberA, memberB)).willReturn(
                 Optional.empty());
 
             // when
@@ -324,7 +323,7 @@ class ChatRoomQueryServiceTest {
         @DisplayName("조회된 ChatRoom이 없는 경우 0을 반환한다.")
         void success_when_does_not_exists_chatroom() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(List.of());
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(List.of());
 
             // when
             CountChatRoomsWithNewChatDTO result = chatRoomQueryService.countChatRoomsWithNewChat(
@@ -338,12 +337,12 @@ class ChatRoomQueryServiceTest {
         @DisplayName("조회된 ChatRoom이 2개이고 그 중 내가 조회하지 않은 ChatRoom은 0개인 경우 0을 반환한다.")
         void success_when_unseen_chatrooms_are_zero_among_two_chatrooms() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(
                 List.of(abChatRoom, acChatRoom));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(abChatRoom)).willReturn(
-                Optional.of(memberAToMemberBChat2));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
-                Optional.of(memberCToMemberAChat2));
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(abChatRoom)).willReturn(
+                memberAToMemberBChat2);
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(acChatRoom)).willReturn(
+                memberCToMemberAChat2);
             given(chatRoomValidator.existNewChat(memberB, abChatRoom,
                 abChatRoom.getMemberALastSeenAt())).willReturn(false);
             given(chatRoomValidator.existNewChat(memberC, acChatRoom,
@@ -361,12 +360,12 @@ class ChatRoomQueryServiceTest {
         @DisplayName("조회된 ChatRoom이 2개이고 그 중 내가 조회하지 않은 ChatRoom은 1개인 경우 1을 반환한다.")
         void success_when_unseen_chatrooms_are_one_among_two_chatrooms() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(
                 List.of(abChatRoom, acChatRoom));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(abChatRoom)).willReturn(
-                Optional.of(memberAToMemberBChat2));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
-                Optional.of(memberCToMemberAChat2));
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(abChatRoom)).willReturn(
+                memberAToMemberBChat2);
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(acChatRoom)).willReturn(
+                memberCToMemberAChat2);
             given(chatRoomValidator.existNewChat(memberB, abChatRoom,
                 abChatRoom.getMemberALastSeenAt())).willReturn(true);
             given(chatRoomValidator.existNewChat(memberC, acChatRoom,
@@ -384,12 +383,12 @@ class ChatRoomQueryServiceTest {
         @DisplayName("조회된 ChatRoom의 상대가 탈퇴한 경우 무조건 새로운 쪽지 없음 처리한다.")
         void success_when_chatroom_has_null_member() {
             // given
-            given(chatRoomRepository.findAllByMember(memberA)).willReturn(
+            given(chatRoomRepositoryService.getChatRoomListByMember(memberA)).willReturn(
                 List.of(memberBIsNullChatRoom, acChatRoom));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(memberBIsNullChatRoom)).willReturn(
-                Optional.of(senderIsNullChat));
-            given(chatRepository.findTopByChatRoomOrderByIdDesc(acChatRoom)).willReturn(
-                Optional.of(memberCToMemberAChat2));
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(memberBIsNullChatRoom)).willReturn(
+                senderIsNullChat);
+            given(chatRepositoryService.getLastChatByChatRoomOrNull(acChatRoom)).willReturn(
+                memberCToMemberAChat2);
             given(chatRoomValidator.existNewChat(memberC, acChatRoom,
                 acChatRoom.getMemberALastSeenAt())).willReturn(true);
 
