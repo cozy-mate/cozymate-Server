@@ -39,7 +39,7 @@ public class S3CommandService {
         try {
             return fileName.substring(fileName.lastIndexOf("."));
         } catch (StringIndexOutOfBoundsException e) {
-            throw new GeneralException(ErrorStatus._FILE_EXTENSTION_ERROR);
+            throw new GeneralException(ErrorStatus._FILE_EXTENSION_ERROR);
         }
     }
 

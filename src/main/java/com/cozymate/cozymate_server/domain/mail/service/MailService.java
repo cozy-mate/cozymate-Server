@@ -11,10 +11,9 @@ import com.cozymate.cozymate_server.domain.mail.dto.request.VerifyRequestDTO;
 import com.cozymate.cozymate_server.domain.mail.dto.response.VerifyResponseDTO;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import jakarta.mail.MessagingException;
@@ -43,7 +42,7 @@ public class MailService {
     private final JavaMailSender mailSender;
     private final MailRepository mailRepository;
     private final MemberRepository memberRepository;
-    private final UniversityRepository universityRepository;
+    private final UniversityRepositoryService universityRepositoryService;
     private final AuthService authService;
 
 
@@ -55,8 +54,8 @@ public class MailService {
     @Transactional
     public void sendUniversityAuthenticationCode(MemberDetails memberDetails,
         MailSendRequestDTO sendDTO) {
-        University university = universityRepository.findById(sendDTO.universityId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+        University university = universityRepositoryService.getUniversityByIdOrThrow(
+            sendDTO.universityId());
 
         String mailAddress = sendDTO.mailAddress();
         validateMailAddress(mailAddress, university.getMailPattern());
@@ -70,8 +69,8 @@ public class MailService {
     @Transactional
     public VerifyResponseDTO verifyMemberUniversity(MemberDetails memberDetails,
         VerifyRequestDTO verifyDTO) {
-        University memberUniversity = universityRepository.findById(verifyDTO.universityId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+        University memberUniversity = universityRepositoryService.getUniversityByIdOrThrow(
+            verifyDTO.universityId());
 
         memberDetails.member().verifyMemberUniversity(memberUniversity, verifyDTO.majorName());
         memberRepository.save(memberDetails.member());

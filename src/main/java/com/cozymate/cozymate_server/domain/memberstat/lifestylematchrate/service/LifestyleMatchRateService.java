@@ -8,7 +8,7 @@ import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.reposit
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 
 import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +29,7 @@ public class LifestyleMatchRateService {
     private final LifestyleMatchRateRepository lifestyleMatchRateRepository;
     private final MemberStatRepository memberStatRepository;
 
-    private final UniversityRepository universityRepository;
+    private final UniversityRepositoryService universityRepositoryService;
     private static final Integer NO_EQUALITY = null;
 
 
@@ -101,7 +101,7 @@ public class LifestyleMatchRateService {
 
     @Transactional
     public void calculateAllLifeStyleMatchRate() {
-        universityRepository.findAll()
+        universityRepositoryService.getAllUniversityList()
             .forEach(university -> {
                 calculateAllLifeStyleMatchRateWithSameUniversityAndGender(
                     university, Gender.MALE);
