@@ -25,7 +25,7 @@ public class ReportValidator {
     }
 
     public void checkReportedMemberExists(Long reportedMemberId) {
-        if (memberRepository.existsById(reportedMemberId)) {
+        if (!memberRepository.existsById(reportedMemberId)) {
             throw new GeneralException(ErrorStatus._REPORT_MEMBER_NOT_FOUND);
         }
     }
