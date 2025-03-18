@@ -3,7 +3,7 @@ package com.cozymate.cozymate_server.domain.member.service;
 import com.cozymate.cozymate_server.domain.auth.repository.TokenRepository;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
-import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
+import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepositoryService;
 import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepository;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
@@ -15,7 +15,7 @@ import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavor
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstatpreference.repository.MemberStatPreferenceRepository;
-import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepository;
+import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepositoryService;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
@@ -46,8 +46,8 @@ public class MemberWithdrawService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRepository chatRepository;
     private final ReportRepository reportRepository;
-    private final FcmRepository fcmRepository;
-    private final NotificationLogRepository notificationLogRepository;
+    private final FcmRepositoryService fcmRepositoryService;
+    private final NotificationLogRepositoryService notificationLogRepositoryService;
     private final MateRepository mateRepository;
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
@@ -106,8 +106,8 @@ public class MemberWithdrawService {
 
         log.debug("문의, 신고내역 처리 완료");
 
-        fcmRepository.deleteAllByMemberId(member.getId());
-        notificationLogRepository.deleteAllByMemberId(member.getId());
+        fcmRepositoryService.deleteFcmByMemberId(member.getId());
+        notificationLogRepositoryService.deleteNotificationLogByMemberId(member.getId());
 
         log.debug("Fcm 토큰, 알림 내역 삭제 완료");
 
