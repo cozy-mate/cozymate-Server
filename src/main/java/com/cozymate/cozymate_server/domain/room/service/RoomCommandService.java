@@ -120,8 +120,8 @@ public class RoomCommandService {
         Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university);
 
         // 해시태그 저장 과정
-        roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         room = roomRepositoryService.save(room);
+        roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         roomLogCommandService.addRoomLogCreationRoom(room);
 
         Mate mate = MateConverter.toEntity(room, member, true);
