@@ -45,7 +45,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // S3 관련
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
     _FILE_DELETE_ERROR(HttpStatus.BAD_REQUEST, "FILE_002", "파일 삭제에 실패했습니다."),
-    _FILE_EXTENSTION_ERROR(HttpStatus.BAD_REQUEST, "FILE_003", "유효하지 않은 파일 확장자입니다."),
+    _FILE_EXTENSION_ERROR(HttpStatus.BAD_REQUEST, "FILE_003", "유효하지 않은 파일 확장자입니다."),
 
     // Room
     _ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM400", "존재하지 않는 방입니다."),
@@ -74,6 +74,8 @@ public enum ErrorStatus implements BaseErrorCode {
     // University 관련 에러
     _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "UNIVERSITY400", "대학을 찾을 수 없습니다."),
     _UNIVERSITY_BINDING_FAIL(HttpStatus.BAD_REQUEST, "UNIVERSITY401", "대학교 바인딩 실패"),
+    _UNIVERSITY_DEPARTMENT_NOT_FOUND(HttpStatus.BAD_REQUEST, "UNIVERSITY402", "해당 대학교에 없는 학과입니다."),
+
 
     // MemberStat 관련 에러
     _MEMBERSTAT_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERSTAT400", "멤버 상세정보가 이미 존재합니다."),

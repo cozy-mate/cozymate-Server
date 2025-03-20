@@ -9,14 +9,17 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
+import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
+import com.cozymate.cozymate_server.domain.member.validator.MemberValidator;
 import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
+
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.time.LocalDate;
@@ -28,13 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MemberCommandService {
+public class MemberService {
 
     // 의존성 주입
     private final AuthService authService;
-    private final MemberQueryService memberQueryService;
-    private final MemberRepository memberRepository;
-    private final UniversityRepository universityRepository;
+    private final MemberRepositoryService memberRepositoryService;
+    private final MemberValidator memberValidator;
+    private final UniversityRepositoryService universityRepositoryService;
 
     private final MemberWithdrawService memberWithdrawService;
 
@@ -51,7 +54,7 @@ public class MemberCommandService {
     public Boolean checkNickname(String nickname) {
         //todo: nickname 금지어 로직 추가, redis 같은 거 써야 할듯
         try {
-            memberQueryService.isValidNickName(nickname);  // 닉네임 유효성 검증
+            memberValidator.checkNickname(nickname);  // 닉네임 유효성 검증
             return true;  // 검증 성공 시
         } catch (IllegalArgumentException e) {
             return false;  // 예외 메시지 반환
@@ -72,7 +75,7 @@ public class MemberCommandService {
 
         log.debug("사용자 로그인 : {}", clientId);
         // 사용자가 기존 회원인지 확인하고, 로그인 처리
-        if (memberQueryService.isPresent(clientId)) {
+        if (memberRepositoryService.getExistenceByClientId(clientId)) {
             return signInByExistingMember(clientId);
         }
 
@@ -91,16 +94,16 @@ public class MemberCommandService {
     public SignInResponseDTO signUp(String clientId,
         SignUpRequestDTO signUpRequestDTO) {
 
-        if (!checkNickname(signUpRequestDTO.nickname())) {
-            throw new GeneralException(ErrorStatus._NICKNAME_EXISTING);
-        }
-        if (memberQueryService.isPresent(clientId)) { // 사용자 중복 검증
-            throw new GeneralException(ErrorStatus._MEMBER_EXISTING);
-        }
-        University memberUniversity = universityRepository.findById(signUpRequestDTO.universityId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._UNIVERSITY_NOT_FOUND));
+        memberValidator.checkNickname(signUpRequestDTO.nickname());
 
-        Member member = memberRepository.save(
+        memberValidator.checkClientId(clientId);
+
+        University memberUniversity = universityRepositoryService.getUniversityByIdOrThrow(
+            signUpRequestDTO.universityId());
+
+        memberValidator.checkMajorName(memberUniversity,signUpRequestDTO.majorName());
+
+        Member member = memberRepositoryService.createMember(
             MemberConverter.toMember(clientId, signUpRequestDTO, memberUniversity));
 
         signUpNotificationService.sendSignUpNotification(member);
@@ -122,35 +125,50 @@ public class MemberCommandService {
 
     @Transactional
     public void updateNickname(Member member, String nickname) {
-        member = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
-        if (!checkNickname(nickname)) {
-            throw new GeneralException(ErrorStatus._NICKNAME_EXISTING);
-        }
+        memberValidator.checkNickname(nickname);
+        member = memberRepositoryService.getMemberByIdOrThrow(member.getId());
+
         member.updateNickname(nickname);
     }
 
     @Transactional
     public void updatePersona(Member member, Integer persona) {
-        member = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        member = memberRepositoryService.getMemberByIdOrThrow(member.getId());
+
         member.updatePersona(persona);
     }
 
     @Transactional
     public void updateBirthday(Member member, LocalDate birthday) {
-        member = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        member = memberRepositoryService.getMemberByIdOrThrow(member.getId());
+
         member.updateBirthday(birthday);
     }
 
     @Transactional
     public void updateMajor(Member member, String majorName) {
-        member = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        member = memberRepositoryService.getMemberByIdOrThrow(member.getId());
+        memberValidator.checkMajorName(member.getUniversity(),majorName);
+
         member.updateMajor(majorName);
     }
 
+    @Transactional
+    public void update(Member member, UpdateRequestDTO requestDTO) {
+        if(!member.getNickname().equals(requestDTO.nickname())){
+            memberValidator.checkNickname(requestDTO.nickname());
+        }
+        memberValidator.checkMajorName(member.getUniversity(),requestDTO.majorName());
+
+        member.update(
+            requestDTO.nickname(),
+            requestDTO.persona(),
+            requestDTO.birthday(),
+            requestDTO.majorName()
+        );
+
+        memberRepositoryService.updateMember(member);
+    }
 
     /**
      * 사용자 회원탈퇴 메서드

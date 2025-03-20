@@ -3,14 +3,12 @@ package com.cozymate.cozymate_server.domain.member.repository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.university.University;
-import com.google.cloud.Tuple;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 

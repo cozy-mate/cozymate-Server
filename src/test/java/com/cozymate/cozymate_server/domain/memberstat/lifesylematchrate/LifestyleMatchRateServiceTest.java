@@ -13,7 +13,7 @@ import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.university.University;
-import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import com.cozymate.cozymate_server.fixture.MemberFixture;
 import com.cozymate.cozymate_server.fixture.MemberStatFixture;
 import com.cozymate.cozymate_server.fixture.UniversityFixture;
@@ -38,7 +38,7 @@ class LifestyleMatchRateServiceTest {
     @Mock
     private MemberStatRepository memberStatRepository;
     @Mock
-    private UniversityRepository universityRepository;
+    private UniversityRepositoryService universityRepositoryService;
 
     @InjectMocks
     private LifestyleMatchRateService lifestyleMatchRateService;
@@ -394,7 +394,7 @@ class LifestyleMatchRateServiceTest {
         @DisplayName("모든 멤버의 일치율을 계산하고 저장")
         void success_should_calculate_and_save_match_rate_for_all_university_members() {
             // given
-            given(universityRepository.findAll()).willReturn(List.of(university));
+            given(universityRepositoryService.getAllUniversityList()).willReturn(List.of(university));
             given(memberStatRepository.findByMemberUniversityAndGender(Gender.MALE,
                 university.getId()))
                 .willReturn(maleMemberStats);
