@@ -269,7 +269,7 @@ public class RoomCommandService {
 
     @Transactional
     public void sendInvitation(Long inviteeId, Member inviterMember) {
-        memberRepository.findById(inviteeId)
+        Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         // 방장이 속한 방의 정보
         Room room = roomRepositoryService.getRoomOrThrow(roomQueryService.getExistRoom(inviterMember.getId()).roomId());
@@ -293,12 +293,12 @@ public class RoomCommandService {
             mate.setEntryStatus(EntryStatus.INVITED);
             mateRepository.save(mate);
         } else {
-            Mate mate = MateConverter.toInvitation(room, inviterMember, false);
+            Mate mate = MateConverter.toInvitation(room, inviteeMember, false);
             mateRepository.save(mate);
         }
 
         eventPublisher.publishEvent(
-            EventConverter.toSentInvitationEvent(inviter.getMember(), inviterMember, room));
+            EventConverter.toSentInvitationEvent(inviter.getMember(), inviteeMember, room));
     }
 
     @Transactional
