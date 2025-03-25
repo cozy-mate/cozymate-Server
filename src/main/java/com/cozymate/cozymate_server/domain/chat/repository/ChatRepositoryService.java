@@ -39,6 +39,6 @@ public class ChatRepositoryService {
 
     public Slice<Chat> getChatListByChatRoomAndLastDeleteAt(ChatRoom chatRoom,
         LocalDateTime lastDeleteAt, Pageable pageable) {
-        return chatRepository.findByChatRoomAndLastDeleteAt(chatRoom, lastDeleteAt, pageable);
+        return chatRepository.findPagingByChatRoomAndLastDeleteAt(chatRoom, lastDeleteAt, pageable);
     }
 }

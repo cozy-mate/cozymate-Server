@@ -37,6 +37,6 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     @Query("select c from Chat c where c.chatRoom = :chatRoom "
         + "and c.createdAt > :lastDeleteAt")
-    Slice<Chat> findByChatRoomAndLastDeleteAt(@Param("chatRoom") ChatRoom chatRoom,
+    Slice<Chat> findPagingByChatRoomAndLastDeleteAt(@Param("chatRoom") ChatRoom chatRoom,
         LocalDateTime lastDeleteAt, Pageable pageable);
 }
