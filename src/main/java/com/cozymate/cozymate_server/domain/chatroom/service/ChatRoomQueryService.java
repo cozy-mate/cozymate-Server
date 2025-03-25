@@ -11,14 +11,16 @@ import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositor
 import com.cozymate.cozymate_server.domain.chatroom.validator.ChatRoomValidator;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.persistence.Tuple;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,55 +37,48 @@ public class ChatRoomQueryService {
     private static final Integer NO_NEW_CHAT_ROOMS = 0;
     private static final String UNKNOWN_SENDER_NICKNAME = "(알수없음)";
 
-    public List<ChatRoomDetailResponseDTO> getChatRoomList(Member member) {
-        List<ChatRoom> findChatRoomList = chatRoomRepositoryService.getChatRoomListByMember(member);
+    public PageResponseDto<List<ChatRoomDetailResponseDTO>> getChatRoomList(Member member, int page,
+        int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        Slice<Tuple> findChatRoomList = chatRoomRepositoryService.getPagingChatRoomListByMember(
+            member, pageRequest);
 
         if (findChatRoomList.isEmpty()) {
-            return List.of();
+            return PageResponseDto.<List<ChatRoomDetailResponseDTO>>builder()
+                .result(List.of())
+                .build();
         }
 
-        Map<ChatRoom, Chat> chatRoomLastChatMap = new HashMap<>();
+        List<ChatRoomDetailResponseDTO> chatRoomDetailResponseDTOList = findChatRoomList.stream()
+            .map(tuple -> {
+                ChatRoom chatRoom = tuple.get("chatRoom", ChatRoom.class);
+                Chat lastChat = tuple.get("lastChat", Chat.class);
 
-        List<ChatRoom> chatRoomList = findChatRoomList.stream()
-            .filter(chatRoom -> {
-                Chat chat = getLatestChatByChatRoom(chatRoom);
-                chatRoomLastChatMap.put(chatRoom, chat);
-                if (chatRoomValidator.isChatNull(chat)) {
-                    return false;
-                }
-                LocalDateTime lastDeleteAt = getLastDeleteAtByMember(chatRoom, member);
-                return chatRoomValidator.isChatReadable(lastDeleteAt, chat);
-            })
-            .sorted((chatRoomA, chatRoomB) -> {
-                Chat chatA = chatRoomLastChatMap.get(chatRoomA);
-                Chat chatB = chatRoomLastChatMap.get(chatRoomB);
-
-                return chatB.getCreatedAt().compareTo(chatA.getCreatedAt());
-            })
-            .toList();
-
-        return chatRoomList.stream()
-            .map(chatRoom -> {
-                Chat chat = chatRoomLastChatMap.get(chatRoom);
-                // 한명이라도 null(탈퇴)인 쪽지방은 새로운 쪽지 유무 확인 x, 전부 false 처리
                 if (chatRoomValidator.isAnyMemberNullInChatRoom(chatRoom)) {
-                    return toChatRoomDetailResponseDTO(chatRoom, member, chat, false);
+                    return toChatRoomDetailResponseDTO(chatRoom, member, lastChat, false);
                 }
 
                 Member recipient = chatRoomValidator.isSameMember(chatRoom.getMemberA(), member)
                     ? chatRoom.getMemberB()
                     : chatRoom.getMemberA();
 
-                LocalDateTime lastSeenAt = chatRoomValidator.isSameMember(chatRoom.getMemberA(), member)
-                    ? chatRoom.getMemberALastSeenAt()
-                    : chatRoom.getMemberBLastSeenAt();
+                LocalDateTime lastSeenAt =
+                    chatRoomValidator.isSameMember(chatRoom.getMemberA(), member)
+                        ? chatRoom.getMemberALastSeenAt()
+                        : chatRoom.getMemberBLastSeenAt();
 
                 boolean hasNewChat = chatRoomValidator.existNewChat(recipient, chatRoom,
                     lastSeenAt);
 
-                return toChatRoomDetailResponseDTO(chatRoom, member, chat, hasNewChat);
-            })
-            .toList();
+                return toChatRoomDetailResponseDTO(chatRoom, member, lastChat, hasNewChat);
+            }).toList();
+
+        return PageResponseDto.<List<ChatRoomDetailResponseDTO>>builder()
+            .page(page)
+            .hasNext(findChatRoomList.hasNext())
+            .result(chatRoomDetailResponseDTOList)
+            .build();
     }
 
     public CountChatRoomsWithNewChatDTO countChatRoomsWithNewChat(Member member) {
@@ -116,9 +111,10 @@ public class ChatRoomQueryService {
                     ? chatRoom.getMemberB()
                     : chatRoom.getMemberA();
 
-                LocalDateTime lastSeenAt = chatRoomValidator.isSameMember(chatRoom.getMemberA(), member)
-                    ? chatRoom.getMemberALastSeenAt()
-                    : chatRoom.getMemberBLastSeenAt();
+                LocalDateTime lastSeenAt =
+                    chatRoomValidator.isSameMember(chatRoom.getMemberA(), member)
+                        ? chatRoom.getMemberALastSeenAt()
+                        : chatRoom.getMemberBLastSeenAt();
 
                 return chatRoomValidator.existNewChat(recipient, chatRoom, lastSeenAt);
             }).count();
