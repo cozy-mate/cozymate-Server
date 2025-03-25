@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.notificationlog.controller;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.notificationlog.dto.response.NotificationLogResponseDTO;
 import com.cozymate.cozymate_server.domain.notificationlog.service.NotificationLogQueryService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -23,10 +25,11 @@ public class NotificationLogController {
     private final NotificationLogQueryService notificationLogQueryService;
 
     @GetMapping
-    @Operation(summary = "[베로] 알림 내역 조회", description = "")
-    public ResponseEntity<ApiResponse<List<NotificationLogResponseDTO>>> getNotificationLog(
-        @AuthenticationPrincipal MemberDetails memberDetails) {
+    @Operation(summary = "[베로] 알림 내역 조회 (수정 - 25.03.26)", description = "")
+    public ResponseEntity<ApiResponse<PageResponseDto<List<NotificationLogResponseDTO>>>> getNotificationLog(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            notificationLogQueryService.getNotificationLogList(memberDetails.member())));
+            notificationLogQueryService.getNotificationLogList(memberDetails.member(), page, size)));
     }
 }
