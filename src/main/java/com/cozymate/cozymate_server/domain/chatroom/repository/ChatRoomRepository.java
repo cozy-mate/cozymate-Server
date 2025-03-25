@@ -27,13 +27,16 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
          from ChatRoom cr
          join Chat c on cr.id = c.chatRoom.id
          where (cr.memberA = :member or cr.memberB = :member)
+         and c.createdAt = (select c2.createdAt 
+                            from Chat c2 
+                            where c2.chatRoom.id = cr.id 
+                            order by c2.id desc limit 1)
          and c.createdAt > coalesce(
              case
                  when cr.memberA = :member then cr.memberALastDeleteAt
                  else cr.memberBLastDeleteAt
              end, '2000-01-01 00:00:00'
          )
-         and c.createdAt = (select c2.createdAt from Chat c2 where c2.chatRoom.id = cr.id order by c2.id desc limit 1)
          order by c.createdAt desc
          """)
    Slice<Tuple> findPagingByMember(@Param("member") Member member, Pageable pageable);
