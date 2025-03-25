@@ -4,8 +4,9 @@ import com.cozymate.cozymate_server.domain.chat.Chat;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,8 +15,8 @@ public class ChatRepositoryService {
 
     private final ChatRepository chatRepository;
 
-    public List<Chat> getChatListByChatRoom(ChatRoom chatRoom) {
-        return chatRepository.findAllByChatRoom(chatRoom);
+    public Slice<Chat> getChatListByChatRoom(ChatRoom chatRoom, Pageable pageable) {
+        return chatRepository.findAllByChatRoom(chatRoom, pageable);
     }
 
     public void createChat(Chat chat) {
@@ -34,5 +35,10 @@ public class ChatRepositoryService {
     public boolean existNewChat(Member member, ChatRoom chatRoom, LocalDateTime lastSeenAt) {
         return chatRepository.existsBySenderAndChatRoomAndCreatedAtAfterOrLastSeenAtIsNull(
             member, chatRoom, lastSeenAt);
+    }
+
+    public Slice<Chat> getChatListByChatRoomAndLastDeleteAt(ChatRoom chatRoom,
+        LocalDateTime lastDeleteAt, Pageable pageable) {
+        return chatRepository.findByChatRoomAndLastDeleteAt(chatRoom, lastDeleteAt, pageable);
     }
 }

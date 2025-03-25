@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO
 import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;
 import com.cozymate.cozymate_server.domain.chat.service.ChatQueryService;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,30 +34,29 @@ public class ChatController {
     @PostMapping("/members/{recipientId}")
     @Operation(summary = "[베로] 쪽지 작성 기능", description = "recipientId: 쪽지를 받을 멤버의 pk값, RequestBody의 content: 쪽지 내용")
     @SwaggerApiError({
-            ErrorStatus._CHAT_NOT_FOUND_RECIPIENT
+        ErrorStatus._CHAT_NOT_FOUND_RECIPIENT
     })
     public ResponseEntity<ApiResponse<ChatRoomIdResponseDTO>> createChat(
-        @Valid @RequestBody CreateChatRequestDTO createChatRequestDTO, @PathVariable Long recipientId,
-        @AuthenticationPrincipal
-        MemberDetails memberDetails) {
+        @Valid @RequestBody CreateChatRequestDTO createChatRequestDTO,
+        @PathVariable Long recipientId, @AuthenticationPrincipal MemberDetails memberDetails) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             chatCommandService.createChat(createChatRequestDTO, memberDetails.member(),
                 recipientId)));
     }
 
     @GetMapping("/chatrooms/{chatRoomId}")
-    @Operation(summary = "[베로] 쪽지방의 쪽지 상세 내역 조회", description = "chatRoomId : 조회할 쪽지방 pk값")
+    @Operation(summary = "[베로] 쪽지방의 쪽지 상세 내역 조회 (수정 - 25.03.26)", description = "chatRoomId : 조회할 쪽지방 pk값")
     @SwaggerApiError({
         ErrorStatus._CHATROOM_NOT_FOUND,
         ErrorStatus._CHATROOM_MEMBERB_REQUIRED_WHEN_MEMBERA_NULL,
         ErrorStatus._CHATROOM_MEMBERA_REQUIRED_WHEN_MEMBERB_NULL,
         ErrorStatus._CHATROOM_INVALID_MEMBER
     })
-    public ResponseEntity<ApiResponse<ChatListResponseDTO>> getChatList(
-        @AuthenticationPrincipal MemberDetails memberDetails,
-        @PathVariable Long chatRoomId) {
+    public ResponseEntity<ApiResponse<PageResponseDto<ChatListResponseDTO>>> getChatList(
+        @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long chatRoomId,
+        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                chatQueryService.getChatList(memberDetails.member(), chatRoomId)));
+                chatQueryService.getChatList(memberDetails.member(), chatRoomId, page, size)));
     }
 }
