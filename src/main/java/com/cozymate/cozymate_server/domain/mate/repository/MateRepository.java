@@ -95,8 +95,8 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     void deleteAllByRoomId(@Param("roomId") Long roomId);
 
     /**
-     * TODO에서 Mate를 가져와서 Mate 데이터와 Member를 사용해야하는데 지연 로딩 문제로 Member가 Proxy 에러가 발생하여 다음과 같이 Fetch
-     * Join을 사용함 내가 완료하지 못한 데이터가 있는지 확인하고, 모두 완료했으면 룸메이트에게 FCM 알림을 보내기 위함
+     * TODO에서 Mate를 가져와서 Mate 데이터와 Member를 사용해야하는데 지연 로딩 문제로 Member가 Proxy 에러가 발생하여 다음과 같이 Fetch Join을 사용함
+     * 내가 완료하지 못한 데이터가 있는지 확인하고, 모두 완료했으면 룸메이트에게 FCM 알림을 보내기 위함
      */
     @Query("""
         SELECT mt FROM Mate mt
