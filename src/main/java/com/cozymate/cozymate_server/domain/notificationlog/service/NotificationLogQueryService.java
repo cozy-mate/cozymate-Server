@@ -20,8 +20,8 @@ public class NotificationLogQueryService {
 
     private final NotificationLogRepositoryService notificationLogRepositoryService;
 
-    public PageResponseDto<List<NotificationLogResponseDTO>> getNotificationLogList(Member member, int page,
-        int size) {
+    public PageResponseDto<List<NotificationLogResponseDTO>> getNotificationLogList(Member member,
+        int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Slice<NotificationLog> notificationLogList = notificationLogRepositoryService.getNotificationLogListByMember(
             member, pageRequest);

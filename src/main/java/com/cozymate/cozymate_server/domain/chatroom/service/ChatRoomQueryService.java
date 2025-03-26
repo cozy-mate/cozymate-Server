@@ -46,6 +46,8 @@ public class ChatRoomQueryService {
 
         if (findChatRoomList.isEmpty()) {
             return PageResponseDto.<List<ChatRoomDetailResponseDTO>>builder()
+                .page(page)
+                .hasNext(false)
                 .result(List.of())
                 .build();
         }
