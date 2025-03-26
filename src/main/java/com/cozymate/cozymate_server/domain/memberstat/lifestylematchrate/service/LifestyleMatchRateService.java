@@ -59,7 +59,6 @@ public class LifestyleMatchRateService {
         return lifestyleMatchRateRepository.findById(
             new LifestyleMatchRate.LifestyleMatchRateId(memberA, memberB)
         ).map(LifestyleMatchRate::getMatchRate).orElse(NO_EQUALITY);
-
     }
 
     @Transactional

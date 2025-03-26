@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -20,6 +21,7 @@ public class LogoutService implements LogoutHandler {
     private final JwtUtil jwtUtil;
     private final AuthService authService;
     @Override
+    @Transactional
     public void logout(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -35,7 +37,7 @@ public class LogoutService implements LogoutHandler {
         // 실제 토큰 값만 추출
         jwt = authHeader.substring(JwtUtil.TOKEN_PREFIX.length());
         String username = jwtUtil.extractUserName(jwt);
-        log.info("logout: {}", username);
+        log.debug("logout: {}", username);
 
         // 사용자 refresh token 삭제
         authService.deleteRefreshToken(username);
