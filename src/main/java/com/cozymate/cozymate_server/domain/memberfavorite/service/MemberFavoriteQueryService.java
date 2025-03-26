@@ -9,12 +9,15 @@ import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +30,19 @@ public class MemberFavoriteQueryService {
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-    public List<MemberFavoriteResponseDTO> getMemberFavoriteList(Member member) {
-        List<MemberFavorite> memberFavoriteList = memberFavoriteRepositoryService.getMemberFavoriteListByMember(
-            member);
+    public PageResponseDto<List<MemberFavoriteResponseDTO>> getMemberFavoriteList(Member member,
+        int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        Slice<MemberFavorite> memberFavoriteList = memberFavoriteRepositoryService.getMemberFavoriteListByMember(
+            member, pageRequest);
 
         if (memberFavoriteList.isEmpty()) {
-            return List.of();
+            return PageResponseDto.<List<MemberFavoriteResponseDTO>>builder()
+                .page(page)
+                .hasNext(false)
+                .result(List.of())
+                .build();
         }
 
         Map<Member, Long> targetMemberFavoriteIdMap = memberFavoriteList.stream()
@@ -50,7 +60,6 @@ public class MemberFavoriteQueryService {
         MemberStat memberStat = member.getMemberStat();
 
         List<MemberFavoriteResponseDTO> memberFavoriteResponseDTOList = findTargetMemberList.stream()
-            .filter(targetMember -> Objects.nonNull(targetMember.getMemberStat()))
             .map(targetMember -> {
                     if (Objects.isNull(memberStat)) {
                         return MemberFavoriteConverter.toMemberFavoriteResponseDTO(
@@ -71,6 +80,10 @@ public class MemberFavoriteQueryService {
                 }
             ).toList();
 
-        return memberFavoriteResponseDTOList;
+        return PageResponseDto.<List<MemberFavoriteResponseDTO>>builder()
+            .page(page)
+            .hasNext(memberFavoriteList.hasNext())
+            .result(memberFavoriteResponseDTOList)
+            .build();
     }
 }

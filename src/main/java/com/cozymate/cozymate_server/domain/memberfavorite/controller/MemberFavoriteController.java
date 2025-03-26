@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberfavorite.dto.response.MemberFavoriteResponseDTO;
 import com.cozymate.cozymate_server.domain.memberfavorite.service.MemberFavoriteCommandService;
 import com.cozymate.cozymate_server.domain.memberfavorite.service.MemberFavoriteQueryService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -42,11 +44,12 @@ public class MemberFavoriteController {
     }
 
     @GetMapping
-    @Operation(summary = "[베로] 찜한 사용자 목록 조회", description = "")
-    public ResponseEntity<ApiResponse<List<MemberFavoriteResponseDTO>>> getMemberFavoriteList(
-        @AuthenticationPrincipal MemberDetails memberDetails) {
+    @Operation(summary = "[베로] 찜한 사용자 목록 조회 (수정 - 25.03.27)", description = "")
+    public ResponseEntity<ApiResponse<PageResponseDto<List<MemberFavoriteResponseDTO>>>> getMemberFavoriteList(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            memberFavoriteQueryService.getMemberFavoriteList(memberDetails.member())));
+            memberFavoriteQueryService.getMemberFavoriteList(memberDetails.member(), page, size)));
     }
 
     @DeleteMapping("/{memberFavoriteId}")
