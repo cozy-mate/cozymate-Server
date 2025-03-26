@@ -56,7 +56,7 @@ public class AuthController {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
     }
-    @GetMapping("/sign-out")
+    @GetMapping("/logout")
     @Operation(summary = "[말즈] 로그아웃",
         description = "사용자를 로그아웃 시킵니다. 스웨거에서는 동작하지 않습니다!")
     @Deprecated
