@@ -48,7 +48,8 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     List<Mate> findAllByRoomIdAndEntryStatus(Long roomId, EntryStatus entryStatus);
 
     @Query("SELECT m FROM Mate m JOIN FETCH m.member WHERE m.room = :room AND m.entryStatus = :entryStatus")
-    List<Mate> findFetchMemberByRoomAndEntryStatus(@Param("room") Room room, @Param("entryStatus") EntryStatus entryStatus);
+    List<Mate> findFetchMemberByRoomAndEntryStatus(@Param("room") Room room,
+        @Param("entryStatus") EntryStatus entryStatus);
 
     // MemberBirthDay의 Localdate 값에서 Month와 Day가 같은 Member들을 찾는다.
     @Query("SELECT m FROM Mate m WHERE MONTH(m.member.birthDay) = :month AND DAY(m.member.birthDay) = :day AND m.entryStatus = :entryStatus")
@@ -80,7 +81,7 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
 
     void deleteAllByMemberIdAndEntryStatusIn(Long memberId, List<EntryStatus> entryStatuses);
 
-    @Query("select mt from Mate mt join fetch mt.member m join fetch m.memberStat where mt.room = :room and mt.entryStatus = :entryStatus")
+    @Query("select mt from Mate mt join fetch mt.member m left join fetch m.memberStat where mt.room = :room and mt.entryStatus = :entryStatus")
     List<Mate> findFetchMemberAndMemberStatByRoom(@Param("room") Room room,
         @Param("entryStatus") EntryStatus entryStatus);
 
@@ -94,24 +95,25 @@ public interface MateRepository extends JpaRepository<Mate, Long> {
     void deleteAllByRoomId(@Param("roomId") Long roomId);
 
     /**
-     * TODO에서 Mate를 가져와서 Mate 데이터와 Member를 사용해야하는데 지연 로딩 문제로 Member가 Proxy 에러가 발생하여 다음과 같이 Fetch Join을 사용함
-     * 내가 완료하지 못한 데이터가 있는지 확인하고, 모두 완료했으면 룸메이트에게 FCM 알림을 보내기 위함
+     * TODO에서 Mate를 가져와서 Mate 데이터와 Member를 사용해야하는데 지연 로딩 문제로 Member가 Proxy 에러가 발생하여 다음과 같이 Fetch
+     * Join을 사용함 내가 완료하지 못한 데이터가 있는지 확인하고, 모두 완료했으면 룸메이트에게 FCM 알림을 보내기 위함
      */
     @Query("""
-    SELECT mt FROM Mate mt
-    JOIN FETCH mt.member m
-    WHERE mt.room.id = :roomId AND mt.id != :mateId
-    """)
+        SELECT mt FROM Mate mt
+        JOIN FETCH mt.member m
+        WHERE mt.room.id = :roomId AND mt.id != :mateId
+        """)
     List<Mate> findByRoomIdAndNotMateId(@Param("roomId") Long roomId, @Param("mateId") Long mateId);
 
     @Query("""
-    SELECT mt FROM Mate mt
-    JOIN FETCH mt.room r
-    JOIN FETCH mt.member m
-    JOIN FETCH m.university u
-    WHERE mt.room.id IN :roomIdList
-    AND mt.isRoomManager = :isRoomManager
-    AND mt.entryStatus = :entryStatus
-""")
-    List<Mate> findAllByRoomIdListAndIsRoomManagerAndEntryStatus(List<Long> roomIdList, boolean isRoomManager, EntryStatus entryStatus);
+            SELECT mt FROM Mate mt
+            JOIN FETCH mt.room r
+            JOIN FETCH mt.member m
+            JOIN FETCH m.university u
+            WHERE mt.room.id IN :roomIdList
+            AND mt.isRoomManager = :isRoomManager
+            AND mt.entryStatus = :entryStatus
+        """)
+    List<Mate> findAllByRoomIdListAndIsRoomManagerAndEntryStatus(List<Long> roomIdList,
+        boolean isRoomManager, EntryStatus entryStatus);
 }

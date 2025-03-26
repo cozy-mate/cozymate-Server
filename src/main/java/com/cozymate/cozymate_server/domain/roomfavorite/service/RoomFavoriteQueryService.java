@@ -9,22 +9,26 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
-import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.converter.RoomFavoriteConverter;
 import com.cozymate.cozymate_server.domain.roomfavorite.dto.response.RoomFavoriteResponseDTO;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepositoryService;
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,37 +40,28 @@ public class RoomFavoriteQueryService {
     private final RoomHashtagQueryService roomHashtagQueryService;
     private final RoomFavoriteRepositoryService roomFavoriteRepositoryService;
 
-    public List<RoomFavoriteResponseDTO> getFavoriteRoomList(Member member) {
-        List<RoomFavorite> roomFavoriteList = roomFavoriteRepositoryService.getRoomFavoriteListByMember(
-            member);
+    public PageResponseDto<List<RoomFavoriteResponseDTO>> getFavoriteRoomList(Member member,
+        int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        Slice<RoomFavorite> roomFavoriteList = roomFavoriteRepositoryService.getRoomFavoriteListByMember(
+            member, pageRequest);
 
         if (roomFavoriteList.isEmpty()) {
-            return List.of();
+            return PageResponseDto.<List<RoomFavoriteResponseDTO>>builder()
+                .page(page)
+                .hasNext(false)
+                .result(List.of())
+                .build();
         }
 
         Map<Room, Long> roomFavoriteIdMap = roomFavoriteList.stream()
             .collect(Collectors.toMap(RoomFavorite::getRoom, RoomFavorite::getId));
 
-        List<Room> findFavoriteRoomIdList = new ArrayList<>(roomFavoriteIdMap.keySet());
-
-        // 방 상태가 disable과 그 외로 분리
-        Map<Boolean, List<Room>> partitionedRoomStatusMap = findFavoriteRoomIdList.stream()
-            .collect(
-                Collectors.partitioningBy(room -> !room.getStatus().equals(RoomStatus.DISABLE)));
-
-        // 방 상태가 disable이 아닌 방 리스트
-        List<Room> nonDisableFavoriteRoomList = partitionedRoomStatusMap.get(true);
-
-        // 방 상태가 disable이 아닌 방 리스트에서 방 인원이 꽉찬 방과 아닌 방으로 분리
-        Map<Boolean, List<Room>> partitionedMateNumMap = nonDisableFavoriteRoomList.stream()
-            .collect(
-                Collectors.partitioningBy(room -> room.getNumOfArrival() != room.getMaxMateNum()));
-
-        // 방이 꽉 차지 않은 방 리스트
-        List<Room> responseRoomList = partitionedMateNumMap.get(true);
+        List<Room> findFavoriteRoomList = new ArrayList<>(roomFavoriteIdMap.keySet());
 
         // <방 id, 해당 방의 mate 리스트>
-        Map<Long, List<Mate>> roomIdMatesMap = responseRoomList.stream().collect(
+        Map<Long, List<Mate>> roomIdMatesMap = findFavoriteRoomList.stream().collect(
             Collectors.toMap(Room::getId,
                 room -> mateRepository.findFetchMemberAndMemberStatByRoom(room,
                     EntryStatus.JOINED)));
@@ -79,9 +74,9 @@ public class RoomFavoriteQueryService {
         MemberStat memberStat = member.getMemberStat();
 
         Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(
-            responseRoomList);
+            findFavoriteRoomList);
 
-        List<RoomFavoriteResponseDTO> favoriteRoomResponseList = responseRoomList.stream()
+        List<RoomFavoriteResponseDTO> favoriteRoomResponseList = findFavoriteRoomList.stream()
             .map(room -> {
                 List<Mate> mates = roomIdMatesMap.get(room.getId());
 
@@ -113,34 +108,10 @@ public class RoomFavoriteQueryService {
             })
             .toList();
 
-        // 조회 조건에 맞지 않는 방 찜 삭제 처리
-        deleteFavoriteRoom(partitionedRoomStatusMap.get(false), partitionedMateNumMap.get(false));
-
-        return favoriteRoomResponseList;
-    }
-
-    private void deleteFavoriteRoom(List<Room> disableFavoriteRoomList,
-        List<Room> fullRoomList) {
-
-        List<Long> deleteTargetRoomIdList = new ArrayList<>();
-
-        // 방 status가 disable인 방 리스트, 존재한다면 방이 있다면 deleteTargetRoomIdList에 추가
-        if (!disableFavoriteRoomList.isEmpty()) {
-            deleteTargetRoomIdList.addAll(disableFavoriteRoomList.stream()
-                .map(Room::getId)
-                .toList());
-        }
-
-        // 인원이 가득 찬 방 리스트, 존재한다면 deleteTargetRoomIdList에 추가
-        if (!fullRoomList.isEmpty()) {
-            deleteTargetRoomIdList.addAll(fullRoomList.stream()
-                .map(Room::getId)
-                .toList());
-        }
-
-        // deletedRoomIdList에 들어 있는 roomId에 해당하는 방 찜 삭제 처리
-        if (!deleteTargetRoomIdList.isEmpty()) {
-            roomFavoriteRepositoryService.deleteRoomFavoriteByRoomIds(deleteTargetRoomIdList);
-        }
+        return PageResponseDto.<List<RoomFavoriteResponseDTO>>builder()
+            .page(page)
+            .hasNext(roomFavoriteList.hasNext())
+            .result(favoriteRoomResponseList)
+            .build();
     }
 }
