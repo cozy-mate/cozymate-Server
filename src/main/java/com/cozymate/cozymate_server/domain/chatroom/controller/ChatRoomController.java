@@ -15,6 +15,8 @@ import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +55,8 @@ public class ChatRoomController {
     @Operation(summary = "[베로] 쪽지방 목록 조회 (수정 - 25.03.26)", description = "")
     public ResponseEntity<ApiResponse<PageResponseDto<List<ChatRoomDetailResponseDTO>>>> getChatRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails,
-        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "10") @Positive int size) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(chatRoomQueryService.getChatRoomList(memberDetails.member(), page, size)));
     }

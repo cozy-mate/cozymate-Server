@@ -12,6 +12,8 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -54,7 +56,8 @@ public class ChatController {
     })
     public ResponseEntity<ApiResponse<PageResponseDto<ChatListResponseDTO>>> getChatList(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long chatRoomId,
-        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "10") @Positive int size) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 chatQueryService.getChatList(memberDetails.member(), chatRoomId, page, size)));

@@ -6,6 +6,8 @@ import com.cozymate.cozymate_server.domain.notificationlog.service.NotificationL
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +30,8 @@ public class NotificationLogController {
     @Operation(summary = "[베로] 알림 내역 조회 (수정 - 25.03.26)", description = "")
     public ResponseEntity<ApiResponse<PageResponseDto<List<NotificationLogResponseDTO>>>> getNotificationLog(
         @AuthenticationPrincipal MemberDetails memberDetails,
-        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "10") @Positive int size) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             notificationLogQueryService.getNotificationLogList(memberDetails.member(), page, size)));
     }
