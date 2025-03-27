@@ -9,6 +9,8 @@ import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +49,8 @@ public class MemberFavoriteController {
     @Operation(summary = "[베로] 찜한 사용자 목록 조회 (수정 - 25.03.27)", description = "")
     public ResponseEntity<ApiResponse<PageResponseDto<List<MemberFavoriteResponseDTO>>>> getMemberFavoriteList(
         @AuthenticationPrincipal MemberDetails memberDetails,
-        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "10") @Positive int size) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             memberFavoriteQueryService.getMemberFavoriteList(memberDetails.member(), page, size)));
     }
