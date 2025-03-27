@@ -24,4 +24,9 @@ public class MateRepositoryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
     }
 
+    public Mate getJoinedMateFetchMemberOrThrow(Long roomId, Long memberId) {
+        return mateRepository.findFetchMemberByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, EntryStatus.JOINED)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
+    }
+
 }

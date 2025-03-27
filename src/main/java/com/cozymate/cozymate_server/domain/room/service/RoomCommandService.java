@@ -177,7 +177,7 @@ public class RoomCommandService {
     @Transactional
     public void quitRoom(Long roomId, Long memberId) {
         Room room = roomRepositoryService.getRoomOrThrow(roomId);
-        Mate quittingMate = mateRepositoryService.getJoinedMateOrThrow(roomId, memberId);
+        Mate quittingMate = mateRepositoryService.getJoinedMateFetchMemberOrThrow(roomId, memberId);
 
         // 이미 나간 방에 대한 예외 처리
         if (quittingMate.getEntryStatus() == EntryStatus.EXITED) {
@@ -272,10 +272,12 @@ public class RoomCommandService {
         Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         // 방장이 속한 방의 정보
-        Room room = roomRepositoryService.getRoomOrThrow(roomQueryService.getExistRoom(inviterMember.getId()).roomId());
+        Room room = roomRepositoryService.getRoomOrThrow(
+            roomQueryService.getExistRoom(inviterMember.getId()).roomId());
 
         // 초대한 사용자가 방장인지 검증
-        Mate inviter = mateRepositoryService.getJoinedMateOrThrow(room.getId(), inviterMember.getId());
+        Mate inviter = mateRepositoryService.getJoinedMateFetchMemberOrThrow(room.getId(),
+            inviterMember.getId());
         roomValidator.checkRoomManager(inviter);
 
         // 이미 참가한 방인지 검사
@@ -352,8 +354,10 @@ public class RoomCommandService {
         memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
-        Room room = roomRepositoryService.getRoomOrThrow(roomQueryService.getExistRoom(inviter.getId()).roomId());
-        Mate inviterMate = mateRepositoryService.getJoinedMateOrThrow(room.getId(), inviter.getId());
+        Room room = roomRepositoryService.getRoomOrThrow(
+            roomQueryService.getExistRoom(inviter.getId()).roomId());
+        Mate inviterMate = mateRepositoryService.getJoinedMateOrThrow(room.getId(),
+            inviter.getId());
         // 초대한 사용자가 방장인지 검증
         roomValidator.checkRoomManager(inviterMate);
 
@@ -405,10 +409,12 @@ public class RoomCommandService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
 
         // 방장이 속한 방의 정보
-        Room room = roomRepositoryService.getRoomOrThrow(roomQueryService.getExistRoom(managerId).roomId());
+        Room room = roomRepositoryService.getRoomOrThrow(
+            roomQueryService.getExistRoom(managerId).roomId());
 
         // 방장인지 검증
-        Mate manager = mateRepositoryService.getJoinedMateOrThrow(room.getId(), managerId);
+        Mate manager = mateRepositoryService.getJoinedMateFetchMemberOrThrow(room.getId(),
+            managerId);
         roomValidator.checkRoomManager(manager);
 
         // 만약 WAITING 또는 ENABLE 상태의 방에 이미 참여했다면 예외 발생
