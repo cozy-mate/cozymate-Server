@@ -9,9 +9,13 @@ import com.cozymate.cozymate_server.domain.chat.validator.ChatValidator;
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,17 +32,17 @@ public class ChatQueryService {
     private static final String SELF_INDICATOR = " (나)";
 
     @Transactional
-    public ChatListResponseDTO getChatList(Member member, Long chatRoomId) {
+    public PageResponseDto<ChatListResponseDTO> getChatList(Member member, Long chatRoomId,
+        int page, int size) {
         ChatRoom chatRoom = chatRoomRepositoryService.getChatRoomByIdOrThrow(chatRoomId);
 
         chatValidator.checkMemberMisMatch(member, chatRoom);
 
-        List<Chat> filteredChatList = getFilteredChatList(chatRoom, member);
+        Slice<Chat> chatList = getChatList(chatRoom, member, page, size);
 
         updateLastSeenAt(member, chatRoom);
 
-        List<ChatContentResponseDTO> chatResponseDtoList = toChatResponseDTOList(filteredChatList,
-            member);
+        List<ChatContentResponseDTO> chatResponseDtoList = toChatResponseDTOList(chatList, member);
 
         Long recipientId = null;
         if (chatValidator.isChatRoomActive(chatRoom)) {
@@ -46,20 +50,24 @@ public class ChatQueryService {
                 ? chatRoom.getMemberB().getId() : chatRoom.getMemberA().getId();
         }
 
-        return ChatConverter.toChatResponseDTO(recipientId, chatResponseDtoList);
+        return PageResponseDto.<ChatListResponseDTO>builder()
+            .page(page)
+            .hasNext(chatList.hasNext())
+            .result(ChatConverter.toChatResponseDTO(recipientId, chatResponseDtoList))
+            .build();
     }
 
-    private List<Chat> getFilteredChatList(ChatRoom chatRoom, Member member) {
-        List<Chat> findChatList = chatRepositoryService.getChatListByChatRoom(chatRoom);
+    private Slice<Chat> getChatList(ChatRoom chatRoom, Member member, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        LocalDateTime memberLastDeleteAt = getMemberLastDeleteAt(chatRoom, member);
-        if (chatValidator.isDeleteAtNull(memberLastDeleteAt)) {
-            return findChatList;
+        LocalDateTime lastDeleteAt = getMemberLastDeleteAt(chatRoom, member);
+
+        if (chatValidator.isDeleteAtNull(lastDeleteAt)) {
+            return chatRepositoryService.getChatListByChatRoom(chatRoom, pageRequest);
         }
 
-        return findChatList.stream()
-            .filter(chat -> chatValidator.isChatCreateAtAfterDeleteAt(chat, memberLastDeleteAt))
-            .toList();
+        return chatRepositoryService.getChatListByChatRoomAndLastDeleteAt(chatRoom, lastDeleteAt,
+            pageRequest);
     }
 
     private LocalDateTime getMemberLastDeleteAt(ChatRoom chatRoom, Member member) {
@@ -94,7 +102,8 @@ public class ChatQueryService {
         }
     }
 
-    private List<ChatContentResponseDTO> toChatResponseDTOList(List<Chat> chatList, Member member) {
+    private List<ChatContentResponseDTO> toChatResponseDTOList(Slice<Chat> chatList,
+        Member member) {
         return chatList.stream()
             .map(chat -> {
                 Member sender = chat.getSender();
