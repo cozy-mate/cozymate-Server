@@ -2,8 +2,9 @@ package com.cozymate.cozymate_server.domain.memberfavorite.repository;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberfavorite.MemberFavorite;
-import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +14,13 @@ public interface MemberFavoriteRepository extends JpaRepository<MemberFavorite, 
 
     boolean existsByMemberAndTargetMember(Member member, Member targetMember);
 
-    List<MemberFavorite> findByMember(Member member);
+    @Query("""
+        select mf from MemberFavorite mf
+        join fetch mf.targetMember tm
+        join fetch tm.memberStat ms
+        where mf.member = :member
+    """)
+    Slice<MemberFavorite> findPagingByMember(@Param("member") Member member, Pageable pageable);
 
     @Modifying
     @Query("delete from MemberFavorite mf where mf.member = :member or mf.targetMember = :member")
