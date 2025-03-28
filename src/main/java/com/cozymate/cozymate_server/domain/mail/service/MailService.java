@@ -54,7 +54,7 @@ public class MailService {
             sendDTO.universityId());
 
         String mailAddress = sendDTO.mailAddress();
-//        validateMailAddress(mailAddress, university.getMailPattern());
+        validateMailAddress(mailAddress, university.getMailPattern());
 
         MailAuthentication mailAuthentication = createAndSendMail(clientId,
             mailAddress, university.getName());

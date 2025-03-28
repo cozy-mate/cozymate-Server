@@ -54,7 +54,7 @@ public class Member extends BaseTimeEntity {
     @NonNull
     private String clientId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @NonNull
     @JoinColumn(name = "university_id")
     private University university;
