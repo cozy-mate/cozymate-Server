@@ -15,6 +15,7 @@ import com.cozymate.cozymate_server.domain.room.converter.RoomConverter;
 import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomExistResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
@@ -79,6 +80,17 @@ public class RoomQueryService {
         memberRepository.findById(otherMemberId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         return getExistRoom(otherMemberId);
+    }
+
+    public RoomExistResponseDTO getRoomExistInfo(Long memberId) {
+        Optional<Mate> mate = mateRepository.findByMemberIdAndEntryStatusAndRoomStatusIn(
+            memberId, EntryStatus.JOINED, List.of(RoomStatus.ENABLE, RoomStatus.WAITING));
+
+        if (mate.isPresent()) {
+            return RoomConverter.toRoomExistResponse(mate.get().getRoom(), mate.get().isRoomManager());
+        }
+
+        return RoomConverter.toRoomExistResponse(null, false);
     }
 
     public List<MateDetailResponseDTO> getInvitedMemberList(Long roomId, Long memberId) {

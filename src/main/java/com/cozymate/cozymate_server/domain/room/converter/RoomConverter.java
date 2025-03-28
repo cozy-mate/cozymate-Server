@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequ
 import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomExistResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
@@ -65,6 +66,13 @@ public class RoomConverter {
 
     public static RoomIdResponseDTO toRoomExistResponse(Room room) {
         return new RoomIdResponseDTO(room != null ? room.getId() : 0L);
+    }
+
+    public static RoomExistResponseDTO toRoomExistResponse(Room room, boolean isRoomManager) {
+        if (room == null) {
+            return new RoomExistResponseDTO(0L, false);
+        }
+        return new RoomExistResponseDTO(room.getId(), isRoomManager);
     }
 
     public static InvitedRoomResponseDTO toInvitedRoomResponseDTO(Integer invitedCount, List<RoomDetailResponseDTO> rooms) {

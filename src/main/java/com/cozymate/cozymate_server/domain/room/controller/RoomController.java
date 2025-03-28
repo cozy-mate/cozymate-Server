@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.room.dto.request.RoomUpdateRequestDTO
 import com.cozymate.cozymate_server.domain.room.dto.response.InvitedRoomResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.MateDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.room.dto.response.RoomExistResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
@@ -182,12 +183,18 @@ public class RoomController {
     }
 
     @GetMapping("/exist")
-    @Operation(summary = "[바니] 로그인한 사용자가 참여한 방이 있는지 여부 조회", description = "현재 참여중인 방이 있다면 해당 roomId가, 없다면 roomId값이 0으로 리턴됩니다.")
+    @Operation(
+        summary = "[바니] 로그인한 사용자가 참여한 방이 있는지 여부 조회(수정 - 25.03.28)",
+        description = """
+        로그인한 사용자가 현재 참여 중인 방이 있는 경우, 해당 roomId와 isRoomManager 값을 반환합니다.
+        참여 중인 방이 없을 경우, roomId는 0으로, isRoomManager는 false로 반환됩니다.
+        """
+    )
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<RoomIdResponseDTO>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomIdResponseDTO response = roomQueryService.getExistRoom(memberDetails.member().getId());
+    public ResponseEntity<ApiResponse<RoomExistResponseDTO>> getExistRoom(@AuthenticationPrincipal MemberDetails memberDetails) {
+        RoomExistResponseDTO response = roomQueryService.getRoomExistInfo(memberDetails.member().getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
