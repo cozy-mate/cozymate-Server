@@ -91,4 +91,11 @@ public class Member extends BaseTimeEntity {
         this.birthDay = birthDay;
         this.majorName = majorName;
     }
+
+    public void update(String nickname, Integer persona, LocalDate birthDay, String majorName){
+        this.nickname = nickname;
+        this.persona = persona;
+        this.birthDay = birthDay;
+        this.majorName = majorName;
+    }
 }

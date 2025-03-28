@@ -5,6 +5,8 @@ import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType.NotificationCategory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,9 +20,9 @@ public class NotificationLogRepositoryService {
         notificationLogRepository.save(notificationLog);
     }
 
-    public List<NotificationLog> getNotificationLogListByMember(Member member) {
+    public Slice<NotificationLog> getNotificationLogListByMember(Member member, Pageable pageable) {
         return notificationLogRepository.findByMemberAndCategoryNotInOrderByIdDesc(
-            member, List.of(NotificationCategory.COZY_HOME, NotificationCategory.COZY_ROLE));
+            member, List.of(NotificationCategory.COZY_HOME, NotificationCategory.COZY_ROLE), pageable);
     }
 
     public void createNoticeNotificationLog(List<Long> successMemberIdList, String content,

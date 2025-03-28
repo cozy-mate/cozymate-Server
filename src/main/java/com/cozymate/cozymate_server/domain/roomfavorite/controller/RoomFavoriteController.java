@@ -4,10 +4,13 @@ import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.roomfavorite.dto.response.RoomFavoriteResponseDTO;
 import com.cozymate.cozymate_server.domain.roomfavorite.service.RoomFavoriteCommandService;
 import com.cozymate.cozymate_server.domain.roomfavorite.service.RoomFavoriteQueryService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -43,11 +47,13 @@ public class RoomFavoriteController {
     }
 
     @GetMapping
-    @Operation(summary = "[베로] 찜한 방 목록 조회", description = "")
-    public ResponseEntity<ApiResponse<List<RoomFavoriteResponseDTO>>> getFavoriteRoomList(
-        @AuthenticationPrincipal MemberDetails memberDetails) {
+    @Operation(summary = "[베로] 찜한 방 목록 조회 (수정 - 25.03.27)", description = "")
+    public ResponseEntity<ApiResponse<PageResponseDto<List<RoomFavoriteResponseDTO>>>> getFavoriteRoomList(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "10") @Positive int size) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
-            roomFavoriteQueryService.getFavoriteRoomList(memberDetails.member())));
+            roomFavoriteQueryService.getFavoriteRoomList(memberDetails.member(), page, size)));
     }
 
     @DeleteMapping("/{roomFavoriteId}")

@@ -2,11 +2,13 @@ package com.cozymate.cozymate_server.domain.roomfavorite.repository;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
+import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,11 +36,8 @@ public class RoomFavoriteRepositoryService {
         return roomFavoriteRepository.existsByMemberAndRoom(member, room);
     }
 
-    public List<RoomFavorite> getRoomFavoriteListByMember(Member member) {
-        return roomFavoriteRepository.findByMember(member);
-    }
-
-    public void deleteRoomFavoriteByRoomIds(List<Long> deleteTargetRoomIdList) {
-        roomFavoriteRepository.deleteAllByRoomIds(deleteTargetRoomIdList);
+    public Slice<RoomFavorite> getRoomFavoriteListByMember(Member member, Pageable pageable) {
+        return roomFavoriteRepository.findPagingByMemberAndRoomStatusNot(member, RoomStatus.DISABLE,
+            pageable);
     }
 }

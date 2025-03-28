@@ -4,9 +4,12 @@ import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.persistence.Tuple;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,5 +38,9 @@ public class ChatRoomRepositoryService {
 
     public List<ChatRoom> getChatRoomListByMember(Member member) {
         return chatRoomRepository.findAllByMember(member);
+    }
+
+    public Slice<Tuple> getPagingChatRoomListByMember(Member member, Pageable pageable) {
+        return chatRoomRepository.findPagingByMember(member, pageable);
     }
 }

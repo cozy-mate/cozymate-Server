@@ -4,8 +4,9 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberfavorite.MemberFavorite;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,7 +34,7 @@ public class MemberFavoriteRepositoryService {
         memberFavoriteRepository.delete(memberFavorite);
     }
 
-    public List<MemberFavorite> getMemberFavoriteListByMember(Member member) {
-        return memberFavoriteRepository.findByMember(member);
+    public Slice<MemberFavorite> getMemberFavoriteListByMember(Member member, Pageable pageable) {
+        return memberFavoriteRepository.findPagingByMember(member, pageable);
     }
 }

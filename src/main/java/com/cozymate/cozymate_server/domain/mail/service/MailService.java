@@ -70,7 +70,7 @@ public class MailService {
 
         // todo: 출시 전 삭제
         if(verifyDTO.code().equals("cozymate")){
-           return authService.signInByPreMember(clientId, memberUniversity,
+            return authService.signInByPreMember(clientId, memberUniversity,
                 verifyDTO.majorName());
         }
 
