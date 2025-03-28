@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.member.converter;
 
 
-import com.cozymate.cozymate_server.domain.auth.dto.TokenResponseDTO;
+import com.cozymate.cozymate_server.domain.auth.dto.response.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.utils.ClientIdMaker;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;

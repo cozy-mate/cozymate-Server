@@ -1,12 +1,12 @@
 package com.cozymate.cozymate_server.domain.member.controller;
 
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.member.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
+import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
-import com.cozymate.cozymate_server.domain.member.service.MemberCommandService;
+import com.cozymate.cozymate_server.domain.member.service.MemberService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
@@ -15,19 +15,17 @@ import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
-import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,30 +39,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/members")
 public class MemberController {
 
-    private final MemberCommandService memberCommandService;
-
-    @PostMapping("/sign-in")
-    @Operation(summary = "[말즈] 로그인",
-        description = "`request Body : \"client_id\": \"123123\"`<br>"
-            + "         *     `\"social_type\": \"KAKAO\"`<br>")
-    @SwaggerApiError({
-        ErrorStatus._MEMBER_BINDING_FAIL,
-    })
-    ResponseEntity<ApiResponse<SignInResponseDTO>> signIn(
-        @Valid @RequestBody SignInRequestDTO signInRequestDTO
-    ) {
-
-        SignInResponseDTO signInResponseDTO = memberCommandService.signIn(signInRequestDTO);
-
-        return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
-    }
-
+    private final MemberService memberService;
     @GetMapping("/check-nickname")
     @Operation(summary = "[말즈] 닉네임 유효성 검증",
         description = "false : 사용 불가, true : 사용 가능")
     ResponseEntity<ApiResponse<Boolean>> checkNickname(
         @RequestParam @Length(min = 2, max = 10) String nickname) {
-        Boolean isValid = memberCommandService.checkNickname(nickname);
+        Boolean isValid = memberService.checkNickname(nickname);
 
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())
             .body(ApiResponse.onSuccess(isValid));
@@ -85,7 +66,7 @@ public class MemberController {
         @RequestAttribute("client_id") String clientId,
         @RequestBody @Valid SignUpRequestDTO signUpRequestDTO) {
 
-        SignInResponseDTO signInResponseDTO = memberCommandService.signUp(clientId,
+        SignInResponseDTO signInResponseDTO = memberService.signUp(clientId,
             signUpRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
@@ -102,7 +83,7 @@ public class MemberController {
     ResponseEntity<ApiResponse<MemberDetailResponseDTO>> getMemberInfo(
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        MemberDetailResponseDTO memberDetailResponseDTO = memberCommandService.getMemberDetailInfo(
+        MemberDetailResponseDTO memberDetailResponseDTO = memberService.getMemberDetailInfo(
             memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(memberDetailResponseDTO));
@@ -116,68 +97,29 @@ public class MemberController {
     public void signOut() {
     }
 
-
-    @PostMapping("/update-nickname")
-    @Operation(summary = "[말즈] 사용자 닉네임 수정",
-        description = "사용자의 닉네임을 수정합니다.<br>예시: `nickname=말즈`")
-    ResponseEntity<ApiResponse<Boolean>> updateNickname(
-        @RequestParam String nickname,
+    @PatchMapping("/update")
+    @Operation(summary = "[말즈] (수정 2025.3.27) 사용자 정보 수정",
+        description = "사용자의 기본정보를 수정합니다."
+            + "<br>닉네임 : `nickname=말즈`"
+            + "<br>프로필 이미지 : `persona=3`"
+            + "<br>생일 : `birthDay=2000-01-01`"
+            + "<br>학과명 : `majorName=컴퓨터공학과`")
+    ResponseEntity<ApiResponse<Boolean>> update(
+        @RequestBody @Valid UpdateRequestDTO requestDTO,
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
-        memberCommandService.updateNickname(memberDetails.member(), nickname);
+        memberService.update(memberDetails.member(), requestDTO);
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
-
-    @PostMapping("/update-persona")
-    @Operation(summary = "[말즈] 사용자 프로필 이미지 수정",
-        description = "사용자의 프로필 이미지를 수정합니다.<br>1~16 사이의 정수값을 전달하며, 이 값은 사전에 정의된 이미지 ID를 나타냅니다.<br>예시: `persona=3`")
-    ResponseEntity<ApiResponse<Boolean>> updatePersona(
-        @RequestParam
-        @Range(min = 1, max = 16)
-        Integer persona,
-        @AuthenticationPrincipal MemberDetails memberDetails
-    ) {
-        memberCommandService.updatePersona(memberDetails.member(), persona);
-        return ResponseEntity.ok(ApiResponse.onSuccess(true));
-    }
-
-    @PostMapping("/update-birthday")
-    @Operation(summary = "[말즈] 사용자 생일 수정",
-        description = "사용자의 생일을 수정합니다.<br>날짜는 'yyyy-MM-dd' 형식으로 전달되어야 합니다.<br>예시: `localDate=2000-01-01`")
-    ResponseEntity<ApiResponse<Boolean>> updateBirthday(
-        @RequestParam
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        LocalDate localDate,
-        @AuthenticationPrincipal MemberDetails memberDetails
-    ) {
-        memberCommandService.updateBirthday(memberDetails.member(), localDate);
-        return ResponseEntity.ok(ApiResponse.onSuccess(true));
-    }
-
-    @PostMapping("/update-majorName")
-    @Operation(summary = "[말즈] 사용자 학과 수정",
-        description = "사용자의 학과명을 수정합니다.<br>학과명은 문자열 형식으로 전달됩니다.<br>예시: `majorName=컴퓨터공학과`")
-    ResponseEntity<ApiResponse<Boolean>> updateMajorName(
-        @RequestParam
-        @NotEmpty
-        @NotNull
-        String majorName,
-        @AuthenticationPrincipal MemberDetails memberDetails
-    ) {
-        memberCommandService.updateMajor(memberDetails.member(), majorName);
-        return ResponseEntity.ok(ApiResponse.onSuccess(true));
-    }
-
 
     @Operation(summary = "[말즈] 회원 탈퇴 API", description = "현재 로그인한 사용자를 탈퇴시킵니다.")
     @DeleteMapping("/withdraw")
     public ResponseEntity<ApiResponse<String>> withdraw(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid WithdrawRequestDTO withdrawRequestDTO) {
-        memberCommandService.withdraw(withdrawRequestDTO,memberDetails);
+        memberService.withdraw(withdrawRequestDTO,memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
-
 
 }

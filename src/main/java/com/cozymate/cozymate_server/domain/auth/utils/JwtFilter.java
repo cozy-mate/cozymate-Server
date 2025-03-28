@@ -35,7 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // JWT 검증을 제외할 URL 목록
     private static final List<String> EXCLUDE_URLS = List.of(
-        "/members/sign-in"
+        "/auth/sign-in"
     );
 
     // 임시 토큰으로만 접근 가능한 URL 목록
