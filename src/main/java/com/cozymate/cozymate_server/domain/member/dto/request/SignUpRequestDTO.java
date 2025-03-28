@@ -37,6 +37,7 @@ public record SignUpRequestDTO(
     @Range(min = 1, max = 16, message = "프로필 캐릭터는 1 ~ 16")
     Integer persona,
 
+    @NotNull
     MemberStatPreferenceDto memberStatPreferenceDto
 ) {
 
