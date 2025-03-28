@@ -13,12 +13,15 @@ import com.cozymate.cozymate_server.domain.room.dto.response.RoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.room.service.RoomQueryService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -307,13 +310,16 @@ public class RoomController {
     }
 
     @GetMapping("/requested")
-    @Operation(summary = "[바니] 사용자가 참여 요청한 방 목록 조회", description = "로그인한 사용자가 참여 요청한 방 목록을 조회합니다.")
+    @Operation(summary = "[바니] 사용자가 참여 요청한 방 목록 조회(수정 - 25.03.28)", description = "로그인한 사용자가 참여 요청한 방 목록을 조회합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<List<RoomDetailResponseDTO>>> getRequestedRoomList(
-        @AuthenticationPrincipal MemberDetails memberDetails) {
-        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getRequestedRoomList(memberDetails.member().getId())));
+    public ResponseEntity<ApiResponse<PageResponseDto<List<RoomDetailResponseDTO>>>> getRequestedRoomList(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "10") @Positive int size
+        ) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(roomQueryService.getRequestedRoomList(memberDetails.member().getId(), page, size)));
     }
 
     @GetMapping("/invited")

@@ -7,7 +7,8 @@ import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +30,11 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
         "WHERE r.id IN (SELECT m.room.id FROM Mate m " +
         "WHERE m.member.id = :memberId AND m.entryStatus = :status)")
     List<Room> findRoomsWithMates(Long memberId, EntryStatus status);
+
+    @Query("SELECT DISTINCT r FROM Room r " +
+        "WHERE r.id IN (SELECT m.room.id FROM Mate m " +
+        "WHERE m.member.id = :memberId AND m.entryStatus = :status)")
+    Slice<Room> findRoomSliceByMemberIdAndEntryStatus(Long memberId, EntryStatus status, Pageable pageable);
 
     /**
      * 사용자에게 방 추천을 해줄 때 조회할 수 있는 방 목록을 보는 쿼리

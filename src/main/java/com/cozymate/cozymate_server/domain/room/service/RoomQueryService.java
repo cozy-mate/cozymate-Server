@@ -24,6 +24,7 @@ import com.cozymate.cozymate_server.domain.room.validator.RoomValidator;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
@@ -33,6 +34,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -114,38 +118,57 @@ public class RoomQueryService {
             }).toList();
     }
 
+    public PageResponseDto<List<RoomDetailResponseDTO>> getPagedRoomList(Long memberId, EntryStatus entryStatus, Pageable pageable) {
+        // 해당 memberId와 entryStatus에 맞는 방을 가져옴
+        Slice<Room> roomSlice = roomRepositoryService.getRoomSliceByMemberIdAndEntryStatus(memberId, entryStatus, pageable);
+
+        List<RoomDetailResponseDTO> content = convertToRoomDetailDTOs(roomSlice.getContent(), memberId);
+
+        return PageResponseDto.<List<RoomDetailResponseDTO>>builder()
+            .page(roomSlice.getNumber())
+            .hasNext(roomSlice.hasNext())
+            .result(content)
+            .build();
+    }
 
     public List<RoomDetailResponseDTO> getRoomList(Long memberId, EntryStatus entryStatus) {
         // 해당 memberId와 entryStatus에 맞는 방을 가져옴
         List<Room> rooms = roomRepositoryService.getRoomListByMemberIdAndEntryStatus(memberId, entryStatus);
+        return convertToRoomDetailDTOs(rooms, memberId);
+    }
 
+    private List<RoomDetailResponseDTO> convertToRoomDetailDTOs(List<Room> rooms, Long memberId) {
         // 방 해시태그 정보 저장
         Map<Long, List<String>> roomHashtagsMap = getRoomHashtagsMap(rooms);
 
         // 방장 정보를 맵으로 저장해둠
-        Map<Long, Mate> managerMap = mateRepository.findRoomManagers(rooms.stream().map(Room::getId).toList())
-            .stream()
-            .collect(Collectors.toMap(mate -> mate.getRoom().getId(), mate -> mate));
+        Map<Long, Mate> managerMap = mateRepository.findRoomManagers(
+            rooms.stream().map(Room::getId).toList()
+        ).stream().collect(Collectors.toMap(mate -> mate.getRoom().getId(), mate -> mate));
 
         // 방 정보를 RoomDetailResponseDTO로 변환하여 반환
         return rooms.stream()
             .map(room -> {
+                // 현재 방에 참여중인 메이트들
                 List<Mate> joinedMates = mateRepository.findJoinedMatesWithMemberAndStats(room.getId());
+
+                // 일치율 매핑
                 Map<Long, Integer> equalityMap = lifestyleMatchRateService.getMatchRateWithMemberIdAndIdList(
                     memberId,
-                    joinedMates.stream().map(mate -> mate.getMember().getId())
-                        .collect(Collectors.toList()));
+                    joinedMates.stream().map(mate -> mate.getMember().getId()).toList()
+                );
+
                 Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
                 List<String> hashtags = extractHashtags(room, roomHashtagsMap);
                 Mate managerMate = managerMap.get(room.getId());
+
                 return RoomConverter.toRoomDetailResponseDTOWithParams(
                     room.getId(),
                     room.getName(),
                     room.getInviteCode(),
                     room.getProfileImage(),
                     joinedMates.stream()
-                        .map(mate -> RoomConverter.toMateDetailListResponse(mate,
-                            equalityMap.get(mate.getMember().getId())))
+                        .map(mate -> RoomConverter.toMateDetailListResponse(mate, equalityMap.get(mate.getMember().getId())))
                         .toList(),
                     managerMate.getMember().getId(),
                     managerMate.getMember().getNickname(),
@@ -157,18 +180,20 @@ public class RoomQueryService {
                     room.getRoomType().toString(),
                     hashtags,
                     roomEquality,
-                    MemberStatConverter.toMemberStatDifferenceResponseDTO(joinedMates.stream()
-                        .map(mate -> memberStatRepository.findByMemberId(mate.getMember().getId()))
-                        .flatMap(Optional::stream)
-                        .toList())
+                    MemberStatConverter.toMemberStatDifferenceResponseDTO(
+                        joinedMates.stream()
+                            .map(mate -> memberStatRepository.findByMemberId(mate.getMember().getId()))
+                            .flatMap(Optional::stream)
+                            .toList()
+                    )
                 );
             })
             .toList();
     }
 
-
-    public List<RoomDetailResponseDTO> getRequestedRoomList(Long memberId) {
-        return getRoomList(memberId, EntryStatus.PENDING);
+    public PageResponseDto<List<RoomDetailResponseDTO>> getRequestedRoomList(Long memberId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return getPagedRoomList(memberId, EntryStatus.PENDING, pageable);
     }
 
     public InvitedRoomResponseDTO getInvitedRoomList(Long memberId) {
