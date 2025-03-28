@@ -4,7 +4,6 @@ package com.cozymate.cozymate_server.domain.member.converter;
 import com.cozymate.cozymate_server.domain.auth.dto.response.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.utils.ClientIdMaker;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
@@ -13,23 +12,18 @@ import com.cozymate.cozymate_server.domain.university.University;
 import java.time.LocalDate;
 
 public class MemberConverter {
-
-    public static Member toMember(
+    public static Member toPreMember(
         String clientId,
-        SignUpRequestDTO signUpRequestDTO,
-        University university
+        University university,
+        String majorName
     ) {
 
         return Member.builder()
             .clientId(clientId)
             .socialType(ClientIdMaker.getSocialTypeInClientId(clientId))
-            .role(Role.USER)
-            .nickname(signUpRequestDTO.nickname())
-            .gender(Gender.getValue(signUpRequestDTO.gender()))
-            .birthDay(signUpRequestDTO.birthday())
-            .persona(signUpRequestDTO.persona())
+            .role(Role.PRE_USER)
             .university(university)
-            .majorName(signUpRequestDTO.majorName())
+            .majorName(majorName)
             .build();
     }
 
@@ -76,13 +70,20 @@ public class MemberConverter {
         return MemberDetailResponseDTO.builder()
             .memberId(memberId)
             .nickname(nickname)
-            .gender(gender.toString())
-            .birthday(birthday.toString())
+            .gender(makeString(gender))
+            .birthday(makeString(birthday))
             .universityName(universityName)
             .universityId(universityId)
             .majorName(majorName)
             .persona(persona)
             .build();
+    }
+
+    private static String makeString(Object value) {
+        if (value == null) {
+            return "";
+        }
+        return value.toString();
     }
 
 }

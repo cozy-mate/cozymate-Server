@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -21,6 +22,7 @@ public class SignUpNotificationService {
     @Value("${discord.webhook-url}")
     private String signUpNotificationUri;
 
+    @Async
     public void sendSignUpNotification(Member member) {
         // WebClient를 사용하여 AWS Lambda로 회원가입 알림을 보냄
         WebClient webClient = WebClient.builder().baseUrl(signUpNotificationUri).build();

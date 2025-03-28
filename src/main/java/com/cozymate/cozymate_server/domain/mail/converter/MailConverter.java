@@ -6,12 +6,12 @@ import com.cozymate.cozymate_server.domain.mail.dto.response.VerifyResponseDTO;
 
 public class MailConverter {
     public static MailAuthentication toMailAuthenticationWithParams(
-            Long memberId,
+            String clientId,
             String mailAddress,
             String code,
             Boolean isVerified) {
         return MailAuthentication.builder()
-                .memberId(memberId)
+                .clientId(clientId)
                 .mailAddress(mailAddress)
                 .code(code)
                 .isVerified(isVerified)

@@ -35,14 +35,19 @@ public class MemberStatPreferenceCommandService {
         String preferencesString = joiner.toString();
 
 
-        MemberStatPreference memberStatPreference = MemberStatPreference.builder()
-            .member(member)
-            .selectedPreferences(preferencesString)
-            .build();
+        MemberStatPreference preference = memberStatPreferenceRepository.findByMemberId(member.getId())
+            .map(existing -> {
+                existing.update(preferencesString); // update 메서드로 값만 수정
+                return existing;
+            })
+            .orElseGet(() -> MemberStatPreference.builder()
+                .member(member)
+                .selectedPreferences(preferencesString)
+                .build());
 
-        memberStatPreferenceRepository.save(memberStatPreference);
+        memberStatPreferenceRepository.save(preference);
 
-        return memberStatPreference.getId();
+        return preference.getId();
     }
 
 

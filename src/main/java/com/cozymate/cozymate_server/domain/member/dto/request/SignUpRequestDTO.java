@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.member.dto.request;
 
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
+import com.cozymate.cozymate_server.domain.memberstatpreference.dto.MemberStatPreferenceDto;
 import com.cozymate.cozymate_server.global.utils.EnumValid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -36,12 +37,7 @@ public record SignUpRequestDTO(
     @Range(min = 1, max = 16, message = "프로필 캐릭터는 1 ~ 16")
     Integer persona,
 
-    @NotNull(message = "null일 수 없습니다.")
-    Long universityId,
-
-    @NotNull(message = "null일 수 없습니다.")
-    @NotEmpty(message = "비어 있을 수 없습니다.")
-    String majorName
+    MemberStatPreferenceDto memberStatPreferenceDto
 ) {
 
 }

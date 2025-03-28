@@ -11,11 +11,7 @@ public enum Permission {
     ADMIN_CREATE("admin:create"),
     ADMIN_DELETE("admin:delete"),
 
-    USER_PUBLIC_ROOM_JOIN("user:public_room_join"),
-    USER_PUBLIC_ROOM_UPDATE("user:public_room_update"),
-    USER_PUBLIC_ROOM_CREATE("user:public_room_create"),
-    USER_PUBLIC_ROOM_DELETE("user:public_room_delete"),
-
+    PRE_USER_SIGNUP("user:signup"),
     ;
 
 
