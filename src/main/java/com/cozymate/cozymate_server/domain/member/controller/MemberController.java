@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,21 +51,32 @@ public class MemberController {
     }
 
     @PostMapping("/sign-up")
-    @Operation(summary = "[말즈] 회원가입",
-        description = "`request Header : Bearer 임시토큰` <br>"
-            + "`request Body : \"name\": \"John Doe\",`<br>"
-            + "         *     `\"nickName\": \"johnny\",`<br>"
-            + "         *     `\"gender\": \"MALE\",`<br>"
-            + "         *     `\"birthday\": \"1990-01-01\"`<br>"
-            + "         *     `\"persona\" : 1`")
+    @Operation(
+        summary = "[말즈] (수정 3.27)회원가입",
+        description = "`Request Header` : Bearer 임시토큰 <br>" +
+            "`Request Body` 예시: <br>" +
+            "`\"nickname\": \"닉네임\",`<br>" +
+            "`\"gender\": \"MALE\",`<br>" +
+            "`\"birthday\": \"2000-01-01\",`<br>" +
+            "`\"persona\": 1,`<br>" +
+            "`\"memberStatPreferenceDto\": {`<br>" +
+            "`&nbsp;&nbsp;&nbsp;&nbsp;\"preferenceList\": [`<br>" +
+            "`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"wakeUpTime\",`<br>" +
+            "`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"sleepingTime\",`<br>" +
+            "`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"airConditioningIntensity\",`<br>" +
+            "`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"studying\"`<br>" +
+            "`&nbsp;&nbsp;&nbsp;&nbsp;]`<br>" +
+            "`}`"
+    )
+
     @SwaggerApiError({
         ErrorStatus._MEMBER_BINDING_FAIL
     })
     ResponseEntity<ApiResponse<SignInResponseDTO>> signUp(
-        @RequestAttribute("client_id") String clientId,
+        @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestBody @Valid SignUpRequestDTO signUpRequestDTO) {
 
-        SignInResponseDTO signInResponseDTO = memberService.signUp(clientId,
+        SignInResponseDTO signInResponseDTO = memberService.signUp(memberDetails.member(),
             signUpRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(signInResponseDTO));
@@ -98,7 +108,7 @@ public class MemberController {
     }
 
     @PatchMapping("/update")
-    @Operation(summary = "[말즈] (수정 2025.3.27) 사용자 정보 수정",
+    @Operation(summary = "[말즈] (수정 2025.3.28) 사용자 정보 수정",
         description = "사용자의 기본정보를 수정합니다."
             + "<br>닉네임 : `nickname=말즈`"
             + "<br>프로필 이미지 : `persona=3`"

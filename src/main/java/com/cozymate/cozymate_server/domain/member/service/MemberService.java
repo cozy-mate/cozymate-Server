@@ -10,12 +10,10 @@ import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
-
+import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
 import com.cozymate.cozymate_server.domain.member.validator.MemberValidator;
-import com.cozymate.cozymate_server.domain.university.University;
-
-import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
+import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
 import com.cozymate.cozymate_server.domain.university.validator.UniversityValidator;
 
 import lombok.RequiredArgsConstructor;
@@ -27,19 +25,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class MemberService {
-
     // 의존성 주입
     private final AuthService authService;
-    private final MemberRepositoryService memberRepositoryService;
     private final MemberValidator memberValidator;
     private final UniversityValidator universityValidator;
-    private final UniversityRepositoryService universityRepositoryService;
-
+    private final MemberStatPreferenceCommandService memberStatPreferenceCommandService;
     private final MemberWithdrawService memberWithdrawService;
-
     private final MailService mailService;
-
     private final SignUpNotificationService signUpNotificationService;
+    private final MemberRepositoryService memberRepositoryService;
 
     /**
      * 닉네임 유효성 검사 메서드
@@ -68,39 +62,42 @@ public class MemberService {
     /**
      * 사용자 회원가입 메서드
      *
-     * @param clientId         사용자 식별자 clientId 로 사용자 중복 검증
+     * @param preMember        필터에서 넘어온 준회원 정보
      * @param signUpRequestDTO 회원가입 요청 정보를 담은 DTO
      * @return 로그인 결과를 담은 DTO
      */
     @Transactional
-    public SignInResponseDTO signUp(String clientId,
+    public SignInResponseDTO signUp(Member preMember,
         SignUpRequestDTO signUpRequestDTO) {
 
         memberValidator.checkNickname(signUpRequestDTO.nickname());
 
-        memberValidator.checkClientId(clientId);
+        Member member = memberRepositoryService.getMemberByIdOrThrow(preMember.getId());
 
-        University memberUniversity = universityRepositoryService.getUniversityByIdOrThrow(
-            signUpRequestDTO.universityId());
+        member.signup(
+            signUpRequestDTO.nickname(),
+            Gender.getValue(signUpRequestDTO.gender()),
+            signUpRequestDTO.birthday(),
+            signUpRequestDTO.persona()
+        );
 
-        universityValidator.checkMajorName(memberUniversity,signUpRequestDTO.majorName());
-
-        Member member = memberRepositoryService.createMember(
-            MemberConverter.toMember(clientId, signUpRequestDTO, memberUniversity));
+        memberStatPreferenceCommandService.savePreferences(member.getId(),
+            signUpRequestDTO.memberStatPreferenceDto().preferenceList());
 
         signUpNotificationService.sendSignUpNotification(member);
-
         // 기존 회원으로 로그인 처리
-        return authService.signInByExistingMember(clientId);
+        return authService.signInByExistingMember(member.getClientId());
     }
 
 
     @Transactional
     public void update(Member member, UpdateRequestDTO requestDTO) {
-        if(!member.getNickname().equals(requestDTO.nickname())){
+        if (!member.getNickname().equals(requestDTO.nickname())) {
             memberValidator.checkNickname(requestDTO.nickname());
         }
-        universityValidator.checkMajorName(member.getUniversity(),requestDTO.majorName());
+        universityValidator.checkMajorName(member.getUniversity(), requestDTO.majorName());
+
+        member = memberRepositoryService.getMemberByIdOrThrow(member.getId());
 
         member.update(
             requestDTO.nickname(),
@@ -108,8 +105,6 @@ public class MemberService {
             requestDTO.birthday(),
             requestDTO.majorName()
         );
-
-        memberRepositoryService.updateMember(member);
     }
 
     /**

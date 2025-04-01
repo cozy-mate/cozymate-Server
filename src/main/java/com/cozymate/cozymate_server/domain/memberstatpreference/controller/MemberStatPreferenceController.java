@@ -30,7 +30,7 @@ public class MemberStatPreferenceController {
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
     @GetMapping("")
-    @Operation(summary = "[포비] 멤버 선호 항목 조회", description = "")
+    @Operation(summary = "[말즈] 멤버 선호 항목 조회", description = "")
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_PREFERENCE_NOT_EXISTS
     })
@@ -42,24 +42,25 @@ public class MemberStatPreferenceController {
     }
 
     @PostMapping("")
-    @Operation(summary = "[포비] 멤버 선호 항목 생성", description = ""
+    @Operation(summary = "[말즈] 멤버 선호 항목 생성", description = ""
         + "선호 항목은 List<String>으로 주시면 됩니다")
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_PREFERENCE_PARAMETER_NOT_VALID
     })
+    @Deprecated
     public ResponseEntity<ApiResponse<Long>> createMemberPreference(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid @RequestBody MemberStatPreferenceDto memberStatPreferenceDto
     ) {
         Long createdId = memberStatPreferenceCommandService.savePreferences(
             memberDetails.member().getId(),
-            memberStatPreferenceDto.getPreferenceList());
+            memberStatPreferenceDto.preferenceList());
 
         return ResponseEntity.ok(ApiResponse.onSuccess(createdId));
     }
 
     @PutMapping("")
-    @Operation(summary = "[포비] 멤버 선호 항목 업데이트", description = ""
+    @Operation(summary = "[말즈] 멤버 선호 항목 업데이트", description = ""
         + "선호 항목은 List<String>으로 주시면 됩니다")
     @SwaggerApiError({
         ErrorStatus._MEMBERSTAT_PREFERENCE_PARAMETER_NOT_VALID
@@ -71,7 +72,7 @@ public class MemberStatPreferenceController {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             memberStatPreferenceCommandService.updatePreferences(
                 memberDetails.member().getId(),
-                memberStatPreferenceDto.getPreferenceList()
+                memberStatPreferenceDto.preferenceList()
             )
         ));
     }

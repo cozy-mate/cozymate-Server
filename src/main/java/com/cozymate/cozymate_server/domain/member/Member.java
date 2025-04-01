@@ -51,58 +51,45 @@ public class Member extends BaseTimeEntity {
     @NonNull
     @Enumerated(EnumType.STRING)
     private Role role;
-
     @NonNull
     private String clientId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
     @NonNull
-//    @Length(min = 2, max = 8)
-    private String nickname;
-
-    @NonNull
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
-
-    @NonNull
-    private LocalDate birthDay;
-
-    @NonNull
-    @Range(min = 1, max = 16)
-    private Integer persona;
-
-    @ManyToOne()
     @JoinColumn(name = "university_id")
     private University university;
 
+    @NonNull
     private String majorName;
 
-    @OneToOne(mappedBy = "member",fetch = FetchType.LAZY)
+    // 정식회원 정보
+    private String nickname;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private LocalDate birthDay;
+
+    @Range(min = 1, max = 16)
+    private Integer persona;
+
+
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
     private MemberStat memberStat;
 
-    public void verifyMemberUniversity(University university, String majorName){
-        this.role = Role.USER_VERIFIED;
-        this.university = university;
-        this.majorName = majorName;
-    }
-
-    public void updatePersona(Integer persona) {
-        this.persona = persona;
-    }
-
-    public void updateNickname(String nickname) {
+    public void signup(String nickname, Gender gender, LocalDate birthDay, Integer persona) {
         this.nickname = nickname;
-    }
-    public void updateBirthday(LocalDate birthDay) {
+        this.gender = gender;
         this.birthDay = birthDay;
-    }
-    public void updateMajor(String majorName) {
-        this.majorName = majorName;
+        this.persona = persona;
+        this.role = Role.USER;
     }
 
-    public void update(String nickname, Integer persona, LocalDate birthDay, String majorName){
+    public void update(String nickname, Integer persona, LocalDate birthDay, String majorName) {
         this.nickname = nickname;
         this.persona = persona;
         this.birthDay = birthDay;
         this.majorName = majorName;
     }
+
 }

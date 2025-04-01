@@ -12,8 +12,11 @@ import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.auth.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
+import com.cozymate.cozymate_server.domain.member.enums.Role;
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
+import com.cozymate.cozymate_server.domain.member.validator.MemberValidator;
+import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 
@@ -33,18 +36,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService implements UserDetailsService {
 
     public static final String TEMPORARY_TOKEN_SUCCESS_MESSAGE = "임시 토큰 발급 완료";
-
     public static final String MEMBER_TOKEN_MESSAGE = "기존 사용자 토큰 발급 성공";
     private final JwtUtil jwtUtil;
     private final MemberRepositoryService memberRepositoryService;
     private final TokenRepository tokenRepository;
+    private final MemberValidator memberValidator;
 
-    public TokenResponseDTO reissue(String refreshToken) {
+    public SignInResponseDTO reissue(String refreshToken) {
         String clientId = jwtUtil.extractUserName(refreshToken);
 
         validateRefreshToken(refreshToken);
 
-        return generateMemberTokenDTO(loadMember(clientId));
+        return signInByExistingMember(clientId);
     }
 
 
@@ -72,7 +75,6 @@ public class AuthService implements UserDetailsService {
 
     }
 
-
     /**
      * 기존 회원 로그인 처리 메서드
      *
@@ -94,6 +96,15 @@ public class AuthService implements UserDetailsService {
         return MemberConverter.toSignInResponseDTO(memberDetailResponseDTO, tokenResponseDTO);
     }
 
+    public SignInResponseDTO signInByPreMember(String clientId,
+        University memberUniversity, String majorName) {
+
+        memberValidator.checkClientId(clientId);
+        memberRepositoryService.createMember(
+            MemberConverter.toPreMember(clientId, memberUniversity, majorName));
+
+        return signInByExistingMember(clientId);
+    }
     /**
      * 임시 회원 로그인 처리 메서드
      *
@@ -107,6 +118,7 @@ public class AuthService implements UserDetailsService {
         // 임시 로그인 응답 DTO 반환
         return MemberConverter.toTemporarySignInResponseDTO(tokenResponseDTO);
     }
+
     // 회원가입을 하려는 경우
     // 임시 토큰을 만들어서 token response dto 만들어 반환
     // 바디에 임시 토큰값 있음
@@ -116,7 +128,14 @@ public class AuthService implements UserDetailsService {
         String temporaryToken = jwtUtil.generateTemporaryToken(temporaryMember);
 
         return AuthConverter.toTemporaryTokenResponseDTO(TEMPORARY_TOKEN_SUCCESS_MESSAGE,
-                temporaryToken);
+            temporaryToken);
+    }
+
+    private TokenResponseDTO generatePreMemberToken(MemberDetails memberDetails) {
+        String temporaryToken = jwtUtil.generateTemporaryToken(memberDetails);
+
+        return AuthConverter.toTemporaryTokenResponseDTO(TEMPORARY_TOKEN_SUCCESS_MESSAGE,
+            temporaryToken);
     }
 
     // 기존 회원인 경우
@@ -124,6 +143,10 @@ public class AuthService implements UserDetailsService {
     // 바디에 access token, refresh token 이 있음
     // refresh token은 db에 저장
     public TokenResponseDTO generateMemberTokenDTO(MemberDetails memberDetails) {
+        if (memberDetails.member().getRole().equals(Role.PRE_USER)) {
+            return generatePreMemberToken(memberDetails);
+        }
+
         String accessToken = jwtUtil.generateAccessToken(memberDetails);
         String refreshToken = jwtUtil.generateRefreshToken(memberDetails);
 
@@ -133,7 +156,7 @@ public class AuthService implements UserDetailsService {
         log.info("refresh token: {}", refreshToken);
 
         return AuthConverter.toTokenResponseDTO(
-                MEMBER_TOKEN_MESSAGE, accessToken, refreshToken);
+            MEMBER_TOKEN_MESSAGE, accessToken, refreshToken);
     }
 
     // refresh token 에서 member details (user details 구현체) 추출
@@ -160,7 +183,6 @@ public class AuthService implements UserDetailsService {
         tokenRepository.delete(token);
     }
 
-
     // 기존회원인 경우
     // 회원을 찾아 그 정보로 MemberDetails 만드는 함수
     private MemberDetails loadMember(String clientId) {
@@ -172,15 +194,17 @@ public class AuthService implements UserDetailsService {
     private TemporaryMember loadTemporaryMember(String clientId) {
         return new TemporaryMember(clientId);
     }
+
     // refresh token을 db에 저장하는 함수
     private void saveRefreshToken(String clientId, String refreshToken) {
         Token newToken = new Token(clientId, refreshToken);
         tokenRepository.save(newToken);
     }
+
     // refresh token db 에서 찾아보기
     private Token findRefreshTokenByClientId(String clientId) {
         return tokenRepository.findById(clientId).orElseThrow(
-                () -> new GeneralException(ErrorStatus._TOKEN_NOT_FOUND)
+            () -> new GeneralException(ErrorStatus._TOKEN_NOT_FOUND)
         );
     }
 

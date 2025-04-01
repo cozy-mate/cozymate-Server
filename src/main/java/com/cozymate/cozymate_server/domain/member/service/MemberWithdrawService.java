@@ -24,8 +24,6 @@ import com.cozymate.cozymate_server.domain.report.repository.ReportRepository;
 import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
-import com.cozymate.cozymate_server.domain.roomlog.repository.RoomLogRepository;
-import com.cozymate.cozymate_server.domain.todo.repository.TodoRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,9 +51,6 @@ public class MemberWithdrawService {
     private final PostImageRepository postImageRepository;
     private final PostCommentRepository postCommentRepository;
     private final RoleRepository roleRepository;
-    private final TodoRepository todoRepository;
-    private final RoomLogRepository roomLogRepository;
-
     private final RoomCommandService roomCommandService;
 
     private final MemberFavoriteRepository memberFavoriteRepository;
@@ -86,7 +81,7 @@ public class MemberWithdrawService {
     @Transactional
     public void deleteRelatedWithMember(Member member) {
         tokenRepository.deleteById(member.getClientId());
-        mailRepository.deleteById(member.getId());
+        mailRepository.deleteById(member.getClientId());
         log.debug("토큰,메일 삭제 완료");
 
         memberFavoriteRepository.deleteByMemberOrTargetMember(member);

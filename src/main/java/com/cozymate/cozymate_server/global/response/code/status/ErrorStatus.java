@@ -37,9 +37,10 @@ public enum ErrorStatus implements BaseErrorCode {
     // Token
     _TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN400", "사용자의 리프레시 토큰을 찾을 수 없습니다."),
     _TOKEN_INVALID(HttpStatus.BAD_REQUEST, "TOKEN401", "토큰이 유효하지 않습니다."),
-    _TEMPORARY_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN402", "임시토큰으로 접근 할 수 없습니다."),
+    _TEMPORARY_TOKEN_NO_USER_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN402", "임시토큰(회원아님)으로 접근 할 수 없습니다."),
     _REFRESH_TOKEN_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN403", "refresh 토큰으로 접근 할 수 없습니다."),
     _TOKEN_AUTHORIZATION_EMPTY(HttpStatus.BAD_REQUEST, "TOKEN404", "사용자 권한이 비어있습니다."),
+    _TEMPORARY_TOKEN_PRE_USER_ACCESS_DENIED_(HttpStatus.BAD_REQUEST, "TOKEN405", "임시토큰(준회원)으로 접근 할 수 없습니다."),
 
 
     // S3 관련

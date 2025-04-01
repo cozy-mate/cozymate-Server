@@ -9,15 +9,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Collection;
 import java.util.List;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,17 +41,17 @@ public class JwtFilter extends OncePerRequestFilter {
     );
 
     // 임시 토큰으로만 접근 가능한 URL 목록
-    private static final List<String> TEMPORARY_URLS = List.of(
-        "/members/sign-up",
-        "/members/check-nickname",
+    private static final List<String> NOT_MEMBER_URLS = List.of(
+        "/members/mail",
+        "/members/mail/verify",
         "/university/get-list",
         "/university/get-info"
     );
-
-    private static final List<String> VERIFIED_URLS = List.of(
-//        "/university/get-member-univ-info"
+    // 임시 토큰으로만 접근 가능한 URL 목록
+    private static final List<String> PRE_MEMBER_URLS = List.of(
+        "/members/sign-up",
+        "/members/check-nickname"
     );
-
     private static final List<String> REFRESH_URLS = List.of("/auth/reissue");
     private static final String REQUEST_ATTRIBUTE_NAME_CLIENT_ID = "client_id";
 
@@ -106,18 +108,25 @@ public class JwtFilter extends OncePerRequestFilter {
             MDC.put(MdcKey.USER_ID.name(), userName);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
 
-            if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.ACCESS)){
-                if (userDetails.getAuthorities() == null || userDetails.getAuthorities().isEmpty()){
+            if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.ACCESS)) {
+                if (userDetails.getAuthorities() == null || userDetails.getAuthorities()
+                    .isEmpty()) {
                     throw new RuntimeException(ErrorStatus._TOKEN_AUTHORIZATION_EMPTY.getMessage());
                 }
             }
 
             // 임시 토큰일 경우, 접근을 제한할 URL 목록에 대한 접근 여부 확인
             if (jwtUtil.equalsTokenTypeWith(jwt, TokenType.TEMPORARY)) {
-                if (isNotAllowTemporary(request)) {
-                    // 임시토큰 접근 거부 예외
+                boolean isPreUser = isPreUser(userDetails.getAuthorities());
+                if (isPreUser && isNotAllowPreMember(request)) {
+                    // 준회원 임시 토큰으로 접근 거부
                     throw new RuntimeException(
-                        ErrorStatus._TEMPORARY_TOKEN_ACCESS_DENIED_.getMessage());
+                        ErrorStatus._TEMPORARY_TOKEN_PRE_USER_ACCESS_DENIED_.getMessage());
+                }
+                if (!isPreUser && isNotAllowNoMember(request)) {
+                    // 회원아님 임시 토큰으로 접근 거부
+                    throw new RuntimeException(
+                        ErrorStatus._TEMPORARY_TOKEN_NO_USER_ACCESS_DENIED_.getMessage());
                 }
                 request.setAttribute(REQUEST_ATTRIBUTE_NAME_CLIENT_ID, userDetails.getUsername());
             }
@@ -130,16 +139,6 @@ public class JwtFilter extends OncePerRequestFilter {
                         ErrorStatus._REFRESH_TOKEN_ACCESS_DENIED_.getMessage());
                 }
                 request.setAttribute(REQUEST_ATTRIBUTE_NAME_REFRESH, jwt);
-            }
-
-            // 사용자 메일인증 여부에 따른 권한 조회
-            if (userDetails.getAuthorities().stream()
-                .noneMatch(grantedAuthority -> grantedAuthority.getAuthority()
-                    .equals("ROLE_USER_VERIFIED"))) {
-                if (isNotAllowUnverified(request)) {
-                    throw new RuntimeException(ErrorStatus._MEMBER_NOT_VERIFIED.getMessage());
-                }
-
             }
 
             // 사용자 정보와 권한을 설정하고 SecurityContext에 인증 정보를 저장
@@ -170,17 +169,18 @@ public class JwtFilter extends OncePerRequestFilter {
         return EXCLUDE_URLS.stream().anyMatch(url -> request.getRequestURI().equals(url));
     }
 
-    // 임시 토큰으로 접근 가능한 URL 목록에 해당하는지 확인
-    private boolean isNotAllowTemporary(HttpServletRequest request) {
-        return TEMPORARY_URLS.stream().noneMatch(url -> request.getRequestURI().equals(url));
+    // 회원이 아닌 임시 토큰으로 접근 가능한 URL 목록에 해당하는지 확인
+    private boolean isNotAllowNoMember(HttpServletRequest request) {
+        return NOT_MEMBER_URLS.stream().noneMatch(url -> request.getRequestURI().equals(url));
+    }
+
+    // 준 회원의 임시 토큰으로 접근 가능한 URL 목록에 해당하는지 확인
+    private boolean isNotAllowPreMember(HttpServletRequest request) {
+        return PRE_MEMBER_URLS.stream().noneMatch(url -> request.getRequestURI().equals(url));
     }
 
     private boolean isNotAllowRefresh(HttpServletRequest request) {
         return REFRESH_URLS.stream().noneMatch(url -> request.getRequestURI().equals(url));
-    }
-
-    private boolean isNotAllowUnverified(HttpServletRequest request) {
-        return VERIFIED_URLS.stream().anyMatch(url -> request.getRequestURI().equals(url));
     }
 
     private boolean isAdminOnlyUrl(HttpServletRequest request) {
@@ -225,5 +225,10 @@ public class JwtFilter extends OncePerRequestFilter {
         return null;
     }
 
+    private boolean isPreUser(Collection<? extends GrantedAuthority> authorities) {
+        return authorities.stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch(auth -> auth.equals("ROLE_PRE_USER"));
+    }
 
 }

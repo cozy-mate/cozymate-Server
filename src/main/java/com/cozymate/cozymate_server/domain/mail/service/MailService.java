@@ -1,17 +1,14 @@
 package com.cozymate.cozymate_server.domain.mail.service;
 
 
-import com.cozymate.cozymate_server.domain.auth.dto.response.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
 import com.cozymate.cozymate_server.domain.mail.converter.MailConverter;
 import com.cozymate.cozymate_server.domain.mail.dto.request.MailSendRequestDTO;
 import com.cozymate.cozymate_server.domain.mail.dto.request.VerifyRequestDTO;
-import com.cozymate.cozymate_server.domain.mail.dto.response.VerifyResponseDTO;
 import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -41,7 +38,6 @@ public class MailService {
     private static final Integer MAIL_AUTHENTICATION_EXPIRED_TIME = 30;
     private final JavaMailSender mailSender;
     private final MailRepository mailRepository;
-    private final MemberRepository memberRepository;
     private final UniversityRepositoryService universityRepositoryService;
     private final AuthService authService;
 
@@ -52,7 +48,7 @@ public class MailService {
 
 
     @Transactional
-    public void sendUniversityAuthenticationCode(MemberDetails memberDetails,
+    public void sendUniversityAuthenticationCode(String clientId,
         MailSendRequestDTO sendDTO) {
         University university = universityRepositoryService.getUniversityByIdOrThrow(
             sendDTO.universityId());
@@ -60,29 +56,33 @@ public class MailService {
         String mailAddress = sendDTO.mailAddress();
         validateMailAddress(mailAddress, university.getMailPattern());
 
-        MailAuthentication mailAuthentication = createAndSendMail(memberDetails.member().getId(),
+        MailAuthentication mailAuthentication = createAndSendMail(clientId,
             mailAddress, university.getName());
 
         mailRepository.save(mailAuthentication);
     }
 
     @Transactional
-    public VerifyResponseDTO verifyMemberUniversity(MemberDetails memberDetails,
+    public SignInResponseDTO verifyMemberUniversity(String clientId,
         VerifyRequestDTO verifyDTO) {
         University memberUniversity = universityRepositoryService.getUniversityByIdOrThrow(
             verifyDTO.universityId());
 
-        memberDetails.member().verifyMemberUniversity(memberUniversity, verifyDTO.majorName());
-        memberRepository.save(memberDetails.member());
+        // todo: 출시 전 삭제
+        if(verifyDTO.code().equals("cozymate")){
+            return authService.signInByPreMember(clientId, memberUniversity,
+                verifyDTO.majorName());
+        }
 
-        verifyAuthenticationCode(memberDetails.member(), verifyDTO.code());
-        TokenResponseDTO tokenResponseDTO = authService.generateMemberTokenDTO(memberDetails);
-        return MailConverter.toVerifyResponseDTO(tokenResponseDTO);
+        verifyAuthenticationCode(clientId, verifyDTO.code());
+
+        return authService.signInByPreMember(clientId, memberUniversity,
+            verifyDTO.majorName());
     }
 
     public String isVerified(Member member) {
         Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
-            member.getId());
+            member.getClientId());
         if (mailAuthentication.isPresent() && Boolean.TRUE.equals(
             mailAuthentication.get().getIsVerified())) {
             return mailAuthentication.get().getMailAddress();
@@ -105,9 +105,9 @@ public class MailService {
         }
     }
 
-    private void verifyAuthenticationCode(Member member, String requestCode) {
+    private void verifyAuthenticationCode(String clientId, String requestCode) {
 
-        MailAuthentication mailAuthentication = mailRepository.findById(member.getId())
+        MailAuthentication mailAuthentication = mailRepository.findById(clientId)
             .orElseThrow(() -> new GeneralException(
                 ErrorStatus._MAIL_AUTHENTICATION_NOT_FOUND));
         // 만료 시간 초과 여부 확인
@@ -125,10 +125,10 @@ public class MailService {
         mailAuthentication.verify();
     }
 
-    private MailAuthentication createAndSendMail(Long memberId, String mailAddress,
+    private MailAuthentication createAndSendMail(String clientId, String mailAddress,
         String universityName) {
         if (mailAddress.equals("test123@inha.edu")) {
-            return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress, "123456",
+            return MailConverter.toMailAuthenticationWithParams(clientId, mailAddress, "123456",
                 false);
         } // 애플심사를 위한 테스트 메일 인증
 
@@ -148,7 +148,7 @@ public class MailService {
             helper.setText(emailBody, true);
             mailSender.send(message);
 
-            return MailConverter.toMailAuthenticationWithParams(memberId, mailAddress,
+            return MailConverter.toMailAuthenticationWithParams(clientId, mailAddress,
                 authenticationCode, false);
         } catch (MessagingException e) {
             throw new GeneralException(ErrorStatus._MAIL_SEND_FAIL);

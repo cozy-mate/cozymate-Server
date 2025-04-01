@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class MailAuthentication extends BaseTimeEntity {
     @Id
-    private Long memberId;
+    private String clientId;
 
     private String mailAddress;
     private String code;
