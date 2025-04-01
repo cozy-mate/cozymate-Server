@@ -222,9 +222,11 @@ public class MemberStatConverter {
 
     public static List<MemberStatPreferenceDetailColorDTO> toMemberStatPreferenceDetailWithoutColorDTOList(
         MemberStat memberStat, List<String> preferences) {
-        Map<String, Object> memberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
-            memberStat,
-            preferences);
+        Map<String, Object> rawMemberStatMap = FieldInstanceResolver.extractMultiMemberStatFields(
+            memberStat, preferences);
+
+        Map<String, String> memberStatMap = QuestionAnswerMapper.convertToStringMap(
+            rawMemberStatMap);
 
         return memberStatMap.entrySet().stream()
             .map(entry -> toMemberStatPreferenceDetailWithoutColorDTO(
