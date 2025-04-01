@@ -9,6 +9,8 @@ import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -55,6 +57,10 @@ public class RoomRepositoryService {
 
     public List<Room> getRoomListByKeywordAndUniversityAndGender(String keyword, Long universityId, Gender gender) {
         return roomRepository.findMatchingPublicRooms(keyword, universityId, gender);
+    }
+
+    public Slice<Room> getRoomSliceByMemberIdAndEntryStatus(Long memberId, EntryStatus entryStatus, Pageable pageable) {
+        return roomRepository.findRoomSliceByMemberIdAndEntryStatus(memberId, entryStatus, pageable);
     }
 
     // 방 저장
