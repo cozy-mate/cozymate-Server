@@ -47,7 +47,7 @@ public class RoomFavoriteController {
     }
 
     @GetMapping
-    @Operation(summary = "[베로] 찜한 방 목록 조회 (수정 - 25.03.27)", description = "")
+    @Operation(summary = "[베로] 찜한 방 목록 조회 (수정 - 25.04.03)", description = "")
     public ResponseEntity<ApiResponse<PageResponseDto<List<RoomFavoriteResponseDTO>>>> getFavoriteRoomList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") @PositiveOrZero int page,
