@@ -1,6 +1,7 @@
 name: PRODUCTION CI/CD
 
 on:
+  workflow_dispatch: # 수동 실행 트리거 추가
   push:
     branches: [ "main" ]
 
@@ -98,13 +99,11 @@ jobs:
           username: ubuntu
           key: ${{ env.SSH_KEY }}
           script: |
-            echo "ECR_URI=${{ env.ECR_URI }}" > /home/ubuntu/.env
             echo "GITHUB_SHA=${{ env.IMAGE_TAG }}" >> /home/ubuntu/.env
-            echo "SPRING_PROFILES=${{ env.PROFILE }}" >> /home/ubuntu/.env
-            
-            sudo docker stop $(sudo docker ps -a -q) || true
-            sudo docker rm $(sudo docker ps -a -q) || true
-            sudo docker images -q | xargs -r docker rmi || true
-            sudo docker system prune -af
-            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ env.ECR_URI }} && sudo docker pull ${{ env.ECR_URI }}:${{ env.IMAGE_TAG }}
-            sudo -E  docker-compose up -d
+            ./cozymate/script/deploy.sh ${{ env.IMAGE_TAG }}
+#            sudo docker stop $(sudo docker ps -a -q) || true
+#            sudo docker rm $(sudo docker ps -a -q) || true
+#            sudo docker images -q | xargs -r docker rmi || true
+#            sudo docker system prune -af
+#            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ env.ECR_URI }} && sudo docker pull ${{ env.ECR_URI }}:${{ env.IMAGE_TAG }}
+#            sudo -E  docker-compose up -d
