@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -84,7 +85,9 @@ public class FieldInstanceResolver {
         return fieldNameList.stream()
             .collect(Collectors.toMap(
                 fieldName -> fieldName,
-                fieldName -> extractMemberStatField(memberStat, fieldName)
+                fieldName -> extractMemberStatField(memberStat, fieldName),
+                (o1, o2) -> o1,
+                LinkedHashMap::new // fieldNameList 조회된 순서 유지
             ));
     }
 

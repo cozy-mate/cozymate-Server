@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -150,7 +151,9 @@ public class QuestionAnswerMapper {
                     }
 
                     return value.toString(); // Integer가 아니면 그냥 String 변환
-                }
+                },
+                (o1, o2) -> o1,
+                LinkedHashMap::new // fieldNameList 조회된 순서 유지
             ));
     }
 
