@@ -63,6 +63,13 @@ public class RoomRepositoryService {
         return roomRepository.findRoomSliceByMemberIdAndEntryStatus(memberId, entryStatus, pageable);
     }
 
+    /**
+     * 유저가 참가할 수 있는 공개방 충 대학교와 성별을 필터링하여 반환
+     */
+    public List<Room> getPublicRoomListByUniversityAndGender(Long universityId, Gender gender){
+        return roomRepository.findAllPublicRoomByUniversityIdAndGender(universityId, gender);
+    }
+
     // 방 저장
     public Room save(Room room) {
         return roomRepository.save(room);

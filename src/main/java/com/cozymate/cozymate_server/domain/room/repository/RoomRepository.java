@@ -41,12 +41,14 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
      */
     @Query("""
         SELECT distinct r FROM Room r
-        WHERE r.roomType = :roomType
-        AND r.status <> :status
+        WHERE r.roomType = "PUBLIC"
+        AND r.status <> 'DISABLE'
         AND r.maxMateNum > r.numOfArrival
+        AND r.university.id = :universityId
+        AND r.gender = :gender
         """)
-    List<Room> findAllRoomListCanDisplay(@Param("roomType") RoomType roomType,
-        @Param("status") RoomStatus status);
+    List<Room> findAllPublicRoomByUniversityIdAndGender(@Param("universityId") Long universityId,
+        @Param("gender") Gender gender);
 
     @Query("SELECT r FROM Room r " +
         "JOIN FETCH Mate m ON r.id = m.room.id AND m.isRoomManager = true " +

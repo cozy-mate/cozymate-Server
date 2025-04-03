@@ -2,7 +2,7 @@ package com.cozymate.cozymate_server.domain.room.service;
 
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
-import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
+import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
@@ -13,11 +13,8 @@ import com.cozymate.cozymate_server.domain.room.converter.RoomRecommendConverter
 import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomRecommendationResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
-import com.cozymate.cozymate_server.domain.room.enums.RoomStatus;
-import com.cozymate.cozymate_server.domain.room.enums.RoomType;
-import com.cozymate.cozymate_server.domain.room.repository.RoomRepository;
+import com.cozymate.cozymate_server.domain.room.repository.RoomRepositoryService;
 import com.cozymate.cozymate_server.domain.room.util.RoomStatUtil;
-import com.cozymate.cozymate_server.domain.roomhashtag.repository.RoomHashtagRepository;
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import jakarta.transaction.Transactional;
@@ -38,12 +35,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class RoomRecommendService {
 
-    private final RoomRepository roomRepository;
-    private final MateRepository mateRepository;
+    private final RoomRepositoryService roomRepositoryService;
+    private final MateRepositoryService mateRepositoryService;
     private final MemberStatRepository memberStatRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
     private final LifestyleMatchRateService lifestyleMatchRateService;
-    private final RoomHashtagRepository roomHashtagRepository;
     private final RoomHashtagQueryService roomHashtagQueryService;
 
     public PageResponseDto<List<RoomRecommendationResponseDTO>> getRecommendationList(Member member,
@@ -67,15 +63,16 @@ public class RoomRecommendService {
             .collect(Collectors.toMap(Room::getId, room -> room));
 
         // roomId에 해당하는 MateList로 구성됨
-        Map<Long, List<Mate>> roomMateMap = mateRepository.findAllFetchMemberAndMemberStatByEntryStatus(
-                EntryStatus.JOINED)
-            .stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
+        Map<Long, List<Mate>> roomMateMap =
+            mateRepositoryService.getMateWithMemberAndMemberStatByEntryStatus(EntryStatus.JOINED)
+                .stream().collect(Collectors.groupingBy(mate -> mate.getRoom().getId()));
 
         Map<Long, Integer> roomEqualityMap = calculateRoomEqualityMap(roomList, member,
             roomMateMap);
 
         // 방 해시태그 조회
-        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(roomList);
+        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(
+            roomList);
 
         // null을 가장 후순위로 처리
         List<Pair<Long, Integer>> sortedRoomList = getSortedRoomListBySortType(roomEqualityMap,
@@ -117,25 +114,13 @@ public class RoomRecommendService {
     }
 
     private List<Room> getRoomList(Member member) {
-        // 모든 공개 방을 가져옴 (Public 방 중에서, Disable 상태가 아니며, 인원이 꽉 차지 않은 방)
-        List<Room> roomList = roomRepository.findAllRoomListCanDisplay(RoomType.PUBLIC, RoomStatus.DISABLE);
-
-        // 대학교 필터링, 성별 필터링 -> TODO: 추후 room으로 해당 데이터가 저장되면 삭제 후 위 쿼리 수정
-        List<Mate> managerList = mateRepository.findAllByRoomIdListAndIsRoomManagerAndEntryStatus(
-            roomList.stream().map(Room::getId).toList(), Boolean.TRUE, EntryStatus.JOINED);
-
-        // 대학 필터링
-        managerList.stream()
-            .filter(manager -> !manager.getMember().getUniversity().getId().equals(member.getUniversity().getId()))
-            .forEach(manager -> roomList.remove(manager.getRoom()));
-
-        // 성별 필터링
-        managerList.stream()
-            .filter(manager -> !manager.getMember().getGender().equals(member.getGender()))
-            .forEach(manager -> roomList.remove(manager.getRoom()));
+        // 모든 공개 방을 가져옴 (대학 필터링, 성별 필터링 완료)
+        List<Room> roomList = roomRepositoryService.getPublicRoomListByUniversityAndGender(
+            member.getUniversity().getId(), member.getGender());
 
         // 본인이 참여한 방 가져오기
-        Optional<Room> joinedRoom = mateRepository.findByMemberAndEntryStatus(member, EntryStatus.JOINED)
+        Optional<Room> joinedRoom = mateRepositoryService.getOptionalMateByMemberAndEntryStatus(
+                member, EntryStatus.JOINED)
             .map(Mate::getRoom);
 
         // 본인이 이미 참여한 방을 제외
@@ -162,8 +147,12 @@ public class RoomRecommendService {
         Member member, Pair<Long, Integer> pair, Room room, Map<Long, List<Mate>> roomMateMap,
         List<String> preferenceList, Map<Long, List<String>> roomHashtagsMap) {
 
-        List<PreferenceMatchCountDTO> preferenceStatsMatchCounts = RoomStatUtil.getPreferenceStatsMatchCounts(
-            member, preferenceList, roomMateMap.get(room.getId()), member.getMemberStat());
+        List<PreferenceMatchCountDTO> preferenceStatsMatchCounts =
+            RoomStatUtil.getPreferenceStatsMatchCounts(
+                    member, preferenceList, roomMateMap.get(room.getId()), member.getMemberStat())
+                .stream()
+                .sorted(Comparator.comparing(PreferenceMatchCountDTO::preferenceName))
+                .toList();
 
         // roomHashtagsMap에서 해시태그 가져오기
         List<String> hashtags = roomHashtagsMap.getOrDefault(room.getId(), List.of());
@@ -213,17 +202,22 @@ public class RoomRecommendService {
 
     private PageResponseDto<List<RoomRecommendationResponseDTO>> getRoomRecommendationResponseListWhenNoMemberStat(
         int size, int page, List<String> memberPreferenceList, List<Room> roomList) {
-        List<PreferenceMatchCountDTO> preferenceMatchCountDTOList = RoomStatUtil.getPreferenceStatsMatchCountsWithoutMemberStat(
-            memberPreferenceList);
+        List<PreferenceMatchCountDTO> preferenceMatchCountDTOList =
+            RoomStatUtil.getPreferenceStatsMatchCountsWithoutMemberStat(memberPreferenceList)
+                .stream()
+                .sorted(Comparator.comparing(PreferenceMatchCountDTO::preferenceName))
+                .toList();
 
         // 방 해시태그 조회
-        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(roomList);
+        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(
+            roomList);
 
         List<RoomRecommendationResponseDTO> responseList =
             roomList.stream()
                 .map(
                     room -> RoomRecommendConverter.toRoomRecommendationResponseWhenNoMemberStat(
-                        room, preferenceMatchCountDTOList, roomHashtagsMap.getOrDefault(room.getId(), List.of())
+                        room, preferenceMatchCountDTOList,
+                        roomHashtagsMap.getOrDefault(room.getId(), List.of())
                     ))
                 .skip((long) page * size)
                 .limit(size)
