@@ -64,12 +64,12 @@ public class RoomRepositoryService {
     }
 
     // 방 저장
-    public Room save(Room room) {
+    public Room createRoom(Room room) {
         return roomRepository.save(room);
     }
 
     // 방 삭제
-    public void delete(Room room) {
+    public void deleteRoom(Room room) {
         roomRepository.delete(room);
     }
 

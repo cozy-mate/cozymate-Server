@@ -12,6 +12,8 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
@@ -75,6 +77,8 @@ public class RoomCommandService {
     private final RoomValidator roomValidator;
     private final RoomRepositoryService roomRepositoryService;
     private final MateRepositoryService mateRepositoryService;
+    private final MemberStatRepositoryService memberStatRepositoryService;
+    private final MemberRepositoryService memberRepositoryService;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -87,7 +91,7 @@ public class RoomCommandService {
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPrivateRoom(request, inviteCode);
         room.enableRoom();
-        room = roomRepositoryService.save(room);
+        room = roomRepositoryService.createRoom(room);
         roomLogCommandService.addRoomLogCreationRoom(room);
 
         Mate mate = MateConverter.toEntity(room, member, true);
@@ -106,9 +110,7 @@ public class RoomCommandService {
         roomValidator.checkAlreadyJoinedRoom(member.getId());
 
         // memberStat이 null일 경우 공개방 생성 불가
-        if (member.getMemberStat() == null) {
-            throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
-        }
+        memberStatRepositoryService.getMemberStatOrThrow(member.getId());
 
         // 기존 참여 요청들 삭제
         clearOtherRoomRequests(member.getId());
@@ -120,7 +122,7 @@ public class RoomCommandService {
         Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university);
 
         // 해시태그 저장 과정
-        room = roomRepositoryService.save(room);
+        room = roomRepositoryService.createRoom(room);
         roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         roomLogCommandService.addRoomLogCreationRoom(room);
 
@@ -154,7 +156,7 @@ public class RoomCommandService {
             room.arrive();
             room.isRoomFull();
         }
-        roomRepositoryService.save(room);
+        roomRepositoryService.createRoom(room);
 
         eventPublisher.publishEvent(EventConverter.toJoinedRoomEvent(member, room));
     }
@@ -167,7 +169,7 @@ public class RoomCommandService {
 
         // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
         deleteRoomDatas(roomId);
-        roomRepositoryService.delete(room);
+        roomRepositoryService.deleteRoom(room);
     }
 
     public Boolean checkRoomName(String roomName) {
@@ -191,7 +193,7 @@ public class RoomCommandService {
         quittingMate.quit();
         mateRepository.save(quittingMate);
         room.quit();
-        roomRepositoryService.save(room);
+        roomRepositoryService.createRoom(room);
 
         // 방장일 경우 가장 먼저 들어온 룸메이트에게 방장 위임
         if (quittingMate.isRoomManager()) {
@@ -202,7 +204,7 @@ public class RoomCommandService {
         if (room.getNumOfArrival() == 0) {
             // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
             deleteRoomDatas(roomId);
-            roomRepositoryService.delete(room);
+            roomRepositoryService.deleteRoom(room);
             return;
         }
 
@@ -262,15 +264,14 @@ public class RoomCommandService {
             roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         }
         room.updateRoom(request.name(), request.persona());
-        roomRepositoryService.save(room);
+        roomRepositoryService.createRoom(room);
 
         return roomQueryService.getRoomById(roomId, memberId);
     }
 
     @Transactional
     public void sendInvitation(Long inviteeId, Member inviterMember) {
-        Member inviteeMember = memberRepository.findById(inviteeId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        Member inviteeMember = memberRepositoryService.getMemberByIdOrThrow(inviteeId);
         // 방장이 속한 방의 정보
         Room room = roomRepositoryService.getRoomOrThrow(
             roomQueryService.getExistRoom(inviterMember.getId()).roomId());
@@ -335,8 +336,7 @@ public class RoomCommandService {
 
     @Transactional
     public void forceQuitRoom(Long roomId, Long targetMemberId, Member manager) {
-        memberRepository.findById(targetMemberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        memberRepositoryService.getMemberByIdOrThrow(targetMemberId);
 
         // 방장이 본인을 퇴장시킬 수 없음
         if (manager.getId().equals(targetMemberId)) {
@@ -351,8 +351,7 @@ public class RoomCommandService {
 
     @Transactional
     public void cancelInvitation(Long inviteeId, Member inviter) {
-        memberRepository.findById(inviteeId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        memberRepositoryService.getMemberByIdOrThrow(inviteeId);
 
         Room room = roomRepositoryService.getRoomOrThrow(
             roomQueryService.getExistRoom(inviter.getId()).roomId());
@@ -405,8 +404,7 @@ public class RoomCommandService {
 
     @Transactional
     public void respondToJoinRequest(Long requesterId, boolean accept, Long managerId) {
-        Member requestMember = memberRepository.findById(requesterId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        Member requestMember = memberRepositoryService.getMemberByIdOrThrow(requesterId);
 
         // 방장이 속한 방의 정보
         Room room = roomRepositoryService.getRoomOrThrow(
