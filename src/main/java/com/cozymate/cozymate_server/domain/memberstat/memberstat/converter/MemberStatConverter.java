@@ -53,8 +53,8 @@ public class MemberStatConverter {
             .admissionYear(memberUniversityStat.getAdmissionYear().toString())
             .numOfRoommate(
                 memberUniversityStat.getNumberOfRoommate())
-            .dormitoryName(memberUniversityStat.getDormitoryName())
-            .acceptance(memberUniversityStat.getAcceptance())
+            .dormName(memberUniversityStat.getDormitoryName())
+            .dormJoiningStatus(memberUniversityStat.getAcceptance())
             .wakeUpTime(
                 lifestyle.getWakeUpTime())
             .sleepingTime(

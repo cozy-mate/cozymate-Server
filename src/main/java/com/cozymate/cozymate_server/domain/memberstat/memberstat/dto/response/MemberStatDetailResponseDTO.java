@@ -7,8 +7,8 @@ import lombok.Builder;
 public record MemberStatDetailResponseDTO(
     String admissionYear,
     String numOfRoommate,
-    String dormitoryName,
-    String acceptance,
+    String dormName,
+    String dormJoiningStatus,
     Integer wakeUpTime,
     Integer sleepingTime,
     Integer turnOffTime,
