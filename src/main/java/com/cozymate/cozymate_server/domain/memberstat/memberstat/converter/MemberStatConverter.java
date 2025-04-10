@@ -52,49 +52,52 @@ public class MemberStatConverter {
         return MemberStatDetailResponseDTO.builder()
             .admissionYear(memberUniversityStat.getAdmissionYear().toString())
             .numOfRoommate(
-                Integer.parseInt(memberUniversityStat.getNumberOfRoommate()))
+                memberUniversityStat.getNumberOfRoommate())
             .dormitoryName(memberUniversityStat.getDormitoryName())
             .acceptance(memberUniversityStat.getAcceptance())
-            .wakeUpMeridian(
-                QuestionAnswerMapper.calculateMeridian(lifestyle.getWakeUpTime()))
             .wakeUpTime(
-                QuestionAnswerMapper.calculateHour(lifestyle.getWakeUpTime()))
-            .sleepingMeridian(
-                QuestionAnswerMapper.calculateMeridian(lifestyle.getSleepingTime()))
+                lifestyle.getWakeUpTime())
             .sleepingTime(
-                QuestionAnswerMapper.calculateHour(lifestyle.getSleepingTime()))
-            .turnOffMeridian(
-                QuestionAnswerMapper.calculateMeridian(lifestyle.getTurnOffTime()))
+                lifestyle.getSleepingTime())
             .turnOffTime(
-                QuestionAnswerMapper.calculateHour(lifestyle.getTurnOffTime()))
-            .smoking(
-                QuestionAnswerMapper.mapValue("smoking", lifestyle.getSmokingStatus()))
-            .sleepingHabit(
-                QuestionAnswerMapper.mapValues("sleepingHabit", lifestyle.getSleepingHabit())) // 중복선택
-            .airConditioningIntensity(lifestyle.getCoolingIntensity())
-            .heatingIntensity(lifestyle.getHeatingIntensity())
+                lifestyle.getTurnOffTime())
+            .smokingStatus(
+                QuestionAnswerMapper.mapValue("smokingStatus", lifestyle.getSmokingStatus()))
+            .sleepingHabits(
+                QuestionAnswerMapper.mapValues("sleepingHabits",
+                    lifestyle.getSleepingHabit())) // 중복선택
+            .coolingIntensity(
+                QuestionAnswerMapper.mapValue("coolingIntensity", lifestyle.getCoolingIntensity()))
+            .heatingIntensity(
+                QuestionAnswerMapper.mapValue("heatingIntensity", lifestyle.getHeatingIntensity()))
             .lifePattern(
                 QuestionAnswerMapper.mapValue("lifePattern", lifestyle.getLifePattern()))
             .intimacy(
                 QuestionAnswerMapper.mapValue("intimacy", lifestyle.getIntimacy()))
-            .canShare(
-                QuestionAnswerMapper.mapValue("canShare", lifestyle.getItemSharing()))
-            .isPlayGame(
-                QuestionAnswerMapper.mapValue("isPlayGame", lifestyle.getPlayingGameFrequency()))
-            .isPhoneCall(
-                QuestionAnswerMapper.mapValue("isPhoneCall", lifestyle.getPhoneCallingFrequency()))
-            .studying(
-                QuestionAnswerMapper.mapValue("studying", lifestyle.getStudyingFrequency()))
-            .intake(
-                QuestionAnswerMapper.mapValue("intake", lifestyle.getEatingFrequency()))
-            .cleanSensitivity(lifestyle.getCleannessSensitivity())
-            .noiseSensitivity(lifestyle.getNoiseSensitivity())
+            .sharingStatus(
+                QuestionAnswerMapper.mapValue("sharingStatus", lifestyle.getItemSharing()))
+            .gamingStatus(
+                QuestionAnswerMapper.mapValue("gamingStatus", lifestyle.getPlayingGameFrequency()))
+            .callingStatus(
+                QuestionAnswerMapper.mapValue("callingStatus",
+                    lifestyle.getPhoneCallingFrequency()))
+            .studyingStatus(
+                QuestionAnswerMapper.mapValue("studyingStatus", lifestyle.getStudyingFrequency()))
+            .eatingStatus(
+                QuestionAnswerMapper.mapValue("eatingStatus", lifestyle.getEatingFrequency()))
+            .cleannessSensitivity(
+                QuestionAnswerMapper.mapValue("cleannessSensitivity",
+                    lifestyle.getCleannessSensitivity()))
+            .noiseSensitivity(
+                QuestionAnswerMapper.mapValue("noiseSensitivity", lifestyle.getNoiseSensitivity()))
             .cleaningFrequency(
-                QuestionAnswerMapper.mapValue("cleaningFrequency", lifestyle.getCleaningFrequency()))
+                QuestionAnswerMapper.mapValue("cleaningFrequency",
+                    lifestyle.getCleaningFrequency()))
             .drinkingFrequency(
-                QuestionAnswerMapper.mapValue("drinkingFrequency", lifestyle.getDrinkingFrequency()))
-            .personality(
-                QuestionAnswerMapper.mapValues("personality", lifestyle.getPersonality()))
+                QuestionAnswerMapper.mapValue("drinkingFrequency",
+                    lifestyle.getDrinkingFrequency()))
+            .personalities(
+                QuestionAnswerMapper.mapValues("personalities", lifestyle.getPersonality()))
             .mbti(
                 QuestionAnswerMapper.mapValue("mbti", lifestyle.getMbti()))
             .selfIntroduction(memberStat.getSelfIntroduction())
@@ -133,42 +136,47 @@ public class MemberStatConverter {
 
     public static MemberUniversityStat toMemberUniversityStatFromDto(
         CreateMemberStatRequestDTO dto) {
+
         return MemberUniversityStat.builder()
             .admissionYear(Integer.parseInt(dto.admissionYear()))
-            .dormitoryName(dto.dormitoryName())
-            .numberOfRoommate(dto.numOfRoommate().toString())
-            .acceptance(dto.acceptance())
+            .dormitoryName(dto.dormName())
+            .numberOfRoommate(makeValidNumberOfRoommate(dto.numOfRoommate()))
+            .acceptance(dto.dormJoiningStatus())
             .build();
     }
 
     public static Lifestyle toLifestyleFromDto(CreateMemberStatRequestDTO dto) {
         return Lifestyle.builder()
-            .wakeUpTime(
-                QuestionAnswerMapper.convertTimeToInteger(dto.wakeUpMeridian(), dto.wakeUpTime()))
-            .sleepingTime(QuestionAnswerMapper.convertTimeToInteger(dto.sleepingMeridian(),
-                dto.sleepingTime()))
-            .turnOffTime(
-                QuestionAnswerMapper.convertTimeToInteger(dto.turnOffMeridian(), dto.turnOffTime()))
-            .smokingStatus(QuestionAnswerMapper.getIndex("smoking", dto.smoking()))
+            .wakeUpTime(dto.wakeUpTime())
+            .sleepingTime(dto.sleepingTime())
+            .turnOffTime(dto.turnOffTime())
+            .smokingStatus(QuestionAnswerMapper.getIndex("smokingStatus", dto.smokingStatus()))
             .sleepingHabit(
-                QuestionAnswerMapper.convertBitMaskToInteger("sleepingHabit", dto.sleepingHabit()))
-            .coolingIntensity(dto.airConditioningIntensity())
-            .heatingIntensity(dto.heatingIntensity())
+                QuestionAnswerMapper.convertBitMaskToInteger("sleepingHabits",
+                    dto.sleepingHabits()))
+            .coolingIntensity(
+                QuestionAnswerMapper.getIndex("coolingIntensity", dto.coolingIntensity()))
+            .heatingIntensity(
+                QuestionAnswerMapper.getIndex("heatingIntensity", dto.heatingIntensity()))
             .lifePattern(QuestionAnswerMapper.getIndex("lifePattern", dto.lifePattern()))
             .intimacy(QuestionAnswerMapper.getIndex("intimacy", dto.intimacy()))
-            .itemSharing(QuestionAnswerMapper.getIndex("canShare", dto.canShare()))
-            .playingGameFrequency(QuestionAnswerMapper.getIndex("isPlayGame", dto.isPlayGame()))
-            .phoneCallingFrequency(QuestionAnswerMapper.getIndex("isPhoneCall", dto.isPhoneCall()))
-            .studyingFrequency(QuestionAnswerMapper.getIndex("studying", dto.studying()))
-            .eatingFrequency(QuestionAnswerMapper.getIndex("intake", dto.intake()))
-            .noiseSensitivity(dto.noiseSensitivity())
-            .cleannessSensitivity(dto.cleanSensitivity())
+            .itemSharing(QuestionAnswerMapper.getIndex("sharingStatus", dto.sharingStatus()))
+            .playingGameFrequency(QuestionAnswerMapper.getIndex("gamingStatus", dto.gamingStatus()))
+            .phoneCallingFrequency(
+                QuestionAnswerMapper.getIndex("callingStatus", dto.callingStatus()))
+            .studyingFrequency(
+                QuestionAnswerMapper.getIndex("studyingStatus", dto.studyingStatus()))
+            .eatingFrequency(QuestionAnswerMapper.getIndex("eatingStatus", dto.eatingStatus()))
+            .noiseSensitivity(
+                QuestionAnswerMapper.getIndex("noiseSensitivity", dto.noiseSensitivity()))
+            .cleannessSensitivity(
+                QuestionAnswerMapper.getIndex("cleannessSensitivity", dto.cleannessSensitivity()))
             .cleaningFrequency(
                 QuestionAnswerMapper.getIndex("cleaningFrequency", dto.cleaningFrequency()))
             .drinkingFrequency(
                 QuestionAnswerMapper.getIndex("drinkingFrequency", dto.drinkingFrequency()))
             .personality(
-                QuestionAnswerMapper.convertBitMaskToInteger("personality", dto.personality()))
+                QuestionAnswerMapper.convertBitMaskToInteger("personalities", dto.personalities()))
             .mbti(QuestionAnswerMapper.getIndex("mbti", dto.mbti().toUpperCase()))
             .build();
     }
@@ -347,7 +355,8 @@ public class MemberStatConverter {
     }
 
     public static Slice<MemberStatPreferenceResponseDTO> toMemberStatPreferenceResponse(
-        Slice<Map<MemberStat, Integer>> filteredResult, MemberStat criteriaMemberStat,List<String> criteriaPreferences) {
+        Slice<Map<MemberStat, Integer>> filteredResult, MemberStat criteriaMemberStat,
+        List<String> criteriaPreferences) {
         return filteredResult.map(
             memberStatIntegerMap -> {
                 Map.Entry<MemberStat, Integer> entry = memberStatIntegerMap.entrySet()
@@ -363,6 +372,13 @@ public class MemberStatConverter {
                 );
             }
         );
+    }
+
+    private static String makeValidNumberOfRoommate(String value) {
+        if (value != null && value.matches("^[1-9]$")) {
+            return value;
+        }
+        return "0";
     }
 
 

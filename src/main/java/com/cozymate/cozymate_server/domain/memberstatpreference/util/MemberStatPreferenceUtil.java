@@ -8,12 +8,12 @@ import java.util.Set;
 
 public class MemberStatPreferenceUtil {
     private static final Set<String> validPreferences = new HashSet<>(Arrays.asList(
-        "birthYear", "admissionYear", "majorName", "acceptance",
-        "wakeUpTime", "sleepingTime", "turnOffTime", "smoking",
-        "sleepingHabit", "airConditioningIntensity", "heatingIntensity", "lifePattern",
-        "intimacy", "canShare", "isPlayGame", "isPhoneCall",
-        "studying", "intake", "cleanSensitivity",
-        "noiseSensitivity", "cleaningFrequency", "drinkingFrequency", "personality",
+        "birthYear", "admissionYear", "majorName", "dormJoiningStatus",
+        "wakeUpTime", "sleepingTime", "turnOffTime", "smokingStatus",
+        "sleepingHabits", "coolingIntensity", "heatingIntensity", "lifePattern",
+        "intimacy", "sharingStatus", "gamingStatus", "callingStatus",
+        "studyingStatus", "eatingStatus", "cleannessSensitivity",
+        "noiseSensitivity", "cleaningFrequency", "drinkingFrequency", "personalities",
         "mbti"
     ));
 

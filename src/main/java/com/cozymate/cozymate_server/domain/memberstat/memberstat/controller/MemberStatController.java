@@ -146,7 +146,7 @@ public class MemberStatController {
         ErrorStatus._MEMBERSTAT_NOT_EXISTS
     })
     @GetMapping("/numOfRoommate")
-    public ResponseEntity<ApiResponse<Integer>> getNumOfRoommateStatus(
+    public ResponseEntity<ApiResponse<String>> getNumOfRoommateStatus(
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         return ResponseEntity.ok(
@@ -163,29 +163,29 @@ public class MemberStatController {
             + "- birthYear: 출생년도\n"
             + "- admissionYear : 학번\n"
             + "- majorName : 학과\n"
-            + "- acceptance : 합격여부\n"
+            + "- dormJoiningStatus : 합격여부\n"
             + "- wakeUpTime : 기상시간\n"
             + "- sleepingTime : 취침시간\n"
             + "- turnOffTime : 소등시간\n"
-            + "- smoking : 흡연여부\n"
-            + "- sleepingHabit : 잠버릇\n"
-            + "- airConditioningIntensity : 에어컨 강도\n"
+            + "- smokingStatus : 흡연여부\n"
+            + "- sleepingHabits : 잠버릇\n"
+            + "- coolingIntensity : 에어컨 강도\n"
             + "- heatingIntensity : 히터 강도\n"
             + "- lifePattern : 생활패턴\n"
             + "- intimacy : 친밀도\n"
-            + "- canShare : 물건공유\n"
-            + "- isPlayGame : 게임여부\n"
-            + "- isPhoneCall : 전화여부\n"
-            + "- studying : 공부여부\n"
-            + "- intake : 섭취여부\n"
-            + "- cleanSensitivity : 청결예민도\n"
+            + "- sharingStatus : 물건공유\n"
+            + "- gamingStatus : 게임여부\n"
+            + "- callingStatus : 전화여부\n"
+            + "- studyingStatus : 공부여부\n"
+            + "- eatingStatus : 섭취여부\n"
+            + "- cleannessSensitivity : 청결예민도\n"
             + "- noiseSensitivity : 소음예민도\n"
             + "- cleaningFrequency : 청소 빈도\n"
             + "- drinkingFrequency : 음주 빈도\n"
-            + "- personality : 성격\n"
+            + "- personalities : 성격\n"
             + "- mbti : mbti\n"
             + "- numOfRoommate : 신청실(Optional)\n\n" +
-            "memberList는는 아래 object를 배열로 갖고 있습니다.\n" +
+            "memberList 는 아래 object를 배열로 갖고 있습니다.\n" +
             "```json\n" +
             "{\n" +
             "  \"memberDetail\": {},\n" +
@@ -231,26 +231,26 @@ public class MemberStatController {
             "- **birthYear** (출생년도) : `[Integer]` 예) `[1995, 1996]`\n" +
             "- **admissionYear** (학번) : `[String]` 예) `[\"09\", \"20\"]`\n" +
             "- **majorName** (학과) : `[String]` 예) `[\"컴퓨터공학과\", \"경영학과\"]`\n" +
-            "- **acceptance** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
+            "- **dormJoiningStatus** (합격여부) : `[String]` 예) `[\"합격\",\"대기중\"]`\n" +
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
             "- **turnOffTime** (소등시간) : `[Integer]` 예) `[22]`\n" +
-            "- **smoking** (흡연여부) : `[String]` 예) `[\"액상형 전자담배\",\"비흡연자\"]`\n" +
-            "- **sleepingHabit** (잠버릇) : `[String]` 예) `[\"코골이\", \"이갈이\"]`\n" +
-            "- **airConditioningIntensity** (에어컨 강도) : `[Integer]` 예) `[1,2]`\n" +
-            "- **heatingIntensity** (히터 강도) : `[Integer]` 예) `[1,2]`\n" +
+            "- **smokingStatus** (흡연여부) : `[String]` 예) `[\"액상형 전자담배\",\"비흡연자\"]`\n" +
+            "- **sleepingHabits** (잠버릇) : `[String]` 예) `[\"코골이\", \"이갈이\"]`\n" +
+            "- **coolingIntensity** (에어컨 강도) : `[String]` 예) `[\"안 틀어요\",\"약하게 틀어요\"]`\n" +
+            "- **heatingIntensity** (히터 강도) : `[String]` 예) `[\"안 틀어요\",\"약하게 틀어요\"]`\n" +
             "- **lifePattern** (생활패턴) : `[String]` 예) `[\"아침형 인간\", \"새벽형 인간\"]`\n" +
-            "- **intimacy** (친밀도) : `[String]` 예) `[\"필요한 말만 했으면 좋겠어요\",\"어느정도 친하게 지내요\"]`\n" +
-            "- **canShare** (물건 공유 가능여부) : `[String]` 예) `[\"아무것도 공유하고싶지 않아요\"]`\n" +
-            "- **isPlayGame** (게임여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
-            "- **isPhoneCall** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n" +
-            "- **studying** (공부여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
-            "- **intake** (음식 섭취 여부) : `[String]` 예) `[\"간단한 간식은 괜찮아요\"]`\n" +
-            "- **cleanSensitivity** (청결 예민도) : `[Integer]` 예) `[3, 4]` (1~5 사이의 숫자)\n" +
-            "- **noiseSensitivity** (소음 예민도) : `[Integer]` 예) `[2, 5]` (1~5 사이의 숫자)\n" +
+            "- **intimacy** (친밀도) : `[String]` 예) `[\"필요한 말만 했으면 좋겠어요\",\"어느정도 친하게 지내요\",]`\n" +
+            "- **sharingStatus** (물건 공유 가능여부) : `[String]` 예) `[\"아무것도 공유하고싶지 않아요\"]`\n" +
+            "- **gamingStatus** (게임여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
+            "- **callingStatus** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n" +
+            "- **studyingStatus** (공부여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
+            "- **eatingStatus** (음식 섭취 여부) : `[String]` 예) `[\"간단한 간식은 괜찮아요\"]`\n" +
+            "- **cleannessSensitivity** (청결 예민도) : `[String]` 예) `[3, 4]` (1~5 사이의 숫자)\n" +
+            "- **noiseSensitivity** (소음 예민도) : `[String]` 예) `[2, 5]` (1~5 사이의 숫자)\n" +
             "- **cleaningFrequency** (청소 빈도) : `[String]` 예) `[\"주1회\", \"월2회\"]`\n" +
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`\n" +
-            "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
+            "- **personalities** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
             "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n" +
             "- **numOfRoommate : 신청실(Optional)\n\n"
 
@@ -282,8 +282,8 @@ public class MemberStatController {
             "```json\n" +
             "{\n" +
             "  \"birthYear\": [1995, 1996],\n" +
-            "  \"major\": [\"컴퓨터공학과\", \"경영학과\"],\n" +
-            "  \"smoking\": [true],\n" +
+            "  \"majorName\": [\"컴퓨터공학과\", \"경영학과\"],\n" +
+            "  \"smokingStatus\": [true],\n" +
             "  \"mbti\": [\"INTJ\", \"ENTP\"]\n" +
             "}\n" +
             "```\n\n" +
@@ -295,23 +295,22 @@ public class MemberStatController {
             "- **wakeUpTime** (기상시간) : `[Integer]` 예) `[7, 8]`\n" +
             "- **sleepingTime** (취침시간) : `[Integer]` 예) `[2, 3]`\n" +
             "- **turnOffTime** (소등시간) : `[Integer]` 예) `[22]`\n" +
-            "- **smoking** (흡연여부) : `[String]` 예) `[\"액상형 전자담배\",\"비흡연자\"]`\n" +
-            "- **sleepingHabit** (잠버릇) : `[String]` 예) `[\"코골이\", \"이갈이\"]`\n" +
-            "- **airConditioningIntensity** (에어컨 강도) : `[Integer]` 예) `[1,2]`\n" +
-            "- **heatingIntensity** (히터 강도) : `[Integer]` 예) `[1,2]`\n" +
+            "- **smokingStatus** (흡연여부) : `[String]` 예) `[\"액상형 전자담배\",\"비흡연자\"]`\n" +
+            "- **sleepingHabits** (잠버릇) : `[String]` 예) `[\"코골이\", \"이갈이\"]`\n" +
+            "- **coolingIntensity** (에어컨 강도) : `[String]` 예) `[\"안 틀어요\",\"약하게 틀어요\"]`\n" +
+            "- **heatingIntensity** (히터 강도) : `[String]` 예) `[\"안 틀어요\",\"약하게 틀어요\"]`\n" +
             "- **lifePattern** (생활패턴) : `[String]` 예) `[\"아침형 인간\", \"새벽형 인간\"]`\n" +
-            "- **intimacy** (친밀도) : `[Integer]` 예) `[1, 5]` (1~5 사이의 숫자)\n" +
-            "- **canShare** (물건 공유 가능여부) : `[String]` 예) `[\"아무것도 공유하고싶지 않아요\"]`\n" +
-            "- **isPlayGame** (게임여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
-            "- **isPhoneCall** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n"
-            +
-            "- **studying** (공부여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
-            "- **intake** (음식 섭취 여부) : `[String]` 예) `[\"간단한 간식은 괜찮아요\"]`\n" +
-            "- **cleanSensitivity** (청결 예민도) : `[Integer]` 예) `[3, 4]` (1~5 사이의 숫자)\n" +
-            "- **noiseSensitivity** (소음 예민도) : `[Integer]` 예) `[2, 5]` (1~5 사이의 숫자)\n" +
+            "- **intimacy** (친밀도) : `[String]` 예) `[\"필요한 말만 했으면 좋겠어요\",\"어느정도 친하게 지내요\",]`\n" +
+            "- **sharingStatus** (물건 공유 가능여부) : `[String]` 예) `[\"아무것도 공유하고싶지 않아요\"]`\n" +
+            "- **gamingStatus** (게임여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
+            "- **callingStatus** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n" +
+            "- **studyingStatus** (공부여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
+            "- **eatingStatus** (음식 섭취 여부) : `[String]` 예) `[\"간단한 간식은 괜찮아요\"]`\n" +
+            "- **cleannessSensitivity** (청결 예민도) : `[String]` 예) `[3, 4]` (1~5 사이의 숫자)\n" +
+            "- **noiseSensitivity** (소음 예민도) : `[String]` 예) `[2, 5]` (1~5 사이의 숫자)\n" +
             "- **cleaningFrequency** (청소 빈도) : `[String]` 예) `[\"주1회\", \"월2회\"]`\n" +
             "- **drinkingFrequency** (음주 빈도) : `[String]` 예) `[\"거의 안 마셔요\",\"한 달에 한 두번 마셔요\"]`\n" +
-            "- **personality** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
+            "- **personalities** (성격) : `[String]` 예) `[\"외향적\", \"내향적\"]`\n" +
             "- **mbti** (MBTI, 대소 무관) : `[String]` 예) `[\"INTJ\", \"ENTP\"]`\n" +
             "- **numOfRoommate : 신청실(Optional)\n\n" +
             "memberList는 아래 object를 배열로 갖고 있습니다.\n" +

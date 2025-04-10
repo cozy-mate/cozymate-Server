@@ -55,18 +55,22 @@ public class MemberController {
         summary = "[말즈] (수정 3.27)회원가입",
         description = "`Request Header` : Bearer 임시토큰 <br>" +
             "`Request Body` 예시: <br>" +
-            "`\"nickname\": \"닉네임\",`<br>" +
-            "`\"gender\": \"MALE\",`<br>" +
-            "`\"birthday\": \"2000-01-01\",`<br>" +
-            "`\"persona\": 1,`<br>" +
-            "`\"memberStatPreferenceDto\": {`<br>" +
-            "`&nbsp;&nbsp;&nbsp;&nbsp;\"preferenceList\": [`<br>" +
-            "`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"wakeUpTime\",`<br>" +
-            "`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"sleepingTime\",`<br>" +
-            "`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"airConditioningIntensity\",`<br>" +
-            "`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"studying\"`<br>" +
-            "`&nbsp;&nbsp;&nbsp;&nbsp;]`<br>" +
-            "`}`"
+            "<br><code>" +
+            "{<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;\"nickname\": \"닉네임\",<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;\"gender\": \"MALE\",<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;\"birthday\": \"2000-01-01\",<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;\"persona\": 1,<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;\"memberStatPreferenceDto\": {<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"preferenceList\": [<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"wakeUpTime\",<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"sleepingTime\",<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"coolingIntensity\",<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"studying\"<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
+            "}" +
+            "</code>"
     )
 
     @SwaggerApiError({

@@ -115,12 +115,11 @@ public class MemberStatQueryService {
      * @param memberId 조회할 사용자의 ID
      * @return 사용자의 인실(Roommate 수), 값이 없는 경우는0 반환
      */
-    public Integer getNumOfRoommateStatus(Long memberId) {
+    public String getNumOfRoommateStatus(Long memberId) {
         return Optional.ofNullable(memberStatRepositoryService.getMemberStatOrThrow(memberId)
                 .getMemberUniversityStat().getNumberOfRoommate())
             .filter(str -> !str.isEmpty())
-            .map(Integer::parseInt)
-            .orElse(0);
+            .orElse("0");
     }
 
 

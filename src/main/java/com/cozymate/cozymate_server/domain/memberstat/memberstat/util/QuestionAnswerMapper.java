@@ -23,15 +23,12 @@ public class QuestionAnswerMapper {
     private static final String AM = "오전";
     private static final String PM = "오후";
 
-    private static final List<String> MULTI_VALUE_QUESTION = List.of("personality",
-        "sleepingHabit");
+    private static final List<String> MULTI_VALUE_QUESTION = List.of("personalities",
+        "sleepingHabits");
 
-    private static final List<String> NOT_LIFESTYLE = List.of("birthYear", "acceptance",
-        "admissionYear", "major", "dormitoryName");
+    private static final List<String> NOT_LIFESTYLE = List.of("birthYear", "dormJoiningStatus",
+        "admissionYear", "majorName", "dormName", "numOfRoommate");
 
-    private static final List<String> DIRECTLY_STORED_KEYS = List.of(
-        "airConditioningIntensity", "heatingIntensity", "cleanSensitivity", "noiseSensitivity"
-    );
 
     static {
         load();
@@ -165,11 +162,6 @@ public class QuestionAnswerMapper {
                     String key = entry.getKey();
                     List<?> values = entry.getValue();
 
-                    // 요청이 정수로 들어오는 값은 변환 없이 그대로 저장
-                    if (DIRECTLY_STORED_KEYS.contains(key)) {
-                        return values;
-                    }
-
                     if (NOT_LIFESTYLE.contains(key)) {
                         return values;
                     }
@@ -185,6 +177,14 @@ public class QuestionAnswerMapper {
                         .toList();
                 }
             ));
+    }
+
+    public static List<String> getOptions(String key) {
+        List<String> options = questionAnswerMap.get(key);
+        if (options == null) {
+            throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR);
+        }
+        return options;
     }
 
 }
