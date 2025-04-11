@@ -1,6 +1,7 @@
 name: PRODUCTION CI/CD
 
 on:
+  workflow_dispatch: # 수동 실행 트리거 추가
   push:
     branches: [ "main" ]
 
@@ -75,15 +76,8 @@ jobs:
     name: CD
     runs-on: ubuntu-latest
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.PRODUCTION_AWS_REGION }}
-      ECR_REPOSITORY: ${{ secrets.PRODUCTION_ECR_REPOSITORY }}
-      ECR_URI: ${{ secrets.PRODUCTION_ECR_URI }}
-      PROFILE: ${{ secrets.PRODUCTION_PROFILE }}
       EC2_HOST: ${{ secrets.PRODUCTION_EC2_HOST }}
       SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
-      SUBMODULE_TOKEN: ${{ secrets.SUBMODULE_ACTION_TOKEN }}
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
@@ -98,13 +92,6 @@ jobs:
           username: ubuntu
           key: ${{ env.SSH_KEY }}
           script: |
-            echo "ECR_URI=${{ env.ECR_URI }}" > /home/ubuntu/.env
             echo "GITHUB_SHA=${{ env.IMAGE_TAG }}" >> /home/ubuntu/.env
-            echo "SPRING_PROFILES=${{ env.PROFILE }}" >> /home/ubuntu/.env
-            
-            sudo docker stop $(sudo docker ps -a -q) || true
-            sudo docker rm $(sudo docker ps -a -q) || true
-            sudo docker images -q | xargs -r docker rmi || true
-            sudo docker system prune -af
-            aws ecr get-login-password --region ap-northeast-2 | sudo docker login --username AWS --password-stdin ${{ env.ECR_URI }} && sudo docker pull ${{ env.ECR_URI }}:${{ env.IMAGE_TAG }}
-            sudo -E  docker-compose up -d
+            cd cozymate/script
+            ./deploy.sh ${{ env.IMAGE_TAG }}
