@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FieldInstanceResolver {
 
     @Getter
@@ -24,11 +26,11 @@ public class FieldInstanceResolver {
         // MemberStat - MemberUniversityStat
         FIELD_MAPPER.put("admissionYear",
             (member, memberStat) -> memberStat.getMemberUniversityStat().getAdmissionYear());
-        FIELD_MAPPER.put("acceptance",
+        FIELD_MAPPER.put("dormJoiningStatus",
             (member, memberStat) -> memberStat.getMemberUniversityStat().getAcceptance());
         FIELD_MAPPER.put("numOfRoommate",
             (member, memberStat) -> memberStat.getMemberUniversityStat().getNumberOfRoommate());
-        FIELD_MAPPER.put("dormitoryName",
+        FIELD_MAPPER.put("dormName",
             (member, memberStat) -> memberStat.getMemberUniversityStat().getDormitoryName());
         // MemberStat - LifeStyle
         FIELD_MAPPER.put("wakeUpTime",
@@ -37,11 +39,11 @@ public class FieldInstanceResolver {
             (member, memberStat) -> memberStat.getLifestyle().getSleepingTime());
         FIELD_MAPPER.put("turnOffTime",
             (member, memberStat) -> memberStat.getLifestyle().getTurnOffTime());
-        FIELD_MAPPER.put("smoking",
+        FIELD_MAPPER.put("smokingStatus",
             (member, memberStat) -> memberStat.getLifestyle().getSmokingStatus());
-        FIELD_MAPPER.put("sleepingHabit",
+        FIELD_MAPPER.put("sleepingHabits",
             (member, memberStat) -> memberStat.getLifestyle().getSleepingHabit());
-        FIELD_MAPPER.put("airConditioningIntensity",
+        FIELD_MAPPER.put("coolingIntensity",
             (member, memberStat) -> memberStat.getLifestyle().getCoolingIntensity());
         FIELD_MAPPER.put("heatingIntensity",
             (member, memberStat) -> memberStat.getLifestyle().getHeatingIntensity());
@@ -49,17 +51,17 @@ public class FieldInstanceResolver {
             (member, memberStat) -> memberStat.getLifestyle().getLifePattern());
         FIELD_MAPPER.put("intimacy",
             (member, memberStat) -> memberStat.getLifestyle().getIntimacy());
-        FIELD_MAPPER.put("canShare",
+        FIELD_MAPPER.put("sharingStatus",
             (member, memberStat) -> memberStat.getLifestyle().getItemSharing());
-        FIELD_MAPPER.put("isPlayGame",
+        FIELD_MAPPER.put("gamingStatus",
             (member, memberStat) -> memberStat.getLifestyle().getPlayingGameFrequency());
-        FIELD_MAPPER.put("isPhoneCall",
+        FIELD_MAPPER.put("callingStatus",
             (member, memberStat) -> memberStat.getLifestyle().getPhoneCallingFrequency());
-        FIELD_MAPPER.put("studying",
+        FIELD_MAPPER.put("studyingStatus",
             (member, memberStat) -> memberStat.getLifestyle().getStudyingFrequency());
-        FIELD_MAPPER.put("intake",
+        FIELD_MAPPER.put("eatingStatus",
             (member, memberStat) -> memberStat.getLifestyle().getEatingFrequency());
-        FIELD_MAPPER.put("cleanSensitivity",
+        FIELD_MAPPER.put("cleannessSensitivity",
             (member, memberStat) -> memberStat.getLifestyle().getCleannessSensitivity());
         FIELD_MAPPER.put("noiseSensitivity",
             (member, memberStat) -> memberStat.getLifestyle().getNoiseSensitivity());
@@ -67,7 +69,7 @@ public class FieldInstanceResolver {
             (member, memberStat) -> memberStat.getLifestyle().getCleaningFrequency());
         FIELD_MAPPER.put("drinkingFrequency",
             (member, memberStat) -> memberStat.getLifestyle().getDrinkingFrequency());
-        FIELD_MAPPER.put("personality",
+        FIELD_MAPPER.put("personalities",
             (member, memberStat) -> memberStat.getLifestyle().getPersonality());
         FIELD_MAPPER.put("mbti", (member, memberStat) -> memberStat.getLifestyle().getMbti());
     }
@@ -75,6 +77,7 @@ public class FieldInstanceResolver {
     public static Object extractMemberStatField(MemberStat memberStat, String fieldName) {
         BiFunction<Member, MemberStat, Object> fieldGetter = FIELD_MAPPER.get(fieldName);
         if (fieldGetter == null) {
+            log.info("field name : {}", fieldName);
             throw new GeneralException(ErrorStatus._MEMBERSTAT_PARAMETER_NOT_VALID);
         }
         return fieldGetter.apply(memberStat.getMember(), memberStat);
