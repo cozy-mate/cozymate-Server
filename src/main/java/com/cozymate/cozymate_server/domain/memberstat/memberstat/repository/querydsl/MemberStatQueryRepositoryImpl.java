@@ -42,7 +42,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     private final JPAQueryFactory queryFactory;
 
     private static final String NUM_OF_ROOMMATE_NOT_DETERMINED = "0";
-    private static final String[] MULTI_ANSWERS = {"personality", "sleepingHabit"};
+    private static final String[] MULTI_ANSWERS = {"personalities", "sleepingHabits"};
     private static final String NUM_OF_ROOMMATE = "numOfRoommate";
 
     @Override
@@ -369,30 +369,30 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "majorName" -> memberStat.member.majorName;
             case "birthYear" -> memberStat.member.birthDay;
 
-            case "acceptance" -> memberStat.memberUniversityStat.acceptance;
+            case "dormJoiningStatus" -> memberStat.memberUniversityStat.acceptance;
             case "admissionYear" -> memberStat.memberUniversityStat.admissionYear;
             case "numOfRoommate" -> memberStat.memberUniversityStat.numberOfRoommate;
-            case "dormitoryName" -> memberStat.memberUniversityStat.dormitoryName;
+            case "dormName" -> memberStat.memberUniversityStat.dormitoryName;
 
             case "wakeUpTime" -> memberStat.lifestyle.wakeUpTime;
             case "sleepingTime" -> memberStat.lifestyle.sleepingTime;
             case "turnOffTime" -> memberStat.lifestyle.turnOffTime;
-            case "smoking" -> memberStat.lifestyle.smokingStatus;
-            case "sleepingHabit" -> memberStat.lifestyle.sleepingHabit;
-            case "airConditioningIntensity" -> memberStat.lifestyle.coolingIntensity;
+            case "smokingStatus" -> memberStat.lifestyle.smokingStatus;
+            case "sleepingHabits" -> memberStat.lifestyle.sleepingHabit;
+            case "coolingIntensity" -> memberStat.lifestyle.coolingIntensity;
             case "heatingIntensity" -> memberStat.lifestyle.heatingIntensity;
             case "lifePattern" -> memberStat.lifestyle.lifePattern;
             case "intimacy" -> memberStat.lifestyle.intimacy;
-            case "canShare" -> memberStat.lifestyle.itemSharing;
-            case "isPlayGame" -> memberStat.lifestyle.playingGameFrequency;
-            case "isPhoneCall" -> memberStat.lifestyle.phoneCallingFrequency;
-            case "studying" -> memberStat.lifestyle.studyingFrequency;
-            case "intake" -> memberStat.lifestyle.eatingFrequency;
-            case "cleanSensitivity" -> memberStat.lifestyle.cleannessSensitivity;
+            case "sharingStatus" -> memberStat.lifestyle.itemSharing;
+            case "gamingStatus" -> memberStat.lifestyle.playingGameFrequency;
+            case "callingStatus" -> memberStat.lifestyle.phoneCallingFrequency;
+            case "studyingStatus" -> memberStat.lifestyle.studyingFrequency;
+            case "eatingStatus" -> memberStat.lifestyle.eatingFrequency;
+            case "cleannessSensitivity" -> memberStat.lifestyle.cleannessSensitivity;
             case "noiseSensitivity" -> memberStat.lifestyle.noiseSensitivity;
             case "cleaningFrequency" -> memberStat.lifestyle.cleaningFrequency;
-            case "personality" -> memberStat.lifestyle.personality;
             case "drinkingFrequency" -> memberStat.lifestyle.drinkingFrequency;
+            case "personalities" -> memberStat.lifestyle.personality;
             case "mbti" -> memberStat.lifestyle.mbti;
             default ->
                 throw new GeneralException(ErrorStatus._MEMBERSTAT_FILTER_PARAMETER_NOT_VALID);
@@ -405,32 +405,32 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "majorName" -> criteriaMemberStat.getMember().getMajorName();
             case "birthYear" -> criteriaMemberStat.getMember().getBirthDay();
 
-            case "acceptance" -> criteriaMemberStat.getMemberUniversityStat().getAcceptance();
+            case "dormJoiningStatus" -> criteriaMemberStat.getMemberUniversityStat().getAcceptance();
             case "admissionYear" -> criteriaMemberStat.getMemberUniversityStat().getAdmissionYear();
             case "numOfRoommate" ->
                 criteriaMemberStat.getMemberUniversityStat().getNumberOfRoommate();
-            case "dormitoryName" -> criteriaMemberStat.getMemberUniversityStat().getDormitoryName();
+            case "dormName" -> criteriaMemberStat.getMemberUniversityStat().getDormitoryName();
 
             case "wakeUpTime" -> criteriaMemberStat.getLifestyle().getWakeUpTime();
             case "sleepingTime" -> criteriaMemberStat.getLifestyle().getSleepingTime();
             case "turnOffTime" -> criteriaMemberStat.getLifestyle().getTurnOffTime();
-            case "smoking" -> criteriaMemberStat.getLifestyle().getSmokingStatus();
-            case "sleepingHabit" -> criteriaMemberStat.getLifestyle().getSleepingHabit();
-            case "airConditioningIntensity" ->
+            case "smokingStatus" -> criteriaMemberStat.getLifestyle().getSmokingStatus();
+            case "sleepingHabits" -> criteriaMemberStat.getLifestyle().getSleepingHabit();
+            case "coolingIntensity" ->
                 criteriaMemberStat.getLifestyle().getCoolingIntensity();
             case "heatingIntensity" -> criteriaMemberStat.getLifestyle().getHeatingIntensity();
             case "lifePattern" -> criteriaMemberStat.getLifestyle().getLifePattern();
             case "intimacy" -> criteriaMemberStat.getLifestyle().getIntimacy();
-            case "canShare" -> criteriaMemberStat.getLifestyle().getItemSharing();
-            case "isPlayGame" -> criteriaMemberStat.getLifestyle().getPlayingGameFrequency();
-            case "isPhoneCall" -> criteriaMemberStat.getLifestyle().getPhoneCallingFrequency();
-            case "studying" -> criteriaMemberStat.getLifestyle().getStudyingFrequency();
-            case "intake" -> criteriaMemberStat.getLifestyle().getEatingFrequency();
-            case "cleanSensitivity" -> criteriaMemberStat.getLifestyle().getCleannessSensitivity();
+            case "sharingStatus" -> criteriaMemberStat.getLifestyle().getItemSharing();
+            case "gamingStatus" -> criteriaMemberStat.getLifestyle().getPlayingGameFrequency();
+            case "callingStatus" -> criteriaMemberStat.getLifestyle().getPhoneCallingFrequency();
+            case "studyingStatus" -> criteriaMemberStat.getLifestyle().getStudyingFrequency();
+            case "eatingStatus" -> criteriaMemberStat.getLifestyle().getEatingFrequency();
+            case "cleannessSensitivity" -> criteriaMemberStat.getLifestyle().getCleannessSensitivity();
             case "noiseSensitivity" -> criteriaMemberStat.getLifestyle().getNoiseSensitivity();
             case "cleaningFrequency" -> criteriaMemberStat.getLifestyle().getCleaningFrequency();
-            case "personality" -> criteriaMemberStat.getLifestyle().getPersonality();
             case "drinkingFrequency" -> criteriaMemberStat.getLifestyle().getDrinkingFrequency();
+            case "personalities" -> criteriaMemberStat.getLifestyle().getPersonality();
             case "mbti" -> criteriaMemberStat.getLifestyle().getMbti();
             default -> null;
         };

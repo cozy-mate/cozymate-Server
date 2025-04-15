@@ -24,30 +24,30 @@ public class RoomMemberStatController {
     @GetMapping("/{roomId}/memberStat/{memberStatKey}")
     @Operation(summary = "[포비] 방에 속해 있는 메이트 멤버 상세정보 조회",
         description = "방의 멤버 상세정보 조회하기\n"+
-            "사용 가능한 Key는 다음과 같습니다 (총 23개):\n\n" +
+            "사용 가능한 Key는 다음과 같습니다 :\n\n" +
             "- **birthYear**\n" +
-            "- **acceptance**\n" +
+            "- **dormJoiningStatus**\n" +
             "- **admissionYear** \n" +
             "- **majorName** \n" +
             "- **wakeUpTime** \n" +
             "- **sleepingTime** \n" +
             "- **turnOffTime** \n" +
-            "- **smoking** \n" +
-            "- **sleepingHabit** \n" +
-            "- **airConditioningIntensity** \n" +
+            "- **smokingStatus** \n" +
+            "- **sleepingHabits** \n" +
+            "- **coolingIntensity** \n" +
             "- **heatingIntensity** \n" +
             "- **lifePattern** \n" +
             "- **intimacy**\n" +
-            "- **canShare** \n" +
-            "- **isPlayGame** \n" +
-            "- **isPhoneCall**\n" +
-            "- **studying** \n" +
-            "- **intake** \n" +
-            "- **cleanSensitivity**\n" +
+            "- **sharingStatus** \n" +
+            "- **gamingStatus** \n" +
+            "- **callingStatus**\n" +
+            "- **studyingStatus** \n" +
+            "- **eatingStatus** \n" +
+            "- **cleannessSensitivity**\n" +
             "- **noiseSensitivity**\n" +
             "- **cleaningFrequency**\n" +
             "- **drinkingFrequency**\n" +
-            "- **personality**\n" +
+            "- **personalities**\n" +
             "- **mbti**\n\n" +
             "memberList는 아래 object를 배열로 갖고 있습니다.\n" +
             "```json\n" +
