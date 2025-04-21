@@ -46,7 +46,7 @@ public class MemberStatController {
     private final MemberStatQueryService memberStatQueryService;
 
     @Operation(
-        summary = "[말즈] 사용자 상세정보 등록",
+        summary = "[말즈] (수정 4.12)사용자 상세정보 등록",
         description = "사용자의 토큰을 넣어 사용하고, body로 사용자 상세정보를 넣어 사용합니다.\n\n"
             + "시간은 형식에 맞춰 meridian은 오전, 오후, time은 값을 주시면 됩니다.\n\n"
             + "에어컨, 히터, 예민도들은 모두 정수로 주시면 됩니다.\n\n"
@@ -70,7 +70,7 @@ public class MemberStatController {
     }
 
     @Operation(
-        summary = "[말즈] 사용자 상세정보 수정",
+        summary = "[말즈](수정 4.12) 사용자 상세정보 수정",
         description = "사용자의 토큰을 넣어 사용하고, body로 사용자 상세정보를 넣어 사용합니다.\n\n"
             + "시간은 형식에 맞춰 meridian은 오전, 오후, time은 값을 주시면 됩니다.\n\n"
             + "에어컨, 히터, 예민도들은 모두 정수로 주시면 됩니다.\n\n"
@@ -93,7 +93,7 @@ public class MemberStatController {
     }
 
     @Operation(
-        summary = "[말즈] 사용자 상세정보 조회",
+        summary = "[말즈] (수정 4.12)사용자 상세정보 조회",
         description = "사용자의 토큰을 넣어 사용합니다.\n\n"
             + "성격, 잠버릇은 다중 선택으로, 문자열 배열을 리턴합니다.\n\n"
             + "멤버 정보는 memberDetail, 멤버 스탯 정보는 memberStatDetail 객체로 리턴합니다."
@@ -112,7 +112,7 @@ public class MemberStatController {
     }
 
     @Operation(
-        summary = "[말즈] 사용자 상세정보 조회",
+        summary = "[말즈] (수정 4.12)사용자 상세정보 조회",
         description = "사용자의 토큰을 넣어 사용합니다.\n\n"
             + "성격, 잠버릇은 다중 선택으로, 문자열 배열을 리턴합니다.\n\n"
             + "멤버 정보는 memberDetail, 멤버 스탯 정보는 memberStatDetail 객체로 리턴합니다."
@@ -135,7 +135,7 @@ public class MemberStatController {
     }
 
     @Operation(
-        summary = "[말즈] 기숙사 인원 미정 여부 조회",
+        summary = "[말즈] (수정 4.12)기숙사 인원 미정 여부 조회 ",
         description = "사용자 토큰을 넣고 사용합니다. 결과 값으로 정수를 리턴합니다.\n\n"
             + "- 미정일 경우 : 0 반환\n"
             + "- 인실이 정해져 있을 경우 : 사용자의 인실 반환\n"
@@ -156,7 +156,7 @@ public class MemberStatController {
     }
 
     @Operation(
-        summary = "[말즈] 사용자 상세정보 완전 일치 필터링 및 일치율 조회",
+        summary = "[말즈] (수정 4.12)사용자 상세정보 완전 일치 필터링 및 일치율 조회",
         description = "사용자의 토큰을 넣어 사용합니다." +
             "filterList = 필터명1,필터명2,...으로 사용하고, 없을 경우 쿼리문에 아예 filterList를 넣지 않으셔도 됩니다.\n\n"
             + "사용 가능한 필터명(24개):\n"
@@ -215,7 +215,7 @@ public class MemberStatController {
 
 
     @Operation(
-        summary = "[말즈] 사용자 상세정보를 키-값으로 필터링하고, 필터링에 맞는 인원 수를 리턴합니다",
+        summary = "[말즈] (수정 4.12) 사용자 상세정보를 키-값으로 필터링하고, 필터링에 맞는 인원 수를 리턴합니다",
         description = "사용자의 토큰을 넣어 사용합니다. " +
             "filterMap은 RequestBody에 다음과 같은 형식으로 전달됩니다:\n\n" +
             "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다.\n\n" +
@@ -275,7 +275,7 @@ public class MemberStatController {
     }
 
     @Operation(
-        summary = "[말즈] 사용자 상세정보를 키-값으로 필터링하고, 사용자 목록 받아오기(일치율 포함)",
+        summary = "[말즈](수정 4.12) 사용자 상세정보를 키-값으로 필터링하고, 사용자 목록 받아오기(일치율 포함)",
         description = "사용자의 토큰을 넣어 사용합니다. " +
             "filterMap은 RequestBody에 다음과 같은 형식으로 전달됩니다:\n\n" +
             "Key는 넣어도 되고, 안 넣어도 됩니다. 다만 Value의 정보가 없을 때는 빈 배열로 주시면 됩니다.\n\n" +
@@ -345,7 +345,7 @@ public class MemberStatController {
     }
 
     @Operation(
-        summary = "[말즈] 사용자 랜덤 추천",
+        summary = "[말즈] (수정 4.12) 사용자 랜덤 추천",
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
             + "랜덤 사용자 5명을 리턴합니다.\n\n"
             + "사용자 멤버 스탯이 없을 때 사용합니다.\n\n" +
@@ -374,7 +374,7 @@ public class MemberStatController {
 
     @GetMapping("/search")
     @Operation(
-        summary = "[말즈] 사용자 검색",
+        summary = "[말즈] (수정 4.12) 사용자 검색",
         description = "요청자의 토큰을 넣고 사용합니다.\n\n"
             + "검색어의 일부만 일치해도, 일치율이 높은 순으로 결과를 리턴합니다.\n\n"
             + "완전일치 순으로 주는게 좋긴 하지만, 우선 일치율, ID 순으로 구현했습니다.\n\n"
