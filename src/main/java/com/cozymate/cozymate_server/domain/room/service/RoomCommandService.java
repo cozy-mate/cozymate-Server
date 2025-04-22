@@ -11,7 +11,8 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
-import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
@@ -55,7 +56,6 @@ public class RoomCommandService {
     private static final int KEY_LENGTH = 8;
 
     private final MateRepository mateRepository;
-    private final MemberRepository memberRepository;
     private final TodoRepository todoRepository;
     private final RuleRepositoryService ruleRepositoryService;
     private final RoomLogRepository roomLogRepository;
@@ -75,6 +75,8 @@ public class RoomCommandService {
     private final RoomValidator roomValidator;
     private final RoomRepositoryService roomRepositoryService;
     private final MateRepositoryService mateRepositoryService;
+    private final MemberStatRepositoryService memberStatRepositoryService;
+    private final MemberRepositoryService memberRepositoryService;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -106,9 +108,7 @@ public class RoomCommandService {
         roomValidator.checkAlreadyJoinedRoom(member.getId());
 
         // memberStat이 null일 경우 공개방 생성 불가
-        if (member.getMemberStat() == null) {
-            throw new GeneralException(ErrorStatus._MEMBERSTAT_NOT_EXISTS);
-        }
+        memberStatRepositoryService.getMemberStatOrThrow(member.getId());
 
         // 기존 참여 요청들 삭제
         clearOtherRoomRequests(member.getId());
@@ -269,8 +269,7 @@ public class RoomCommandService {
 
     @Transactional
     public void sendInvitation(Long inviteeId, Member inviterMember) {
-        Member inviteeMember = memberRepository.findById(inviteeId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        Member inviteeMember = memberRepositoryService.getMemberByIdOrThrow(inviteeId);
         // 방장이 속한 방의 정보
         Room room = roomRepositoryService.getRoomOrThrow(
             roomQueryService.getExistRoom(inviterMember.getId()).roomId());
@@ -335,8 +334,7 @@ public class RoomCommandService {
 
     @Transactional
     public void forceQuitRoom(Long roomId, Long targetMemberId, Member manager) {
-        memberRepository.findById(targetMemberId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        memberRepositoryService.getMemberByIdOrThrow(targetMemberId);
 
         // 방장이 본인을 퇴장시킬 수 없음
         if (manager.getId().equals(targetMemberId)) {
@@ -351,8 +349,7 @@ public class RoomCommandService {
 
     @Transactional
     public void cancelInvitation(Long inviteeId, Member inviter) {
-        memberRepository.findById(inviteeId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        memberRepositoryService.getMemberByIdOrThrow(inviteeId);
 
         Room room = roomRepositoryService.getRoomOrThrow(
             roomQueryService.getExistRoom(inviter.getId()).roomId());
@@ -370,6 +367,9 @@ public class RoomCommandService {
 
     @Transactional
     public void requestToJoin(Long roomId, Member member) {
+        // 라이프스타일 입력 여부 확인
+        memberStatRepositoryService.getMemberStatOrThrow(member.getId());
+
         Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
         roomValidator.checkAlreadyJoinedRoom(member.getId());
@@ -405,8 +405,7 @@ public class RoomCommandService {
 
     @Transactional
     public void respondToJoinRequest(Long requesterId, boolean accept, Long managerId) {
-        Member requestMember = memberRepository.findById(requesterId)
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
+        Member requestMember = memberRepositoryService.getMemberByIdOrThrow(requesterId);
 
         // 방장이 속한 방의 정보
         Room room = roomRepositoryService.getRoomOrThrow(
