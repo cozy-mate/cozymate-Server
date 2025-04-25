@@ -12,30 +12,34 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class QuestionAnswerMapper {
 
-    private static Map<String, List<String>> questionAnswerMap;
+    private static Map<String, List<String>> QUESTION_ANSWER_MAP;
     private static final String JSON_FILE = "memberstat/question_answer.json";
     private static final String AM = "오전";
     private static final String PM = "오후";
 
-    private static final List<String> MULTI_VALUE_QUESTION = List.of("personalities",
+    private static final Set<String> MULTI_VALUE_QUESTION = Set.of("personalities",
         "sleepingHabits");
 
-    private static final List<String> NOT_LIFESTYLE = List.of("birthYear", "dormJoiningStatus",
+    private static final Set<String> NOT_LIFESTYLE = Set.of("birthYear", "dormJoiningStatus",
         "admissionYear", "majorName", "dormName", "numOfRoommate");
 
+    private static final Set<String> TIME_KEYS = Set.of(
+        "turnOffTime", "sleepingTime", "wakeUpTime"
+    );
 
     static {
         load();
     }
 
     private static void load() {
-        if (questionAnswerMap == null) { // 중복 로딩 방지
+        if (QUESTION_ANSWER_MAP == null) { // 중복 로딩 방지
             try (InputStream inputStream = QuestionAnswerMapper.class.getClassLoader()
                 .getResourceAsStream(JSON_FILE)) {
                 if (inputStream == null) {
@@ -43,7 +47,7 @@ public class QuestionAnswerMapper {
                     throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_NOT_FOUND);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
-                questionAnswerMap = objectMapper.readValue(inputStream,
+                QUESTION_ANSWER_MAP = objectMapper.readValue(inputStream,
                     new TypeReference<>() {
                     });
             } catch (IOException e) {
@@ -54,8 +58,9 @@ public class QuestionAnswerMapper {
     }
 
     public static int getIndex(String key, String value) {
-        List<String> options = questionAnswerMap.get(key);
+        List<String> options = QUESTION_ANSWER_MAP.get(key);
         if (options == null) {
+            log.error("key is not in file: {}", key);
             throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR);
         }
         int index = options.indexOf(value);
@@ -67,7 +72,7 @@ public class QuestionAnswerMapper {
     }
 
     public static String mapValue(String key, Integer index) {
-        List<String> options = questionAnswerMap.get(key);
+        List<String> options = QUESTION_ANSWER_MAP.get(key);
         if (options == null) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR);
         }
@@ -138,7 +143,7 @@ public class QuestionAnswerMapper {
                     String key = entry.getKey();
                     Object value = entry.getValue();
 
-                    if (value instanceof Integer && questionAnswerMap.containsKey(key)) {
+                    if (value instanceof Integer && QUESTION_ANSWER_MAP.containsKey(key)) {
                         if (MULTI_VALUE_QUESTION.stream().anyMatch(q -> q.equals(key))) {
                             List<String> mappedValues = mapValues(key, (Integer) value);
                             return String.join(", ", mappedValues); // 여러 값을 콤마로 구분
@@ -162,7 +167,7 @@ public class QuestionAnswerMapper {
                     String key = entry.getKey();
                     List<?> values = entry.getValue();
 
-                    if (NOT_LIFESTYLE.contains(key)) {
+                    if (NOT_LIFESTYLE.contains(key) || TIME_KEYS.contains(key)) {
                         return values;
                     }
 
@@ -180,7 +185,7 @@ public class QuestionAnswerMapper {
     }
 
     public static List<String> getOptions(String key) {
-        List<String> options = questionAnswerMap.get(key);
+        List<String> options = QUESTION_ANSWER_MAP.get(key);
         if (options == null) {
             throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR);
         }
