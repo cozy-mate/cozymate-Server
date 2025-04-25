@@ -5,11 +5,10 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service.LifestyleMatchRateService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.request.CreateMemberStatRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
-import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.util.MemberStatRedisMapper;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
-import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
-import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +22,7 @@ public class MemberStatCommandService {
 
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final MemberStatRepositoryService memberStatRepositoryService;
+    private final MemberStatCacheService memberStatCacheService;
 
     @Transactional
     public Long createMemberStat(
@@ -31,6 +31,8 @@ public class MemberStatCommandService {
             MemberStatConverter.toEntity(member, createMemberStatRequestDTO));
 
         lifestyleMatchRateService.saveLifeStyleMatchRate(memberStat);
+
+        memberStatCacheService.save(MemberStatRedisMapper.toDto(memberStat));
 
         return memberStat.getMember().getId();
     }
