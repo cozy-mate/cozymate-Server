@@ -71,8 +71,16 @@ public class RoomValidator {
         }
     }
 
+    // 사용자 상세정보 여부 검사
     public void checkMemberStatIsNull(Long memberId){
         memberStatRepositoryService.getMemberStatOrThrow(memberId);
+    }
+
+    // 방 성별 검사
+    public void checkGender(Room room, Member member){
+        if(!room.getGender().equals(member.getGender())){
+            throw new GeneralException(ErrorStatus._MISMATCH_GENDER);
+        }
     }
 
 }

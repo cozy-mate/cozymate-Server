@@ -122,7 +122,7 @@ public class RoomController {
     })
     public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> getRoomInfo(@RequestParam String inviteCode,
         @AuthenticationPrincipal MemberDetails memberDetails) {
-        RoomDetailResponseDTO roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode, memberDetails.member().getId());
+        RoomDetailResponseDTO roomJoinResponse = roomQueryService.getRoomByInviteCode(inviteCode, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess(roomJoinResponse));
     }
 
