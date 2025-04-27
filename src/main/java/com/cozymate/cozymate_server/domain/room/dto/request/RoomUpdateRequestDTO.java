@@ -16,8 +16,9 @@ public record RoomUpdateRequestDTO(
     @Range(min=1, max=16)
     Integer persona,
     @Size(min = 1, max = 3, message = "해시태그는 1개에서 3개까지 입력할 수 있습니다.")
-    List<@NotBlank @Pattern(regexp = "^(?!_)[가-힣a-zA-Z0-9]+(_[가-힣a-zA-Z0-9]+)*(?<!_)$",
-    message = "해시태그는 한글, 영어, 숫자 및 '_'만 사용할 수 있으며, '_'는 앞이나 뒤에 올 수 없습니다.") String> hashtagList
+    List<@Size(min = 1, max = 5, message = "해시태그는 1글자에서 5글자까지 입력할 수 있습니다.")
+        @NotBlank @Pattern(regexp = "^(?!_)[가-힣a-zA-Z0-9]+(_[가-힣a-zA-Z0-9]+)*(?<!_)$",
+        message = "해시태그는 한글, 영어, 숫자 및 '_'만 사용할 수 있으며, '_'는 앞이나 뒤에 올 수 없습니다.") String> hashtagList
 ) {
 
 }
