@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.servic
 
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.LifestyleMatchRate;
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.redis.service.LifestyleMatchRateCacheService;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.util.MemberMatchRateCalculator;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
@@ -25,10 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class LifestyleMatchRateService {
-
     private final LifestyleMatchRateRepositoryService lifestyleMatchRateRepositoryService;
     private final MemberStatRepository memberStatRepository;
     private final UniversityRepository universityRepository;
+    private final LifestyleMatchRateCacheService lifestyleMatchRateCacheService;
 
     private static final Integer NO_EQUALITY = null;
 
@@ -67,6 +68,8 @@ public class LifestyleMatchRateService {
             .toList();
 
         lifestyleMatchRateRepositoryService.createAndUpdateLifestyleMatchRateList(lifestyleMatchRateList);
+
+        lifestyleMatchRateCacheService.saveLifeStyleMatchRate(lifestyleMatchRateList);
     }
 
     @Transactional
