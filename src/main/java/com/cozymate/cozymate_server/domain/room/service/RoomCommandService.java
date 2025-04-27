@@ -269,6 +269,9 @@ public class RoomCommandService {
 
     @Transactional
     public void sendInvitation(Long inviteeId, Member inviterMember) {
+        // 초대하려는 사용자가 MemberStat이 있는 지 검사
+        roomValidator.checkMemberStatIsNull(inviteeId);
+
         Member inviteeMember = memberRepository.findById(inviteeId)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MEMBER_NOT_FOUND));
         // 방장이 속한 방의 정보
@@ -370,6 +373,10 @@ public class RoomCommandService {
 
     @Transactional
     public void requestToJoin(Long roomId, Member member) {
+        // 참여 요청을 보내는 사용자가 MemberStat이 있는 지 검사
+        roomValidator.checkMemberStatIsNull(member.getId());
+
+
         Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
         roomValidator.checkAlreadyJoinedRoom(member.getId());

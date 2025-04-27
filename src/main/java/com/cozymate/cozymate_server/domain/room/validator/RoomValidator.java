@@ -3,6 +3,9 @@ package com.cozymate.cozymate_server.domain.room.validator;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService;
+import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.enums.RoomType;
 import com.cozymate.cozymate_server.domain.room.repository.RoomRepositoryService;
@@ -17,6 +20,8 @@ public class RoomValidator {
 
     private final MateRepositoryService mateRepositoryService;
     private final RoomRepositoryService roomRepositoryService;
+
+    private final MemberStatRepositoryService memberStatRepositoryService;
 
     // 방 이름 중복 검사
     public Boolean isUniqueRoomName(String roomName) {
@@ -64,6 +69,10 @@ public class RoomValidator {
             default:
                 break;
         }
+    }
+
+    public void checkMemberStatIsNull(Long memberId){
+        memberStatRepositoryService.getMemberStatOrThrow(memberId);
     }
 
 }
