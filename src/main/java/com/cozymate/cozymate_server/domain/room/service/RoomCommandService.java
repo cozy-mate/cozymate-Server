@@ -292,6 +292,9 @@ public class RoomCommandService {
         // 방 정원 검사
         roomValidator.checkRoomFull(room);
 
+        // 방 성별 검사
+        roomValidator.checkGender(room, inviteeMember);
+
         if (invitee.isPresent()) {
             Mate mate = invitee.get();
             roomValidator.checkEntryStatus(mate);
@@ -376,10 +379,12 @@ public class RoomCommandService {
         // 참여 요청을 보내는 사용자가 MemberStat이 있는 지 검사
         roomValidator.checkMemberStatIsNull(member.getId());
 
-
         Room room = roomRepositoryService.getRoomOrThrow(roomId);
 
         roomValidator.checkAlreadyJoinedRoom(member.getId());
+
+        // 참여 요청을 보내는 사용자의 성별 검사
+        roomValidator.checkGender(room, member);
 
         Optional<Mate> existingMate = mateRepositoryService.getMateOptional(room.getId(),
             member.getId());
@@ -497,6 +502,9 @@ public class RoomCommandService {
     }
 
     private void processJoinRequest(Mate mate, Room room) {
+        // 방 참여시키전에 성별 검증 (트랜잭션 하나에서 호출하세요)
+        roomValidator.checkGender(room, mate.getMember());
+
         mate.setEntryStatus(EntryStatus.JOINED);
         mateRepository.save(mate);
         room.arrive();
