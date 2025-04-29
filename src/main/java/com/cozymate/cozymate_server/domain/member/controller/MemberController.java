@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.code.status.SuccessStatus;
 
+import com.cozymate.cozymate_server.global.utils.BannedWordValid;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ import org.hibernate.validator.constraints.Length;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Slf4j
 @RequestMapping("/members")
+@Validated
 public class MemberController {
 
     private final MemberService memberService;
@@ -43,7 +46,7 @@ public class MemberController {
     @Operation(summary = "[말즈] 닉네임 유효성 검증",
         description = "false : 사용 불가, true : 사용 가능")
     ResponseEntity<ApiResponse<Boolean>> checkNickname(
-        @RequestParam @Length(min = 2, max = 10) String nickname) {
+        @RequestParam @Length(min = 2, max = 10) @BannedWordValid String nickname) {
         Boolean isValid = memberService.checkNickname(nickname);
 
         return ResponseEntity.status(SuccessStatus._OK.getHttpStatus())

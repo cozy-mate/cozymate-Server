@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.member.dto.request;
 
 
+import com.cozymate.cozymate_server.global.utils.BannedWordValid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -14,6 +15,7 @@ public record UpdateRequestDTO(
     @NotEmpty(message = "비어 있을 수 없습니다.")
     @Length(min = 2, max = 8, message = "닉네임 길이는 2~8")
     @Pattern(regexp = "^[가-힣a-zA-Z0-9]+$", message = "닉네임은 한글, 영어, 숫자만 가능합니다.")
+    @BannedWordValid
     String nickname,
 
     @NotNull(message = "null일 수 없습니다.")
