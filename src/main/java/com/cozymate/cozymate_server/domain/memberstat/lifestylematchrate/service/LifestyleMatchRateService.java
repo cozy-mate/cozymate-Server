@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class LifestyleMatchRateService {
+
     private final LifestyleMatchRateRepositoryService lifestyleMatchRateRepositoryService;
     private final MemberStatRepository memberStatRepository;
     private final UniversityRepository universityRepository;
@@ -33,6 +33,17 @@ public class LifestyleMatchRateService {
 
     private static final Integer NO_EQUALITY = null;
 
+    public void saveLifeStyleMatchRate(MemberStat memberStat) {
+        List<MemberStat> targetMemberStats = getTargetMemberStats(memberStat);
+
+        List<LifestyleMatchRate> lifestyleMatchRateList = targetMemberStats.stream()
+            .map(targetStat -> createMatchRate(memberStat, targetStat))
+            .toList();
+
+        lifestyleMatchRateRepositoryService.createAndUpdateLifestyleMatchRateList(
+            lifestyleMatchRateList);
+        lifestyleMatchRateCacheService.saveLifeStyleMatchRate(lifestyleMatchRateList);
+    }
     public Map<Long, Integer> getMatchRateWithMemberIdAndIdList(Long memberId,
         List<Long> memberIdList) {
         if (memberIdList.isEmpty()) {
@@ -48,7 +59,8 @@ public class LifestyleMatchRateService {
 
     public Map<Long, Integer> getMatchRate(Long memberId) {
         return createMatchRateMap(memberId,
-            lifestyleMatchRateRepositoryService.getLifestyleMatchRateListBySingleMemberId(memberId));
+            lifestyleMatchRateRepositoryService.getLifestyleMatchRateListBySingleMemberId(
+                memberId));
     }
 
     public Integer getSingleMatchRate(Long memberA, Long memberB) {
@@ -59,38 +71,32 @@ public class LifestyleMatchRateService {
             .orElse(NO_EQUALITY);
     }
 
-    @Transactional
-    public void saveLifeStyleMatchRate(MemberStat memberStat) {
-        List<MemberStat> targetMemberStats = getTargetMemberStats(memberStat);
 
-        List<LifestyleMatchRate> lifestyleMatchRateList = targetMemberStats.stream()
-            .map(targetStat -> createMatchRate(memberStat, targetStat))
-            .toList();
-
-        lifestyleMatchRateRepositoryService.createAndUpdateLifestyleMatchRateList(lifestyleMatchRateList);
-
-        lifestyleMatchRateCacheService.saveLifeStyleMatchRate(lifestyleMatchRateList);
-    }
-
-    @Transactional
     public void calculateAllLifeStyleMatchRate() {
         universityRepository.findAll()
             .forEach(university -> Arrays.stream(Gender.values())
-                .forEach(gender -> calculateAllLifeStyleMatchRateWithSameUniversityAndGender(university, gender)));
+                .forEach(
+                    gender -> calculateAllLifeStyleMatchRateWithSameUniversityAndGender(university,
+                        gender)));
     }
 
-    private void calculateAllLifeStyleMatchRateWithSameUniversityAndGender(University university, Gender gender) {
-        List<MemberStat> memberStatList = memberStatRepository.findByMemberUniversityAndGender(gender, university.getId());
+    private void calculateAllLifeStyleMatchRateWithSameUniversityAndGender(University university,
+        Gender gender) {
+        List<MemberStat> memberStatList = memberStatRepository.findByMemberUniversityAndGender(
+            gender, university.getId());
 
         List<LifestyleMatchRate> lifestyleMatchRateList = new ArrayList<>();
 
         for (int i = 0; i < memberStatList.size(); i++) {
             for (int j = i + 1; j < memberStatList.size(); j++) {
-                lifestyleMatchRateList.add(createMatchRate(memberStatList.get(i), memberStatList.get(j)));
+                lifestyleMatchRateList.add(
+                    createMatchRate(memberStatList.get(i), memberStatList.get(j)));
             }
         }
 
-        lifestyleMatchRateRepositoryService.createAndUpdateLifestyleMatchRateList(lifestyleMatchRateList);
+        lifestyleMatchRateCacheService.saveLifeStyleMatchRate(lifestyleMatchRateList);
+        lifestyleMatchRateRepositoryService.createAndUpdateLifestyleMatchRateList(
+            lifestyleMatchRateList);
     }
 
     private List<MemberStat> getTargetMemberStats(MemberStat memberStat) {
@@ -104,13 +110,16 @@ public class LifestyleMatchRateService {
         int matchRate = MemberMatchRateCalculator.calculateLifestyleMatchRate(
             memberA.getLifestyle(), memberB.getLifestyle());
 
-        return new LifestyleMatchRate(memberA.getMember().getId(), memberB.getMember().getId(), matchRate);
+        return new LifestyleMatchRate(memberA.getMember().getId(), memberB.getMember().getId(),
+            matchRate);
     }
 
-    private Map<Long, Integer> createMatchRateMap(Long memberId, List<LifestyleMatchRate> lifestyleMatchRateList) {
+    private Map<Long, Integer> createMatchRateMap(Long memberId,
+        List<LifestyleMatchRate> lifestyleMatchRateList) {
         return lifestyleMatchRateList.stream()
             .collect(Collectors.toMap(
-                rate -> rate.getId().getMemberA().equals(memberId) ? rate.getId().getMemberB() : rate.getId().getMemberA(),
+                rate -> rate.getId().getMemberA().equals(memberId) ? rate.getId().getMemberB()
+                    : rate.getId().getMemberA(),
                 LifestyleMatchRate::getMatchRate
             ));
     }

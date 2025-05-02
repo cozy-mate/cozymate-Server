@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberStatController {
 
 
-    private final MemberStatCommandService memberStatService;
+    private final MemberStatCommandService memberStatCommandService;
 
     private final MemberStatQueryService memberStatQueryService;
 
@@ -64,7 +64,7 @@ public class MemberStatController {
         @Valid @RequestBody CreateMemberStatRequestDTO createMemberStatRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatService.createMemberStat(memberDetails.member(),
+                memberStatCommandService.createMemberStat(memberDetails.member(),
                     createMemberStatRequestDTO)
             ));
     }
@@ -88,7 +88,7 @@ public class MemberStatController {
         @Valid @RequestBody CreateMemberStatRequestDTO createMemberStatRequestDTO) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                memberStatService.modifyMemberStat(memberDetails.member(),
+                memberStatCommandService.modifyMemberStat(memberDetails.member(),
                     createMemberStatRequestDTO)));
     }
 
