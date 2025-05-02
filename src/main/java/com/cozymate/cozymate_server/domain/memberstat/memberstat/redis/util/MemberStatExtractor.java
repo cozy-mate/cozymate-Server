@@ -3,14 +3,19 @@ package com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.util;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.Lifestyle;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberUniversityStat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MemberStatExtractor {
 
-    private MemberStatExtractor() {}
+    private MemberStatExtractor() {
+    }
+
+    private static final Set<String> MULTI_VALUE_QUESTION = Set.of("personalities", "sleepingHabits");
 
     public static Map<String, List<?>> toFilterMap(MemberStat memberStat, List<String> filterList) {
         Map<String, String> allAnswers = extractAnswers(memberStat);
@@ -19,7 +24,16 @@ public class MemberStatExtractor {
             .filter(allAnswers::containsKey)
             .collect(Collectors.toMap(
                 key -> key,
-                key -> List.of(allAnswers.get(key)) // 단일값을 List로 감쌈
+                key -> {
+                    String raw = allAnswers.get(key);
+                    if (MULTI_VALUE_QUESTION.contains(key)) {
+                        return Arrays.stream(raw.split(","))
+                            .map(String::trim)
+                            .filter(s -> !s.isEmpty())
+                            .collect(Collectors.toList());
+                    }
+                    return List.of(raw);
+                }
             ));
     }
     public static Map<String, String> extractAnswers(MemberStat memberStat) {
@@ -54,9 +68,25 @@ public class MemberStatExtractor {
         answers.put("drinkingFrequency", toStringOrEmpty(lifestyle.getDrinkingFrequency()));
         answers.put("mbti", toStringOrEmpty(lifestyle.getMbti()));
 
-        // Bitmask 처리 항목
-        answers.put("sleepingHabit", toBitString(lifestyle.getSleepingHabit(), 6));
-        answers.put("personalities", toBitString(lifestyle.getPersonality(), 12));
+        // 비트마스크: sleepingHabit (6개)
+        StringBuilder sleepingHabitKeys = new StringBuilder();
+        int sleepingHabit = lifestyle.getSleepingHabit();
+        for (int i = 0; i < 6; i++) {
+            if ((sleepingHabit & (1 << i)) != 0) {
+                sleepingHabitKeys.append(i).append(",");
+            }
+        }
+        answers.put("sleepingHabits", sleepingHabitKeys.toString());
+
+        // 비트마스크: personality (12개)
+        StringBuilder personalityKeys = new StringBuilder();
+        int personality = lifestyle.getPersonality();
+        for (int i = 0; i < 12; i++) {
+            if ((personality & (1 << i)) != 0) {
+                personalityKeys.append(i).append(",");
+            }
+        }
+        answers.put("personalities", personalityKeys.toString());
 
         return answers;
     }

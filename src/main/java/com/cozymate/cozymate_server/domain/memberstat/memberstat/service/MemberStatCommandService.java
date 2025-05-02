@@ -8,6 +8,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -55,10 +56,10 @@ public class MemberStatCommandService {
         return memberStat.getMember().getId();
     }
 
-    @Transactional
-    public void migrate() {
+//    @Transactional
+//    public void migrate() {
 //        List<MemberStat> all = memberStatRepositoryService.getAll();
 //        all.forEach(memberStatCacheService::save);
-        lifestyleMatchRateService.calculateAllLifeStyleMatchRate();
-    }
+//        lifestyleMatchRateService.calculateAllLifeStyleMatchRate();
+//    }
 }
