@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +56,7 @@ public class MailService {
 
         String mailAddress = sendDTO.mailAddress();
         validateMailAddress(mailAddress, university.getMailPattern());
+        deleteDuplicatedAddress(mailAddress);
 
         MailAuthentication mailAuthentication = createAndSendMail(clientId,
             mailAddress, university.getName());
@@ -69,7 +71,7 @@ public class MailService {
             verifyDTO.universityId());
 
         // todo: 출시 전 삭제
-        if(verifyDTO.code().equals("cozymate")){
+        if (verifyDTO.code().equals("cozymate")) {
             return authService.signInByPreMember(clientId, memberUniversity,
                 verifyDTO.majorName());
         }
@@ -156,13 +158,16 @@ public class MailService {
     }
 
     private void validateMailAddress(String mailAddress, String mailPattern) {
-        Optional<MailAuthentication> mailAuthentication = mailRepository.findByMailAddress(
-            mailAddress);
-
         if (!mailAddress.contains(mailPattern)) {
             throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
         }
-        if (mailAuthentication.isPresent() && mailAuthentication.get().getIsVerified()) {
+        List<MailAuthentication> mailAuthentications = mailRepository.findAllByMailAddress(
+            mailAddress);
+
+        boolean hasVerified = mailAuthentications.stream()
+            .anyMatch(MailAuthentication::getIsVerified);
+
+        if (hasVerified) {
             throw new GeneralException(ErrorStatus._MAIL_ADDRESS_DUPLICATED);
         }
     }
@@ -184,6 +189,15 @@ public class MailService {
         } catch (IOException e) {
             throw new GeneralException(ErrorStatus._CANNOT_FIND_MAIL_FORM);
         }
+    }
+
+    private void deleteDuplicatedAddress(String mailAddress) {
+        // 같은 mailAddress로 인증 안 된 기록 모두 삭제
+        List<MailAuthentication> existing = mailRepository.findAllByMailAddress(mailAddress);
+        existing.stream()
+            .filter(auth -> Boolean.FALSE.equals(auth.getIsVerified()))
+            .forEach(mailRepository::delete);
+
     }
 
 }
