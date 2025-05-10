@@ -56,7 +56,6 @@ public class MailService {
 
         String mailAddress = sendDTO.mailAddress();
         validateMailAddress(mailAddress, university.getMailPattern());
-        deleteDuplicatedAddress(mailAddress);
 
         MailAuthentication mailAuthentication = createAndSendMail(clientId,
             mailAddress, university.getName());
@@ -76,7 +75,7 @@ public class MailService {
                 verifyDTO.majorName());
         }
 
-        verifyAuthenticationCode(clientId, verifyDTO.code());
+        verifyAuthenticationCode(clientId, verifyDTO.code(), memberUniversity.getMailPattern());
 
         return authService.signInByPreMember(clientId, memberUniversity,
             verifyDTO.majorName());
@@ -107,7 +106,7 @@ public class MailService {
         }
     }
 
-    private void verifyAuthenticationCode(String clientId, String requestCode) {
+    private void verifyAuthenticationCode(String clientId, String requestCode, String mailPattern) {
 
         MailAuthentication mailAuthentication = mailRepository.findById(clientId)
             .orElseThrow(() -> new GeneralException(
@@ -118,6 +117,9 @@ public class MailService {
                 mailAuthentication.getUpdatedAt().plusMinutes(MAIL_AUTHENTICATION_EXPIRED_TIME))) {
             throw new GeneralException(ErrorStatus._MAIL_AUTHENTICATION_CODE_EXPIRED);
         }
+
+        // 메일 중복 확인
+        validateMailAddress(mailAuthentication.getMailAddress(), mailPattern);
 
         // 메일 인증 코드 일치 여부 확인
         if (!mailAuthentication.getCode().equals(requestCode)) {
@@ -189,15 +191,6 @@ public class MailService {
         } catch (IOException e) {
             throw new GeneralException(ErrorStatus._CANNOT_FIND_MAIL_FORM);
         }
-    }
-
-    private void deleteDuplicatedAddress(String mailAddress) {
-        // 같은 mailAddress로 인증 안 된 기록 모두 삭제
-        List<MailAuthentication> existing = mailRepository.findAllByMailAddress(mailAddress);
-        existing.stream()
-            .filter(auth -> Boolean.FALSE.equals(auth.getIsVerified()))
-            .forEach(mailRepository::delete);
-
     }
 
 }
