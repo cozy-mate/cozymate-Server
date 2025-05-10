@@ -38,4 +38,13 @@ public interface MemberStatRepository extends JpaRepository<MemberStat, Long>,
 
     void deleteByMemberId(Long memberId);
 
+    @Query("""
+            SELECT ms FROM MemberStat ms
+            JOIN FETCH ms.member m
+            JOIN FETCH m.university
+            WHERE m.id IN :memberIds
+        """)
+    List<MemberStat> findAllByMemberIds(@Param("memberIds") List<Long> memberIds);
+
+
 }

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -36,13 +35,12 @@ public class LifestyleMatchRateRepositoryService {
         return repository.findBySingleMemberId(memberId);
     }
 
-    @Transactional
-    public void createLifestyleMatchRate(LifestyleMatchRate lifestyleMatchRate){
+    public void createLifestyleMatchRate(LifestyleMatchRate lifestyleMatchRate) {
         repository.save(lifestyleMatchRate);
     }
 
-    @Transactional
-    public void createAndUpdateLifestyleMatchRateList(List<LifestyleMatchRate> lifestyleMatchRateList){
+    public void createAndUpdateLifestyleMatchRateList(
+        List<LifestyleMatchRate> lifestyleMatchRateList) {
         bulkRepository.saveAllWithUpsert(lifestyleMatchRateList);
     }
 }

@@ -17,6 +17,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.Me
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatSearchResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.MemberStatConverter;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAnswerMapper;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
@@ -51,11 +52,10 @@ public class MemberStatQueryService {
     private final MemberStatRepositoryService memberStatRepositoryService;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
 
-
     private final LifestyleMatchRateService lifestyleMatchRateService;
     private final RoomQueryService roomQueryService;
     private final RoomRepositoryService roomRepositoryService;
-
+    private final MemberStatCacheService memberStatCacheService;
 
     private static final Long NO_ROOMMATE = 0L;
     private static final Long NOT_FAVORITE = 0L;
@@ -83,7 +83,7 @@ public class MemberStatQueryService {
      * @return MemberStat과 룸메이트 정보, 선호 여부 등을 포함한 DTO
      * @throws GeneralException MEMBERSTAT_NOT_EXISTS 예외 발생 가능
      *                          <p>
-     *                          todo: 개선 필요 쿼리가 너무 여러개임
+     *                                                                            todo: 개선 필요 쿼리가 너무 여러개임
      */
     @Transactional(readOnly = true)
     public MemberStatDetailAndRoomIdAndEqualityResponseDTO getMemberStatWithId(Member viewer,
@@ -129,6 +129,7 @@ public class MemberStatQueryService {
      * @param member     조회하는 사용자
      * @param filterList 적용할 필터 리스트
      * @param pageable   페이징 정보
+     *
      * @return 필터링된 MemberStat 목록
      */
     @Transactional(readOnly = true)
@@ -138,14 +139,16 @@ public class MemberStatQueryService {
         MemberStat criteriaMemberStat = memberStatRepositoryService.getMemberStatOrThrow(
             member.getId());
 
-        Slice<Map<MemberStat, Integer>> filteredResult =
-            memberStatRepositoryService.getMemberStatListByAttributeList(
-                criteriaMemberStat,
-                filterList,
-                pageable
-            );
+        Map<Long, Integer> cachedMap = memberStatCacheService.filterUsersWithAttributeList(
+            member.getUniversity().getId(), member.getGender().toString(),
+            criteriaMemberStat, filterList
+        );
+
+        Slice<Map<MemberStat, Integer>> result = memberStatRepositoryService.getMemberStatListByFilteredIds(
+            cachedMap, pageable);
+
         return getPageResponseOrEmpty(
-            filteredResult,
+            result,
             pageable,
             slice -> createMemberStatPreferenceResponse(slice, criteriaMemberStat)
         );
