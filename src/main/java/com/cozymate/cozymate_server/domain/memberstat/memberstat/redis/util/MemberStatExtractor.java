@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.Lifestyle;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberUniversityStat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +16,14 @@ public class MemberStatExtractor {
     private MemberStatExtractor() {
     }
 
-    private static final Set<String> MULTI_VALUE_QUESTION = Set.of("personalities", "sleepingHabits");
+    private static final Set<String> MULTI_VALUE_QUESTION = Set.of("personalities",
+        "sleepingHabits");
 
     public static Map<String, List<?>> toFilterMap(MemberStat memberStat, List<String> filterList) {
+        if (filterList == null || filterList.isEmpty()) {
+            return Collections.emptyMap();
+        }
         Map<String, String> allAnswers = extractAnswers(memberStat);
-
         return filterList.stream()
             .filter(allAnswers::containsKey)
             .collect(Collectors.toMap(
@@ -36,6 +40,7 @@ public class MemberStatExtractor {
                 }
             ));
     }
+
     public static Map<String, String> extractAnswers(MemberStat memberStat) {
         Map<String, String> answers = new HashMap<>();
 
