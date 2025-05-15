@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.auth.dto.response.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.auth.utils.ClientIdMaker;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.member.dto.response.MemberUniversityInfoResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.enums.Role;
@@ -76,6 +77,18 @@ public class MemberConverter {
             .universityId(universityId)
             .majorName(majorName)
             .persona(persona)
+            .build();
+    }
+
+    public static MemberUniversityInfoResponseDTO toMemberUniversityInfoResponseDTO(
+        String universityName,
+        String mailAddress,
+        String majorName
+    ){
+        return MemberUniversityInfoResponseDTO.builder()
+            .universityName(universityName)
+            .mailAddress(mailAddress)
+            .majorName(majorName)
             .build();
     }
 

@@ -2,6 +2,8 @@ package com.cozymate.cozymate_server.domain.member.service;
 
 import com.cozymate.cozymate_server.domain.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
+import com.cozymate.cozymate_server.domain.mail.repository.MailAuthenticationRepositoryService;
 import com.cozymate.cozymate_server.domain.mail.service.MailService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
@@ -9,6 +11,7 @@ import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.member.dto.response.MemberUniversityInfoResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
@@ -16,6 +19,7 @@ import com.cozymate.cozymate_server.domain.member.validator.MemberValidator;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
 import com.cozymate.cozymate_server.domain.university.validator.UniversityValidator;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class MemberService {
+
     // 의존성 주입
     private final AuthService authService;
     private final MemberValidator memberValidator;
@@ -32,6 +37,7 @@ public class MemberService {
     private final MemberStatPreferenceCommandService memberStatPreferenceCommandService;
     private final MemberWithdrawService memberWithdrawService;
     private final MailService mailService;
+    private final MailAuthenticationRepositoryService mailAuthenticationRepositoryService;
     private final SignUpNotificationService signUpNotificationService;
     private final MemberRepositoryService memberRepositoryService;
 
@@ -57,6 +63,22 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberDetailResponseDTO getMemberDetailInfo(MemberDetails memberDetails) {
         return MemberConverter.toMemberDetailResponseDTOFromEntity(memberDetails.member());
+    }
+
+
+    @Transactional(readOnly = true)
+    public MemberUniversityInfoResponseDTO getMemberUniversityInfo(Member member) {
+
+        String mailAddress = mailAuthenticationRepositoryService
+            .getMailAuthenticationByIdOptional(member.getClientId())
+            .map(MailAuthentication::getMailAddress)
+            .orElse("");
+
+        return MemberConverter.toMemberUniversityInfoResponseDTO(
+            member.getUniversity().getName(),
+            mailAddress,
+            member.getMajorName()
+        );
     }
 
     /**
@@ -121,4 +143,5 @@ public class MemberService {
         mailService.sendCustomMailToAdmin(mailSubject, withdrawReason);
         memberWithdrawService.withdraw(memberDetails.member());
     }
+
 }
