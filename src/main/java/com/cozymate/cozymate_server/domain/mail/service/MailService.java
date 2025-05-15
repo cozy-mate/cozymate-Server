@@ -6,7 +6,8 @@ import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
 import com.cozymate.cozymate_server.domain.mail.converter.MailConverter;
 import com.cozymate.cozymate_server.domain.mail.dto.request.MailSendRequestDTO;
 import com.cozymate.cozymate_server.domain.mail.dto.request.VerifyRequestDTO;
-import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
+
+import com.cozymate.cozymate_server.domain.mail.repository.MailAuthenticationRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.university.University;
@@ -38,7 +39,7 @@ public class MailService {
 
     private static final Integer MAIL_AUTHENTICATION_EXPIRED_TIME = 30;
     private final JavaMailSender mailSender;
-    private final MailRepository mailRepository;
+    private final MailAuthenticationRepositoryService mailAuthenticationRepositoryService;
     private final UniversityRepositoryService universityRepositoryService;
     private final AuthService authService;
 
@@ -60,7 +61,7 @@ public class MailService {
         MailAuthentication mailAuthentication = createAndSendMail(clientId,
             mailAddress, university.getName());
 
-        mailRepository.save(mailAuthentication);
+        mailAuthenticationRepositoryService.createMailAuthentication(mailAuthentication);
     }
 
     @Transactional
@@ -82,7 +83,7 @@ public class MailService {
     }
 
     public String isVerified(Member member) {
-        Optional<MailAuthentication> mailAuthentication = mailRepository.findById(
+        Optional<MailAuthentication> mailAuthentication = mailAuthenticationRepositoryService.getMailAuthenticationByIdOptional(
             member.getClientId());
         if (mailAuthentication.isPresent() && Boolean.TRUE.equals(
             mailAuthentication.get().getIsVerified())) {
@@ -108,9 +109,8 @@ public class MailService {
 
     private void verifyAuthenticationCode(String clientId, String requestCode, String mailPattern) {
 
-        MailAuthentication mailAuthentication = mailRepository.findById(clientId)
-            .orElseThrow(() -> new GeneralException(
-                ErrorStatus._MAIL_AUTHENTICATION_NOT_FOUND));
+        MailAuthentication mailAuthentication = mailAuthenticationRepositoryService.getMailAuthenticationByIdOrThrow(
+            clientId);
         // 만료 시간 초과 여부 확인
         if (LocalDateTime.now()
             .isAfter(
@@ -163,7 +163,7 @@ public class MailService {
         if (!mailAddress.contains(mailPattern)) {
             throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
         }
-        List<MailAuthentication> mailAuthentications = mailRepository.findAllByMailAddress(
+        List<MailAuthentication> mailAuthentications = mailAuthenticationRepositoryService.getMailAuthenticationListByMailAddress(
             mailAddress);
 
         boolean hasVerified = mailAuthentications.stream()

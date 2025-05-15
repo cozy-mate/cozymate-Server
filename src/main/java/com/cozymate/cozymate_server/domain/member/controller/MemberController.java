@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
+import com.cozymate.cozymate_server.domain.member.dto.response.MemberUniversityInfoResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.service.MemberService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
+
     @GetMapping("/check-nickname")
     @Operation(summary = "[말즈] 닉네임 유효성 검증",
         description = "false : 사용 불가, true : 사용 가능")
@@ -66,10 +68,14 @@ public class MemberController {
             "&nbsp;&nbsp;&nbsp;&nbsp;\"persona\": 1,<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;\"memberStatPreferenceDto\": {<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"preferenceList\": [<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"wakeUpTime\",<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"sleepingTime\",<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"coolingIntensity\",<br>" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"studying\"<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"wakeUpTime\",<br>"
+            +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"sleepingTime\",<br>"
+            +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"coolingIntensity\",<br>"
+            +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"studying\"<br>"
+            +
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>" +
             "&nbsp;&nbsp;&nbsp;&nbsp;}<br>" +
             "}" +
@@ -134,9 +140,19 @@ public class MemberController {
     public ResponseEntity<ApiResponse<String>> withdraw(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid WithdrawRequestDTO withdrawRequestDTO) {
-        memberService.withdraw(withdrawRequestDTO,memberDetails);
+        memberService.withdraw(withdrawRequestDTO, memberDetails);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
+    }
+
+    @Operation(summary = "[말즈] 인증된 학교 정보 API (신규 2025.5.12)", description = "사용자의 학교이름, 메일주소, 학과")
+    @GetMapping("/university-info")
+    public ResponseEntity<ApiResponse<MemberUniversityInfoResponseDTO>> getMemberUniversityInfo(
+        @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(memberService.getMemberUniversityInfo(memberDetails.member()))
+        );
     }
 
 }

@@ -5,7 +5,7 @@ import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepositoryService;
 import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepository;
-import com.cozymate.cozymate_server.domain.mail.repository.MailRepository;
+import com.cozymate.cozymate_server.domain.mail.repository.MailAuthenticationRepository;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
@@ -37,7 +37,7 @@ public class MemberWithdrawService {
 
     private final MemberRepository memberRepository;
     private final TokenRepository tokenRepository;
-    private final MailRepository mailRepository;
+    private final MailAuthenticationRepository mailAuthenticationRepository;
     private final MemberStatRepository memberStatRepository;
     private final MemberStatPreferenceRepository memberStatPreferenceRepository;
     private final LifestyleMatchRateRepository lifestyleMatchRateRepository;
@@ -81,7 +81,7 @@ public class MemberWithdrawService {
     @Transactional
     public void deleteRelatedWithMember(Member member) {
         tokenRepository.deleteById(member.getClientId());
-        mailRepository.deleteById(member.getClientId());
+        mailAuthenticationRepository.deleteById(member.getClientId());
         log.debug("토큰,메일 삭제 완료");
 
         memberFavoriteRepository.deleteByMemberOrTargetMember(member);
