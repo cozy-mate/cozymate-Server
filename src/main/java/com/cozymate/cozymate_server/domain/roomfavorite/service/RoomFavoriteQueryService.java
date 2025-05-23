@@ -17,6 +17,7 @@ import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteR
 import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +55,8 @@ public class RoomFavoriteQueryService {
         }
 
         Map<Room, Long> roomFavoriteIdMap = roomFavoriteList.stream()
-            .collect(Collectors.toMap(RoomFavorite::getRoom, RoomFavorite::getId));
+            .collect(Collectors.toMap(RoomFavorite::getRoom, RoomFavorite::getId,
+                (o1, o2) -> o1, LinkedHashMap::new));
 
         List<Room> findFavoriteRoomList = new ArrayList<>(roomFavoriteIdMap.keySet());
 
