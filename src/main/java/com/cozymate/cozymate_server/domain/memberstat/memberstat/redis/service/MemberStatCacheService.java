@@ -111,6 +111,41 @@ public class MemberStatCacheService {
             ));
     }
 
+    public void delete(MemberStat memberStat) {
+        Long universityId = memberStat.getMember().getUniversity().getId();
+        String gender = memberStat.getMember().getGender().toString();
+        Long memberId = memberStat.getMember().getId();
+
+        // 1. 기본 풀에서 제거
+        String poolKey = generatePoolKey(universityId, gender);
+        redisTemplate.opsForSet().remove(poolKey, memberId.toString());
+
+        // 2. 라이프스타일 Set에서 제거
+        Map<String, String> extractedAnswers = MemberStatExtractor.extractAnswers(memberStat);
+        for (Map.Entry<String, String> entry : extractedAnswers.entrySet()) {
+            String question = entry.getKey();
+            String answer = entry.getValue();
+
+            if (answer.isBlank()) continue;
+
+            if (MULTI_VALUE_QUESTION.contains(question)) {
+                for (String val : answer.split(",")) {
+                    if (!val.isBlank()) {
+                        String lifestyleKey = generateLifestyleKey(universityId, question, val.trim());
+                        redisTemplate.opsForSet().remove(lifestyleKey, memberId.toString());
+                    }
+                }
+            } else {
+                String lifestyleKey = generateLifestyleKey(universityId, question, answer);
+                redisTemplate.opsForSet().remove(lifestyleKey, memberId.toString());
+            }
+        }
+
+        // 3. 매칭률 캐시도 삭제
+        lifestyleMatchRateCacheService.deleteAllRelatedTo(memberId);
+    }
+
+
     /**
      * 필터 조건 기반 사용자 ID 리스트 필터링
      * - 각 조건별 Union 후, 전체 조건에 대해 교집합 수행

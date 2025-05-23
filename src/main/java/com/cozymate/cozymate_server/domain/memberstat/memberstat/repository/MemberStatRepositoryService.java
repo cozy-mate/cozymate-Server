@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class MemberStatRepositoryService {
 
     private final MemberStatRepository memberStatRepository;
@@ -90,13 +92,15 @@ public class MemberStatRepositoryService {
         Map<Long, MemberStat> idToStat = memberStats.stream()
             .collect(Collectors.toMap(stat -> stat.getMember().getId(), Function.identity()));
 
-        // 5. 정렬된 순서에 따라 Map 구성
+        // 5. 정렬된 순서에 따라 Map 구성 (null key 방지)
         List<Map<MemberStat, Integer>> content = pagedUserIds.stream()
+            .filter(idToStat::containsKey) // null 방지
             .map(id -> Map.of(idToStat.get(id), idToMatchRate.get(id)))
             .toList();
 
         return new SliceImpl<>(content, pageable, hasNext);
     }
+
 
 
     /**
