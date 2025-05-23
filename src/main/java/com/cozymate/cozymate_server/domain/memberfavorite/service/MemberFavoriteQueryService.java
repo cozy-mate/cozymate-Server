@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.converter.Membe
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,7 +47,8 @@ public class MemberFavoriteQueryService {
         }
 
         Map<Member, Long> targetMemberFavoriteIdMap = memberFavoriteList.stream()
-            .collect(Collectors.toMap(MemberFavorite::getTargetMember, MemberFavorite::getId));
+            .collect(Collectors.toMap(MemberFavorite::getTargetMember, MemberFavorite::getId,
+                (o1, o2) -> o1, LinkedHashMap::new));
 
         List<Member> findTargetMemberList = new ArrayList<>(targetMemberFavoriteIdMap.keySet());
 
