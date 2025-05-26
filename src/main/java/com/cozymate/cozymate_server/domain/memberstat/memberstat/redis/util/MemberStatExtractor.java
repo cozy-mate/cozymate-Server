@@ -47,6 +47,10 @@ public class MemberStatExtractor {
         Lifestyle lifestyle = memberStat.getLifestyle();
         MemberUniversityStat universityStat = memberStat.getMemberUniversityStat();
 
+        // 사용자 기본 정보
+        answers.put("majorName",toStringOrEmpty(memberStat.getMember().getMajorName()));
+        answers.put("birthYear",toStringOrEmpty(memberStat.getMember().getBirthDay().getYear()));
+
         // UniversityStat
         answers.put("admissionYear", toStringOrEmpty(universityStat.getAdmissionYear()));
         answers.put("dormitoryName", toStringOrEmpty(universityStat.getDormitoryName()));
