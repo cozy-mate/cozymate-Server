@@ -14,8 +14,10 @@ import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.redis.service.LifestyleMatchRateCacheService;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.repository.MemberStatPreferenceRepository;
 import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepositoryService;
 import com.cozymate.cozymate_server.domain.post.Post;
@@ -27,6 +29,7 @@ import com.cozymate.cozymate_server.domain.role.repository.RoleRepository;
 import com.cozymate.cozymate_server.domain.room.service.RoomCommandService;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepository;
 import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,7 @@ public class MemberWithdrawService {
     private final MailAuthenticationRepository mailAuthenticationRepository;
     private final MemberStatRepository memberStatRepository;
     private final MemberStatPreferenceRepository memberStatPreferenceRepository;
+    private final MemberStatRepositoryService memberStatRepositoryService;
     private final LifestyleMatchRateRepository lifestyleMatchRateRepository;
     private final MemberStatCacheService memberStatCacheService;
     private final ChatRoomRepository chatRoomRepository;
@@ -91,12 +95,12 @@ public class MemberWithdrawService {
         roomFavoriteRepository.deleteByMember(member);
         log.debug("찜 삭제 완료");
 
-        memberStatRepository.deleteByMemberId(member.getId());
+        deleteMemberStat(member.getId());
+
         memberStatPreferenceRepository.deleteByMemberId(member.getId());
         lifestyleMatchRateRepository.deleteAllByMemberId(member.getId());
-        memberStatCacheService.delete(member.getMemberStat());
 
-        log.debug("사용자 상세정보 및 관련 통계 삭제 완료");
+        log.debug("사용자 상세정보 및 일치율 삭제 완료");
 
         handleChatAndChatRoom(member);
 
@@ -179,5 +183,17 @@ public class MemberWithdrawService {
         postCommentRepository.deleteAllByPostId(post.getId());
 
         log.debug("post관련 엔티티 삭제 완료");
+    }
+
+    /**
+     * redis 에서 MemberStat 삭제하고, DB에서 삭제
+     */
+    private void deleteMemberStat(Long memberId){
+        Optional<MemberStat> memberStat = memberStatRepositoryService.getMemberStatOptional(memberId);
+
+        if(memberStat.isPresent()){
+            memberStatCacheService.delete(memberStat.get());
+            memberStatRepository.deleteByMemberId(memberId);
+        }
     }
 }
