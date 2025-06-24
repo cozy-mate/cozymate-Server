@@ -44,7 +44,7 @@ public enum NotificationType {
         public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
             return fcmPushContentDTO.member().getNickname()
                 + "님, 오늘 "
-                + fcmPushContentDTO.roleContent()
+                + fcmPushContentDTO.content()
                 + " 잊지 않으셨죠?";
         }
 
@@ -265,6 +265,24 @@ public enum NotificationType {
         public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
             return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
                 createDTO.getContent(), createDTO.getContentMember().getId());
+        }
+    },
+
+    /**
+     * 일단 알림 목록 조회 안되도록 카테고리 설정
+     */
+    ARRIVE_CHAT(NotificationCategory.COZY_HOME) {
+
+        @Override
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname() + " : "
+                + fcmPushContentDTO.content();
+        }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getChatRoom().getId());
         }
     }
     ;
