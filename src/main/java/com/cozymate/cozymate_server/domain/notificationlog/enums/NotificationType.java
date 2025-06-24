@@ -272,7 +272,6 @@ public enum NotificationType {
      * 일단 알림 목록 조회 안되도록 카테고리 설정
      */
     ARRIVE_CHAT(NotificationCategory.COZY_HOME) {
-
         @Override
         public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
             return fcmPushContentDTO.member().getNickname() + " : "
