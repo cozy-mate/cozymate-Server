@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.fcm.dto.push.target;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
+import com.cozymate.cozymate_server.domain.room.Room;
 
 /**
  * 알림 내용에 포함되는 멤버의 닉네임과 실제 알림을 받는 멤버가 다른 경우 사용
@@ -14,10 +15,17 @@ import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationTyp
 public record OneTargetReverseDTO(
     Member contentMember,
     Member recipientMember,
-    NotificationType notificationType
+    NotificationType notificationType,
+    Room room
 ) {
+
     public static OneTargetReverseDTO create(Member contentMember, Member recipientMember,
         NotificationType notificationType) {
-        return new OneTargetReverseDTO(contentMember, recipientMember, notificationType);
+        return new OneTargetReverseDTO(contentMember, recipientMember, notificationType, null);
+    }
+
+    public static OneTargetReverseDTO create(Member contentMember, Member recipientMember,
+        NotificationType notificationType, Room room) {
+        return new OneTargetReverseDTO(contentMember, recipientMember, notificationType, room);
     }
 }

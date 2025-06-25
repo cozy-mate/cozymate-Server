@@ -188,7 +188,7 @@ public enum NotificationType {
         @Override
         public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
             return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
-                createDTO.getContent(), createDTO.getRoom().getId());
+                createDTO.getContent(), createDTO.getContentMember().getId());
         }
     },
 
@@ -265,6 +265,20 @@ public enum NotificationType {
         public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
             return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
                 createDTO.getContent(), createDTO.getContentMember().getId());
+        }
+    },
+
+    SENT_ROOM_JOIN_REQUEST(NotificationCategory.ROOM_JOIN_REQUEST) {
+        @Override
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname()
+                + "님에게 방 참여 요청을 보냈어요";
+        }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getRoom().getId());
         }
     }
     ;

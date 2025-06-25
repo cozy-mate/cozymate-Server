@@ -134,7 +134,7 @@ public class EventListener {
         Member managerMember = managerMate.getMember();
 
         OneTargetReverseDTO oneTargetReverseDTO = OneTargetReverseDTO.create(member, managerMember,
-            NotificationType.ARRIVE_ROOM_JOIN_REQUEST);
+            NotificationType.ARRIVE_ROOM_JOIN_REQUEST, room);
 
         fcmPushService.sendNotification(oneTargetReverseDTO);
     }
