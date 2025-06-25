@@ -36,11 +36,13 @@ public class MemberStatCacheService {
     private static final String GENDER_KEY = ":gender:";
     private static final String LIFESTYLE_DELIMITER = ":";
 
-    private static final Set<String> MULTI_VALUE_QUESTION = Set.of("personalities", "sleepingHabits");
+    private static final String HASROOM_KEY = ":hasroom";
+    private static final Set<String> MULTI_VALUE_QUESTION = Set.of("personalities",
+        "sleepingHabits");
+
 
     /**
-     * 사용자의 MemberStat 기반 Redis 캐시 전체 초기 등록
-     * - Pool + Lifestyle + UniversityStat 항목을 기준으로 Set에 삽입
+     * 사용자의 MemberStat 기반 Redis 캐시 전체 초기 등록 - Pool + Lifestyle + UniversityStat 항목을 기준으로 Set에 삽입
      */
     public void save(MemberStat memberStat) {
         Long universityId = memberStat.getMember().getUniversity().getId();
@@ -83,7 +85,8 @@ public class MemberStatCacheService {
             }
 
             if (MULTI_VALUE_QUESTION.contains(key)) {
-                removeMultiValues(member.getUniversity().getId(), key, oldValue, newValue, member.getId());
+                removeMultiValues(member.getUniversity().getId(), key, oldValue, newValue,
+                    member.getId());
                 addMultiValues(member.getUniversity().getId(), key, newValue, member.getId());
                 continue;
             }
@@ -96,11 +99,13 @@ public class MemberStatCacheService {
     /**
      * 필터 조건 기반 사용자 ID → 매칭률 Map 반환 (정렬 포함)
      */
-    public Map<Long, Integer> filterUsersWithAttributeList(Long universityId, String gender, MemberStat memberStat, List<String> filterList) {
+    public Map<Long, Integer> filterUsersWithAttributeList(Long universityId, String gender,
+        MemberStat memberStat, List<String> filterList, Boolean hasRoom) {
         Map<String, List<?>> filterMap = MemberStatExtractor.toFilterMap(memberStat, filterList);
-        List<Long> filteredUserList = filterUsers(universityId, gender, filterMap);
+        List<Long> filteredUserList = filterUsers(universityId, gender, filterMap, hasRoom);
 
-        return lifestyleMatchRateCacheService.findMatchRates(memberStat.getMember().getId(), filteredUserList)
+        return lifestyleMatchRateCacheService.findMatchRates(memberStat.getMember().getId(),
+                filteredUserList)
             .entrySet().stream()
             .sorted((a, b) -> b.getValue() - a.getValue())
             .collect(Collectors.toMap(
@@ -126,12 +131,15 @@ public class MemberStatCacheService {
             String question = entry.getKey();
             String answer = entry.getValue();
 
-            if (answer.isBlank()) continue;
+            if (answer.isBlank()) {
+                continue;
+            }
 
             if (MULTI_VALUE_QUESTION.contains(question)) {
                 for (String val : answer.split(",")) {
                     if (!val.isBlank()) {
-                        String lifestyleKey = generateLifestyleKey(universityId, question, val.trim());
+                        String lifestyleKey = generateLifestyleKey(universityId, question,
+                            val.trim());
                         redisTemplate.opsForSet().remove(lifestyleKey, memberId.toString());
                     }
                 }
@@ -145,80 +153,170 @@ public class MemberStatCacheService {
         lifestyleMatchRateCacheService.deleteAllRelatedTo(memberId);
     }
 
+    /**
+     * 방 참여자 Set에 사용자 추가
+     */
+    public void addUserToHasRoom(Long universityId, String gender, Long userId) {
+        String hasRoomKey = generateHasRoomKey(universityId, gender);
+        redisTemplate.opsForSet().add(hasRoomKey, userId.toString());
+    }
 
     /**
-     * 필터 조건 기반 사용자 ID 리스트 필터링
-     * - 각 조건별 Union 후, 전체 조건에 대해 교집합 수행
+     * 방 참여자 Set에서 사용자 제거
      */
-    private List<Long> filterUsers(Long universityId, String gender, Map<String, List<?>> filters) {
+    public void removeUserFromHasRoom(Long universityId, String gender, Long userId) {
+        String hasRoomKey = generateHasRoomKey(universityId, gender);
+        redisTemplate.opsForSet().remove(hasRoomKey, userId.toString());
+    }
+
+    /**
+     * 필터 조건 기반 사용자 ID 리스트 필터링 - 각 조건별 Union 후, 전체 조건에 대해 교집합 수행
+     */
+    private List<Long> filterUsers(Long universityId, String gender, Map<String, List<?>> filters,
+        Boolean hasRoom) {
         List<Set<Object>> groupedKeyResults = new ArrayList<>();
 
         Set<Object> basePool = getBasePool(universityId, gender);
-        if (basePool == null || basePool.isEmpty()) return Collections.emptyList();
+        if (basePool == null || basePool.isEmpty()) {
+            return Collections.emptyList();
+        }
         groupedKeyResults.add(basePool);
 
         for (Map.Entry<String, List<?>> entry : filters.entrySet()) {
-            Set<Object> unioned = getUnionedSetPerFilter(universityId, entry.getKey(), entry.getValue());
-            if (unioned == null || unioned.isEmpty()) return Collections.emptyList();
+            Set<Object> unioned = getUnionedSetPerFilter(universityId, entry.getKey(),
+                entry.getValue());
+            if (unioned == null || unioned.isEmpty()) {
+                return Collections.emptyList();
+            }
             groupedKeyResults.add(unioned);
         }
 
         Set<Object> result = intersectGroupedResults(groupedKeyResults);
 
+        // 방 참여자 제외
+        if (hasRoom) {
+            return excludeUsersInHasRoom(result, universityId, gender);
+        }
+
         return result.stream().map(Object::toString).map(Long::valueOf).toList();
     }
 
-    /** Pool Key 기반 사용자 Set 조회 */
+    /**
+     * 방 있는 사람을 제외하는 메소드
+     * **/
+    private List<Long> excludeUsersInHasRoom(Set<Object> result, Long universityId, String gender) {
+        Set<Object> hasRoomSet = getUsersInHasRoom(universityId, gender);
+
+        if (hasRoomSet.isEmpty()) {
+            return result.stream()
+                .map(Object::toString)
+                .map(Long::valueOf)
+                .toList();
+        }
+
+        Set<Long> resultLongSet = result.stream()
+            .map(Object::toString)
+            .map(Long::valueOf)
+            .collect(Collectors.toSet());
+
+        Set<Long> hasRoomLongSet = hasRoomSet.stream()
+            .map(Object::toString)
+            .map(Long::valueOf)
+            .collect(Collectors.toSet());
+
+        resultLongSet.removeAll(hasRoomLongSet);
+
+        return new ArrayList<>(resultLongSet);
+    }
+
+    /**
+     * Pool Key 기반 사용자 Set 조회
+     */
     private Set<Object> getBasePool(Long universityId, String gender) {
         String poolKey = generatePoolKey(universityId, gender);
         return redisTemplate.opsForSet().members(poolKey);
     }
 
-    /** 필터 조건 키 목록을 기반으로 Redis Set Union 결과 반환 */
+    /**
+     * 필터 조건 키 목록을 기반으로 Redis Set Union 결과 반환
+     */
     private Set<Object> getUnionedSetPerFilter(Long universityId, String key, List<?> values) {
         List<String> keys = values.stream()
             .filter(Objects::nonNull)
             .map(val -> generateLifestyleKey(universityId, key, val.toString()))
             .toList();
 
-        if (keys.isEmpty()) return null;
+        if (keys.isEmpty()) {
+            return null;
+        }
         return redisTemplate.opsForSet().union(keys.get(0), keys.subList(1, keys.size()));
     }
 
-    /** Set 목록 간 메모리 교집합 수행 */
+    /**
+     * Set 목록 간 메모리 교집합 수행
+     */
     private Set<Object> intersectGroupedResults(List<Set<Object>> sets) {
         Set<Object> result = sets.get(0);
         for (int i = 1; i < sets.size(); i++) {
             result.retainAll(sets.get(i));
-            if (result.isEmpty()) break;
+            if (result.isEmpty()) {
+                break;
+            }
         }
         return result;
     }
 
-    /** 기본 Pool Key 생성 */
+    /**
+     * 기본 Pool Key 생성
+     */
     private String generatePoolKey(Long universityId, String gender) {
         return POOL_KEY_PREFIX + universityId + GENDER_KEY + gender;
     }
 
-    /** Lifestyle Set Key 생성 */
-    private String generateLifestyleKey(Long universityId, String questionKey, String answerValue) {
-        return LIFESTYLE_KEY_PREFIX + universityId + LIFESTYLE_DELIMITER + questionKey + LIFESTYLE_DELIMITER + answerValue;
+    /**
+     * 방 참여 여부 Key 생성
+     */
+    private String generateHasRoomKey(Long universityId, String gender) {
+        return generatePoolKey(universityId, gender) + HASROOM_KEY;
     }
 
-    /** Pool Set에 사용자 추가 */
+    /**
+     * Lifestyle Set Key 생성
+     */
+    private String generateLifestyleKey(Long universityId, String questionKey, String answerValue) {
+        return generateLifestyleKeyPrefix(universityId, questionKey) + answerValue;
+    }
+
+    /**
+     * Lifestyle Set Key prefix
+     */
+    private String generateLifestyleKeyPrefix(Long universityId, String questionKey) {
+        return LIFESTYLE_KEY_PREFIX + universityId + LIFESTYLE_DELIMITER + questionKey
+            + LIFESTYLE_DELIMITER;
+    }
+
+    /**
+     * Pool Set에 사용자 추가
+     */
     private void addToMemberPool(Long universityId, String gender, Long userId) {
         String poolKey = generatePoolKey(universityId, gender);
         redisTemplate.opsForSet().add(poolKey, userId.toString());
     }
 
-    /** Lifestyle 항목별 Set에 사용자 추가 */
-    private void addToLifestyle(Long universityId, String questionKey, String answerValue, Long userId) {
+    /**
+     * Lifestyle 항목별 Set에 사용자 추가
+     */
+    private void addToLifestyle(Long universityId, String questionKey, String answerValue,
+        Long userId) {
         String lifestyleKey = generateLifestyleKey(universityId, questionKey, answerValue);
         redisTemplate.opsForSet().add(lifestyleKey, userId.toString());
     }
 
-    /** 복수 값 항목 (bitmask) 분해 후 Set에 추가 */
-    private void addMultiValues(Long universityId, String questionKey, String answerValues, Long userId) {
+    /**
+     * 복수 값 항목 (bitmask) 분해 후 Set에 추가
+     */
+    private void addMultiValues(Long universityId, String questionKey, String answerValues,
+        Long userId) {
         for (String v : answerValues.split(",")) {
             if (!v.isBlank()) {
                 addToLifestyle(universityId, questionKey, v.trim(), userId);
@@ -226,14 +324,20 @@ public class MemberStatCacheService {
         }
     }
 
-    /** Lifestyle 항목 Set에서 사용자 제거 */
-    private void removeLifestyle(Long universityId, String questionKey, String answerValue, Long userId) {
+    /**
+     * Lifestyle 항목 Set에서 사용자 제거
+     */
+    private void removeLifestyle(Long universityId, String questionKey, String answerValue,
+        Long userId) {
         String keyToRemove = generateLifestyleKey(universityId, questionKey, answerValue);
         redisTemplate.opsForSet().remove(keyToRemove, userId.toString());
     }
 
-    /** 복수 값 항목 수정 시 이전 값들 중 제거할 항목 삭제 */
-    private void removeMultiValues(Long universityId, String questionKey, String oldValue, String newValue, Long userId) {
+    /**
+     * 복수 값 항목 수정 시 이전 값들 중 제거할 항목 삭제
+     */
+    private void removeMultiValues(Long universityId, String questionKey, String oldValue,
+        String newValue, Long userId) {
         Set<String> oldSet = Set.of(oldValue.split(","));
         Set<String> newSet = Set.of(newValue.split(","));
 
@@ -242,6 +346,15 @@ public class MemberStatCacheService {
                 removeLifestyle(universityId, questionKey, val.trim(), userId);
             }
         }
+    }
+
+
+    /**
+     * 방 참여자 Set 조회
+     */
+    private Set<Object> getUsersInHasRoom(Long universityId, String gender) {
+        String hasRoomKey = generateHasRoomKey(universityId, gender);
+        return redisTemplate.opsForSet().members(hasRoomKey);
     }
 }
 

@@ -203,13 +203,14 @@ public class MemberStatController {
     public ResponseEntity<ApiResponse<MemberStatPageResponseDTO<List<?>>>> getFilteredMemberList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(required = false) List<String> filterList
+        @RequestParam(required = false) List<String> filterList,
+        @RequestParam(required = false, defaultValue = "false") Boolean hasRoom
     ) {
         Pageable pageable = PageRequest.of(page, 5);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 memberStatQueryService.getMemberStatList(
-                    memberDetails.member(), filterList, pageable)
+                    memberDetails.member(), filterList, pageable, hasRoom)
             ));
     }
 
@@ -243,7 +244,8 @@ public class MemberStatController {
             "- **intimacy** (친밀도) : `[String]` 예) `[\"필요한 말만 했으면 좋겠어요\",\"어느정도 친하게 지내요\",]`\n" +
             "- **sharingStatus** (물건 공유 가능여부) : `[String]` 예) `[\"아무것도 공유하고싶지 않아요\"]`\n" +
             "- **gamingStatus** (게임여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
-            "- **callingStatus** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n" +
+            "- **callingStatus** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n"
+            +
             "- **studyingStatus** (공부여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
             "- **eatingStatus** (음식 섭취 여부) : `[String]` 예) `[\"간단한 간식은 괜찮아요\"]`\n" +
             "- **cleannessSensitivity** (청결 예민도) : `[String]` 예) `[3, 4]` (1~5 사이의 숫자)\n" +
@@ -303,7 +305,8 @@ public class MemberStatController {
             "- **intimacy** (친밀도) : `[String]` 예) `[\"필요한 말만 했으면 좋겠어요\",\"어느정도 친하게 지내요\",]`\n" +
             "- **sharingStatus** (물건 공유 가능여부) : `[String]` 예) `[\"아무것도 공유하고싶지 않아요\"]`\n" +
             "- **gamingStatus** (게임여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
-            "- **callingStatus** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n" +
+            "- **callingStatus** (전화여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\", \"부모님과의 전화는 괜찮아요\"]`\n"
+            +
             "- **studyingStatus** (공부여부) : `[String]` 예) `[\"아예 하지 않았으면 좋겠어요\"]`\n" +
             "- **eatingStatus** (음식 섭취 여부) : `[String]` 예) `[\"간단한 간식은 괜찮아요\"]`\n" +
             "- **cleannessSensitivity** (청결 예민도) : `[String]` 예) `[3, 4]` (1~5 사이의 숫자)\n" +

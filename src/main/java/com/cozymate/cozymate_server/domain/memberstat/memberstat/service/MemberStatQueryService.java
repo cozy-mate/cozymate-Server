@@ -129,19 +129,18 @@ public class MemberStatQueryService {
      * @param member     조회하는 사용자
      * @param filterList 적용할 필터 리스트
      * @param pageable   페이징 정보
-     *
      * @return 필터링된 MemberStat 목록
      */
     @Transactional(readOnly = true)
     public MemberStatPageResponseDTO<List<?>> getMemberStatList(Member member,
-        List<String> filterList, Pageable pageable) {
+        List<String> filterList, Pageable pageable, Boolean hasRoom) {
 
         MemberStat criteriaMemberStat = memberStatRepositoryService.getMemberStatOrThrow(
             member.getId());
 
         Map<Long, Integer> cachedMap = memberStatCacheService.filterUsersWithAttributeList(
             member.getUniversity().getId(), member.getGender().toString(),
-            criteriaMemberStat, filterList
+            criteriaMemberStat, filterList, hasRoom
         );
 
         Slice<Map<MemberStat, Integer>> result = memberStatRepositoryService.getMemberStatListByFilteredIds(
