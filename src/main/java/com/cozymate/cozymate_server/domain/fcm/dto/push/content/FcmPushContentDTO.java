@@ -6,7 +6,7 @@ import java.util.List;
 
 public record FcmPushContentDTO(
     Member member,
-    String roleContent,
+    String content, // roleContent or chatContent
     List<String> todoContents,
     Room room
 ) {
@@ -16,8 +16,9 @@ public record FcmPushContentDTO(
     }
 
     // 롤 내용 하나만 줘야하는 경우, 21시 미완료 Role 한개만 리마인더 스케줄러
-    public static FcmPushContentDTO create(Member member, String roleContent) {
-        return new FcmPushContentDTO(member, roleContent, null, null);
+    // 쪽지 알림
+    public static FcmPushContentDTO create(Member member, String content) {
+        return new FcmPushContentDTO(member, content, null, null);
     }
 
     // 투두 내용 리스트로 전부 줘야하는 경우, 00시 투드 리스트 스케줄러

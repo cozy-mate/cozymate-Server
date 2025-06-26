@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.fcm.service;
 
+import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.content.FcmPushContentDTO;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
@@ -109,6 +110,23 @@ public class MessageUtil {
 
         NotificationLog notificationLog = notificationType.generateNotificationLog(
             NotificationLogCreateDTO.createNotificationLogCreateDTO(member, content));
+
+        return getMessageResult(fcmList, content, notificationType, notificationLog);
+    }
+
+    public MessageResult createMessage(Member sender, Member recipient, String chatContent,
+        NotificationType notificationType, ChatRoom chatRoom) {
+        List<Fcm> fcmList = getFcmList(recipient);
+
+        if (fcmList.isEmpty()) {
+            return getEmptyMessageResult();
+        }
+
+        String content = getContent(sender, notificationType, chatContent);
+
+        NotificationLog notificationLog = notificationType.generateNotificationLog(
+            NotificationLogCreateDTO.createNotificationLogCreateDTO(recipient, sender, content,
+                chatRoom));
 
         return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
