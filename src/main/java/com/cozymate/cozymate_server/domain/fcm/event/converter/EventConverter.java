@@ -1,8 +1,10 @@
 package com.cozymate.cozymate_server.domain.fcm.event.converter;
 
+import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.fcm.event.AcceptedJoinEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.QuitRoomEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.RejectedJoinEvent;
+import com.cozymate.cozymate_server.domain.fcm.event.SentChatEvent;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.fcm.event.AcceptedInvitationEvent;
@@ -71,6 +73,15 @@ public class EventConverter {
         return RejectedJoinEvent.builder()
             .manager(manager)
             .requester(requester)
+            .build();
+    }
+
+    public static SentChatEvent toSentChatEvent(Member sender, Member recipient, String content, ChatRoom chatRoom) {
+        return SentChatEvent.builder()
+            .sender(sender)
+            .recipient(recipient)
+            .content(content)
+            .chatRoom(chatRoom)
             .build();
     }
 }

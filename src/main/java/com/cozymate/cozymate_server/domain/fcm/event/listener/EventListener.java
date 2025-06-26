@@ -1,10 +1,12 @@
 package com.cozymate.cozymate_server.domain.fcm.event.listener;
 
+import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupRoomNameWithOutMeTargetDTO;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.HostAndMemberAndRoomTargetDTO;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetReverseDTO;
 import com.cozymate.cozymate_server.domain.fcm.event.AcceptedJoinEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.RejectedJoinEvent;
+import com.cozymate.cozymate_server.domain.fcm.event.SentChatEvent;
 import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 import com.cozymate.cozymate_server.domain.mate.Mate;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
@@ -170,6 +172,18 @@ public class EventListener {
 
         OneTargetReverseDTO oneTargetReverseDTO = OneTargetReverseDTO.create(manager, requester,
             NotificationType.REJECT_ROOM_JOIN);
+
+        fcmPushService.sendNotification(oneTargetReverseDTO);
+    }
+
+    @TransactionalEventListener
+    public void sendNotification(SentChatEvent event) {
+        Member sender = event.sender();
+        Member recipient = event.recipient();
+        ChatRoom chatRoom = event.chatRoom();
+
+        OneTargetReverseDTO oneTargetReverseDTO = OneTargetReverseDTO.create(sender, recipient,
+            NotificationType.ARRIVE_CHAT, event.content(), chatRoom);
 
         fcmPushService.sendNotification(oneTargetReverseDTO);
     }

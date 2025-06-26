@@ -22,7 +22,8 @@ public class MemberStatComparator {
         for (int i = 0; i < memberStatList.size(); i++) {
             T currentValue = getter.apply(memberStatList.get(i).getMember(), memberStatList.get(i));
             for (int j = i + 1; j < memberStatList.size(); j++) {
-                T comparisonValue = getter.apply(memberStatList.get(j).getMember(), memberStatList.get(j));
+                T comparisonValue = getter.apply(memberStatList.get(j).getMember(),
+                    memberStatList.get(j));
                 if (currentValue.equals(comparisonValue)) {
                     foundSame = true;
                 } else {

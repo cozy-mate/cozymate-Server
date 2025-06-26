@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.fcm.dto.push.target;
 
+import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.room.Room;
@@ -16,16 +17,26 @@ public record OneTargetReverseDTO(
     Member contentMember,
     Member recipientMember,
     NotificationType notificationType,
-    Room room
+    Room room,
+    String chatContent,
+    ChatRoom chatRoom
 ) {
 
     public static OneTargetReverseDTO create(Member contentMember, Member recipientMember,
         NotificationType notificationType) {
-        return new OneTargetReverseDTO(contentMember, recipientMember, notificationType, null);
+        return new OneTargetReverseDTO(contentMember, recipientMember, notificationType, null,
+            null, null);
     }
 
     public static OneTargetReverseDTO create(Member contentMember, Member recipientMember,
         NotificationType notificationType, Room room) {
-        return new OneTargetReverseDTO(contentMember, recipientMember, notificationType, room);
+        return new OneTargetReverseDTO(contentMember, recipientMember, notificationType, room,
+             null, null);
+    }
+
+    public static OneTargetReverseDTO create(Member contentMember, Member recipientMember,
+        NotificationType notificationType, String chatContent, ChatRoom chatRoom) {
+        return new OneTargetReverseDTO(contentMember, recipientMember, notificationType, null,
+            chatContent, chatRoom);
     }
 }

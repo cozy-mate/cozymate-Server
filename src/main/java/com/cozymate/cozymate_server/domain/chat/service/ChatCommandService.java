@@ -6,6 +6,7 @@ import com.cozymate.cozymate_server.domain.chat.repository.ChatRepositoryService
 import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 import com.cozymate.cozymate_server.domain.chatroom.dto.response.ChatRoomIdResponseDTO;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
+import com.cozymate.cozymate_server.domain.fcm.event.converter.EventConverter;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.chat.converter.ChatConverter;
@@ -14,6 +15,7 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ public class ChatCommandService {
     private final ChatRepositoryService chatRepositoryService;
     private final ChatRoomRepositoryService chatRoomRepositoryService;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ChatRoomIdResponseDTO createChat(CreateChatRequestDTO createChatRequestDTO,
         Member sender, Long recipientId) {
@@ -34,16 +37,19 @@ public class ChatCommandService {
         Optional<ChatRoom> findChatRoom = chatRoomRepositoryService.getChatRoomByMemberAAndMemberBOptional(
             sender, recipient);
 
+        ChatRoom chatRoom;
         if (findChatRoom.isPresent()) {
-            saveChat(findChatRoom.get(), sender, createChatRequestDTO.content());
-
-            return ChatRoomConverter.toChatRoomIdResponseDTO(findChatRoom.get().getId());
+            chatRoom = findChatRoom.get();
+        } else {
+            chatRoom = ChatRoomConverter.toEntity(sender, recipient);
+            chatRoom = chatRoomRepositoryService.createChatRoom(chatRoom);
         }
 
-        ChatRoom chatRoom = ChatRoomConverter.toEntity(sender, recipient);
-        chatRoom = chatRoomRepositoryService.createChatRoom(chatRoom);
         saveChat(chatRoom, sender, createChatRequestDTO.content());
 
+        eventPublisher.publishEvent(
+            EventConverter.toSentChatEvent(sender, recipient, createChatRequestDTO.content(),
+                chatRoom));
         return ChatRoomConverter.toChatRoomIdResponseDTO(chatRoom.getId());
     }
 

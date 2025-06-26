@@ -101,8 +101,14 @@ public class FcmPushService {
             notificationLogRepositoryService.createNotificationLog(notificationLog);
         }
 
-        sendNotificationToMember(messageUtil.createMessage(contentMember, recipientMember,
-            notificationType));
+        if (target.chatContent() != null) {
+            sendNotificationToMember(
+                messageUtil.createMessage(contentMember, recipientMember, target.chatContent(),
+                    notificationType, target.chatRoom()));
+        } else {
+            sendNotificationToMember(messageUtil.createMessage(contentMember, recipientMember,
+                notificationType));
+        }
     }
 
     /**
