@@ -198,12 +198,14 @@ public class MemberStatCacheService {
             return excludeUsersInHasRoom(result, universityId, gender);
         }
 
-        return result.stream().map(Object::toString).map(Long::valueOf).toList();
+        return result.stream().map(Object::toString)
+            .filter(s -> s.matches("\\d+"))  // 숫자인 것만 통과
+            .map(Long::valueOf).toList();
     }
 
     /**
      * 방 있는 사람을 제외하는 메소드
-     * **/
+     **/
     private List<Long> excludeUsersInHasRoom(Set<Object> result, Long universityId, String gender) {
         Set<Object> hasRoomSet = getUsersInHasRoom(universityId, gender);
 
@@ -214,19 +216,19 @@ public class MemberStatCacheService {
                 .toList();
         }
 
-        Set<Long> resultLongSet = result.stream()
+        Set<Long> resultSet = result.stream()
             .map(Object::toString)
             .map(Long::valueOf)
             .collect(Collectors.toSet());
 
-        Set<Long> hasRoomLongSet = hasRoomSet.stream()
+        Set<Long> hasRoomIdSet = hasRoomSet.stream()
             .map(Object::toString)
             .map(Long::valueOf)
             .collect(Collectors.toSet());
 
-        resultLongSet.removeAll(hasRoomLongSet);
+        resultSet.removeAll(hasRoomIdSet);
 
-        return new ArrayList<>(resultLongSet);
+        return new ArrayList<>(resultSet);
     }
 
     /**
