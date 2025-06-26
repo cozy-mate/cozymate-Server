@@ -198,9 +198,7 @@ public class MemberStatCacheService {
             return excludeUsersInHasRoom(result, universityId, gender);
         }
 
-        return result.stream().map(Object::toString)
-            .filter(s -> s.matches("\\d+"))  // 숫자인 것만 통과
-            .map(Long::valueOf).toList();
+        return result.stream().map(Object::toString).map(Long::valueOf).toList();
     }
 
     /**
@@ -236,7 +234,10 @@ public class MemberStatCacheService {
      */
     private Set<Object> getBasePool(Long universityId, String gender) {
         String poolKey = generatePoolKey(universityId, gender);
-        return redisTemplate.opsForSet().members(poolKey);
+        return redisTemplate.opsForSet().members(poolKey).stream()
+            .map(Object::toString)
+            .filter(s -> s.matches("\\d+")) // 숫자인 것만
+            .collect(Collectors.toSet());
     }
 
     /**
