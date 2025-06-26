@@ -13,6 +13,7 @@ public class UniversityConverter {
   public static University toUniversity(UniversityRequestDTO universityDTO) {
     return University.builder()
         .name(universityDTO.name())
+        .mailPattern(universityDTO.mailPattern())
         .dormitoryNames(universityDTO.dormitoryNames())
         .departments(universityDTO.departments())
         .build();

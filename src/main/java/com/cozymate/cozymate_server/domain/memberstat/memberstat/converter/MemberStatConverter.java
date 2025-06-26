@@ -23,6 +23,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.QuestionAn
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 
@@ -296,17 +297,18 @@ public class MemberStatConverter {
     }
 
     public static DifferenceStatus toDifferenceStatus(List<MemberStat> memberStatList, String key) {
-        if (memberStatList.isEmpty()) {
-            return DifferenceStatus.NOT_SAME_NOT_DIFFERENT;
-        }
-        if (memberStatList.size() == 1) {
+        if (memberStatList.size() <= 1) {
             return DifferenceStatus.NOT_SAME_NOT_DIFFERENT;
         }
 
-        return MemberStatComparator.compareField(memberStatList,
-            FieldInstanceResolver.getFIELD_MAPPER());
+        BiFunction<Member, MemberStat, ?> getter = FieldInstanceResolver.getFIELD_MAPPER().get(key);
+        if (getter == null) {
+            return DifferenceStatus.NOT_SAME_NOT_DIFFERENT;
+        }
 
+        return MemberStatComparator.compareField(memberStatList, getter);
     }
+
 
     public static MemberStatDifferenceListResponseDTO toMemberStatDifferenceResponseDTO(
         List<MemberStat> memberStatList) {
