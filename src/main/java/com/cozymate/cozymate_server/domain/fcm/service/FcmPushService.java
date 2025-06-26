@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.fcm.service;
 
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
+import com.cozymate.cozymate_server.domain.fcm.dto.push.content.FcmPushContentDTO;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupRoomNameWithOutMeTargetDTO;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupTargetDTO;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupWithOutMeTargetDTO;
@@ -12,6 +13,7 @@ import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.fcm.dto.MessageResult;
 import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
+import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogCreateDTO;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepositoryService;
 import com.cozymate.cozymate_server.domain.room.Room;
@@ -89,6 +91,16 @@ public class FcmPushService {
         Member recipientMember = target.recipientMember();
         NotificationType notificationType = target.notificationType();
 
+        // 방 참여 요청의 경우 요청자는 fcm 알림 전송 x, 알림 내역만 저장 (토스트 팝업 대체)
+        if (target.room() != null) {
+            String content = NotificationType.SENT_ROOM_JOIN_REQUEST.generateContent(
+                FcmPushContentDTO.create(recipientMember));
+            NotificationLog notificationLog = NotificationType.SENT_ROOM_JOIN_REQUEST.generateNotificationLog(
+                NotificationLogCreateDTO.createNotificationLogCreateDTO(contentMember,
+                    recipientMember, target.room(), content));
+            notificationLogRepositoryService.createNotificationLog(notificationLog);
+        }
+
         if (target.chatContent() != null) {
             sendNotificationToMember(
                 messageUtil.createMessage(contentMember, recipientMember, target.chatContent(),
@@ -110,8 +122,12 @@ public class FcmPushService {
         NotificationType hostNotificationType = target.hostNotificationType();
         NotificationType memberNotificationType = target.memberNotificationType();
 
-        sendNotificationToMember(
-            messageUtil.createMessage(member, room, host, hostNotificationType));
+        // 방장은 fcm 알림 전송 x, 알림 내역만 저장 (토스트 팝업 대체)
+        String content = hostNotificationType.generateContent(
+            FcmPushContentDTO.create(member, room));
+        NotificationLog notificationLog = hostNotificationType.generateNotificationLog(
+            NotificationLogCreateDTO.createNotificationLogCreateDTO(host, member, room, content));
+        notificationLogRepositoryService.createNotificationLog(notificationLog);
 
         sendNotificationToMember(
             messageUtil.createMessage(host, room, member, memberNotificationType));
