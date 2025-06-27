@@ -328,6 +328,11 @@ public class RoomCommandService {
             processJoinRequest(invitee, room);
             clearOtherRoomRequests(inviteeMember.getId());
 
+            // 방 정원 꽉찬 경우 다른 요청들 모두 날림
+            if (room.getMaxMateNum()==room.getNumOfArrival()) {
+                clearOtherMateRequests(roomId);
+            }
+
             eventPublisher.publishEvent(
                 EventConverter.toAcceptedInvitationEvent(inviteeMember, room));
         } else {
@@ -442,6 +447,11 @@ public class RoomCommandService {
             processJoinRequest(requester, room);
             clearOtherRoomRequests(requesterId);
 
+            // 방 정원 꽉찬 경우 다른 요청들 모두 날림
+            if (room.getMaxMateNum()==room.getNumOfArrival()) {
+                clearOtherMateRequests(room.getId());
+            }
+
             eventPublisher.publishEvent(
                 EventConverter.toAcceptedJoinEvent(manager.getMember(), requestMember, room));
         } else {
@@ -514,6 +524,12 @@ public class RoomCommandService {
     private void clearOtherRoomRequests(Long memberId) {
         mateRepository.deleteAllByMemberIdAndEntryStatusIn(
             memberId, List.of(EntryStatus.PENDING, EntryStatus.INVITED)
+        );
+    }
+
+    private void clearOtherMateRequests(Long roomId) {
+        mateRepository.deleteAllByRoomIdAndEntryStatusIn(
+            roomId, List.of(EntryStatus.PENDING, EntryStatus.INVITED)
         );
     }
 
