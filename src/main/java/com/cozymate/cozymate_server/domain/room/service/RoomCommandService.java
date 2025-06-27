@@ -84,7 +84,7 @@ public class RoomCommandService {
         roomValidator.checkAlreadyJoinedRoom(member.getId());
 
         // 기존 참여 요청들 삭제
-        clearOtherRoomRequests(member.getId());
+        deleteJoinRequestsByMember(member.getId());
 
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPrivateRoom(request, inviteCode);
@@ -113,7 +113,7 @@ public class RoomCommandService {
         }
 
         // 기존 참여 요청들 삭제
-        clearOtherRoomRequests(member.getId());
+        deleteJoinRequestsByMember(member.getId());
 
         Gender gender = member.getGender();
         University university = member.getUniversity();
@@ -149,7 +149,7 @@ public class RoomCommandService {
             roomValidator.checkEntryStatus(existingMate.get());
             // 재입장 처리
             processJoinRequest(existingMate.get(), room);
-            clearOtherRoomRequests(member.getId());
+            deleteJoinRequestsByMember(member.getId());
         } else {
             Mate mate = MateConverter.toEntity(room, member, false);
             mateRepository.save(mate);
@@ -334,11 +334,11 @@ public class RoomCommandService {
         if (accept) {
             // 초대 요청을 수락하여 JOINED 상태로 변경
             processJoinRequest(invitee, room);
-            clearOtherRoomRequests(inviteeMember.getId());
+            deleteJoinRequestsByMember(inviteeMember.getId());
 
             // 방 정원 꽉찬 경우 다른 요청들 모두 날림
             if (room.getMaxMateNum()==room.getNumOfArrival()) {
-                clearOtherMateRequests(roomId);
+                deleteJoinRequestsByRoom(roomId);
             }
 
             eventPublisher.publishEvent(
@@ -453,11 +453,11 @@ public class RoomCommandService {
 
         if (accept) {
             processJoinRequest(requester, room);
-            clearOtherRoomRequests(requesterId);
+            deleteJoinRequestsByMember(requesterId);
 
             // 방 정원 꽉찬 경우 다른 요청들 모두 날림
             if (room.getMaxMateNum()==room.getNumOfArrival()) {
-                clearOtherMateRequests(room.getId());
+                deleteJoinRequestsByRoom(room.getId());
             }
 
             eventPublisher.publishEvent(
@@ -535,13 +535,13 @@ public class RoomCommandService {
         );
     }
 
-    private void clearOtherRoomRequests(Long memberId) {
+    private void deleteJoinRequestsByMember(Long memberId) {
         mateRepository.deleteAllByMemberIdAndEntryStatusIn(
             memberId, List.of(EntryStatus.PENDING, EntryStatus.INVITED)
         );
     }
 
-    private void clearOtherMateRequests(Long roomId) {
+    private void deleteJoinRequestsByRoom(Long roomId) {
         mateRepository.deleteAllByRoomIdAndEntryStatusIn(
             roomId, List.of(EntryStatus.PENDING, EntryStatus.INVITED)
         );
