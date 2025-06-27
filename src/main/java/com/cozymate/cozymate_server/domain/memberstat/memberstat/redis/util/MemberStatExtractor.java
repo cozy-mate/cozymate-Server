@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MemberStatExtractor {
 
     private MemberStatExtractor() {
@@ -54,8 +56,8 @@ public class MemberStatExtractor {
         // UniversityStat
         answers.put("admissionYear", toStringOrEmpty(universityStat.getAdmissionYear()));
         answers.put("dormitoryName", toStringOrEmpty(universityStat.getDormitoryName()));
-        answers.put("numberOfRoommate", toStringOrEmpty(universityStat.getNumberOfRoommate()));
-        answers.put("acceptance", toStringOrEmpty(universityStat.getAcceptance()));
+        answers.put("numOfRoommate", toStringOrEmpty(universityStat.getNumberOfRoommate()));
+        answers.put("dormJoiningStatus", toStringOrEmpty(universityStat.getAcceptance()));
 
         // Lifestyle 단일 선택 항목
         answers.put("wakeUpTime", toStringOrEmpty(lifestyle.getWakeUpTime()));
