@@ -12,6 +12,7 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
@@ -75,6 +76,7 @@ public class RoomCommandService {
     private final RoomValidator roomValidator;
     private final RoomRepositoryService roomRepositoryService;
     private final MateRepositoryService mateRepositoryService;
+    private final MemberStatCacheService memberStatCacheService;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -192,6 +194,12 @@ public class RoomCommandService {
         mateRepository.save(quittingMate);
         room.quit();
         roomRepositoryService.save(room);
+
+        memberStatCacheService.removeUserFromHasRoom(
+            room.getUniversity().getId(),
+            room.getGender().name(),
+            quittingMate.getMember().getId()
+        );
 
         // 방장일 경우 가장 먼저 들어온 룸메이트에게 방장 위임
         if (quittingMate.isRoomManager()) {
@@ -519,6 +527,12 @@ public class RoomCommandService {
         mateRepository.save(mate);
         room.arrive();
         room.isRoomFull();
+
+        memberStatCacheService.addUserToHasRoom(
+            room.getUniversity().getId(),
+            room.getGender().name(),
+            mate.getMember().getId()
+        );
     }
 
     private void clearOtherRoomRequests(Long memberId) {
