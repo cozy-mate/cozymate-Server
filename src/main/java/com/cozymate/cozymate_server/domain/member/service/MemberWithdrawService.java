@@ -159,6 +159,8 @@ public class MemberWithdrawService {
 
         postCommentRepository.deleteAllByCommenterId(mate.getId());
 
+        todoCommandService.updateAssignedMateIfMateExitRoom(mate);
+
         roleRepository.findAllByMateId(mate.getId()).forEach(role -> {
             role.removeAssignee(mate.getId());
 
@@ -170,7 +172,7 @@ public class MemberWithdrawService {
 
         log.debug("role 삭제 완료");
 
-        todoCommandService.updateAssignedMateIfMateExitRoom(mate);
+
         log.debug("todo 삭제 완료");
         log.debug("mate 관련 엔티티 삭제 완료");
     }
