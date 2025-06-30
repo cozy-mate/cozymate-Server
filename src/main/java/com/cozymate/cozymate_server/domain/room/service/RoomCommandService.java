@@ -12,6 +12,7 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepositoryService
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
@@ -75,6 +76,7 @@ public class RoomCommandService {
     private final RoomValidator roomValidator;
     private final RoomRepositoryService roomRepositoryService;
     private final MateRepositoryService mateRepositoryService;
+    private final MemberStatCacheService memberStatCacheService;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -82,7 +84,7 @@ public class RoomCommandService {
         roomValidator.checkAlreadyJoinedRoom(member.getId());
 
         // 기존 참여 요청들 삭제
-        clearOtherRoomRequests(member.getId());
+        deleteJoinRequestsByMember(member.getId());
 
         String inviteCode = generateUniqueUppercaseKey();
         Room room = RoomConverter.toPrivateRoom(request, inviteCode);
@@ -111,7 +113,7 @@ public class RoomCommandService {
         }
 
         // 기존 참여 요청들 삭제
-        clearOtherRoomRequests(member.getId());
+        deleteJoinRequestsByMember(member.getId());
 
         Gender gender = member.getGender();
         University university = member.getUniversity();
@@ -147,7 +149,7 @@ public class RoomCommandService {
             roomValidator.checkEntryStatus(existingMate.get());
             // 재입장 처리
             processJoinRequest(existingMate.get(), room);
-            clearOtherRoomRequests(member.getId());
+            deleteJoinRequestsByMember(member.getId());
         } else {
             Mate mate = MateConverter.toEntity(room, member, false);
             mateRepository.save(mate);
@@ -192,6 +194,12 @@ public class RoomCommandService {
         mateRepository.save(quittingMate);
         room.quit();
         roomRepositoryService.save(room);
+
+        memberStatCacheService.removeUserFromHasRoom(
+            room.getUniversity().getId(),
+            room.getGender().name(),
+            quittingMate.getMember().getId()
+        );
 
         // 방장일 경우 가장 먼저 들어온 룸메이트에게 방장 위임
         if (quittingMate.isRoomManager()) {
@@ -326,7 +334,12 @@ public class RoomCommandService {
         if (accept) {
             // 초대 요청을 수락하여 JOINED 상태로 변경
             processJoinRequest(invitee, room);
-            clearOtherRoomRequests(inviteeMember.getId());
+            deleteJoinRequestsByMember(inviteeMember.getId());
+
+            // 방 정원 꽉찬 경우 다른 요청들 모두 날림
+            if (room.getMaxMateNum()==room.getNumOfArrival()) {
+                deleteJoinRequestsByRoom(roomId);
+            }
 
             eventPublisher.publishEvent(
                 EventConverter.toAcceptedInvitationEvent(inviteeMember, room));
@@ -440,7 +453,12 @@ public class RoomCommandService {
 
         if (accept) {
             processJoinRequest(requester, room);
-            clearOtherRoomRequests(requesterId);
+            deleteJoinRequestsByMember(requesterId);
+
+            // 방 정원 꽉찬 경우 다른 요청들 모두 날림
+            if (room.getMaxMateNum()==room.getNumOfArrival()) {
+                deleteJoinRequestsByRoom(room.getId());
+            }
 
             eventPublisher.publishEvent(
                 EventConverter.toAcceptedJoinEvent(manager.getMember(), requestMember, room));
@@ -509,11 +527,23 @@ public class RoomCommandService {
         mateRepository.save(mate);
         room.arrive();
         room.isRoomFull();
+
+        memberStatCacheService.addUserToHasRoom(
+            room.getUniversity().getId(),
+            room.getGender().name(),
+            mate.getMember().getId()
+        );
     }
 
-    private void clearOtherRoomRequests(Long memberId) {
+    private void deleteJoinRequestsByMember(Long memberId) {
         mateRepository.deleteAllByMemberIdAndEntryStatusIn(
             memberId, List.of(EntryStatus.PENDING, EntryStatus.INVITED)
+        );
+    }
+
+    private void deleteJoinRequestsByRoom(Long roomId) {
+        mateRepository.deleteAllByRoomIdAndEntryStatusIn(
+            roomId, List.of(EntryStatus.PENDING, EntryStatus.INVITED)
         );
     }
 
