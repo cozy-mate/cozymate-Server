@@ -66,9 +66,6 @@ public class MessageUtil {
         return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
 
-    /**
-     * 여기의 contentMemberId를 fcm Message에 넣어야함
-     */
     public MessageResult createMessage(Member contentMember, Member recipientMember,
         NotificationType notificationType) {
         List<Fcm> fcmList = getFcmList(recipientMember);
