@@ -169,9 +169,10 @@ public class EventListener {
     public void sendNotification(RejectedJoinEvent event) {
         Member manager = event.manager();
         Member requester = event.requester();
+        Room room = event.room();
 
         OneTargetReverseDTO oneTargetReverseDTO = OneTargetReverseDTO.create(manager, requester,
-            NotificationType.REJECT_ROOM_JOIN);
+            NotificationType.REJECT_ROOM_JOIN, room);
 
         fcmPushService.sendNotification(oneTargetReverseDTO);
     }

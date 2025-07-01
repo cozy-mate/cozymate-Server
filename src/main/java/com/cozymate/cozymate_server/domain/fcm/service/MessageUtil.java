@@ -29,8 +29,8 @@ public class MessageUtil {
     private static final String NOTIFICATION_TITLE = "cozymate";
     private final FcmRepository fcmRepository;
 
-    public MessageResult createMessage(Member contentMember, Room room,
-        Member recipientMember, NotificationType notificationType) {
+    public MessageResult createMessage(Member contentMember, Room room, Member recipientMember,
+        NotificationType notificationType) {
         List<Fcm> fcmList = getFcmList(recipientMember);
 
         if (fcmList.isEmpty()) {
@@ -43,7 +43,8 @@ public class MessageUtil {
             NotificationLogCreateDTO.createNotificationLogCreateDTO(recipientMember, contentMember,
                 room, content));
 
-        if (NotificationType.ARRIVE_ROOM_INVITE.equals(notificationType)) {
+        if (NotificationType.ARRIVE_ROOM_INVITE.equals(notificationType)
+            || NotificationType.REJECT_ROOM_JOIN.equals(notificationType)) {
             return getMessageResult(fcmList, content, room, notificationType, notificationLog);
         }
 
@@ -65,6 +66,9 @@ public class MessageUtil {
         return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
 
+    /**
+     * 여기의 contentMemberId를 fcm Message에 넣어야함
+     */
     public MessageResult createMessage(Member contentMember, Member recipientMember,
         NotificationType notificationType) {
         List<Fcm> fcmList = getFcmList(recipientMember);
@@ -78,6 +82,11 @@ public class MessageUtil {
         NotificationLog notificationLog = notificationType.generateNotificationLog(
             NotificationLogCreateDTO.createNotificationLogCreateDTO(recipientMember, contentMember,
                 content));
+
+        if (NotificationType.REJECT_ROOM_INVITE.equals(notificationType)) {
+            return getMessageResult(fcmList, content, contentMember, notificationType,
+                notificationLog);
+        }
 
         return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
@@ -128,7 +137,7 @@ public class MessageUtil {
             NotificationLogCreateDTO.createNotificationLogCreateDTO(recipient, sender, content,
                 chatRoom));
 
-        return getMessageResult(fcmList, content, notificationType, notificationLog);
+        return getMessageResult(fcmList, content, notificationType, notificationLog, chatRoom);
     }
 
     public MulticastMessage createMessage(List<String> fcmTokenValueList, String content) {
@@ -168,14 +177,14 @@ public class MessageUtil {
     }
 
     private MessageResult getMessageResult(List<Fcm> fcmList, String content, Member member,
-        NotificationType notificationType) {
+        NotificationType notificationType, NotificationLog notificationLog) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()
             .map(fcm -> {
                 String token = fcm.getToken();
 
-                HashMap<String, String> messageMap = new HashMap<>();
+                Map<String, String> messageMap = new HashMap<>();
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
                 messageMap.put("memberId", member.getId().toString());
@@ -200,6 +209,7 @@ public class MessageUtil {
         MessageResult messageResult = MessageResult.builder()
             .messageTokenMap(messageTokenMap)
             .messages(messages)
+            .notificationLog(notificationLog)
             .build();
         return messageResult;
     }
@@ -212,7 +222,7 @@ public class MessageUtil {
             .map(fcm -> {
                 String token = fcm.getToken();
 
-                HashMap<String, String> messageMap = new HashMap<>();
+                Map<String, String> messageMap = new HashMap<>();
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
                 messageMap.put("roomId", room.getId().toString());
@@ -250,9 +260,47 @@ public class MessageUtil {
             .map(fcm -> {
                 String token = fcm.getToken();
 
-                HashMap<String, String> messageMap = new HashMap<>();
+                Map<String, String> messageMap = new HashMap<>();
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
+                messageMap.put("actionType", String.valueOf(notificationType));
+
+                Notification notification = Notification.builder()
+                    .setTitle(NOTIFICATION_TITLE)
+                    .setBody(content)
+                    .build();
+
+                Message message = Message.builder()
+                    .putAllData(messageMap)
+                    .setToken(token)
+                    .setNotification(notification)
+                    .build();
+
+                messageTokenMap.put(message, token);
+
+                return message;
+            }).toList();
+
+        MessageResult messageResult = MessageResult.builder()
+            .messageTokenMap(messageTokenMap)
+            .messages(messages)
+            .notificationLog(notificationLog)
+            .build();
+        return messageResult;
+    }
+
+    private MessageResult getMessageResult(List<Fcm> fcmList, String content,
+        NotificationType notificationType, NotificationLog notificationLog, ChatRoom chatRoom) {
+        Map<Message, String> messageTokenMap = new HashMap<>();
+
+        List<Message> messages = fcmList.stream()
+            .map(fcm -> {
+                String token = fcm.getToken();
+
+                Map<String, String> messageMap = new HashMap<>();
+                messageMap.put("title", NOTIFICATION_TITLE);
+                messageMap.put("body", content);
+                messageMap.put("chatRoomId", chatRoom.getId().toString());
                 messageMap.put("actionType", String.valueOf(notificationType));
 
                 Notification notification = Notification.builder()
