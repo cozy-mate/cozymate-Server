@@ -6,6 +6,9 @@ import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,5 +33,9 @@ public class InquiryRepositoryService {
 
     public Boolean existInquiryByMember(Member member) {
         return inquiryRepository.existsByMember(member);
+    }
+
+    public Page<Inquiry> getAllInquiriesForAdmin(Pageable pageable) {
+        return inquiryRepository.findAll(pageable);
     }
 }

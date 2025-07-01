@@ -57,15 +57,4 @@ public class InquiryController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(inquiryQueryService.getInquiryRecord(memberDetails.member())));
     }
-
-    @PatchMapping("/{inquiryId}")
-    @Operation(summary = "[베로] 답변 완료로 변경 (관리자용)", description = "")
-    @SwaggerApiError(
-        ErrorStatus._INQUIRY_NOT_FOUND
-    )
-    public ResponseEntity<ApiResponse<String>> updateInquiryStatus(@PathVariable Long inquiryId) {
-        inquiryCommandService.updateInquiryStatus(inquiryId);
-        return ResponseEntity.ok(
-            ApiResponse.onSuccess("변경 완료"));
-    }
 }

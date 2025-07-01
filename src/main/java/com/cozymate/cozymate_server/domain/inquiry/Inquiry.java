@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,7 +44,14 @@ public class Inquiry extends BaseTimeEntity {
     @Enumerated(value = EnumType.STRING)
     private InquiryStatus inquiryStatus;
 
-    public void updateStatus(InquiryStatus inquiryStatus) {
-        this.inquiryStatus = inquiryStatus;
+    @Size(max = 255)
+    private String replyContent;
+    private LocalDateTime replyAt;
+
+    public void finishReply(String replyContent) {
+        this.replyContent = replyContent;
+        this.inquiryStatus = InquiryStatus.ANSWERED;
+        this.replyAt = LocalDateTime.now();
+
     }
 }
