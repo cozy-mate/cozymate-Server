@@ -13,7 +13,7 @@ public class UniversityConverter {
   public static University toUniversity(UniversityRequestDTO universityDTO) {
     return University.builder()
         .name(universityDTO.name())
-        .mailPattern(universityDTO.mailPattern())
+        .mailPatterns(universityDTO.mailPatterns())
         .dormitoryNames(universityDTO.dormitoryNames())
         .departments(universityDTO.departments())
         .build();
@@ -23,7 +23,8 @@ public class UniversityConverter {
     return UniversityDetailResponseDTO.builder()
         .id(university.getId())
         .name(university.getName())
-        .mailPattern(university.getMailPattern())
+        .mailPatterns(university.getMailPatterns())
+        .mailPattern(university.getMailPatterns().get(0))
         .dormitoryNames(university.getDormitoryNames().stream().sorted().toList())
         .departments(university.getDepartments().stream().sorted().toList())
         .build();

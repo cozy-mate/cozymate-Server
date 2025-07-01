@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,7 @@ public class MailService {
             sendDTO.universityId());
 
         String mailAddress = sendDTO.mailAddress();
-        validateMailAddress(mailAddress, university.getMailPattern());
+        validateMailAddress(mailAddress, university.getMailPatterns());
 
         MailAuthentication mailAuthentication = createAndSendMail(clientId,
             mailAddress, university.getName());
@@ -76,7 +77,7 @@ public class MailService {
                 verifyDTO.majorName());
         }
 
-        verifyAuthenticationCode(clientId, verifyDTO.code(), memberUniversity.getMailPattern());
+        verifyAuthenticationCode(clientId, verifyDTO.code(), memberUniversity.getMailPatterns());
 
         return authService.signInByPreMember(clientId, memberUniversity,
             verifyDTO.majorName());
@@ -107,7 +108,8 @@ public class MailService {
         }
     }
 
-    private void verifyAuthenticationCode(String clientId, String requestCode, String mailPattern) {
+    private void verifyAuthenticationCode(String clientId, String requestCode,
+        List<String> mailPatterns) {
 
         MailAuthentication mailAuthentication = mailAuthenticationRepositoryService.getMailAuthenticationByIdOrThrow(
             clientId);
@@ -119,7 +121,7 @@ public class MailService {
         }
 
         // 메일 중복 확인
-        validateMailAddress(mailAuthentication.getMailAddress(), mailPattern);
+        validateMailAddress(mailAuthentication.getMailAddress(), mailPatterns);
 
         // 메일 인증 코드 일치 여부 확인
         if (!mailAuthentication.getCode().equals(requestCode)) {
@@ -159,8 +161,9 @@ public class MailService {
         }
     }
 
-    private void validateMailAddress(String mailAddress, String mailPattern) {
-        if (!mailAddress.contains(mailPattern)) {
+    private void validateMailAddress(String mailAddress, List<String> mailPatterns) {
+        String domain = mailAddress.substring(mailAddress.indexOf('@') + 1);
+        if (!mailPatterns.contains(domain)) {
             throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
         }
         List<MailAuthentication> mailAuthentications = mailAuthenticationRepositoryService.getMailAuthenticationListByMailAddress(
