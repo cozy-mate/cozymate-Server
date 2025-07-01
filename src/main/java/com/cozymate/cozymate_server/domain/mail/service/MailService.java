@@ -153,7 +153,6 @@ public class MailService {
             helper.setSubject("cozymate 대학교 메일인증");
             helper.setText(emailBody, true);
             mailSender.send(message);
-            log.info("메일 보내기 완료");
 
             return MailConverter.toMailAuthenticationWithParams(clientId, mailAddress,
                 authenticationCode, false);
@@ -165,8 +164,6 @@ public class MailService {
     private void validateMailAddress(String mailAddress, List<String> mailPatterns) {
         String domain = mailAddress.substring(mailAddress.indexOf('@') + 1);
         if (!mailPatterns.contains(domain)) {
-            log.info("allow pattern : {}",mailPatterns.toString());
-            log.info("[Debug] mail domain :{} origin address :{}", domain, mailAddress);
             throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
         }
         List<MailAuthentication> mailAuthentications = mailAuthenticationRepositoryService.getMailAuthenticationListByMailAddress(
