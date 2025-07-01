@@ -13,6 +13,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
+import com.cozymate.cozymate_server.domain.notificationlog.service.NotificationLogCommandService;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
@@ -77,6 +78,7 @@ public class RoomCommandService {
     private final RoomRepositoryService roomRepositoryService;
     private final MateRepositoryService mateRepositoryService;
     private final MemberStatCacheService memberStatCacheService;
+    private final NotificationLogCommandService notificationLogCommandService;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -170,6 +172,7 @@ public class RoomCommandService {
         // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
         deleteRoomDatas(roomId);
         roomRepositoryService.delete(room);
+        notificationLogCommandService.updateTargetIdToNullByRoomId(roomId);
     }
 
     public Boolean checkRoomName(String roomName) {
@@ -211,6 +214,7 @@ public class RoomCommandService {
             // 연관된 Mate, Rule, RoomLog, Feed 엔티티 삭제
             deleteRoomDatas(roomId);
             roomRepositoryService.delete(room);
+            notificationLogCommandService.updateTargetIdToNullByRoomId(roomId);
             return;
         }
 
