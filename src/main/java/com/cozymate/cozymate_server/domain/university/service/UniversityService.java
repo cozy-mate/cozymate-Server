@@ -33,7 +33,7 @@ public class UniversityService {
     public UniversityDetailResponseDTO updateUniversity(UniversityRequestDTO requestDTO) {
         University university = universityRepositoryService.getUniversityByNameOrThrow(requestDTO.name());
 
-        university.update(requestDTO.mailPattern(), requestDTO.departments(), requestDTO.dormitoryNames());
+        university.update(requestDTO.mailPatterns(), requestDTO.departments(), requestDTO.dormitoryNames());
 
         return UniversityConverter.toUniversityDTOFromEntity(university);
     }

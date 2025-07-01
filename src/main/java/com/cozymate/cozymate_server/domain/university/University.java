@@ -28,8 +28,9 @@ public class University extends BaseTimeEntity {
 
     private String name;
 
-    private String mailPattern;
-
+    @Type(JsonType.class)
+    @Column(columnDefinition = "json")
+    private List<String> mailPatterns;
     @Type(JsonType.class)
     @Column(columnDefinition = "json")
     private List<String> departments;
@@ -38,8 +39,8 @@ public class University extends BaseTimeEntity {
     @Column(columnDefinition = "json")
     private List<String> dormitoryNames;
 
-    public void update(String mailPattern, List<String> departments, List<String> dormitoryNames) {
-        this.mailPattern = mailPattern;
+    public void update(List<String> mailPatterns, List<String> departments, List<String> dormitoryNames) {
+        this.mailPatterns = mailPatterns;
         this.departments = departments;
         this.dormitoryNames = dormitoryNames;
     }

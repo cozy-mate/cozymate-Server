@@ -8,6 +8,7 @@ public record UniversityDetailResponseDTO(
         Long id,
         String name,
         String mailPattern,
+        List<String> mailPatterns,
         List<String> dormitoryNames,
         List<String> departments) {
 }

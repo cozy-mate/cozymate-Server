@@ -5,10 +5,11 @@ import lombok.Builder;
 
 @Builder
 public record UniversityRequestDTO(
-        String name,
-        String mailPattern,
-        List<String>dormitoryNames,
-        List<String> departments
+    String name,
+    List<String> mailPatterns,
+    List<String> dormitoryNames,
+    List<String> departments
 
 ) {
+
 }
