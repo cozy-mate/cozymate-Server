@@ -56,6 +56,12 @@ public class RoleCommandService {
         Role role = roleRepositoryService.createRole(
             RoleConverter.toEntity(mate, mateIdList, requestDto.content(), repeatDayBitmask)
         );
+
+        DayOfWeek dayOfWeek = LocalDate.now(clock).getDayOfWeek();
+        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
+        if ((role.getRepeatDays() & dayBitmask) != 0) {
+            todoCommandService.createRoleTodo(role);
+        }
         return RoleConverter.toRoleSimpleResponseDTOWithEntity(role);
     }
 
