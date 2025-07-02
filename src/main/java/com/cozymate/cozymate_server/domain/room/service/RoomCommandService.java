@@ -129,6 +129,12 @@ public class RoomCommandService {
         Mate mate = MateConverter.toEntity(room, member, true);
         mateRepository.save(mate);
 
+        memberStatCacheService.addUserToHasRoom(
+            room.getUniversity().getId(),
+            room.getGender().name(),
+            mate.getMember().getId()
+        );
+
         Feed feed = FeedConverter.toEntity(room);
         feedRepository.save(feed);
 
