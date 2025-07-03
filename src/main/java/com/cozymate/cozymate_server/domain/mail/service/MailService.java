@@ -176,10 +176,10 @@ public class MailService {
     }
 
     private void validateMailAddress(String mailAddress, List<String> mailPatterns) {
-//        String domain = mailAddress.substring(mailAddress.indexOf('@') + 1);
-//        if (!mailPatterns.contains(domain)) {
-//            throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
-//        }
+        String domain = mailAddress.substring(mailAddress.indexOf('@') + 1);
+        if (!mailPatterns.contains(domain)) {
+            throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
+        }
         List<MailAuthentication> mailAuthentications = mailAuthenticationRepositoryService.getMailAuthenticationListByMailAddress(
             mailAddress);
 
