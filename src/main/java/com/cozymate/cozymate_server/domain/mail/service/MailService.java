@@ -14,8 +14,10 @@ import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.activation.DataSource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,16 +39,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class MailService {
 
-    private static final Integer MAIL_AUTHENTICATION_EXPIRED_TIME = 30;
     private final JavaMailSender mailSender;
     private final MailAuthenticationRepositoryService mailAuthenticationRepositoryService;
     private final UniversityRepositoryService universityRepositoryService;
     private final AuthService authService;
 
 
-    private static final String ADMIN_MAIL_ADDRESS = "cozymate0@gmail.com"; // 관리자 이메일 주소
+    private static final int MAIL_AUTHENTICATION_EXPIRED_TIME = 30;
+    private static final String ADMIN_MAIL_ADDRESS = "cozymate0@gmail.com";
+    private static final String CONFUSION_CHARACTERS_REGEX = "[IlOo0]";
 
-    private static final String CONFUSION_CHARACTERS = "[IlOo0]";
+    private static final String FROM = "cozymate_service <cozymate0@gmail.com>";
+    private static final String EMAIL_SUBJECT = "cozymate 대학교 메일인증";
+    private static final String MAIL_TEMPLATE_PATH = "mail/mail_form.html";
+    private static final String LOGO_IMAGE_PATH = "mail/logo.png";
+
+    private static final int AUTH_CODE_LENGTH = 6;
 
 
     @Transactional
@@ -140,18 +147,25 @@ public class MailService {
 
         String authenticationCode = Base64.getEncoder()
             .encodeToString(UUID.randomUUID().toString().getBytes())
-            .replaceAll(CONFUSION_CHARACTERS, "") // 제외할 문자 제거
-            .substring(0, 6);
+            .replaceAll(CONFUSION_CHARACTERS_REGEX, "") // 제외할 문자 제거
+            .substring(0, AUTH_CODE_LENGTH);
 
         String emailBody = makeMailBody(authenticationCode, universityName);
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            DataSource logo = createLogo();
 
+            helper.setFrom(FROM);
             helper.setTo(mailAddress);
-            helper.setSubject("cozymate 대학교 메일인증");
+            helper.setSubject(EMAIL_SUBJECT);
             helper.setText(emailBody, true);
+
+            if (logo != null) {
+                helper.addInline("logo", logo);
+            }
+
             mailSender.send(message);
 
             return MailConverter.toMailAuthenticationWithParams(clientId, mailAddress,
@@ -162,10 +176,10 @@ public class MailService {
     }
 
     private void validateMailAddress(String mailAddress, List<String> mailPatterns) {
-        String domain = mailAddress.substring(mailAddress.indexOf('@') + 1);
-        if (!mailPatterns.contains(domain)) {
-            throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
-        }
+//        String domain = mailAddress.substring(mailAddress.indexOf('@') + 1);
+//        if (!mailPatterns.contains(domain)) {
+//            throw new GeneralException(ErrorStatus._INVALID_MAIL_ADDRESS_DOMAIN);
+//        }
         List<MailAuthentication> mailAuthentications = mailAuthenticationRepositoryService.getMailAuthenticationListByMailAddress(
             mailAddress);
 
@@ -180,7 +194,7 @@ public class MailService {
     private String makeMailBody(String authenticationCode, String universityName) {
         try {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
-                "mail/mail_form.html");
+                MAIL_TEMPLATE_PATH);
 
             if (inputStream == null) {
                 throw new GeneralException(ErrorStatus._CANNOT_FIND_MAIL_FORM);
@@ -195,5 +209,19 @@ public class MailService {
             throw new GeneralException(ErrorStatus._CANNOT_FIND_MAIL_FORM);
         }
     }
+
+    private DataSource createLogo() {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(LOGO_IMAGE_PATH)) {
+            if (is == null) {
+                return null;
+            }
+
+            byte[] imageBytes = is.readAllBytes();
+            return new ByteArrayDataSource(imageBytes, "image/png");
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
 
 }
