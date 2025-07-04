@@ -206,8 +206,6 @@ public enum ErrorStatus implements BaseErrorCode {
     _ROOMFAVORITE_MEMBER_MISMATCH(HttpStatus.BAD_REQUEST, "ROOMFAVORITE402", "해당 찜에 대한 권한이 없습니다."),
     _ROOMFAVORITE_CANNOT_PRIVATE_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE403",
         "비공개 방은 찜을 할 수 없습니다."),
-    _ROOMFAVORITE_CANNOT_FULL_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE404",
-        "인원이 가득 찬 방은 찜을 할 수 없습니다."),
     _ROOMFAVORITE_CANNOT_DISABLE_ROOM(HttpStatus.BAD_REQUEST, "ROOMFAVORITE405",
         "삭제된 방은 찜을 할 수 없습니다."),
 

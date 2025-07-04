@@ -40,7 +40,6 @@ public interface RoomFavoriteRepository extends JpaRepository<RoomFavorite, Long
         select rf from RoomFavorite rf 
         where rf.member = :member 
         and rf.room.status <> :roomStatus 
-        and rf.room.numOfArrival < rf.room.maxMateNum
         """)
     Slice<RoomFavorite> findPagingByMemberAndRoomStatusNot(@Param("member") Member member,
         @Param("roomStatus") RoomStatus roomStatus, Pageable pageable);
