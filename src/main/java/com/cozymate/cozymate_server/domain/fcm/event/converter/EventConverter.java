@@ -69,10 +69,11 @@ public class EventConverter {
             .build();
     }
 
-    public static RejectedJoinEvent toRejectedJoinEvent(Member manager, Member requester) {
+    public static RejectedJoinEvent toRejectedJoinEvent(Member manager, Member requester, Room room) {
         return RejectedJoinEvent.builder()
             .manager(manager)
             .requester(requester)
+            .room(room)
             .build();
     }
 

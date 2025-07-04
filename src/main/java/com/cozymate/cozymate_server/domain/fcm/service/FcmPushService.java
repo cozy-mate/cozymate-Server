@@ -91,21 +91,25 @@ public class FcmPushService {
         Member recipientMember = target.recipientMember();
         NotificationType notificationType = target.notificationType();
 
-        // 방 참여 요청의 경우 요청자는 fcm 알림 전송 x, 알림 내역만 저장 (토스트 팝업 대체)
-        if (target.room() != null) {
-            String content = NotificationType.SENT_ROOM_JOIN_REQUEST.generateContent(
-                FcmPushContentDTO.create(recipientMember));
-            NotificationLog notificationLog = NotificationType.SENT_ROOM_JOIN_REQUEST.generateNotificationLog(
-                NotificationLogCreateDTO.createNotificationLogCreateDTO(contentMember,
-                    recipientMember, target.room(), content));
-            notificationLogRepositoryService.createNotificationLog(notificationLog);
-        }
-
-        if (target.chatContent() != null) {
+        if (NotificationType.ARRIVE_CHAT.equals(notificationType)) {
             sendNotificationToMember(
                 messageUtil.createMessage(contentMember, recipientMember, target.chatContent(),
                     notificationType, target.chatRoom()));
+        } else if (NotificationType.REJECT_ROOM_JOIN.equals(notificationType)) {
+            sendNotificationToMember(
+                messageUtil.createMessage(contentMember, target.room(), recipientMember,
+                    notificationType));
         } else {
+            // 방 참여 요청의 경우 요청자는 fcm 알림 전송 x, 알림 내역만 저장 (토스트 팝업 대체)
+            if (NotificationType.ARRIVE_ROOM_JOIN_REQUEST.equals(notificationType)) {
+                String content = NotificationType.SENT_ROOM_JOIN_REQUEST.generateContent(
+                    FcmPushContentDTO.create(recipientMember));
+                NotificationLog notificationLog = NotificationType.SENT_ROOM_JOIN_REQUEST.generateNotificationLog(
+                    NotificationLogCreateDTO.createNotificationLogCreateDTO(contentMember,
+                        recipientMember, target.room(), content));
+                notificationLogRepositoryService.createNotificationLog(notificationLog);
+            }
+
             sendNotificationToMember(messageUtil.createMessage(contentMember, recipientMember,
                 notificationType));
         }

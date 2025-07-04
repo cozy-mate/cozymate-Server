@@ -466,7 +466,7 @@ public class RoomCommandService {
             mateRepository.delete(requester); // 거절 시 요청자 삭제
 
             eventPublisher.publishEvent(
-                EventConverter.toRejectedJoinEvent(manager.getMember(), requestMember));
+                EventConverter.toRejectedJoinEvent(manager.getMember(), requestMember, room));
         }
     }
 
