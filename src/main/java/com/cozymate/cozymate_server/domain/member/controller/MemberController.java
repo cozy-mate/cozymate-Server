@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.member.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;

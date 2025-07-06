@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberblock.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberblock.dto.response.MemberBlockResponseDTO;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockCommandService;
 import com.cozymate.cozymate_server.domain.memberblock.service.MemberBlockQueryService;

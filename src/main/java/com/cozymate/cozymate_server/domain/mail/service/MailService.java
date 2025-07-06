@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.mail.service;
 
 
-import com.cozymate.cozymate_server.domain.auth.service.AuthService;
+import com.cozymate.cozymate_server.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
 import com.cozymate.cozymate_server.domain.mail.converter.MailConverter;
 import com.cozymate.cozymate_server.domain.mail.dto.request.MailSendRequestDTO;
@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

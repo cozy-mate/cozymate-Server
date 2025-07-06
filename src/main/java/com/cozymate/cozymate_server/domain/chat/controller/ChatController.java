@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.chat.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO;
 import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO;
 import com.cozymate.cozymate_server.domain.chat.service.ChatCommandService;

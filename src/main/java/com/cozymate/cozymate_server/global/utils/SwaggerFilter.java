@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.global.utils;
 
-import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
+import com.cozymate.cozymate_server.auth.utils.JwtUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +37,7 @@ public class SwaggerFilter implements Filter {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        Cookie cookie = new Cookie("JWT", jwtUtil.generateAdminToken()); // 쿠키 이름 및 값 설정
+        Cookie cookie = new Cookie("JWT", jwtUtil.generateSwaggerToken()); // 쿠키 이름 및 값 설정
         cookie.setHttpOnly(true); // 클라이언트 측 스크립트에서 쿠키를 접근하지 못하게 함
         cookie.setSecure(true);
         cookie.setPath("/"); // 쿠키의 유효 범위 설정

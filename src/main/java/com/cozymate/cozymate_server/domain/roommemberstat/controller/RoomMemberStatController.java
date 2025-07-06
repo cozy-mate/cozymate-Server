@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.roommemberstat.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomMemberStatDetailListDTO;
 import com.cozymate.cozymate_server.domain.roommemberstat.service.RoomMemberStatService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;

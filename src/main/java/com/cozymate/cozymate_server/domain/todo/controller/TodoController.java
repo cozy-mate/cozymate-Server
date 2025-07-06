@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.todo.controller;
 
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.todo.dto.request.CreateTodoRequestDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.request.UpdateTodoRequestDTO;
 import com.cozymate.cozymate_server.domain.todo.dto.response.TodoIdResponseDTO;

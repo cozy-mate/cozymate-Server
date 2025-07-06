@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.roomlog.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.roomlog.dto.response.RoomLogDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.roomlog.service.RoomLogQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;

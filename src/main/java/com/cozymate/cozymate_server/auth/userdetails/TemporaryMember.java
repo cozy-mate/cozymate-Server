@@ -1,16 +1,24 @@
-package com.cozymate.cozymate_server.domain.auth.userdetails;
+package com.cozymate.cozymate_server.auth.userdetails;
 
-import com.cozymate.cozymate_server.domain.member.Member;
-
+import java.util.ArrayList;
 import java.util.Collection;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public record MemberDetails(Member member) implements UserDetails {
+@Getter
+@RequiredArgsConstructor
+public class TemporaryMember implements UserDetails {
+    @NonNull
+    String clientId;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return member.getRole().getAuthorities();
+        return new ArrayList<>();
     }
 
     @Override
@@ -20,6 +28,7 @@ public record MemberDetails(Member member) implements UserDetails {
 
     @Override
     public String getUsername() {
-        return member.getClientId();
+        return clientId;
     }
+
 }

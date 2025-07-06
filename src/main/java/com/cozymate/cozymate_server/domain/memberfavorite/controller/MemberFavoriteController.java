@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberfavorite.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberfavorite.dto.response.MemberFavoriteResponseDTO;
 import com.cozymate.cozymate_server.domain.memberfavorite.service.MemberFavoriteCommandService;
 import com.cozymate.cozymate_server.domain.memberfavorite.service.MemberFavoriteQueryService;

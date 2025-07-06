@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.rule.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.rule.dto.request.CreateRuleRequestDTO;
 import com.cozymate.cozymate_server.domain.rule.dto.response.RuleIdResponseDTO;
 import com.cozymate.cozymate_server.domain.rule.dto.response.RuleDetailResponseDTO;

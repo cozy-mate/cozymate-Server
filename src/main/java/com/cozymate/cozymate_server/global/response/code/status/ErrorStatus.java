@@ -215,6 +215,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _INQUIRY_EMAIL_FORMAT_INVALID(HttpStatus.BAD_REQUEST, "INQUIRY400", "이메일 형식이 올바르지 않습니다."),
     _INQUIRY_NOT_FOUND(HttpStatus.BAD_REQUEST, "INQUIRY401", "해당 문의 내역이 존재하지 않습니다."),
 
+    // ADMIN
+    _ADMIN_GOOGLE_AUTHENTICATION_FAIL(HttpStatus.BAD_REQUEST, "ADMIN400","구글 인증 실패")
+
     ;
 
     private final HttpStatus httpStatus;

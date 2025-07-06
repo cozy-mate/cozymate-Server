@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.auth.dto.request;
+package com.cozymate.cozymate_server.auth.dto.request;
 
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 import com.cozymate.cozymate_server.global.utils.EnumValid;

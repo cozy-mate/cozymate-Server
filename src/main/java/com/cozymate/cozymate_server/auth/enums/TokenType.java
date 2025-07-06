@@ -1,10 +1,11 @@
-package com.cozymate.cozymate_server.domain.auth.enums;
+package com.cozymate.cozymate_server.auth.enums;
 
 public enum TokenType {
     TEMPORARY,
     ACCESS,
     REFRESH,
-    ADMIN
+    ADMIN,
+    SWAGGER
     ;
 
     @Override

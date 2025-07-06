@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.auth;
+package com.cozymate.cozymate_server.auth;
 
 
 import java.io.Serializable;

@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
-import com.cozymate.cozymate_server.domain.auth.repository.TokenRepository;
+import com.cozymate.cozymate_server.auth.repository.TokenRepository;
 import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
 import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepositoryService;
@@ -12,7 +12,6 @@ import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
 import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
-import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.redis.service.LifestyleMatchRateCacheService;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
