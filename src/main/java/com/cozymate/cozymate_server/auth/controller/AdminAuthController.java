@@ -36,10 +36,10 @@ public class AdminAuthController {
     private String GOOGLE_CLIENT_ID;
 
     @Value("${oauth.google.client_secret}")
-    private final String GOOGLE_CLIENT_SECRET;
-    private final String REDIRECT_URI = "https://cozymate.shop/admin/auth/callback";
-    private final String SCOPE = "email profile";
-    private final String RESPONSE_TYPE = "code";
+    private String GOOGLE_CLIENT_SECRET;
+    private static final String REDIRECT_URI = "https://cozymate.shop/admin/auth/callback";
+    private static final String SCOPE = "email profile";
+    private static final String RESPONSE_TYPE = "code";
     private static final String GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
     private static final String GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
     private static final String GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
