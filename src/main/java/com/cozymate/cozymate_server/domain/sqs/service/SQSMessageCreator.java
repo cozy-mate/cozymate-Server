@@ -221,7 +221,7 @@ public class SQSMessageCreator {
                     .body(content)
                     .actionType(String.valueOf(notificationType))
                     .deviceToken(token)
-                    .roomId(member.getId().toString())
+                    .memberId(member.getId().toString())
                     .build();
 
                 sqsMessageTokenMap.put(fcmSqsMessage, token);
@@ -251,7 +251,7 @@ public class SQSMessageCreator {
                     .body(content)
                     .actionType(String.valueOf(notificationType))
                     .deviceToken(token)
-                    .roomId(chatRoom.getId().toString())
+                    .chatRoomId(chatRoom.getId().toString())
                     .build();
 
                 sqsMessageTokenMap.put(fcmSqsMessage, token);
