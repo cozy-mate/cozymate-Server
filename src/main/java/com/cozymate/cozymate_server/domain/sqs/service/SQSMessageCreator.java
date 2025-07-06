@@ -11,9 +11,7 @@ import com.cozymate.cozymate_server.domain.notificationlog.NotificationLog;
 import com.cozymate.cozymate_server.domain.notificationlog.dto.NotificationLogCreateDTO;
 import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 import com.cozymate.cozymate_server.domain.room.Room;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -150,7 +148,6 @@ public class SQSMessageCreator {
 
     private SQSMessageResult getSQSMessageResult(List<Fcm> fcmList, String content,
         NotificationType notificationType, NotificationLog notificationLog) {
-        Map<FcmSQSMessage, String> sqsMessageTokenMap = new HashMap<>();
 
         List<FcmSQSMessage> fcmSQSMessageList = fcmList.stream()
             .map(fcm -> {
@@ -163,13 +160,10 @@ public class SQSMessageCreator {
                     .deviceToken(token)
                     .build();
 
-                sqsMessageTokenMap.put(fcmSqsMessage, token);
-
                 return fcmSqsMessage;
             }).toList();
 
         SQSMessageResult sqsMessageResult = SQSMessageResult.builder()
-            .messageTokenMap(sqsMessageTokenMap)
             .fcmSQSMessageList(fcmSQSMessageList)
             .notificationLog(notificationLog)
             .build();
@@ -179,8 +173,6 @@ public class SQSMessageCreator {
 
     private SQSMessageResult getSQSMessageResultWithRoomId(List<Fcm> fcmList, String content,
         Room room, NotificationType notificationType, NotificationLog notificationLog) {
-
-        Map<FcmSQSMessage, String> sqsMessageTokenMap = new HashMap<>();
 
         List<FcmSQSMessage> fcmSQSMessageList = fcmList.stream()
             .map(fcm -> {
@@ -194,13 +186,10 @@ public class SQSMessageCreator {
                     .roomId(room.getId().toString())
                     .build();
 
-                sqsMessageTokenMap.put(fcmSqsMessage, token);
-
                 return fcmSqsMessage;
             }).toList();
 
         SQSMessageResult sqsMessageResult = SQSMessageResult.builder()
-            .messageTokenMap(sqsMessageTokenMap)
             .fcmSQSMessageList(fcmSQSMessageList)
             .notificationLog(notificationLog)
             .build();
@@ -210,7 +199,6 @@ public class SQSMessageCreator {
 
     private SQSMessageResult getSQSMessageResultWithMemberId(List<Fcm> fcmList, String content,
         Member member, NotificationType notificationType, NotificationLog notificationLog) {
-        Map<FcmSQSMessage, String> sqsMessageTokenMap = new HashMap<>();
 
         List<FcmSQSMessage> fcmSQSMessageList = fcmList.stream()
             .map(fcm -> {
@@ -224,13 +212,10 @@ public class SQSMessageCreator {
                     .memberId(member.getId().toString())
                     .build();
 
-                sqsMessageTokenMap.put(fcmSqsMessage, token);
-
                 return fcmSqsMessage;
             }).toList();
 
         SQSMessageResult sqsMessageResult = SQSMessageResult.builder()
-            .messageTokenMap(sqsMessageTokenMap)
             .fcmSQSMessageList(fcmSQSMessageList)
             .notificationLog(notificationLog)
             .build();
@@ -240,7 +225,6 @@ public class SQSMessageCreator {
 
     private SQSMessageResult getMessageResultWithChatRoomId(List<Fcm> fcmList, String content,
         NotificationType notificationType, NotificationLog notificationLog, ChatRoom chatRoom) {
-        Map<FcmSQSMessage, String> sqsMessageTokenMap = new HashMap<>();
 
         List<FcmSQSMessage> fcmSQSMessageList = fcmList.stream()
             .map(fcm -> {
@@ -254,13 +238,10 @@ public class SQSMessageCreator {
                     .chatRoomId(chatRoom.getId().toString())
                     .build();
 
-                sqsMessageTokenMap.put(fcmSqsMessage, token);
-
                 return fcmSqsMessage;
             }).toList();
 
         SQSMessageResult sqsMessageResult = SQSMessageResult.builder()
-            .messageTokenMap(sqsMessageTokenMap)
             .fcmSQSMessageList(fcmSQSMessageList)
             .notificationLog(notificationLog)
             .build();
