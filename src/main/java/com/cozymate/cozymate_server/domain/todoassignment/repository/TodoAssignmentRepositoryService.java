@@ -79,15 +79,6 @@ public class TodoAssignmentRepositoryService {
     }
 
     /**
-     * <p>Role 투두 중 특정 시점에 할당된 Assignment 객체 리스트를 조회</p>
-     * <p>Schedular에서 사용</p>
-     */
-    public List<TodoAssignment> getAssignmentListByTimePointAndTodoRoleIsNotNull(
-        LocalDate timePoint) {
-        return todoAssignmentRepository.findByTodoTimePointAndTodoRoleIsNotNull(timePoint);
-    }
-
-    /**
      * Assignment 생성
      */
     public TodoAssignment createAssignment(TodoAssignment todoAssignment) {
@@ -106,17 +97,6 @@ public class TodoAssignmentRepositoryService {
      */
     public void deleteAssignmentListInAssignmentList(List<TodoAssignment> todoAssignmentList) {
         todoAssignmentRepository.deleteAll(todoAssignmentList);
-    }
-
-    /**
-     * 투두 리스트에 할당된 Assignment 삭제
-     */
-    public void deleteAssignmentListInTodoList(List<Todo> todoList) {
-        deleteAssignmentListInTodoIdList(todoList.stream().map(Todo::getId).toList());
-    }
-
-    public void deleteAssignmentListInTodoIdList(List<Long> todoIdList) {
-        todoAssignmentRepository.deleteAllByTodoIdIn(todoIdList);
     }
 
 

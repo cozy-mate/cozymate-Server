@@ -26,10 +26,6 @@ public class RoleRepositoryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._ROLE_NOT_FOUND));
     }
 
-    public List<Role> getRoleList() {
-        return roleRepository.findAll();
-    }
-
     public List<Role> getRoleListByRoomId(Long roomId) {
         return roleRepository.findAllByRoomId(roomId);
     }

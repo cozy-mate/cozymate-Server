@@ -72,27 +72,6 @@ public class TodoFixture {
         return Pair.of(todo, todoAssignmentList);
     }
 
-
-    // 정상 더미데이터, 오늘 투두, 롤에서 생성된 투두
-    public static Pair<Todo, List<TodoAssignment>> 정상_6(Room room, Mate mate, Role role,
-        List<Mate> mateList) {
-        Todo todo = Todo.builder()
-            .id(6L)
-            .room(room)
-            .mateId(mate.getId())
-            .role(role)
-            .content("마트가서 간식 사오기")
-            .timePoint(LocalDate.now())
-            .todoType(TodoType.ROLE_TODO) // Todotype은 mate와 assignedMateList에 따라 결정
-            .build();
-
-        List<TodoAssignment> todoAssignmentList = mateList.stream()
-            .map(mate1 -> new TodoAssignment(mate1, todo, false)
-            ).toList();
-
-        return Pair.of(todo, todoAssignmentList);
-    }
-
     // 에러 더미데이터, content의 최대 길이는 35자인데, 36자로 너무 긴 content
     public static Pair<Todo, List<TodoAssignment>> 너무_긴_content(Room room, Mate mate,
         TodoType todoType, List<Mate> mateList) {
