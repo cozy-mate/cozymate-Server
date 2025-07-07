@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.auth.dto.response;
+package com.cozymate.cozymate_server.auth.dto.response;
 
 import lombok.Builder;
 

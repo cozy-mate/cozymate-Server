@@ -1,9 +1,9 @@
 package com.cozymate.cozymate_server.global.config;
 
-import com.cozymate.cozymate_server.domain.auth.service.AuthService;
-import com.cozymate.cozymate_server.domain.auth.service.LogoutService;
-import com.cozymate.cozymate_server.domain.auth.utils.JwtFilter;
-import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
+import com.cozymate.cozymate_server.auth.service.AuthService;
+import com.cozymate.cozymate_server.auth.service.LogoutService;
+import com.cozymate.cozymate_server.auth.utils.JwtFilter;
+import com.cozymate.cozymate_server.auth.utils.JwtUtil;
 
 import com.cozymate.cozymate_server.global.utils.SwaggerFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -90,7 +90,7 @@ public class SecurityConfig {
             .authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config",
                     "/swagger-resources/**").permitAll()
-                .requestMatchers("/", "/auth/sign-in", "/actuator/health").permitAll()
+                .requestMatchers("/", "admin/auth/login","admin/auth/callback","/auth/sign-in", "/actuator/health").permitAll()
                 .anyRequest()
                 .authenticated());
 

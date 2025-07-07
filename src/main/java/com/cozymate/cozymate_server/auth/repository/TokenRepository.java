@@ -1,6 +1,6 @@
-package com.cozymate.cozymate_server.domain.auth.repository;
+package com.cozymate.cozymate_server.auth.repository;
 
-import com.cozymate.cozymate_server.domain.auth.Token;
+import com.cozymate.cozymate_server.auth.Token;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 

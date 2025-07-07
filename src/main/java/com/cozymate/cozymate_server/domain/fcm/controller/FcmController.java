@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.fcm.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
 import com.cozymate.cozymate_server.domain.fcm.dto.request.FcmRequestDTO;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;

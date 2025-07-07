@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.mail.service;
 
 
-import com.cozymate.cozymate_server.domain.auth.service.AuthService;
+import com.cozymate.cozymate_server.auth.service.AuthService;
 import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
 import com.cozymate.cozymate_server.domain.mail.converter.MailConverter;
 import com.cozymate.cozymate_server.domain.mail.dto.request.MailSendRequestDTO;

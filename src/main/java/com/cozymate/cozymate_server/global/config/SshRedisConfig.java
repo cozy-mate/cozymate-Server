@@ -17,7 +17,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @RequiredArgsConstructor
 @EnableRedisRepositories(basePackages = {
     "com.cozymate.cozymate_server.global.redis",
-    "com.cozymate.cozymate_server.domain.auth.repository"
+    "com.cozymate.cozymate_server.auth.repository"
 })
 public class SshRedisConfig {
 

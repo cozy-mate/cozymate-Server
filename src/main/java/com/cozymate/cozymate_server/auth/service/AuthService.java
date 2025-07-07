@@ -1,15 +1,15 @@
-package com.cozymate.cozymate_server.domain.auth.service;
+package com.cozymate.cozymate_server.auth.service;
 
-import com.cozymate.cozymate_server.domain.auth.Token;
-import com.cozymate.cozymate_server.domain.auth.dto.response.TokenResponseDTO;
-import com.cozymate.cozymate_server.domain.auth.repository.TokenRepository;
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.auth.userdetails.TemporaryMember;
-import com.cozymate.cozymate_server.domain.auth.utils.AuthConverter;
-import com.cozymate.cozymate_server.domain.auth.utils.ClientIdMaker;
-import com.cozymate.cozymate_server.domain.auth.utils.JwtUtil;
+import com.cozymate.cozymate_server.auth.Token;
+import com.cozymate.cozymate_server.auth.repository.TokenRepository;
+import com.cozymate.cozymate_server.auth.utils.AuthConverter;
+import com.cozymate.cozymate_server.auth.utils.ClientIdMaker;
+import com.cozymate.cozymate_server.auth.dto.response.TokenResponseDTO;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.TemporaryMember;
+import com.cozymate.cozymate_server.auth.utils.JwtUtil;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
-import com.cozymate.cozymate_server.domain.auth.dto.request.SignInRequestDTO;
+import com.cozymate.cozymate_server.auth.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.domain.member.enums.Role;

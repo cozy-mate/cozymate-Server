@@ -1,7 +1,7 @@
-package com.cozymate.cozymate_server.domain.auth.controller;
+package com.cozymate.cozymate_server.auth.controller;
 
-import com.cozymate.cozymate_server.domain.auth.service.AuthService;
-import com.cozymate.cozymate_server.domain.auth.dto.request.SignInRequestDTO;
+import com.cozymate.cozymate_server.auth.service.AuthService;
+import com.cozymate.cozymate_server.auth.dto.request.SignInRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 

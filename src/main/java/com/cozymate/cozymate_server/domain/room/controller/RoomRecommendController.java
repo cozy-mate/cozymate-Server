@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomRecommendationResponseDTO;
 import com.cozymate.cozymate_server.domain.room.enums.RoomSortType;
 import com.cozymate.cozymate_server.domain.room.service.RoomRecommendService;

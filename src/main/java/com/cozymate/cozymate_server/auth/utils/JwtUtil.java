@@ -1,8 +1,9 @@
-package com.cozymate.cozymate_server.domain.auth.utils;
+package com.cozymate.cozymate_server.auth.utils;
 
-import com.cozymate.cozymate_server.domain.auth.enums.TokenType;
+import com.cozymate.cozymate_server.auth.userdetails.AdminDetails;
+import com.cozymate.cozymate_server.auth.userdetails.SwaggerDetails;
+import com.cozymate.cozymate_server.auth.enums.TokenType;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.AdminDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
@@ -93,9 +94,12 @@ public class JwtUtil {
             .parseClaimsJws(token);
     }
 
+    public String generateSwaggerToken() {
+        return buildToken(TokenType.SWAGGER, new SwaggerDetails(), 2592000000L);
+    }
 
     public String generateAdminToken() {
-        return buildToken(TokenType.ADMIN, new AdminDetails(), 15778476000L);
+        return buildToken(TokenType.ADMIN, new AdminDetails(), 2592000000L);
     }
 
     // 주어진 클레임, 사용자 정보, 그리고 만료 시간을 바탕으로 JWT 토큰을 생성

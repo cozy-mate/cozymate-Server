@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.notificationlog.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.notificationlog.dto.response.NotificationLogResponseDTO;
 import com.cozymate.cozymate_server.domain.notificationlog.service.NotificationLogQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;

@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.mail.controller;
 
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.mail.dto.request.MailSendRequestDTO;
 import com.cozymate.cozymate_server.domain.mail.dto.request.VerifyRequestDTO;
 import com.cozymate.cozymate_server.domain.mail.service.MailService;

@@ -1,11 +1,11 @@
-package com.cozymate.cozymate_server.domain.auth.userdetails;
+package com.cozymate.cozymate_server.auth.userdetails;
 
 import com.cozymate.cozymate_server.domain.member.enums.Role;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public record AdminDetails() implements UserDetails {
+public record SwaggerDetails() implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Role.ADMIN.getAuthorities();

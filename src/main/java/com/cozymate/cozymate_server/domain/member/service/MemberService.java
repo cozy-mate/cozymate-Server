@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
-import com.cozymate.cozymate_server.domain.auth.service.AuthService;
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.service.AuthService;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
 import com.cozymate.cozymate_server.domain.mail.repository.MailAuthenticationRepositoryService;
 import com.cozymate.cozymate_server.domain.mail.service.MailService;
@@ -19,7 +19,6 @@ import com.cozymate.cozymate_server.domain.member.validator.MemberValidator;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
 import com.cozymate.cozymate_server.domain.university.validator.UniversityValidator;
 
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

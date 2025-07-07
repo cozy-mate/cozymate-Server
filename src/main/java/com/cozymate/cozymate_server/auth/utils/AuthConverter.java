@@ -1,6 +1,6 @@
-package com.cozymate.cozymate_server.domain.auth.utils;
+package com.cozymate.cozymate_server.auth.utils;
 
-import com.cozymate.cozymate_server.domain.auth.dto.response.TokenResponseDTO;
+import com.cozymate.cozymate_server.auth.dto.response.TokenResponseDTO;
 
 public class AuthConverter {
 

@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.mail.converter;
 
-import com.cozymate.cozymate_server.domain.auth.dto.response.TokenResponseDTO;
+import com.cozymate.cozymate_server.auth.dto.response.TokenResponseDTO;
 import com.cozymate.cozymate_server.domain.mail.MailAuthentication;
 import com.cozymate.cozymate_server.domain.mail.dto.response.VerifyResponseDTO;
 

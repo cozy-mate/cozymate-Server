@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.feed.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.feed.dto.FeedRequestDTO;
 import com.cozymate.cozymate_server.domain.feed.dto.FeedResponseDTO;
 import com.cozymate.cozymate_server.domain.feed.service.FeedCommandService;

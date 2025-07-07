@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.role.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.role.dto.request.CreateRoleRequestDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.role.dto.response.RoleIdResponseDTO;

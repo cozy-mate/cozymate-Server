@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.university.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 
 import com.cozymate.cozymate_server.domain.university.dto.request.UniversityRequestDTO;
 import com.cozymate.cozymate_server.domain.university.dto.response.UniversityDetailResponseDTO;

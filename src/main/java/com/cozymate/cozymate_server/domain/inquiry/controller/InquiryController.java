@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.inquiry.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.inquiry.dto.request.CreateInquiryRequestDTO;
 import com.cozymate.cozymate_server.domain.inquiry.dto.response.InquiryDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.inquiry.service.InquiryCommandService;

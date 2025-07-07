@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstatpreference.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.memberstatpreference.dto.MemberStatPreferenceDto;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceQueryService;

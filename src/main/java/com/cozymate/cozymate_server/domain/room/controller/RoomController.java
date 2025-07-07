@@ -1,7 +1,7 @@
 package com.cozymate.cozymate_server.domain.room.controller;
 
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.room.dto.request.PrivateRoomCreateRequestDTO;
 import com.cozymate.cozymate_server.domain.room.dto.request.PublicRoomCreateRequestDTO;

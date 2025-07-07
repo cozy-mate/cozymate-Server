@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.postcomment.controller;
 
-import com.cozymate.cozymate_server.domain.auth.userdetails.MemberDetails;
+import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
 import com.cozymate.cozymate_server.domain.postcomment.dto.PostCommentCreateDTO;
 import com.cozymate.cozymate_server.domain.postcomment.dto.PostCommentUpdateDTO;
 import com.cozymate.cozymate_server.domain.postcomment.dto.PostCommentViewDTO;

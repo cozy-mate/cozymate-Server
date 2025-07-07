@@ -1,4 +1,4 @@
-package com.cozymate.cozymate_server.domain.auth.utils;
+package com.cozymate.cozymate_server.auth.utils;
 
 import com.cozymate.cozymate_server.domain.member.enums.SocialType;
 
