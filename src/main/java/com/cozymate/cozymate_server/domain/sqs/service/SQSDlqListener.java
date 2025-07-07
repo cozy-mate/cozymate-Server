@@ -24,10 +24,10 @@ public class SQSDlqListener {
         log.info("리스너 동작");
         try {
             DlqMessage dlqMessage = om.readValue(message, DlqMessage.class);
-            List<FailedPayload> faildFcmList = dlqMessage.failedPayloads();
-            log.info("실패 메시지 개수: {}", faildFcmList.size());
+            List<FailedPayload> failedFcmList = dlqMessage.failedPayloads();
+            log.info("실패 메시지 개수: {}", failedFcmList.size());
 
-            List<String> fcmTokenList = faildFcmList.stream()
+            List<String> fcmTokenList = failedFcmList.stream()
                 .map(f -> f.deviceToken())
                 .toList();
 
