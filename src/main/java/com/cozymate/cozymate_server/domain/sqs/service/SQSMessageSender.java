@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.operations.SendResult;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,14 +31,17 @@ public class SQSMessageSender {
             throw new RuntimeException("SQS 전송용 JSON 직렬화 실패", e);
         }
 
-        try {
-            SendResult<String> sendResult = sqsTemplate.send(to -> to
-                .queue(QUEUE_NAME)
-                .payload(payload));
+        CompletableFuture<SendResult<Object>> sendFuture = sqsTemplate.sendAsync(to -> to
+            .queue(QUEUE_NAME)
+            .payload(payload)
+        );
 
-            log.info("SQS 메시지 전송 성공, 메시지 id : {}", sendResult.messageId());
-        } catch (Exception e) {
-            log.error("SQS 메시지 전송 실패. payload: {}, 이유: {}", payload, e.getMessage(), e);
-        }
+        sendFuture.whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("SQS 전송 실패, {}", ex.getMessage(), ex);
+            } else {
+                log.info("SQS 메시지 전송 성공, {}", result.messageId());
+            }
+        });
     }
 }
