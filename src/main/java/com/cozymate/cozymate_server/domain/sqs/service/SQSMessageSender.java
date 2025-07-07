@@ -40,7 +40,7 @@ public class SQSMessageSender {
             if (ex != null) {
                 log.error("SQS 전송 실패, {}", ex.getMessage(), ex);
             } else {
-                log.info("SQS 메시지 전송 성공, {}", result.messageId());
+                log.info("SQS 메시지 전송 성공, 메시지 id : {}", result.messageId());
             }
         });
     }
