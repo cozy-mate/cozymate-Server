@@ -22,10 +22,6 @@ public class RoomFavoriteValidator {
             throw new GeneralException(ErrorStatus._ROOMFAVORITE_CANNOT_PRIVATE_ROOM);
         }
 
-        if (room.getNumOfArrival() == room.getMaxMateNum()) {
-            throw new GeneralException(ErrorStatus._ROOMFAVORITE_CANNOT_FULL_ROOM);
-        }
-
         if (RoomStatus.DISABLE.equals(room.getStatus())) {
             throw new GeneralException(ErrorStatus._ROOMFAVORITE_CANNOT_DISABLE_ROOM);
         }

@@ -36,7 +36,6 @@ public class RoomFavoriteController {
     @SwaggerApiError({
         ErrorStatus._ROOM_NOT_FOUND,
         ErrorStatus._ROOMFAVORITE_CANNOT_PRIVATE_ROOM,
-        ErrorStatus._ROOMFAVORITE_CANNOT_FULL_ROOM,
         ErrorStatus._ROOMFAVORITE_CANNOT_DISABLE_ROOM,
         ErrorStatus._ROOMFAVORITE_ALREADY_EXISTS,
     })
