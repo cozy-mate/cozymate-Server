@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.fcm.repository;
 
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,5 +26,9 @@ public class FcmRepositoryService {
 
     public void deleteFcmByMemberId(Long memberId) {
         fcmRepository.deleteAllByMemberId(memberId);
+    }
+
+    public void updateFcmValidToFalseByTokenList(List<String> tokenList) {
+        fcmRepository.updateValidByTokenList(tokenList);
     }
 }
