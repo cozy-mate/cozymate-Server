@@ -44,7 +44,7 @@ public class AdminAuthController {
     private static final String GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
     private static final String GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
     private static final String ADMIN_EMAIL = "cozymate0@gmail.com";
-    private static final String ADMIN_REDIRECT_URL = "https://cozymate-admin.web.app/";
+    private static final String ADMIN_REDIRECT_URL = "https://cozymate-admin.web.app/inquiry";
     private static final String GRANT_TYPE = "authorization_code";
     private static final String COOKIE_NAME = "JWT";
     private static final int COOKIE_MAX_AGE = -1;
