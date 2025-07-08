@@ -4,7 +4,11 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.report.Report;
 import com.cozymate.cozymate_server.domain.report.enums.ReportReason;
 import com.cozymate.cozymate_server.domain.report.enums.ReportSource;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,5 +25,14 @@ public class ReportRepositoryService {
 
     public void createReport(Report report) {
         reportRepository.save(report);
+    }
+
+    public Page<Report> getAllReportsForAdmin(Pageable pageable) {
+        return reportRepository.findAll(pageable);
+    }
+
+    public Report getReportByIdOrThrow(Long reportId) {
+        return reportRepository.findById(reportId)
+            .orElseThrow(() -> new GeneralException(ErrorStatus._REPORT_NOT_FOUND));
     }
 }

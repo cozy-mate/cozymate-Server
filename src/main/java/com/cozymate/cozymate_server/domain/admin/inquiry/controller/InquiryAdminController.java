@@ -40,7 +40,7 @@ public class InquiryAdminController {
 
     @GetMapping("/{inquiryId}")
     @Operation(summary = "[무빗] 코지메이트 특정 문의 조회 (관리자용)", description = "")
-    public ResponseEntity<ApiResponse<InquiryAdminResponseDTO>> getInquiryList(
+    public ResponseEntity<ApiResponse<InquiryAdminResponseDTO>> getInquiry(
         @PathVariable Long inquiryId
     ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(

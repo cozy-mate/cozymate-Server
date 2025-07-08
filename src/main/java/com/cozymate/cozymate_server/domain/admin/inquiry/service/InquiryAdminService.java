@@ -6,7 +6,6 @@ import com.cozymate.cozymate_server.domain.admin.inquiry.dto.InquiryAdminRespons
 import com.cozymate.cozymate_server.domain.inquiry.Inquiry;
 import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepositoryService;
 import com.cozymate.cozymate_server.global.common.PageDetailResponseDTO;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class InquiryAdminService {
     private final InquiryRepositoryService inquiryRepositoryService;
 
     // TODO: member를 계속 조회하는건 비효율적, 차라리 inquiry랑 report에 외래키 연관 없애기
-    @Transactional
+    @Transactional(readOnly = true)
     public PageDetailResponseDTO<List<InquiryAdminResponseDTO>> getInquiryList(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Inquiry> inquiryPage = inquiryRepositoryService.getAllInquiriesForAdmin(pageable);
@@ -38,7 +38,7 @@ public class InquiryAdminService {
             .build();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public InquiryAdminResponseDTO getInquiryById(Long inquiryId) {
         Inquiry inquiry = inquiryRepositoryService.getInquiryByIdOrThrow(inquiryId);
         return InquiryAdminConverter.toInquiryAdminResponseDTO(inquiry);
