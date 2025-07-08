@@ -201,7 +201,7 @@ public class TodoCommandService {
      * <p>오늘 날짜의 투두가 완료되었을 때 실행됨 본인의 오늘 투두가 모두 완료되었다면 FCM 발행</p>
      */
     private void allTodoCompleteNotification(Mate mate, LocalDate today) {
-        List<Mate> mateList = mateRepository.findAllByMemberIdAndEntryStatus(mate.getRoom().getId(),
+        List<Mate> mateList = mateRepository.findAllByRoomIdAndEntryStatus(mate.getRoom().getId(),
             EntryStatus.JOINED).stream().filter(m -> !m.getId().equals(mate.getId())).toList();
 
         // 본인의 오늘 할 일이 더이상 없는지 확인
