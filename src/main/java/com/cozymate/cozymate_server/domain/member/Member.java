@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.utils.BaseTimeEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
@@ -28,6 +29,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.validator.constraints.Range;
 
 @Getter
@@ -77,6 +79,9 @@ public class Member extends BaseTimeEntity {
     @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
     private MemberStat memberStat;
 
+    @ColumnDefault("false")
+    private boolean isBanned = false;
+
     public void signup(String nickname, Gender gender, LocalDate birthDay, Integer persona) {
         this.nickname = nickname;
         this.gender = gender;
@@ -92,4 +97,7 @@ public class Member extends BaseTimeEntity {
         this.majorName = majorName;
     }
 
+    public void updateBannedStatus(boolean isBanned) {
+        this.isBanned = isBanned;
+    }
 }

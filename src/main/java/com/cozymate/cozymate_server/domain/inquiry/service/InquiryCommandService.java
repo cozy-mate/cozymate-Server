@@ -25,10 +25,4 @@ public class InquiryCommandService {
         Inquiry inquiry = InquiryConverter.toEntity(member, createInquiryRequestDTO);
         inquiryRepositoryService.createInquiry(inquiry);
     }
-
-    public void updateInquiryStatus(Long inquiryId) {
-        Inquiry inquiry = inquiryRepositoryService.getInquiryByIdOrThrow(inquiryId);
-
-        inquiry.updateStatus(InquiryStatus.ANSWERED);
-    }
 }

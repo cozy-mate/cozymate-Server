@@ -185,6 +185,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _REPORT_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT400", "신고 대상 멤버를 찾을 수 없습니다."),
     _REPORT_DUPLICATE(HttpStatus.BAD_REQUEST, "REPORT401", "중복된 신고 요청입니다."),
     _REPORT_CANNOT_REQUEST_SELF(HttpStatus.BAD_REQUEST, "REPORT402", "자신에 대한 차단 관련 요청을 할 수 없습니다."),
+    _REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT404", "신고 내역을 찾을 수 없습니다."),
 
     // MemberFavorite 관련
     _MEMBERFAVORITE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "MEMBERFAVORITE400",
