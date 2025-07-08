@@ -57,11 +57,6 @@ public class RoleCommandService {
             RoleConverter.toEntity(mate, mateIdList, requestDto.content(), repeatDayBitmask)
         );
 
-        DayOfWeek dayOfWeek = LocalDate.now(clock).getDayOfWeek();
-        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
-        if ((role.getRepeatDays() & dayBitmask) != 0) {
-            todoCommandService.createRoleTodo(role);
-        }
         return RoleConverter.toRoleSimpleResponseDTOWithEntity(role);
     }
 
@@ -74,8 +69,6 @@ public class RoleCommandService {
         Mate mate = getMate(member.getId(), roomId);
 
         roleValidator.checkUpdatePermission(role, mate);
-
-        todoCommandService.deleteTodoByRoleId(role);
         roleRepositoryService.deleteRole(role);
     }
 
@@ -120,17 +113,6 @@ public class RoleCommandService {
         // role 수정
         role.updateEntity(mateIdList, requestDto.content(),
             RoleConverter.convertDayListToBitmask(requestDto.repeatDayList()));
-    }
-
-    /**
-     * 오늘 요일에 해당하는 Role을 투두로 추가 (SCHEDULED)
-     */
-    public void addRoleToTodo() {
-        DayOfWeek dayOfWeek = LocalDate.now(clock).getDayOfWeek();
-        int dayBitmask = DayListBitmask.getBitmaskByDayOfWeek(dayOfWeek);
-        List<Role> roleList = roleRepositoryService.getRoleList();
-        roleList.stream().filter(role -> (role.getRepeatDays() & dayBitmask) != 0).toList()
-            .forEach(todoCommandService::createRoleTodo);
     }
 
     // mate의 name과 id가 일치하는지 여부 체크

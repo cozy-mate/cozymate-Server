@@ -30,17 +30,6 @@ public interface TodoAssignmentRepository extends JpaRepository<TodoAssignment, 
         @Param("timePoint") LocalDate timePoint);
 
     @Query("""
-        SELECT ta
-        FROM TodoAssignment ta
-        JOIN FETCH ta.todo
-        JOIN FETCH ta.mate
-        WHERE ta.todo.timePoint = :timePoint
-        AND ta.todo.role IS NOT NULL
-        """)
-    List<TodoAssignment> findByTodoTimePointAndTodoRoleIsNotNull(
-        @Param("timePoint") LocalDate timePoint);
-
-    @Query("""
         SELECT COUNT(ta)
         FROM TodoAssignment ta
         JOIN ta.mate

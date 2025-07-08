@@ -48,10 +48,6 @@ public class Todo extends BaseTimeEntity {
     private TodoType todoType;
 
     public void updateTodoType(List<Mate> assignmentMateList) {
-        if (this.role != null) {
-            this.todoType = TodoType.ROLE_TODO;
-            return;
-        }
         if (assignmentMateList.size() == 1) {
             this.todoType = TodoType.SINGLE_TODO;
             return;
@@ -61,10 +57,6 @@ public class Todo extends BaseTimeEntity {
 
     // 객체에 저장된 AssignedMateCount 값으로 체크 -> 해당 값이 정확해야함
     public void updateTodoType() {
-        if (this.role != null) {
-            this.todoType = TodoType.ROLE_TODO;
-            return;
-        }
         if (this.assignedMateCount == 1) {
             this.todoType = TodoType.SINGLE_TODO;
             return;

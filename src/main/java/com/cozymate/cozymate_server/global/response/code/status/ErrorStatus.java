@@ -129,8 +129,6 @@ public enum ErrorStatus implements BaseErrorCode {
     _TODO_EDIT_PERMISSION_DENIED(HttpStatus.BAD_REQUEST, "TODO401", "수정할 수 있는 권한이 없습니다."),
     _TODO_DAILY_LIMIT(HttpStatus.BAD_REQUEST, "TODO402", "생성할 수 있는 하루 최대 Todo 개수를 초과했습니다."),
     _TODO_NOT_IN_ROOM(HttpStatus.BAD_REQUEST, "TODO403", "해당하는 방에 해당 Todo가 없습니다."),
-    _ROLE_TODO_CANNOT_DELETE(HttpStatus.BAD_REQUEST, "TODO404", "Role Todo는 삭제할 수 없습니다."),
-    _ROLE_TODO_CANNOT_UPDATE(HttpStatus.BAD_REQUEST, "TODO405", "Role Todo는 수정할 수 없습니다."),
     _TODO_ASSIGNED_MATE_LIMIT(HttpStatus.BAD_REQUEST, "TODO406", "하나의 Todo에 할당할 수 있는 할당자를 초과했습니다."),
 
     // TodoAssignment 관련

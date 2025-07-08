@@ -86,33 +86,6 @@ public class TodoCommandService {
     }
 
     /**
-     * <p>Role 투두를 생성하는 함수</p>
-     * <p>Role 부분에서 Schedular를 통해서 실행됨</p>
-     * <p>Role에서의 검증이 충분히 잘 되어있다면 이 부분에서는 검증을 간단하게 해도 됨</p>
-     */
-    public void createRoleTodo(Role role) {
-        // 사용자의 mate 정보 조회
-        Mate todoCreator = mateRepository.findById(role.getMateId())
-            .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
-
-        List<Mate> assignedMateList = mateRepository.findAllByIdIn(role.getAssignedMateIdList());
-
-        // 생성자와 할당자가 모두 동일한 방에 있는지 검증
-        todoValidator.checkInSameRoom(todoCreator, assignedMateList);
-
-        Todo todo = todoRepositoryService.createTodo(
-            TodoConverter.toEntity(todoCreator.getRoom(), todoCreator.getId(), role.getContent(),
-                LocalDate.now(clock), role)
-        );
-
-        // 할당자를 확인하고 TodoType, assignmentCount 설정 && 더티체크
-        todo.updateTodoType(assignedMateList);
-        todo.updateAssignmentCount(assignedMateList.size());
-
-        addAssignedMateList(todo, assignedMateList);
-    }
-
-    /**
      * <p>본인 투두의 완료 여부를 변경 할당 데이터가 없으면 예외 발생 (todoAssignmentCommandService)</p>
      * <p>모든 할당자가 완료되었을 때 FCM 발송</p>
      *
@@ -142,10 +115,6 @@ public class TodoCommandService {
         Mate mate = getMate(member.getId(), roomId);
         Todo todo = todoRepositoryService.getTodoOrThrow(todoId);
 
-        if (isRoleTodo(todo)) {
-            throw new GeneralException(ErrorStatus._ROLE_TODO_CANNOT_DELETE);
-        }
-
         todoAssignmentCommandService.deleteAssignment(mate, todo);
         todo.decreaseAssignmentCount();
 
@@ -173,19 +142,6 @@ public class TodoCommandService {
     }
 
     /**
-     * <p>특정 Role에 할당된 모든 투두를 삭제</p>
-     * <p>roleID에 해당하는 투두 리스트를 가져와서, todoAssignmentCommandService로 할당 정보를 벌크로 삭제</p>
-     * <p>이후 룸로그를 삭제하고 투두를 벌크로 삭제</p>
-     */
-    public void deleteTodoByRoleId(Role role) {
-        List<Todo> todoList = todoRepositoryService.getTodoListByRoleId(role.getId());
-        todoAssignmentRepositoryService.deleteAssignmentListInTodoList(todoList);
-        // TODO: RoomLog에서 연관을 지우고 삭제
-        todoList.forEach(todo -> roomLogCommandService.changeRoomLogTodoToNull(todo.getId()));
-        todoRepositoryService.deleteTodoListByRoleId(role.getId());
-    }
-
-    /**
      * <p>특정 투두의 정보를 업데이트</p>
      * <p>검증 - 최대 할당자 초과 체크, 수정 권한 체크, 롤 투두인지 체크(수정 불가), 동일 방에 있는지 체크</p>
      * <p>TodoType과 할당자 수는 자동으로 업데이트</p>
@@ -199,9 +155,6 @@ public class TodoCommandService {
         Mate mate = getMate(member.getId(), roomId);
         Todo todo = todoRepositoryService.getTodoOrThrow(todoId);
 
-        if (isRoleTodo(todo)) {
-            throw new GeneralException(ErrorStatus._ROLE_TODO_CANNOT_UPDATE);
-        }
         todoValidator.checkEditPermission(mate, todo);
 
         List<TodoAssignment> todoAssignmentList = todoAssignmentRepositoryService
@@ -242,14 +195,6 @@ public class TodoCommandService {
         return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId,
                 EntryStatus.JOINED)
             .orElseThrow(() -> new GeneralException(ErrorStatus._MATE_NOT_FOUND));
-    }
-
-
-    /**
-     * <p>TodoType이 roleTodo인지 여부를 반환</p>
-     */
-    private boolean isRoleTodo(Todo todo) {
-        return todo.getRole() != null;
     }
 
     /**

@@ -317,45 +317,5 @@ public class RoleCommandServiceTest {
 
     }
 
-    @Nested
-    @MockitoSettings(strictness = Strictness.LENIENT)
-    class addRoleToTodo {
-
-        private Role role2;
-        private Role role3;
-        private Role role4;
-        private Role role5;
-
-        @BeforeEach
-        void setUp() {
-            role = RoleFixture.정상_1(room, mate, List.of(mate));  // 월
-            role2 = RoleFixture.정상_2(room, mate, List.of(mate)); // 매일
-            role3 = RoleFixture.정상_3(room, mate, List.of(mate)); // 화, 목
-            role4 = RoleFixture.정상_4(room, mate, List.of(mate)); // 월 ~ 금
-            role5 = RoleFixture.정상_5(room, mate, List.of(mate)); // X
-
-            given(clock.getZone()).willReturn(ZoneId.of("Asia/Seoul"));
-            given(clock.instant()).willReturn(Instant.parse("2025-03-24T00:00:01Z")); // 월요일
-            willDoNothing().given(todoCommandService).createRoleTodo(any(Role.class));
-
-        }
-
-        @Test
-        @DisplayName("오늘 요일에 해당하는 Role을 투두로 추가한다.")
-        void success_add_role_to_todo() {
-            //given
-            given(roleRepositoryService.getRoleList())
-                .willReturn(List.of(role, role2, role3, role4, role5));
-
-            //when
-            roleCommandService.addRoleToTodo();
-
-            //then
-            // 1, 2, 4번 Role -> 투두 추가.
-            verify(todoCommandService, times(3))
-                .createRoleTodo(any(Role.class));
-        }
-    }
-
 
 }
