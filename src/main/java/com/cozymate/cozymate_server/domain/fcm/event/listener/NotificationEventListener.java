@@ -226,7 +226,7 @@ public class NotificationEventListener {
         notificationLogRepositoryService.createNotificationLog(notificationLog);
 
         // SQSMessageResult 생성
-        SQSMessageResult sqsMessageResult = sqsMessageCreator.create(member,
+        SQSMessageResult sqsMessageResult = sqsMessageCreator.createWithMemberId(member,
             managerMember, NotificationType.ARRIVE_ROOM_JOIN_REQUEST);
 
         // 알림 저장

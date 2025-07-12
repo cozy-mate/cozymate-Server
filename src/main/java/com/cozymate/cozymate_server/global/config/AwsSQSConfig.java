@@ -1,6 +1,10 @@
 package com.cozymate.cozymate_server.global.config;
 
+import io.awspring.cloud.sqs.config.SqsMessageListenerContainerFactory;
+import io.awspring.cloud.sqs.listener.acknowledgement.AcknowledgementOrdering;
+import io.awspring.cloud.sqs.listener.acknowledgement.handler.AcknowledgementMode;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +32,21 @@ public class AwsSQSConfig {
             .credentialsProvider(StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(AWS_ACCESS_KEY, AWS_SECRET_KEY)))
             .region(Region.of(AWS_REGION))
+            .build();
+    }
+
+    // Listener Factory 설정 (Listener 쪽)
+    @Bean
+    SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory(SqsAsyncClient sqsAsyncClient) {
+        return SqsMessageListenerContainerFactory
+            .builder()
+            .configure(options -> options
+                .acknowledgementMode(AcknowledgementMode.ALWAYS)
+                .acknowledgementInterval(Duration.ofSeconds(3))
+                .acknowledgementThreshold(5)
+                .acknowledgementOrdering(AcknowledgementOrdering.PARALLEL)
+            )
+            .sqsAsyncClient(sqsAsyncClient)
             .build();
     }
 
