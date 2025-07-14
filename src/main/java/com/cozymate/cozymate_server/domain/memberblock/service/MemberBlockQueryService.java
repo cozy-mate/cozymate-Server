@@ -31,7 +31,7 @@ public class MemberBlockQueryService {
             )
             .toList();
     }
-
+    
     public boolean isBlocked(Member member, Long blockedMemberId) {
         return memberBlockRepository.existsByMemberIdAndBlockedMemberId(member.getId(),
             blockedMemberId);

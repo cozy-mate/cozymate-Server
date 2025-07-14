@@ -60,4 +60,14 @@ public class MemberBlockController {
         memberBlockCommandService.deleteMemberBlock(memberId, memberDetails.member());
         return ResponseEntity.ok(ApiResponse.onSuccess("차단 해제 완료"));
     }
+
+    @GetMapping("/{memberId}")
+    @Operation(summary = "[무빗] 특정 멤버 차단 여부 조회", description = "")
+    public ResponseEntity<ApiResponse<Boolean>> getIsBlockedMember(
+        @AuthenticationPrincipal MemberDetails memberDetails,
+        @PathVariable Long memberId
+    ) {
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+            memberBlockQueryService.isBlocked(memberDetails.member(), memberId)));
+    }
 }
