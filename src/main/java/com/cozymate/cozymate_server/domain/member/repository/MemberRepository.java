@@ -29,13 +29,16 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         "AND m.gender = :gender " +
         "AND m.id <> :searchingMemberId " +
         "AND ms IS NOT NULL " +
-        "AND m.nickname LIKE %:subString%")
+        "AND m.nickname LIKE %:subString% " +
+        "AND NOT EXISTS ( " +
+        "   SELECT mb FROM MemberBlock mb " +
+        "   WHERE mb.member.id = :searchingMemberId AND mb.blockedMember.id = m.id " +
+        ")")
     List<Member> findMembersWithMatchingCriteria(
         @Param("subString") String subString,
         @Param("universityId") Long universityId,
         @Param("gender") Gender gender,
         @Param("searchingMemberId") Long searchingMemberId
     );
-
 
 }

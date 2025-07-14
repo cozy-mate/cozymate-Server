@@ -25,10 +25,15 @@ public class MemberBlockQueryService {
             return new ArrayList<>();
         }
 
-        List<MemberBlockResponseDTO> memberBlockResponseDTOList = memberBlockList.stream()
-            .map(memberBlock -> MemberBlockConverter.toMemberBlockResponseDTO(memberBlock.getBlockedMember()))
+        return memberBlockList.stream()
+            .map(memberBlock -> MemberBlockConverter.toMemberBlockResponseDTO(
+                memberBlock.getBlockedMember())
+            )
             .toList();
+    }
 
-        return memberBlockResponseDTOList;
+    public boolean isBlocked(Member member, Long blockedMemberId) {
+        return memberBlockRepository.existsByMemberIdAndBlockedMemberId(member.getId(),
+            blockedMemberId);
     }
 }
