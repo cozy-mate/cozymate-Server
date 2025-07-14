@@ -70,4 +70,5 @@ public class MemberBlockController {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             memberBlockQueryService.isBlocked(memberDetails.member(), memberId)));
     }
+
 }
