@@ -3,6 +3,8 @@ package com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.que
 import static com.cozymate.cozymate_server.domain.member.QMember.member;
 import static com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.QLifestyleMatchRate.lifestyleMatchRate;
 import static com.cozymate.cozymate_server.domain.memberstat.memberstat.QMemberStat.memberStat;
+import static com.cozymate.cozymate_server.domain.memberblock.QMemberBlock.memberBlock;
+import static com.querydsl.jpa.JPAExpressions.selectOne;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
@@ -39,11 +41,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository {
 
-    private final JPAQueryFactory queryFactory;
-
     private static final String NUM_OF_ROOMMATE_NOT_DETERMINED = "0";
     private static final String[] MULTI_ANSWERS = {"personalities", "sleepingHabits"};
     private static final String NUM_OF_ROOMMATE = "numOfRoommate";
+    private final JPAQueryFactory queryFactory;
 
     @Override
     public Slice<Map<MemberStat, Integer>> filterByLifestyleAttributeList(
@@ -64,11 +65,15 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
     }
 
     // 상세 검색 필터링에 대한 멤버 개수 표시
+    // 내가 차단한 사용자는 제외하고 가져옴
     @Override
     public int countAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
         Map<String, List<?>> filterMap) {
         return createBaseQuery(criteriaMemberStat)
-            .where(applyFilters(filterMap, criteriaMemberStat))
+            .where(
+                applyFilters(filterMap, criteriaMemberStat),
+                blockFilter(criteriaMemberStat)
+            )
             .fetch()
             .size();
     }
@@ -79,7 +84,10 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         String substring) {
 
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
-            .where(memberStat.member.nickname.like("%" + substring + "%")) // 닉네임 조건 추가
+            .where(
+                memberStat.member.nickname.like("%" + substring + "%"),
+                blockFilter(criteriaMemberStat)
+            ) // 닉네임 조건 추가
             .orderBy(lifestyleMatchRate.matchRate.desc(),
                 member.nickname.asc(),
                 memberStat.id.asc())
@@ -101,8 +109,12 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
         MemberStat criteriaMemberStat, BooleanBuilder filters, Pageable pageable) {
 
         // pageSize + 1만큼 데이터를 조회하여 다음 페이지 여부 확인
+        // 내가 차단한 사용자는 제외하고 가져옴
         List<Tuple> results = createBaseQuery(criteriaMemberStat)
-            .where(filters)
+            .where(
+                filters,
+                blockFilter(criteriaMemberStat)
+            )
             .orderBy(lifestyleMatchRate.matchRate.desc(), member.nickname.asc(),
                 memberStat.id.asc())
             .offset(pageable.getOffset())
@@ -256,7 +268,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
 
 
     // 다중 선택 요소들의 필터(성격, 잠버릇)
-    private BooleanExpression handleMultiAnswersContentFilter(NumberPath<Integer> path, Object filterValue) {
+    private BooleanExpression handleMultiAnswersContentFilter(NumberPath<Integer> path,
+        Object filterValue) {
         if (filterValue instanceof Integer value) {
             List<Integer> matchingValues = getMatchingValues(value);
             return matchingValues.isEmpty() ? Expressions.TRUE : path.in(matchingValues);
@@ -284,8 +297,6 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             .boxed()
             .collect(Collectors.toList());
     }
-
-
 
 
     // 인실에 대한 필터(예외 경우의 수 처리)
@@ -405,7 +416,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "majorName" -> criteriaMemberStat.getMember().getMajorName();
             case "birthYear" -> criteriaMemberStat.getMember().getBirthDay();
 
-            case "dormJoiningStatus" -> criteriaMemberStat.getMemberUniversityStat().getAcceptance();
+            case "dormJoiningStatus" ->
+                criteriaMemberStat.getMemberUniversityStat().getAcceptance();
             case "admissionYear" -> criteriaMemberStat.getMemberUniversityStat().getAdmissionYear();
             case "numOfRoommate" ->
                 criteriaMemberStat.getMemberUniversityStat().getNumberOfRoommate();
@@ -416,8 +428,7 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "turnOffTime" -> criteriaMemberStat.getLifestyle().getTurnOffTime();
             case "smokingStatus" -> criteriaMemberStat.getLifestyle().getSmokingStatus();
             case "sleepingHabits" -> criteriaMemberStat.getLifestyle().getSleepingHabit();
-            case "coolingIntensity" ->
-                criteriaMemberStat.getLifestyle().getCoolingIntensity();
+            case "coolingIntensity" -> criteriaMemberStat.getLifestyle().getCoolingIntensity();
             case "heatingIntensity" -> criteriaMemberStat.getLifestyle().getHeatingIntensity();
             case "lifePattern" -> criteriaMemberStat.getLifestyle().getLifePattern();
             case "intimacy" -> criteriaMemberStat.getLifestyle().getIntimacy();
@@ -426,7 +437,8 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "callingStatus" -> criteriaMemberStat.getLifestyle().getPhoneCallingFrequency();
             case "studyingStatus" -> criteriaMemberStat.getLifestyle().getStudyingFrequency();
             case "eatingStatus" -> criteriaMemberStat.getLifestyle().getEatingFrequency();
-            case "cleannessSensitivity" -> criteriaMemberStat.getLifestyle().getCleannessSensitivity();
+            case "cleannessSensitivity" ->
+                criteriaMemberStat.getLifestyle().getCleannessSensitivity();
             case "noiseSensitivity" -> criteriaMemberStat.getLifestyle().getNoiseSensitivity();
             case "cleaningFrequency" -> criteriaMemberStat.getLifestyle().getCleaningFrequency();
             case "drinkingFrequency" -> criteriaMemberStat.getLifestyle().getDrinkingFrequency();
@@ -434,6 +446,16 @@ public class MemberStatQueryRepositoryImpl implements MemberStatQueryRepository 
             case "mbti" -> criteriaMemberStat.getLifestyle().getMbti();
             default -> null;
         };
+    }
+
+    private BooleanBuilder blockFilter(MemberStat criteriaMemberStat) {
+        return new BooleanBuilder()
+            .and(selectOne()
+                .from(memberBlock)
+                .where(
+                    (memberBlock.member.id.eq(criteriaMemberStat.getMember().getId())
+                        .and(memberBlock.blockedMember.id.eq(memberStat.member.id)))
+                ).notExists());
     }
 
 

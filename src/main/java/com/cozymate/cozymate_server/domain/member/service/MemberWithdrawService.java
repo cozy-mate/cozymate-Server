@@ -11,6 +11,7 @@ import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
+import com.cozymate.cozymate_server.domain.memberblock.repository.MemberBlockRepository;
 import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
@@ -64,6 +65,7 @@ public class MemberWithdrawService {
 
     private final InquiryRepository inquiryRepository;
     private final TodoCommandService todoCommandService;
+    private final MemberBlockRepository memberBlockRepository;
 
 
     /**
@@ -124,6 +126,9 @@ public class MemberWithdrawService {
         mateRepository.deleteAllByMemberId(member.getId());
 
         log.debug("mate 삭제 완료");
+
+        memberBlockRepository.deleteAllByMemberIdOrBlockedMemberId(member.getId());
+        log.debug("회원 차단 내역 삭제 완료");
 
     }
 

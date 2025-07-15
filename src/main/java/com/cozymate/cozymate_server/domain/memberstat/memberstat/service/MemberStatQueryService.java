@@ -144,7 +144,7 @@ public class MemberStatQueryService {
         );
 
         Slice<Map<MemberStat, Integer>> result = memberStatRepositoryService.getMemberStatListByFilteredIds(
-            cachedMap, pageable);
+            member, cachedMap, pageable);
 
         return getPageResponseOrEmpty(
             result,
@@ -242,6 +242,7 @@ public class MemberStatQueryService {
     @Transactional(readOnly = true)
     public List<MemberStatSearchResponseDTO> getMemberSearchResponse(Member viewer,
         String keyword) {
+        // 내가 차단한 사용자는 제외하고 가져옴
         return memberStatRepositoryService.getMemberStatOptional(viewer.getId())
             .map(criteriaStat -> memberStatRepositoryService.getMemberStatByKeywordWithMatchRate(
                     criteriaStat, keyword)

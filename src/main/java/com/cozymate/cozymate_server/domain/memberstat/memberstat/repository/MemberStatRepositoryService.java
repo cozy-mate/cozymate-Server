@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.memberstat.memberstat.repository;
 
 
+import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -73,6 +74,7 @@ public class MemberStatRepositoryService {
      * @return Slice<Map < MemberStat, Integer>>
      */
     public Slice<Map<MemberStat, Integer>> getMemberStatListByFilteredIds(
+        Member member,
         Map<Long, Integer> idToMatchRate,
         Pageable pageable
     ) {
@@ -86,7 +88,7 @@ public class MemberStatRepositoryService {
         boolean hasNext = end < sortedUserIds.size();
 
         // 3. DB 조회
-        List<MemberStat> memberStats = memberStatRepository.findAllByMemberIds(pagedUserIds);
+        List<MemberStat> memberStats = memberStatRepository.findAllByMemberIds(member.getId(), pagedUserIds);
 
         // 4. userId → MemberStat 매핑
         Map<Long, MemberStat> idToStat = memberStats.stream()
@@ -133,6 +135,7 @@ public class MemberStatRepositoryService {
      */
     public Integer getNumberOfMemberStatByAttributeAndValuesMap(MemberStat criteriaMemberStat,
         Map<String, List<?>> attributeAndValueMap) {
+
         return memberStatRepository.countAdvancedFilteredMemberStat(criteriaMemberStat,
             attributeAndValueMap);
     }

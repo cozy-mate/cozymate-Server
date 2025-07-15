@@ -17,16 +17,6 @@ public class MemberBlockUtil {
     private final MateRepository mateRepository;
 
     /**
-     * @param member          : 로그인 사용자
-     * @param blockedMemberId : 차단된 사용자인지 확인 대상 멤버id
-     * @return 차단된 사용자 : true, 차단되지 않은 사용자 : false
-     */
-    public boolean existsMemberBlock(Member member, Long blockedMemberId) {
-        return memberBlockRepository.existsByMemberIdAndBlockedMemberId(member.getId(),
-            blockedMemberId);
-    }
-
-    /**
      *
      * @param targetList : memberId를 가지는 클래스 타입의 리스트
      * @param member : 로그인 사용자

@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.querydsl;
 
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +25,7 @@ public interface MemberStatQueryRepository {
     int countAdvancedFilteredMemberStat(MemberStat criteriaMemberStat,
         Map<String, List<?>> filterMap);
 
-    Map<MemberStat, Integer> getMemberStatsWithKeywordAndMatchRate(MemberStat criteriaMemberStat,String substring);
+    Map<MemberStat, Integer> getMemberStatsWithKeywordAndMatchRate(MemberStat criteriaMemberStat,
+        String substring);
 
 }
