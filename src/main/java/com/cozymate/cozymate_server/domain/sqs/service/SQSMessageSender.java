@@ -34,8 +34,7 @@ public class SQSMessageSender {
             SendResult<String> sendResult = sqsTemplate.send(to -> to
                 .queue(QUEUE_NAME)
                 .payload(payload));
-
-            log.info("SQS 메시지 전송 성공, 메시지 id : {}", sendResult.messageId());
+            log.info("SQS 메시지 전송 성공. 메시지 id : {}", sendResult.messageId());
         } catch (Exception e) {
             log.error("SQS 메시지 전송 실패. payload: {}, 이유: {}", payload, e.getMessage(), e);
         }

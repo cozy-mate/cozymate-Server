@@ -23,4 +23,9 @@ public interface FcmRepository extends JpaRepository<Fcm, String> {
     @Modifying
     @Query("delete from Fcm f where f.member.id = :memberId")
     void deleteAllByMemberId(@Param("memberId") Long memberId);
+
+    @Transactional
+    @Modifying
+    @Query("update Fcm f set f.isValid = false where f.token in :tokenList")
+    void updateValidByTokenList(@Param("tokenList") List<String> tokenList);
 }

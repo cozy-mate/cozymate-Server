@@ -47,7 +47,6 @@ public class SQSMessageCreator {
 
     /**
      * ACCEPT_ROOM_INVITE
-     * ARRIVE_ROOM_JOIN_REQUEST
      * ACCEPT_ROOM_JOIN
      */
     public SQSMessageResult create(Member contentMember, Member recipientMember,
@@ -92,6 +91,7 @@ public class SQSMessageCreator {
 
     /**
      * REJECT_ROOM_INVITE
+     * ARRIVE_ROOM_JOIN_REQUEST
      */
     public SQSMessageResult createWithMemberId(Member contentMember, Member recipientMember,
         NotificationType notificationType) {
