@@ -37,8 +37,11 @@ public class ReportAdminService {
                     String reportedMemberNickname = reportedMember
                         .map(Member::getNickname)
                         .orElse("[탈퇴한 유저]");
+                    boolean isBannedReportedMember = reportedMember
+                        .map(Member::isBanned)
+                        .orElse(false);
                     return ReportAdminConverter.toReportAdminResponseDTO(report,
-                        reportedMemberNickname);
+                        reportedMemberNickname, isBannedReportedMember);
                 }
             )
             .toList();
@@ -60,7 +63,11 @@ public class ReportAdminService {
         String reportedMemberNickname = reportedMember
             .map(Member::getNickname)
             .orElse("[탈퇴한 유저]");
-        return ReportAdminConverter.toReportAdminResponseDTO(report, reportedMemberNickname);
+        boolean isBannedReportedMember = reportedMember
+            .map(Member::isBanned)
+            .orElse(false);
+        return ReportAdminConverter.toReportAdminResponseDTO(report, reportedMemberNickname,
+            isBannedReportedMember);
     }
 
     @Transactional

@@ -13,7 +13,8 @@ public record ReportAdminResponseDTO(
     String reportReason,
     String reportSource,
     String content,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    boolean isBanned
 ) {
 
 }

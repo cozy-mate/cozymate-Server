@@ -8,7 +8,7 @@ import java.util.Optional;
 public class ReportAdminConverter {
 
     public static ReportAdminResponseDTO toReportAdminResponseDTO(Report report,
-        String reportedNickname) {
+        String reportedNickname, boolean isBanned) {
         return ReportAdminResponseDTO.builder()
             .reportId(report.getId())
             .reporterMemberId(Optional.ofNullable(report.getReporter())
@@ -23,6 +23,7 @@ public class ReportAdminConverter {
             .reportSource(report.getReportSource().toString())
             .content(report.getContent())
             .createdAt(report.getCreatedAt())
+            .isBanned(isBanned)
             .build();
     }
 
