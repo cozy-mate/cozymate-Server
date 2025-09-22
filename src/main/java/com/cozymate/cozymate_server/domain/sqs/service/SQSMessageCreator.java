@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.sqs.service;
 
-import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
+import com.cozymate.cozymate_server.domain.messageroom.MessageRoom;
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.content.FcmPushContentDTO;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
@@ -115,21 +115,21 @@ public class SQSMessageCreator {
      * ARRIVE_CHAT
      */
     public SQSMessageResult createWithChatRoomId(Member sender, Member recipient,
-        String chatContent, ChatRoom chatRoom, NotificationType notificationType) {
+        String chatContent, MessageRoom messageRoom, NotificationType notificationType) {
         List<Fcm> fcmList = getFcmList(recipient);
 
         String notificationContent = getContent(sender, notificationType, chatContent);
 
         NotificationLog notificationLog = notificationType.generateNotificationLog(
             NotificationLogCreateDTO.createNotificationLogCreateDTO(recipient, sender,
-                notificationContent, chatRoom));
+                notificationContent, messageRoom));
 
         if (fcmList.isEmpty()) {
             return getEmptySQSMessageResult(notificationLog);
         }
 
         return getMessageResultWithChatRoomId(fcmList, notificationContent, notificationType,
-            notificationLog, chatRoom);
+            notificationLog, messageRoom);
     }
 
 
@@ -224,7 +224,7 @@ public class SQSMessageCreator {
     }
 
     private SQSMessageResult getMessageResultWithChatRoomId(List<Fcm> fcmList, String content,
-        NotificationType notificationType, NotificationLog notificationLog, ChatRoom chatRoom) {
+        NotificationType notificationType, NotificationLog notificationLog, MessageRoom messageRoom) {
 
         List<FcmSQSMessage> fcmSQSMessageList = fcmList.stream()
             .map(fcm -> {
@@ -235,7 +235,7 @@ public class SQSMessageCreator {
                     .body(content)
                     .actionType(String.valueOf(notificationType))
                     .deviceToken(token)
-                    .chatRoomId(chatRoom.getId().toString())
+                    .messageRoomId(messageRoom.getId().toString())
                     .build();
 
                 return fcmSqsMessage;

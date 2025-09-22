@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.fcm.service;
 
-import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
+import com.cozymate.cozymate_server.domain.messageroom.MessageRoom;
 import com.cozymate.cozymate_server.domain.fcm.Fcm;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.content.FcmPushContentDTO;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepository;
@@ -121,7 +121,7 @@ public class MessageUtil {
     }
 
     public MessageResult createMessage(Member sender, Member recipient, String chatContent,
-        NotificationType notificationType, ChatRoom chatRoom) {
+        NotificationType notificationType, MessageRoom messageRoom) {
         List<Fcm> fcmList = getFcmList(recipient);
 
         if (fcmList.isEmpty()) {
@@ -132,9 +132,9 @@ public class MessageUtil {
 
         NotificationLog notificationLog = notificationType.generateNotificationLog(
             NotificationLogCreateDTO.createNotificationLogCreateDTO(recipient, sender, content,
-                chatRoom));
+                messageRoom));
 
-        return getMessageResult(fcmList, content, notificationType, notificationLog, chatRoom);
+        return getMessageResult(fcmList, content, notificationType, notificationLog, messageRoom);
     }
 
     public MulticastMessage createMessage(List<String> fcmTokenValueList, String content) {
@@ -287,7 +287,7 @@ public class MessageUtil {
     }
 
     private MessageResult getMessageResult(List<Fcm> fcmList, String content,
-        NotificationType notificationType, NotificationLog notificationLog, ChatRoom chatRoom) {
+        NotificationType notificationType, NotificationLog notificationLog, MessageRoom messageRoom) {
         Map<Message, String> messageTokenMap = new HashMap<>();
 
         List<Message> messages = fcmList.stream()
@@ -297,7 +297,7 @@ public class MessageUtil {
                 Map<String, String> messageMap = new HashMap<>();
                 messageMap.put("title", NOTIFICATION_TITLE);
                 messageMap.put("body", content);
-                messageMap.put("chatRoomId", chatRoom.getId().toString());
+                messageMap.put("messageRoomId", messageRoom.getId().toString());
                 messageMap.put("actionType", String.valueOf(notificationType));
 
                 Notification notification = Notification.builder()

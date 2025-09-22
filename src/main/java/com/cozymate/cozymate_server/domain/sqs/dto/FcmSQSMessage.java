@@ -11,7 +11,7 @@ public record FcmSQSMessage(
 
     // 상황별 키 (선택적 필드)
     String memberId,
-    String chatRoomId,
+    String messageRoomId,
     String roomId
 ) {
 }

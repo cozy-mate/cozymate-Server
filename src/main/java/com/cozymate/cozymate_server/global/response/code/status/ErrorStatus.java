@@ -100,14 +100,14 @@ public enum ErrorStatus implements BaseErrorCode {
     _MEMBERSTAT_PREFERENCE_PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "MEMBERSTATPREFERENCE401",
         "존재하지 않는 멤버 항목(들)입니다."),
 
-    // ChatRoom 관련 에러
-    _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "쪽지방을 찾을 수 없습니다."),
-    _CHATROOM_FORBIDDEN(HttpStatus.BAD_REQUEST, "CHATROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
-    _CHATROOM_MEMBERB_REQUIRED_WHEN_MEMBERA_NULL(HttpStatus.BAD_REQUEST, "CHATROOM402",
+    // MessageRoom 관련 에러
+    _MESSAGEROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "MESSAGEROOM400", "쪽지방을 찾을 수 없습니다."),
+    _MESSAGEROOM_FORBIDDEN(HttpStatus.BAD_REQUEST, "MESSAGEROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
+    _MESSAGEROOM_MEMBERB_REQUIRED_WHEN_MEMBERA_NULL(HttpStatus.BAD_REQUEST, "MESSAGEROOM402",
         "해당 쪽지방의 MemberA가 null이고, 현재 요청 Member가 ChatRoom의 MemberB가 아닙니다."),
-    _CHATROOM_MEMBERA_REQUIRED_WHEN_MEMBERB_NULL(HttpStatus.BAD_REQUEST, "CHATROOM403",
+    _MESSAGEROOM_MEMBERA_REQUIRED_WHEN_MEMBERB_NULL(HttpStatus.BAD_REQUEST, "MESSAGEROOM403",
         "해당 쪽지방의 MemberB가 null이고, 현재 요청 Member가 ChatRoom의 MemberA가 아닙니다."),
-    _CHATROOM_INVALID_MEMBER(HttpStatus.BAD_REQUEST, "CHATROOM404",
+    _MESSAGEROOM_INVALID_MEMBER(HttpStatus.BAD_REQUEST, "MESSAGEROOM404",
         "해당 쪽지방의 두 Member가 모두 null이 아니고, 현재 요청 Member가 MemberA, MemberB 둘다 아닙니다."),
 
     // Mate 관련
@@ -115,9 +115,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _MATE_OR_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "MATE401", "해당하는 메이트나 방 정보가 없습니다."),
     _MATE_NOT_IN_SAME_ROOM(HttpStatus.BAD_REQUEST, "MATE402", "같은 방이 아닌 메이트가 있습니다."),
 
-    // Chat 관련 에러
-    _CHAT_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHAT400", "쪽지를 찾을 수 없습니다."),
-    _CHAT_NOT_FOUND_RECIPIENT(HttpStatus.BAD_REQUEST, "CHAT401", "존재하지 않는 수신인입니다."),
+    // Message 관련 에러
+    _MESSAGE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MESSAGE400", "쪽지를 찾을 수 없습니다."),
+    _MESSAGE_NOT_FOUND_RECIPIENT(HttpStatus.BAD_REQUEST, "MESSAGE401", "존재하지 않는 수신인입니다."),
 
     // Rule 관련
     _RULE_NOT_FOUND(HttpStatus.BAD_REQUEST, "RULE400", "해당하는 Rule이 없습니다."),

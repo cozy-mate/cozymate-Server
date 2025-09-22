@@ -91,10 +91,10 @@ public class FcmPushService {
         Member recipientMember = target.recipientMember();
         NotificationType notificationType = target.notificationType();
 
-        if (NotificationType.ARRIVE_CHAT.equals(notificationType)) {
+        if (NotificationType.ARRIVE_MESSAGE.equals(notificationType)) {
             sendNotificationToMember(
                 messageUtil.createMessage(contentMember, recipientMember, target.chatContent(),
-                    notificationType, target.chatRoom()));
+                    notificationType, target.messageRoom()));
         } else if (NotificationType.REJECT_ROOM_JOIN.equals(notificationType)) {
             sendNotificationToMember(
                 messageUtil.createMessage(contentMember, target.room(), recipientMember,

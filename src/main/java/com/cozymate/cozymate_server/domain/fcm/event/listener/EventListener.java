@@ -181,10 +181,10 @@
 //    public void sendNotification(SentChatEvent event) {
 //        Member sender = event.sender();
 //        Member recipient = event.recipient();
-//        ChatRoom chatRoom = event.chatRoom();
+//        ChatRoom messageRoom = event.messageRoom();
 //
 //        OneTargetReverseDTO oneTargetReverseDTO = OneTargetReverseDTO.create(sender, recipient,
-//            NotificationType.ARRIVE_CHAT, event.content(), chatRoom);
+//            NotificationType.ARRIVE_CHAT, event.content(), messageRoom);
 //
 //        fcmPushService.sendNotification(oneTargetReverseDTO);
 //    }
