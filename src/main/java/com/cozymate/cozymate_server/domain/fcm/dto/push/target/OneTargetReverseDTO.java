@@ -18,7 +18,7 @@ public record OneTargetReverseDTO(
     Member recipientMember,
     NotificationType notificationType,
     Room room,
-    String chatContent,
+    String messageContent,
     MessageRoom messageRoom
 ) {
 
@@ -35,8 +35,8 @@ public record OneTargetReverseDTO(
     }
 
     public static OneTargetReverseDTO create(Member contentMember, Member recipientMember,
-        NotificationType notificationType, String chatContent, MessageRoom messageRoom) {
+        NotificationType notificationType, String messageContent, MessageRoom messageRoom) {
         return new OneTargetReverseDTO(contentMember, recipientMember, notificationType, null,
-            chatContent, messageRoom);
+            messageContent, messageRoom);
     }
 }

@@ -4,7 +4,7 @@ import com.cozymate.cozymate_server.domain.messageroom.MessageRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 
 @SuppressWarnings("NonAsciiCharacters")
-public class ChatRoomFixture {
+public class MessageRoomFixture {
 
     // 정상 더미데이터, 멤버 둘다 탈퇴하지 않은 경우
     public static MessageRoom 정상_1(Member memberA, Member memberB) {

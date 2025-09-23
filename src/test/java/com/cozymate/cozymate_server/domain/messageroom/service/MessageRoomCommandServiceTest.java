@@ -10,8 +10,8 @@ import com.cozymate.cozymate_server.domain.messageroom.dto.response.MessageRoomI
 import com.cozymate.cozymate_server.domain.messageroom.repository.MessageRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.messageroom.validator.MessageRoomValidator;
 import com.cozymate.cozymate_server.domain.member.Member;
-import com.cozymate.cozymate_server.fixture.ChatFixture;
-import com.cozymate.cozymate_server.fixture.ChatRoomFixture;
+import com.cozymate.cozymate_server.fixture.MessageFixture;
+import com.cozymate.cozymate_server.fixture.MessageRoomFixture;
 import com.cozymate.cozymate_server.fixture.MemberFixture;
 import com.cozymate.cozymate_server.fixture.UniversityFixture;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -50,14 +50,14 @@ class MessageRoomCommandServiceTest {
     void setUp() {
         memberA = MemberFixture.정상_1(UniversityFixture.createTestUniversity());
         memberB = MemberFixture.정상_2(UniversityFixture.createTestUniversity());
-        messageRoom = ChatRoomFixture.정상_1(memberA, memberB);
+        messageRoom = MessageRoomFixture.정상_1(memberA, memberB);
     }
 
     @Nested
     class saveMessageRoom {
 
         @Test
-        @DisplayName("ChatRoom 저장에 성공한다.")
+        @DisplayName("MessageRoom 저장에 성공한다.")
         void success_when_valid_input() {
             // given
             given(messageRoomRepositoryService.createMessageRoom(any(MessageRoom.class))).willReturn(
@@ -84,16 +84,16 @@ class MessageRoomCommandServiceTest {
 
         @BeforeEach
         void setUp() {
-            memberAMessage1 = ChatFixture.정상_6(memberA, messageRoom);
-            memberBMessage1 = ChatFixture.정상_7(memberB, messageRoom);
-            memberAMessage2 = ChatFixture.정상_8(memberA, messageRoom);
+            memberAMessage1 = MessageFixture.정상_6(memberA, messageRoom);
+            memberBMessage1 = MessageFixture.정상_7(memberB, messageRoom);
+            memberAMessage2 = MessageFixture.정상_8(memberA, messageRoom);
 
-            memberBIsNullMessageRoom = ChatRoomFixture.정상_4(memberA);
-            memberAIsNullMessageRoom = ChatRoomFixture.정상_5(memberB);
+            memberBIsNullMessageRoom = MessageRoomFixture.정상_4(memberA);
+            memberAIsNullMessageRoom = MessageRoomFixture.정상_5(memberB);
         }
 
         @Test
-        @DisplayName("memberA가 ChatRoom을 삭제할 때 memberB의 LastDeleteAt이 null인 경우, ChatRoom을 논리적으로 삭제한다.")
+        @DisplayName("memberA가 MessageRoom을 삭제할 때 memberB의 LastDeleteAt이 null인 경우, MessageRoom을 논리적으로 삭제한다.")
         void success_when_memberB_lastDeleteAt_is_null() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(messageRoom.getId())).willReturn(
@@ -114,7 +114,7 @@ class MessageRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberB가 ChatRoom을 삭제할 때 memberA의 LastDeleteAt이 null인 경우, ChatRoom을 논리적으로 삭제한다.")
+        @DisplayName("memberB가 MessageRoom을 삭제할 때 memberA의 LastDeleteAt이 null인 경우, MessageRoom을 논리적으로 삭제한다.")
         void success_when_memberA_lastDeleteAt_is_null() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(messageRoom.getId())).willReturn(
@@ -135,8 +135,8 @@ class MessageRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberA가 ChatRoom을 삭제할 때, memberB의 LastDeleteAt이 존재하면서 이후에 생성된 Chat이 존재하는 경우, ChatRoom을 논리적으로 삭제한다.")
-        void success_when_memberB_lastDeleteAt_exists_and_newer_chat_exists() {
+        @DisplayName("memberA가 MessageRoom을 삭제할 때, memberB의 LastDeleteAt이 존재하면서 이후에 생성된 Message이 존재하는 경우, MessageRoom을 논리적으로 삭제한다.")
+        void success_when_memberB_lastDeleteAt_exists_and_newer_message_exists() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(messageRoom.getId())).willReturn(
                 messageRoom);
@@ -157,8 +157,8 @@ class MessageRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberB가 ChatRoom을 삭제할 때, memberA의 LastDeleteAt이 존재하면서 이후에 생성된 Chat이 존재하는 경우, ChatRoom을 논리적으로 삭제한다.")
-        void success_when_memberA_lastDeleteAt_exists_and_newer_chat_exists() {
+        @DisplayName("memberB가 MessageRoom을 삭제할 때, memberA의 LastDeleteAt이 존재하면서 이후에 생성된 Message이 존재하는 경우, MessageRoom을 논리적으로 삭제한다.")
+        void success_when_memberA_lastDeleteAt_exists_and_newer_message_exists() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(messageRoom.getId())).willReturn(
                 messageRoom);
@@ -179,8 +179,8 @@ class MessageRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberA가 ChatRoom을 삭제할 때, 마지막 Chat 생성일이 두 멤버의 LastDeleteAt 이전인 경우, ChatRoom과 해당 ChatRoom의 Chat을 물리적으로 삭제한다.")
-        void success_memberA_criteria_when_lastChat_is_before_both_lastDeleteAt() {
+        @DisplayName("memberA가 MessageRoom을 삭제할 때, 마지막 Message 생성일이 두 멤버의 LastDeleteAt 이전인 경우, MessageRoom과 해당 MessageRoom의 Message을 물리적으로 삭제한다.")
+        void success_memberA_criteria_when_lastMessage_is_before_both_lastDeleteAt() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(messageRoom.getId())).willReturn(
                 messageRoom);
@@ -201,8 +201,8 @@ class MessageRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberB가 ChatRoom을 삭제할 때, 마지막 Chat 생성일이 두 멤버의 LastDeleteAt 이전인 경우, ChatRoom과 해당 ChatRoom의 Chat을 물리적으로 삭제한다.")
-        void success_memberB_criteria_when_lastChat_is_before_both_lastDeleteAt_memberB_기준() {
+        @DisplayName("memberB가 MessageRoom을 삭제할 때, 마지막 Message 생성일이 두 멤버의 LastDeleteAt 이전인 경우, MessageRoom과 해당 MessageRoom의 Message을 물리적으로 삭제한다.")
+        void success_memberB_criteria_when_lastMessage_is_before_both_lastDeleteAt_memberB_기준() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(messageRoom.getId())).willReturn(
                 messageRoom);
@@ -223,7 +223,7 @@ class MessageRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberA가 ChatRoom을 삭제할 때, memberB가 탈퇴(null)인 경우, ChatRoom과 해당 ChatRoom의 Chat을 물리적으로 삭제한다.")
+        @DisplayName("memberA가 MessageRoom을 삭제할 때, memberB가 탈퇴(null)인 경우, MessageRoom과 해당 MessageRoom의 Message을 물리적으로 삭제한다.")
         void success_when_memberB_is_null() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(
@@ -245,7 +245,7 @@ class MessageRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("memberB가 ChatRoom을 삭제할 때, memberA가 탈퇴(null)인 경우, ChatRoom과 해당 ChatRoom의 Chat을 물리적으로 삭제한다.")
+        @DisplayName("memberB가 MessageRoom을 삭제할 때, memberA가 탈퇴(null)인 경우, MessageRoom과 해당 MessageRoom의 Message을 물리적으로 삭제한다.")
         void success_when_memberA_is_null() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(
@@ -268,8 +268,8 @@ class MessageRoomCommandServiceTest {
         }
 
         @Test
-        @DisplayName("ChatRoom의 Member가 아닌 경우 예외가 발생한다.")
-        void failure_when_member_is_not_part_of_chatroom() {
+        @DisplayName("MessageRoom의 Member가 아닌 경우 예외가 발생한다.")
+        void failure_when_member_is_not_part_of_messageroom() {
             // given
             given(messageRoomRepositoryService.getMessageRoomByIdOrThrow(messageRoom.getId())).willReturn(
                 messageRoom);

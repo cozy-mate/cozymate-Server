@@ -32,9 +32,9 @@ public class MessageQueryService {
     private static final String SELF_INDICATOR = " (나)";
 
     @Transactional
-    public PageResponseDto<MessageListResponseDTO> getMessageList(Member member, Long chatRoomId,
+    public PageResponseDto<MessageListResponseDTO> getMessageList(Member member, Long messageRoomId,
         int page, int size) {
-        MessageRoom messageRoom = messageRoomRepositoryService.getMessageRoomByIdOrThrow(chatRoomId);
+        MessageRoom messageRoom = messageRoomRepositoryService.getMessageRoomByIdOrThrow(messageRoomId);
 
         messageValidator.checkMemberMisMatch(member, messageRoom);
 

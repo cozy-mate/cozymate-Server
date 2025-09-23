@@ -120,7 +120,7 @@ public class MessageUtil {
         return getMessageResult(fcmList, content, notificationType, notificationLog);
     }
 
-    public MessageResult createMessage(Member sender, Member recipient, String chatContent,
+    public MessageResult createMessage(Member sender, Member recipient, String messageContent,
         NotificationType notificationType, MessageRoom messageRoom) {
         List<Fcm> fcmList = getFcmList(recipient);
 
@@ -128,7 +128,7 @@ public class MessageUtil {
             return getEmptyMessageResult();
         }
 
-        String content = getContent(sender, notificationType, chatContent);
+        String content = getContent(sender, notificationType, messageContent);
 
         NotificationLog notificationLog = notificationType.generateNotificationLog(
             NotificationLogCreateDTO.createNotificationLogCreateDTO(recipient, sender, content,

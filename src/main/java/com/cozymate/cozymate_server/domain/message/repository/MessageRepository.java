@@ -37,6 +37,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     @Query("select m from Message m where m.messageRoom = :messageRoom "
         + "and m.createdAt > :lastDeleteAt")
-    Slice<Message> findPagingByChatRoomAndLastDeleteAt(@Param("messageRoom") MessageRoom messageRoom,
+    Slice<Message> findPagingByMessageRoomAndLastDeleteAt(@Param("messageRoom") MessageRoom messageRoom,
         LocalDateTime lastDeleteAt, Pageable pageable);
 }

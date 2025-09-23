@@ -1,17 +1,17 @@
 //package com.cozymate.cozymate_server.domain.fcm.event.listener;
 //
-//import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
 //import com.cozymate.cozymate_server.domain.fcm.dto.push.target.GroupRoomNameWithOutMeTargetDTO;
 //import com.cozymate.cozymate_server.domain.fcm.dto.push.target.HostAndMemberAndRoomTargetDTO;
 //import com.cozymate.cozymate_server.domain.fcm.dto.push.target.OneTargetReverseDTO;
 //import com.cozymate.cozymate_server.domain.fcm.event.AcceptedJoinEvent;
 //import com.cozymate.cozymate_server.domain.fcm.event.RejectedJoinEvent;
-//import com.cozymate.cozymate_server.domain.fcm.event.SentChatEvent;
+//import com.cozymate.cozymate_server.domain.fcm.event.SentMessageEvent;
 //import com.cozymate.cozymate_server.domain.fcm.service.FcmPushService;
 //import com.cozymate.cozymate_server.domain.mate.Mate;
 //import com.cozymate.cozymate_server.domain.mate.enums.EntryStatus;
 //import com.cozymate.cozymate_server.domain.mate.repository.MateRepository;
 //import com.cozymate.cozymate_server.domain.member.Member;
+//import com.cozymate.cozymate_server.domain.messageroom.MessageRoom;
 //import com.cozymate.cozymate_server.domain.notificationlog.enums.NotificationType;
 //import com.cozymate.cozymate_server.domain.room.Room;
 //import com.cozymate.cozymate_server.domain.fcm.event.AcceptedInvitationEvent;
@@ -178,13 +178,13 @@
 //    }
 //
 //    @TransactionalEventListener
-//    public void sendNotification(SentChatEvent event) {
+//    public void sendNotification(SentMessageEvent event) {
 //        Member sender = event.sender();
 //        Member recipient = event.recipient();
-//        ChatRoom messageRoom = event.messageRoom();
+//        MessageRoom messageRoom = event.messageRoom();
 //
 //        OneTargetReverseDTO oneTargetReverseDTO = OneTargetReverseDTO.create(sender, recipient,
-//            NotificationType.ARRIVE_CHAT, event.content(), messageRoom);
+//            NotificationType.ARRIVE_MESSAGE, event.content(), messageRoom);
 //
 //        fcmPushService.sendNotification(oneTargetReverseDTO);
 //    }

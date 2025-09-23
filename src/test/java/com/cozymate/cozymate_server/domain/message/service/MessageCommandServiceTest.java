@@ -11,8 +11,8 @@ import com.cozymate.cozymate_server.domain.messageroom.dto.response.MessageRoomI
 import com.cozymate.cozymate_server.domain.messageroom.repository.MessageRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepository;
-import com.cozymate.cozymate_server.fixture.ChatFixture;
-import com.cozymate.cozymate_server.fixture.ChatRoomFixture;
+import com.cozymate.cozymate_server.fixture.MessageFixture;
+import com.cozymate.cozymate_server.fixture.MessageRoomFixture;
 import com.cozymate.cozymate_server.fixture.MemberFixture;
 import com.cozymate.cozymate_server.fixture.UniversityFixture;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -50,17 +50,17 @@ class MessageCommandServiceTest {
     void setUp() {
         sender = MemberFixture.정상_1(UniversityFixture.createTestUniversity());
         recipient = MemberFixture.정상_2(UniversityFixture.createTestUniversity());
-        messageRoom = ChatRoomFixture.정상_1(sender, recipient);
-        message = ChatFixture.정상_1(sender, messageRoom);
-        createMessageRequestDTO = ChatFixture.정상_1_생성_요청_DTO(message);
+        messageRoom = MessageRoomFixture.정상_1(sender, recipient);
+        message = MessageFixture.정상_1(sender, messageRoom);
+        createMessageRequestDTO = MessageFixture.정상_1_생성_요청_DTO(message);
     }
 
     @Nested
     class createMessage {
 
         @Test
-        @DisplayName("둘 사이에 ChatRoom이 이미 존재하는 경우, 새로운 ChatRoom을 생성하지 않고 쪽지 작성에 성공한다.")
-        void success_when_chatroom_exists() {
+        @DisplayName("둘 사이에 MessageRoom이 이미 존재하는 경우, 새로운 MessageRoom을 생성하지 않고 쪽지 작성에 성공한다.")
+        void success_when_messageroom_exists() {
             // given
             given(memberRepository.findById(recipient.getId()))
                 .willReturn(Optional.of(recipient));
@@ -79,8 +79,8 @@ class MessageCommandServiceTest {
         }
 
         @Test
-        @DisplayName("둘 사이에 ChatRoom이 존재하지 않는 경우, 새로운 ChatRoom을 생성하고 쪽지 작성에 성공한다.")
-        void success_when_chatroom_does_not_exist() {
+        @DisplayName("둘 사이에 MessageRoom이 존재하지 않는 경우, 새로운 MessageRoom을 생성하고 쪽지 작성에 성공한다.")
+        void success_when_messageroom_does_not_exist() {
             // given
             given(memberRepository.findById(recipient.getId()))
                 .willReturn(Optional.of(recipient));

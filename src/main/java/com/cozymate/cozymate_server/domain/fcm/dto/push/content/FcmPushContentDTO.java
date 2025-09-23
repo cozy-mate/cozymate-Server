@@ -6,7 +6,7 @@ import java.util.List;
 
 public record FcmPushContentDTO(
     Member member,
-    String content, // roleContent or chatContent
+    String content, // roleContent or messageContent
     List<String> todoContents,
     Room room
 ) {

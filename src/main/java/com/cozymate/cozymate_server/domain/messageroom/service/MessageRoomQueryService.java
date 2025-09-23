@@ -156,7 +156,7 @@ public class MessageRoomQueryService {
     }
 
     private MessageRoomDetailResponseDTO toMessageRoomDetailResponseDTO(MessageRoom messageRoom, Member member,
-        Message message, boolean hasNewChat) {
+        Message message, boolean hasNewMessage) {
 
         // 상대가 탈퇴한 경우
         if (messageRoomValidator.isAnyMemberNullInMessageRoom(messageRoom)) {
@@ -164,6 +164,6 @@ public class MessageRoomQueryService {
                 message.getContent(), messageRoom.getId());
         }
 
-        return MessageRoomConverter.toMessageRoomDetailResponseDTO(member, message, messageRoom, hasNewChat);
+        return MessageRoomConverter.toMessageRoomDetailResponseDTO(member, message, messageRoom, hasNewMessage);
     }
 }

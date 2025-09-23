@@ -39,6 +39,6 @@ public class MessageRepositoryService {
 
     public Slice<Message> getMessageListByMessageRoomAndLastDeleteAt(MessageRoom messageRoom,
         LocalDateTime lastDeleteAt, Pageable pageable) {
-        return messageRepository.findPagingByChatRoomAndLastDeleteAt(messageRoom, lastDeleteAt, pageable);
+        return messageRepository.findPagingByMessageRoomAndLastDeleteAt(messageRoom, lastDeleteAt, pageable);
     }
 }

@@ -315,7 +315,7 @@ public class NotificationEventListener {
         MessageRoom messageRoom = event.messageRoom();
 
         //SQSMessageResult 생성
-        SQSMessageResult sqsMessageResult = sqsMessageCreator.createWithChatRoomId(sender,
+        SQSMessageResult sqsMessageResult = sqsMessageCreator.createWithMessageRoomId(sender,
             recipient, event.content(), messageRoom, NotificationType.ARRIVE_MESSAGE);
 
         // 알림 저장

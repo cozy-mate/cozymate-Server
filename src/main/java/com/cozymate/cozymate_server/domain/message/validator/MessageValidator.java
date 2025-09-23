@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class MessageValidator {
 
     public void checkMemberMisMatch(Member member, MessageRoom messageRoom) {
-        // ChatRoom의 MemberA가 null(탈퇴 회원)인 경우
+        // MessageRoom의 MemberA가 null(탈퇴 회원)인 경우
         if (isNullMember(messageRoom.getMemberA())) {
             if (!isSameMember(member, messageRoom.getMemberB())) {
                 throw new GeneralException(ErrorStatus._MESSAGEROOM_MEMBERB_REQUIRED_WHEN_MEMBERA_NULL);
@@ -21,7 +21,7 @@ public class MessageValidator {
             return;
         }
 
-        // ChatRoom의 MemberB가 null(탈퇴 회원)인 경우
+        // MessageRoom의 MemberB가 null(탈퇴 회원)인 경우
         if (isNullMember(messageRoom.getMemberB())) {
             if (!isSameMember(member, messageRoom.getMemberA())) {
                 throw new GeneralException(ErrorStatus._MESSAGEROOM_MEMBERA_REQUIRED_WHEN_MEMBERB_NULL);
@@ -29,7 +29,7 @@ public class MessageValidator {
             return;
         }
 
-        // ChatRoom의 두 Member가 모두 null(탈퇴 회원)이 아닌 경우, 현재 요청 Member가 MemberA, MemberB 둘다 아닌 경우
+        // MessageRoom의 두 Member가 모두 null(탈퇴 회원)이 아닌 경우, 현재 요청 Member가 MemberA, MemberB 둘다 아닌 경우
         if (!isSameMember(member, messageRoom.getMemberA())
             && !isSameMember(member, messageRoom.getMemberB())) {
             throw new GeneralException(ErrorStatus._MESSAGEROOM_INVALID_MEMBER);
@@ -52,7 +52,7 @@ public class MessageValidator {
         return Objects.isNull(deleteAt);
     }
 
-    public boolean isChatCreateAtAfterDeleteAt(Message message, LocalDateTime deleteAt) {
+    public boolean isMessageCreateAtAfterDeleteAt(Message message, LocalDateTime deleteAt) {
         return message.getCreatedAt().isAfter(deleteAt);
     }
 }

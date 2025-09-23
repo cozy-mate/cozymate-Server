@@ -112,13 +112,13 @@ public class SQSMessageCreator {
     }
 
     /**
-     * ARRIVE_CHAT
+     * ARRIVE_MESSAGE
      */
-    public SQSMessageResult createWithChatRoomId(Member sender, Member recipient,
-        String chatContent, MessageRoom messageRoom, NotificationType notificationType) {
+    public SQSMessageResult createWithMessageRoomId(Member sender, Member recipient,
+        String messageContent, MessageRoom messageRoom, NotificationType notificationType) {
         List<Fcm> fcmList = getFcmList(recipient);
 
-        String notificationContent = getContent(sender, notificationType, chatContent);
+        String notificationContent = getContent(sender, notificationType, messageContent);
 
         NotificationLog notificationLog = notificationType.generateNotificationLog(
             NotificationLogCreateDTO.createNotificationLogCreateDTO(recipient, sender,
@@ -128,7 +128,7 @@ public class SQSMessageCreator {
             return getEmptySQSMessageResult(notificationLog);
         }
 
-        return getMessageResultWithChatRoomId(fcmList, notificationContent, notificationType,
+        return getMessageResultWithMessageRoomId(fcmList, notificationContent, notificationType,
             notificationLog, messageRoom);
     }
 
@@ -142,8 +142,8 @@ public class SQSMessageCreator {
     }
 
     private String getContent(Member member, NotificationType notificationType,
-        String chatContent) {
-        return notificationType.generateContent(FcmPushContentDTO.create(member, chatContent));
+        String messageContent) {
+        return notificationType.generateContent(FcmPushContentDTO.create(member, messageContent));
     }
 
     private SQSMessageResult getSQSMessageResult(List<Fcm> fcmList, String content,
@@ -223,7 +223,7 @@ public class SQSMessageCreator {
         return sqsMessageResult;
     }
 
-    private SQSMessageResult getMessageResultWithChatRoomId(List<Fcm> fcmList, String content,
+    private SQSMessageResult getMessageResultWithMessageRoomId(List<Fcm> fcmList, String content,
         NotificationType notificationType, NotificationLog notificationLog, MessageRoom messageRoom) {
 
         List<FcmSQSMessage> fcmSQSMessageList = fcmList.stream()

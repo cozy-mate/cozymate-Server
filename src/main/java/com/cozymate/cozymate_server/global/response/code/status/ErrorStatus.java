@@ -104,9 +104,9 @@ public enum ErrorStatus implements BaseErrorCode {
     _MESSAGEROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "MESSAGEROOM400", "쪽지방을 찾을 수 없습니다."),
     _MESSAGEROOM_FORBIDDEN(HttpStatus.BAD_REQUEST, "MESSAGEROOM401", "해당 쪽지방을 삭제할 권한이 없습니다."),
     _MESSAGEROOM_MEMBERB_REQUIRED_WHEN_MEMBERA_NULL(HttpStatus.BAD_REQUEST, "MESSAGEROOM402",
-        "해당 쪽지방의 MemberA가 null이고, 현재 요청 Member가 ChatRoom의 MemberB가 아닙니다."),
+        "해당 쪽지방의 MemberA가 null이고, 현재 요청 Member가 MessageRoom의 MemberB가 아닙니다."),
     _MESSAGEROOM_MEMBERA_REQUIRED_WHEN_MEMBERB_NULL(HttpStatus.BAD_REQUEST, "MESSAGEROOM403",
-        "해당 쪽지방의 MemberB가 null이고, 현재 요청 Member가 ChatRoom의 MemberA가 아닙니다."),
+        "해당 쪽지방의 MemberB가 null이고, 현재 요청 Member가 MessageRoom의 MemberA가 아닙니다."),
     _MESSAGEROOM_INVALID_MEMBER(HttpStatus.BAD_REQUEST, "MESSAGEROOM404",
         "해당 쪽지방의 두 Member가 모두 null이 아니고, 현재 요청 Member가 MemberA, MemberB 둘다 아닙니다."),
 

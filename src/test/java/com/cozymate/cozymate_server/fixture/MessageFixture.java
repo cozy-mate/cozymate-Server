@@ -7,7 +7,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import java.time.LocalDateTime;
 
 @SuppressWarnings("NonAsciiCharacters")
-public class ChatFixture {
+public class MessageFixture {
 
     // 정상 더미데이터, content가 존재하는 경우
     public static Message 정상_1(Member member, MessageRoom messageRoom) {
@@ -50,7 +50,7 @@ public class ChatFixture {
         return message;
     }
 
-    // 정상 더미데이터, 탈퇴한 사용자에 대한 Chat인 경우
+    // 정상 더미데이터, 탈퇴한 사용자에 대한 Message인 경우
     public static Message 정상_4(MessageRoom messageRoom) {
         Message message = Message.builder()
             .id(4L)
@@ -64,7 +64,7 @@ public class ChatFixture {
         return message;
     }
 
-    // 정상 더미데이터, 탈퇴한 사용자에 대한 Chat인 경우
+    // 정상 더미데이터, 탈퇴한 사용자에 대한 Message인 경우
     public static Message 정상_5(MessageRoom messageRoom) {
         Message message = Message.builder()
             .id(5L)
