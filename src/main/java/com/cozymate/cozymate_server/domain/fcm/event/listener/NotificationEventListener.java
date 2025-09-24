@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.fcm.event.listener;
 
-import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
+import com.cozymate.cozymate_server.domain.messageroom.MessageRoom;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.content.FcmPushContentDTO;
 import com.cozymate.cozymate_server.domain.fcm.event.AcceptedInvitationEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.AcceptedJoinEvent;
@@ -9,7 +9,7 @@ import com.cozymate.cozymate_server.domain.fcm.event.QuitRoomEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.RejectedInvitationEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.RejectedJoinEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.RequestedJoinRoomEvent;
-import com.cozymate.cozymate_server.domain.fcm.event.SentChatEvent;
+import com.cozymate.cozymate_server.domain.fcm.event.SentMessageEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.SentInvitationEvent;
 import com.cozymate.cozymate_server.domain.sqs.dto.SQSMessageResult;
 import com.cozymate.cozymate_server.domain.sqs.service.SQSMessageSender;
@@ -309,14 +309,14 @@ public class NotificationEventListener {
 
     @Async
     @TransactionalEventListener
-    public void sendNotification(SentChatEvent event) {
+    public void sendNotification(SentMessageEvent event) {
         Member sender = event.sender();
         Member recipient = event.recipient();
-        ChatRoom chatRoom = event.chatRoom();
+        MessageRoom messageRoom = event.messageRoom();
 
         //SQSMessageResult 생성
-        SQSMessageResult sqsMessageResult = sqsMessageCreator.createWithChatRoomId(sender,
-            recipient, event.content(), chatRoom, NotificationType.ARRIVE_CHAT);
+        SQSMessageResult sqsMessageResult = sqsMessageCreator.createWithMessageRoomId(sender,
+            recipient, event.content(), messageRoom, NotificationType.ARRIVE_MESSAGE);
 
         // 알림 저장
         notificationLogRepositoryService.createNotificationLog(

@@ -27,7 +27,7 @@ public class ReportController {
     @Operation(
         summary = "[베로] 신고하기",
         description = "memberId : 신고 대상 사용자 pk\n\n"
-            + "source :  MEMBER_STAT(사용자 상세에서의 신고) , CHAT(쪽지에서의 신고)\n\n"
+            + "source :  MEMBER_STAT(사용자 상세에서의 신고) , MESSAGE(쪽지에서의 신고)\n\n"
             + "reason : "
             + "OBSCENITY(음란성/선정성), "
             + "INSULT(욕설/인신공격), "

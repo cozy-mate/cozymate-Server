@@ -1,8 +1,8 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
 import com.cozymate.cozymate_server.auth.repository.TokenRepository;
-import com.cozymate.cozymate_server.domain.chat.repository.ChatRepository;
-import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepository;
+import com.cozymate.cozymate_server.domain.message.repository.MessageRepository;
+import com.cozymate.cozymate_server.domain.messageroom.repository.MessageRoomRepository;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepositoryService;
 import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepository;
 import com.cozymate.cozymate_server.domain.mail.repository.MailAuthenticationRepository;
@@ -48,8 +48,8 @@ public class MemberWithdrawService {
     private final MemberStatRepositoryService memberStatRepositoryService;
     private final LifestyleMatchRateRepository lifestyleMatchRateRepository;
     private final MemberStatCacheService memberStatCacheService;
-    private final ChatRoomRepository chatRoomRepository;
-    private final ChatRepository chatRepository;
+    private final MessageRoomRepository messageRoomRepository;
+    private final MessageRepository messageRepository;
     private final ReportRepository reportRepository;
     private final FcmRepositoryService fcmRepositoryService;
     private final NotificationLogRepositoryService notificationLogRepositoryService;
@@ -103,7 +103,7 @@ public class MemberWithdrawService {
 
         log.debug("사용자 상세정보 및 일치율 삭제 완료");
 
-        handleChatAndChatRoom(member);
+        handleMessageAndMessageRoom(member);
 
         reportRepository.bulkDeleteReporter(member);
         inquiryRepository.bulkDeleteMember(member);
@@ -133,16 +133,16 @@ public class MemberWithdrawService {
     }
 
     /**
-     * 회원과 관련된 채팅 및 채팅방 데이터를 처리하는 메서드. 회원이 보낸 채팅의 sender를 null로 만든다. chatroom의 참여자를 null로 만든다.
-     * chatroom의 참여자가 모두 null이면 chatroom을 삭제한다.
+     * 회원과 관련된 채팅 및 채팅방 데이터를 처리하는 메서드. 회원이 보낸 채팅의 sender를 null로 만든다. messageroom의 참여자를 null로 만든다.
+     * messageroom의 참여자가 모두 null이면 messageroom을 삭제한다.
      */
-    private void handleChatAndChatRoom(Member member) {
-        chatRepository.bulkDeleteSender(member);
+    private void handleMessageAndMessageRoom(Member member) {
+        messageRepository.bulkDeleteSender(member);
 
         log.debug("쪽지 처리 완료");
 
-        chatRoomRepository.bulkDeleteMemberA(member);
-        chatRoomRepository.bulkDeleteMemberB(member);
+        messageRoomRepository.bulkDeleteMemberA(member);
+        messageRoomRepository.bulkDeleteMemberB(member);
 
         log.debug("쪽지방 처리 완료");
 

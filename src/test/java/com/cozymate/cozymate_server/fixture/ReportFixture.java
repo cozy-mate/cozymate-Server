@@ -15,7 +15,7 @@ public class ReportFixture {
             .reporter(member)
             .reportedMemberId(targetMember.getId())
             .reportReason(ReportReason.OBSCENITY)
-            .reportSource(ReportSource.CHAT)
+            .reportSource(ReportSource.MESSAGE)
             .content(null)
             .build();
     }
@@ -39,7 +39,7 @@ public class ReportFixture {
             .reporter(member)
             .reportedMemberId(targetMember.getId())
             .reportReason(ReportReason.OTHER)
-            .reportSource(ReportSource.CHAT)
+            .reportSource(ReportSource.MESSAGE)
             .content("테스트 신고 내용 1")
             .build();
     }
@@ -63,7 +63,7 @@ public class ReportFixture {
             .reporter(member)
             .reportedMemberId(null)
             .reportReason(ReportReason.OBSCENITY)
-            .reportSource(ReportSource.CHAT)
+            .reportSource(ReportSource.MESSAGE)
             .content(null)
             .build();
     }
@@ -87,7 +87,7 @@ public class ReportFixture {
             .reporter(member)
             .reportedMemberId(targetMember.getId())
             .reportReason(ReportReason.OTHER)
-            .reportSource(ReportSource.CHAT)
+            .reportSource(ReportSource.MESSAGE)
             .content(null)
             .build();
     }

@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.notificationlog.dto;
 
-import com.cozymate.cozymate_server.domain.chatroom.ChatRoom;
+import com.cozymate.cozymate_server.domain.messageroom.MessageRoom;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.room.Room;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ public class NotificationLogCreateDTO {
     private Member contentMember;
     private Room room;
     private String content;
-    private ChatRoom chatRoom;
+    private MessageRoom messageRoom;
 
     public static NotificationLogCreateDTO createNotificationLogCreateDTO(Member member,
         String content) {
@@ -46,12 +46,12 @@ public class NotificationLogCreateDTO {
     }
 
     public static NotificationLogCreateDTO createNotificationLogCreateDTO(Member recipientMember,
-        Member sender, String content, ChatRoom chatRoom) {
+        Member sender, String content, MessageRoom messageRoom) {
         return NotificationLogCreateDTO.builder()
             .recipientMember(recipientMember)
             .contentMember(sender)
             .content(content)
-            .chatRoom(chatRoom)
+            .messageRoom(messageRoom)
             .build();
     }
 }

@@ -281,11 +281,11 @@ public enum NotificationType {
                 createDTO.getContent(), createDTO.getRoom().getId());
         }
     },
-  
+
     /**
      * 일단 알림 목록 조회 안되도록 카테고리 설정
      */
-    ARRIVE_CHAT(NotificationCategory.COZY_HOME) {
+    ARRIVE_MESSAGE(NotificationCategory.COZY_HOME) {
         @Override
         public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
             return fcmPushContentDTO.member().getNickname() + " : "
@@ -295,7 +295,7 @@ public enum NotificationType {
         @Override
         public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
             return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
-                createDTO.getContent(), createDTO.getChatRoom().getId());
+                createDTO.getContent(), createDTO.getMessageRoom().getId());
         }
     }
     ;
