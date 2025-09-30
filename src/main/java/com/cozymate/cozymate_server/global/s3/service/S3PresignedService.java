@@ -1,19 +1,26 @@
 package com.cozymate.cozymate_server.global.s3.service;
 
+import static java.time.Duration.ofMinutes;
+
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import com.cozymate.cozymate_server.global.s3.dto.DownloadPresignedUrlsResponse;
 import com.cozymate.cozymate_server.global.s3.dto.PresignedUrlRequest;
 import com.cozymate.cozymate_server.global.s3.dto.PresignedUrlResponse;
-import java.time.Duration;
+import com.cozymate.cozymate_server.global.utils.S3KeyUtil;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -21,47 +28,28 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequ
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 @RequiredArgsConstructor
-@PropertySource("classpath:application.yml")
 @Service
 public class S3PresignedService {
 
+    private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
 
-//    private String generatePreSignedUrl(GeneratePresignedUrlRequest generatePresignedUrlRequest) {
-//        String preSignedUrl;
-//        try {
-//            preSignedUrl = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest).toString();
-//        } catch (AmazonServiceException e) {
-//            throw new IllegalStateException("Pre-signed Url 생성 실패했습니다.");
-//        }
-//        return preSignedUrl;
-//    }
-//
-//    private String getPresignedUrl(String directory, String fileName) {
-//        Date date = new Date();
-//        long time = date.getTime();
-//        time += 1000 * 60 * 5;
-//        date.setTime(time);
-//
-//        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, directory + "/" + fileName)
-//            .withMethod(HttpMethod.PUT)
-//            .withContentType(MediaTypeFactory.getMediaType(encodeKorToUrl(fileName)).orElseThrow(() -> new CustomException(ErrorCode.INVALID_EXTENSION)).toString())
-//            .withExpiration(date);
-//
-//    }
+    @Value("${spring.cloud.aws.s3.presigned.expiration-minutes}")
+    private long expirationMinutes;
 
+    // 여러 이미지 업로드를 위한 presigned URL 발급
     public List<PresignedUrlResponse> createPresignedUrls(List<PresignedUrlRequest> requests) {
         return requests.stream()
-            .map(r -> createPresignedUrl(r.getFileName(), r.getContentType()))
+            .map(r -> createPresignedUrl(r.fileName(), r.contentType()))
             .collect(Collectors.toList());
     }
 
-    // 단일 이미지 업로드를 위한 Presigned Url 발급
+    // 단일 이미지 업로드를 위한 presigned URL 발급
     public PresignedUrlResponse createPresignedUrl(String fileName, String contentType) {
-        String s3Key = createFileName(fileName);
+        String s3Key = S3KeyUtil.generateKey("posts", fileName);
 
         PutObjectRequest putObjectRequest =
             PutObjectRequest.builder()
@@ -72,7 +60,7 @@ public class S3PresignedService {
 
         PutObjectPresignRequest putObjectPresignRequest =
             PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(5))
+                .signatureDuration(ofMinutes(expirationMinutes))
                 .putObjectRequest(putObjectRequest)
                 .build();
 
@@ -82,16 +70,28 @@ public class S3PresignedService {
         return PresignedUrlResponse.builder()
             .uploadUrl(presignedPutObjectRequest.url().toString())
             .s3Key(s3Key)
-            .originalFileName(fileName)
             .build();
-
-//            presignedPutObjectRequest.url().toString();
     }
 
-    // 이미지 조회를 위한 Presigned Url 발급
+    // 여러 이미지 조회를 위한 presigned URL 발급
+    public DownloadPresignedUrlsResponse getPresignedUrls(List<String> s3Keys) {
+        List<String> urlList = s3Keys.stream()
+            .map(this::getPresignedUrl)
+            .toList();
+
+        return DownloadPresignedUrlsResponse.of(urlList);
+    }
+
+    // 이미지 조회를 위한 presigned url 발급
     public String getPresignedUrl(String imageName) {
-        if(imageName == null || imageName.equals("")) {
-            return null;
+        if (!StringUtils.hasText(imageName)) {
+            throw new GeneralException(ErrorStatus._INVALID_S3_KEY);
+        }
+
+        try {
+            s3Client.headObject(b -> b.bucket(bucket).key(imageName));
+        } catch (S3Exception e) {
+            throw new GeneralException(ErrorStatus._INVALID_S3_KEY);
         }
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -100,7 +100,7 @@ public class S3PresignedService {
             .build();
 
         GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(5))
+            .signatureDuration(ofMinutes(expirationMinutes))
             .getObjectRequest(getObjectRequest)
             .build();
 
@@ -110,26 +110,18 @@ public class S3PresignedService {
         return presignedGetObjectRequest.url().toString();
     }
 
-    private String generateS3Key(String originalFileName) {
-        String ext = originalFileName.contains(".")
-            ? originalFileName.substring(originalFileName.lastIndexOf("."))
-            : "";
-        String uuid = UUID.randomUUID().toString().substring(0, 8);
-        long ts = System.currentTimeMillis();
-        return String.format("posts/%d_%s%s", ts, uuid, ext);
-    }
-
-    private String getFileExtension(String fileName) {
-        // TODO: 파일 업로드 확장자 제한 추가 예정
+    public void deleteByS3Key(String s3Key) {
         try {
-            return fileName.substring(fileName.lastIndexOf("."));
-        } catch (StringIndexOutOfBoundsException e) {
-            throw new GeneralException(ErrorStatus._FILE_EXTENSION_ERROR);
-        }
-    }
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(s3Key)
+                .build();
 
-    private String createFileName(String fileName) {
-        return UUID.randomUUID().toString().concat(getFileExtension(fileName));
+            s3Client.deleteObject(deleteObjectRequest);
+        } catch (S3Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "파일 삭제에 실패했습니다.");
+        }
     }
 
 }
