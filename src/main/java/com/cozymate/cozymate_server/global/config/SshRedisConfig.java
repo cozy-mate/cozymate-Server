@@ -26,10 +26,10 @@ public class SshRedisConfig {
     @Value("${server}")
     private String isServer;
 
-    @Value("${cloud.aws.ec2.redis_endpoint}")
+    @Value("${spring.cloud.aws.ec2.redis_endpoint}")
     private String redisEndpoint;
 
-    @Value("${cloud.aws.ec2.redis_port}")
+    @Value("${spring.cloud.aws.ec2.redis_port}")
     private int redisPort;
 
     @Bean

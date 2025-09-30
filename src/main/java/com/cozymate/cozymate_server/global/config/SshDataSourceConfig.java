@@ -23,9 +23,9 @@ public class SshDataSourceConfig {
     @Value("${server}")
     private String isServer;
 
-    @Value("${cloud.aws.ec2.database_endpoint}")
+    @Value("${spring.cloud.aws.ec2.database_endpoint}")
     private String databaseEndpoint;
-    @Value("${cloud.aws.ec2.database_port}")
+    @Value("${spring.cloud.aws.ec2.database_port}")
     private int databasePort;
 
 

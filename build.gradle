@@ -54,9 +54,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     //aws - S3
-    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    // implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     // TODO: 07.25. [무빗] 위 패키지는 18년이 마지막 업데이트된 레거시, 추후 아래 패키지로 변경 예정
-    // implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3Z:3.1.1'
+     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+
 
     //queryDsl
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -90,6 +91,7 @@ dependencies {
     // AWS SQS
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.0.1")
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
+
 }
 
 tasks.named('test') {
