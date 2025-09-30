@@ -31,7 +31,7 @@ public class PostCommandService {
     private final PostRepository postRepository;
     private final MateRepository mateRepository;
     private final FeedRepository feedRepository;
-    private final PostImageRepository postImageRepository;
+    private final PostConverter postConverter;
 
     private final PostImageCommandService postImageCommandService;
     private final PostCommentCommandService postCommentCommandService;
@@ -49,7 +49,7 @@ public class PostCommandService {
 
         Feed feed = feedRepository.findByRoomId(postCreateDTO.getRoomId());
 
-        Post post = postRepository.save(PostConverter.toEntity(
+        Post post = postRepository.save(postConverter.toEntity(
             postCreateDTO, feed, mate
         ));
 

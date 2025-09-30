@@ -92,7 +92,6 @@ public class S3CommandService {
             .objects(keys)
             .build();
 
-        // DeleteObjectsRequest 빌더 패턴으로 생성
         DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
             .bucket(bucket)
             .delete(delete)
@@ -125,7 +124,6 @@ public class S3CommandService {
             .objects(keys)
             .build();
 
-        // DeleteObjectsRequest 빌더 패턴으로 생성
         DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
             .bucket(bucket)
             .delete(delete)

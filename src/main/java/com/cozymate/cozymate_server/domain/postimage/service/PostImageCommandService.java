@@ -30,12 +30,11 @@ public class PostImageCommandService {
         }
 
     }
-    public void saveImages(Post post, List<String> imageUriList) {
-        if (!imageUriList.isEmpty()) {
-            List<PostImage> postImages = imageUriList.stream()
-                .filter(uri -> uri.contains("/"))
-                .map(uri -> uri.substring(uri.lastIndexOf('/') + 1))
-                .map(content -> PostImageConverter.toEntity(post, content))
+
+    public void saveImages(Post post, List<String> s3KeyList) {
+        if (!s3KeyList.isEmpty()) {
+            List<PostImage> postImages = s3KeyList.stream()
+                .map(s3Key -> PostImageConverter.toEntity(post, s3Key))
                 .toList();
             postImageRepository.saveAll(postImages);
         }

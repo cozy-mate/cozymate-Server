@@ -11,10 +11,16 @@ import com.cozymate.cozymate_server.domain.postcomment.converter.PostCommentConv
 import com.cozymate.cozymate_server.domain.postimage.PostImage;
 import com.cozymate.cozymate_server.global.utils.ImageUtil;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class PostConverter {
 
-    public static Post toEntity(PostCreateDTO postCreateDTO, Feed feed, Mate writer) {
+    private final ImageUtil imageUtil;
+
+    public Post toEntity(PostCreateDTO postCreateDTO, Feed feed, Mate writer) {
         return Post.builder()
             .content(postCreateDTO.getContent())
             .feed(feed)
@@ -22,7 +28,7 @@ public class PostConverter {
             .build();
     }
 
-    public static PostDetailDTO toDetailDto(Post post, List<PostImage> postImage,
+    public PostDetailDTO toDetailDto(Post post, List<PostImage> postImage,
         List<PostComment> postComment, Integer commentCount) {
         return PostDetailDTO.builder()
             .id(post.getId())
@@ -33,12 +39,12 @@ public class PostConverter {
             .createdAt(post.getCreatedAt())
             .commentCount(commentCount)
             .imageList(
-                postImage.stream().map(PostImage::getContent).map(ImageUtil::generateUrl).toList())
+                postImage.stream().map(PostImage::getS3key).map(imageUtil::generateUrl).toList())
             .commentList(postComment.stream().map(PostCommentConverter::toDto).toList())
             .build();
     }
 
-    public static PostSummaryDTO toSummaryDto(Post post,
+    public PostSummaryDTO toSummaryDto(Post post,
         List<PostImage> postImages,
         Integer commentCount){
         return PostSummaryDTO.builder()
@@ -49,7 +55,7 @@ public class PostConverter {
             .persona(post.getWriter().getMember().getPersona())
             .createdAt(post.getCreatedAt())
             .imageList(
-                postImages.stream().map(PostImage::getContent).map(ImageUtil::generateUrl).toList())
+                postImages.stream().map(PostImage::getS3key).map(imageUtil::generateUrl).toList())
             .commentCount(commentCount)
             .build();
     }

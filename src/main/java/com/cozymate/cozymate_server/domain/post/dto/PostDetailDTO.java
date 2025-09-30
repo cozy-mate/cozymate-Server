@@ -21,6 +21,7 @@ public class PostDetailDTO {
     private String nickname;
     private int commentCount;
     private int persona;
+    // 이미지 url list
     private List<String> imageList;
     private List<PostCommentViewDTO> commentList;
 }

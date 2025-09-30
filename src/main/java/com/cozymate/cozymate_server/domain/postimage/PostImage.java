@@ -28,5 +28,5 @@ public class PostImage extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Post post;
 
-    private String content;
+    private String s3key;
 }

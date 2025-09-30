@@ -19,7 +19,7 @@ public class S3KeyUtil {
 
     /**
      * S3 Key 생성 (폴더 + timestamp + uuid + 확장자)
-     * @param prefix 폴더명 (예: "posts", "profiles", "notices")
+     * @param prefix 폴더명 (예: "posts")
      * @param originalFileName 원본 파일명
      * @return S3에 업로드될 고유 key
      */

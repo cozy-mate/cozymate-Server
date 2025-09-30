@@ -35,6 +35,7 @@ public class PostQueryService {
     private final MateRepository mateRepository;
     private final PostCommentRepository postCommentRepository;
     private final FeedRepository feedRepository;
+    private final PostConverter postConverter;
 
     public PostDetailDTO getPost(Member member, Long roomId, Long postId) {
 
@@ -51,7 +52,7 @@ public class PostQueryService {
 
         // Local 변수 reassign 하기 싫어서 삼항 연산자 사용
 
-        return PostConverter.toDetailDto(
+        return postConverter.toDetailDto(
             post,
             imageList.isEmpty()
                 ? new ArrayList<>() : imageList,
@@ -71,7 +72,7 @@ public class PostQueryService {
         Page<Post> postList = postRepository.findByFeedIdOrderByCreatedAtDesc(feed.getId(),pageable);
 
         return postList.stream().map(
-            post->PostConverter.toSummaryDto(
+            post->postConverter.toSummaryDto(
                 post,
                 postImageRepository.findByPostId(post.getId()).isEmpty() ?
                     new ArrayList<>() : postImageRepository.findByPostId(post.getId()),

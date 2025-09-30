@@ -18,6 +18,7 @@ public class PostCreateDTO {
     @NotBlank
     private String content;
 
+    // 전달받은 s3 key List
     private List<String> imageList;
 
 }
