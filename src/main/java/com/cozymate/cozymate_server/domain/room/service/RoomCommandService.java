@@ -124,7 +124,6 @@ public class RoomCommandService {
         Room room = RoomConverter.toPublicRoom(request, inviteCode, gender, university);
 
         // 해시태그 저장 과정
-        room = roomRepositoryService.save(room);
         roomHashtagCommandService.createRoomHashtag(room, request.hashtagList());
         roomLogCommandService.addRoomLogCreationRoom(room);
 
@@ -139,6 +138,8 @@ public class RoomCommandService {
 
         Feed feed = FeedConverter.toEntity(room);
         feedRepository.save(feed);
+        room.assignFeed(feed);
+        room = roomRepositoryService.save(room);
 
         return roomQueryService.getRoomById(room.getId(), member.getId());
     }
