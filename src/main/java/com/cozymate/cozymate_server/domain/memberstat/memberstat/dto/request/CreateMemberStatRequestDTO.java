@@ -88,6 +88,6 @@ public record CreateMemberStatRequestDTO(
     @Size(max = 4, min = 4)
     String mbti,
     String selfIntroduction
-) {
+)implements LifestyleInput {
 
 }
