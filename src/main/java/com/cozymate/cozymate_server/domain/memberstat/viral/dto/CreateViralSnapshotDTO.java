@@ -6,6 +6,7 @@ import lombok.Builder;
 @Builder(toBuilder = true)
 public record CreateViralSnapshotDTO(
     String viralCode,
+    Integer matchRate,
     List<String> sameValues,
     List<String> differentValues,
     List<String> ambiguousValues

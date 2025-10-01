@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstat.viral.service;
 
+import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.util.MemberMatchRateCalculator;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.FieldInstanceResolver;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.MemberStatComparator;
@@ -52,8 +53,11 @@ public class MemberStatSnapshotService {
             FieldInstanceResolver.extractAllLifestyleFields(sharer.getLifestyle()));
         Map<String, String> criteriaMap = toStringMap(
             FieldInstanceResolver.extractAllLifestyleFields(criteria.getLifestyle()));
+        Integer matchRate = MemberMatchRateCalculator.calculateLifestyleMatchRate(
+            sharer.getLifestyle(),criteria.getLifestyle()
+        );
 
-        ComparisonResult result = compareMaps(sharerMap, criteriaMap);
+        ComparisonResult result = compareMaps(sharerMap, criteriaMap, matchRate);
 
         return buildCompareDto(criteria.getViralCode(), result);
     }
@@ -88,7 +92,8 @@ public class MemberStatSnapshotService {
     /**
      * 두 맵을 기준으로 SAME/DIFFERENT/AMBIGUOUS 분류
      */
-    private ComparisonResult compareMaps(Map<String, String> left, Map<String, String> right) {
+    private ComparisonResult compareMaps(
+        Map<String, String> left, Map<String, String> right, Integer matchRate) {
         Set<String> keys = new HashSet<>();
         keys.addAll(left.keySet());
         keys.addAll(right.keySet());
@@ -105,12 +110,13 @@ public class MemberStatSnapshotService {
                 case NOT_SAME_NOT_DIFFERENT -> ambiguous.add(key);
             }
         }
-        return new ComparisonResult(same, different, ambiguous);
+        return new ComparisonResult(matchRate, same, different, ambiguous);
     }
 
     private CreateViralSnapshotDTO buildCompareDto(String viralCode, ComparisonResult result) {
         return CreateViralSnapshotDTO.builder()
             .viralCode(viralCode)
+            .matchRate(result.matchRate)
             .sameValues(result.same)
             .differentValues(result.different)
             .ambiguousValues(result.ambiguous)
@@ -119,6 +125,7 @@ public class MemberStatSnapshotService {
 
     private ComparisonResult createEmptyResult() {
         return new ComparisonResult(
+            0,
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList()
@@ -126,6 +133,7 @@ public class MemberStatSnapshotService {
     }
 
     private record ComparisonResult(
+        Integer matchRate,
         List<String> same,
         List<String> different,
         List<String> ambiguous
