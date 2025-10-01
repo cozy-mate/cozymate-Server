@@ -12,10 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -111,17 +109,16 @@ public class S3PresignedService {
     }
 
     public void deleteByS3Key(String s3Key) {
-        try {
-            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(bucket)
-                .key(s3Key)
-                .build();
-
-            s3Client.deleteObject(deleteObjectRequest);
-        } catch (S3Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "파일 삭제에 실패했습니다.");
+        if (!StringUtils.hasText(s3Key)) {
+            throw new GeneralException(ErrorStatus._INVALID_S3_KEY);
         }
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+            .bucket(bucket)
+            .key(s3Key)
+            .build();
+
+        s3Client.deleteObject(deleteObjectRequest);
     }
 
 }
