@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -59,8 +60,10 @@ public class SecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(
-                            Arrays.asList("https://admin-cozymate.web.app"));
+                        configuration.setAllowedOrigins(Arrays.asList(
+                            "https://admin-cozymate.web.app",
+                            "http://localhost:5173"
+                        ));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -87,9 +90,14 @@ public class SecurityConfig {
         //경로별 인가 작업
         httpSecurity
             .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config",
-                    "/swagger-resources/**").permitAll()
-                .requestMatchers("/", "admin/auth/login","admin/auth/callback","/auth/sign-in", "/actuator/health").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                .requestMatchers(
+                    "/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config", "/swagger-resources/**")
+                    .permitAll()
+                .requestMatchers(
+                    "/admin/auth/**", "/auth/sign-in", "/viral/create", "/viral/**")
+                    .permitAll()
                 .anyRequest()
                 .authenticated());
 
