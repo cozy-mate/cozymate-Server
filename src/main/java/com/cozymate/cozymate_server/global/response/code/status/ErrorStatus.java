@@ -213,8 +213,11 @@ public enum ErrorStatus implements BaseErrorCode {
     _INQUIRY_NOT_FOUND(HttpStatus.BAD_REQUEST, "INQUIRY401", "해당 문의 내역이 존재하지 않습니다."),
 
     // ADMIN
-    _ADMIN_GOOGLE_AUTHENTICATION_FAIL(HttpStatus.BAD_REQUEST, "ADMIN400","구글 인증 실패")
+    _ADMIN_GOOGLE_AUTHENTICATION_FAIL(HttpStatus.BAD_REQUEST, "ADMIN400","구글 인증 실패"),
 
+    // VIRAL
+    _VIRAL_CODE_GENERATING_EXCESS(HttpStatus.BAD_REQUEST, "VIRAL500","바이럴 코드 사용 초과"),
+    _VIRAL_CODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIRAL404","바이럴 코드로 사용자의 값을 찾을 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;
