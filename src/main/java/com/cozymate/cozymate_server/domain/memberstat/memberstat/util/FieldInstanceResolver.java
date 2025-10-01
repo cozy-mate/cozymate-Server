@@ -1,14 +1,17 @@
 package com.cozymate.cozymate_server.domain.memberstat.memberstat.util;
 
 import com.cozymate.cozymate_server.domain.member.Member;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.Lifestyle;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,9 @@ public class FieldInstanceResolver {
 
     @Getter
     private static final Map<String, BiFunction<Member, MemberStat, Object>> FIELD_MAPPER = new HashMap<>();
+
+    @Getter
+    private static final Map<String, Function<Lifestyle, Object>> LIFESTYLE_MAPPER = new LinkedHashMap<>();
 
     static {
         // Member 관련 필드 매핑
@@ -72,6 +78,28 @@ public class FieldInstanceResolver {
         FIELD_MAPPER.put("personalities",
             (member, memberStat) -> memberStat.getLifestyle().getPersonality());
         FIELD_MAPPER.put("mbti", (member, memberStat) -> memberStat.getLifestyle().getMbti());
+
+
+        LIFESTYLE_MAPPER.put("wakeUpTime", Lifestyle::getWakeUpTime);
+        LIFESTYLE_MAPPER.put("sleepingTime", Lifestyle::getSleepingTime);
+        LIFESTYLE_MAPPER.put("turnOffTime", Lifestyle::getTurnOffTime);
+        LIFESTYLE_MAPPER.put("smokingStatus", Lifestyle::getSmokingStatus);
+        LIFESTYLE_MAPPER.put("sleepingHabits", Lifestyle::getSleepingHabit);
+        LIFESTYLE_MAPPER.put("coolingIntensity", Lifestyle::getCoolingIntensity);
+        LIFESTYLE_MAPPER.put("heatingIntensity", Lifestyle::getHeatingIntensity);
+        LIFESTYLE_MAPPER.put("lifePattern", Lifestyle::getLifePattern);
+        LIFESTYLE_MAPPER.put("intimacy", Lifestyle::getIntimacy);
+        LIFESTYLE_MAPPER.put("sharingStatus", Lifestyle::getItemSharing);
+        LIFESTYLE_MAPPER.put("gamingStatus", Lifestyle::getPlayingGameFrequency);
+        LIFESTYLE_MAPPER.put("callingStatus", Lifestyle::getPhoneCallingFrequency);
+        LIFESTYLE_MAPPER.put("studyingStatus", Lifestyle::getStudyingFrequency);
+        LIFESTYLE_MAPPER.put("eatingStatus", Lifestyle::getEatingFrequency);
+        LIFESTYLE_MAPPER.put("cleannessSensitivity", Lifestyle::getCleannessSensitivity);
+        LIFESTYLE_MAPPER.put("noiseSensitivity", Lifestyle::getNoiseSensitivity);
+        LIFESTYLE_MAPPER.put("cleaningFrequency", Lifestyle::getCleaningFrequency);
+        LIFESTYLE_MAPPER.put("drinkingFrequency", Lifestyle::getDrinkingFrequency);
+        LIFESTYLE_MAPPER.put("personalities", Lifestyle::getPersonality);
+        LIFESTYLE_MAPPER.put("mbti", Lifestyle::getMbti);
     }
 
     public static Object extractMemberStatField(MemberStat memberStat, String fieldName) {
@@ -93,5 +121,21 @@ public class FieldInstanceResolver {
                 LinkedHashMap::new // fieldNameList 조회된 순서 유지
             ));
     }
+
+    public static Map<String, Object> extractAllLifestyleFields(Lifestyle lifestyle) {
+        if (lifestyle == null) return Collections.emptyMap();
+        Map<String, Object> result = new LinkedHashMap<>();
+        LIFESTYLE_MAPPER.forEach((key, getter) -> {
+            try {
+                result.put(key, getter.apply(lifestyle));
+            } catch (Exception e) {
+                log.warn("Failed to extract lifestyle field {}: {}", key, e.getMessage());
+                result.put(key, null);
+            }
+        });
+        return result;
+    }
+
+
 
 }

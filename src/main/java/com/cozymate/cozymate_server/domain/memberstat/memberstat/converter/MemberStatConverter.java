@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.request.LifestyleInput;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatDifferenceListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatRandomListResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.response.MemberStatSearchResponseDTO;
@@ -146,7 +147,7 @@ public class MemberStatConverter {
             .build();
     }
 
-    public static Lifestyle toLifestyleFromDto(CreateMemberStatRequestDTO dto) {
+    public static Lifestyle toLifestyleFromDto(LifestyleInput dto) {
         return Lifestyle.builder()
             .wakeUpTime(dto.wakeUpTime())
             .sleepingTime(dto.sleepingTime())
