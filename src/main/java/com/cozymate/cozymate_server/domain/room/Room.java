@@ -118,4 +118,8 @@ public class Room extends BaseTimeEntity {
         this.status = RoomStatus.ENABLE;
         this.enabledAt = LocalDate.now();
     }
+
+    public void assignFeed(Feed feed) {
+        this.feed = feed;
+    }
 }

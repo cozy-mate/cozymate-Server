@@ -3,13 +3,13 @@ package com.cozymate.cozymate_server.global.logging;
 import com.cozymate.cozymate_server.global.logging.enums.MdcKey;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.LocalDateTime;
 import org.slf4j.MDC;
 import org.springframework.web.servlet.HandlerInterceptor;
 

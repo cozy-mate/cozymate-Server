@@ -18,13 +18,13 @@ import org.springframework.validation.annotation.Validated;
 @Setter
 public class SshTunnelConfig {
 
-    @Value("${cloud.aws.ec2.remote_jump_host}")
+    @Value("${spring.cloud.aws.ec2.remote_jump_host}")
     private String remoteJumpHost;
-    @Value("${cloud.aws.ec2.ssh_port}")
+    @Value("${spring.cloud.aws.ec2.ssh_port}")
     private int sshPort;
-    @Value("${cloud.aws.ec2.user}")
+    @Value("${spring.cloud.aws.ec2.user}")
     private String user;
-    @Value("${cloud.aws.ec2.private_key_path}")
+    @Value("${spring.cloud.aws.ec2.private_key_path}")
     private String privateKeyPath;
 
     private Session session;

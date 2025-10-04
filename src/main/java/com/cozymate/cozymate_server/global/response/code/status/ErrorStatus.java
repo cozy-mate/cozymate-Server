@@ -47,6 +47,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_001", "파일 업로드에 실패했습니다."),
     _FILE_DELETE_ERROR(HttpStatus.BAD_REQUEST, "FILE_002", "파일 삭제에 실패했습니다."),
     _FILE_EXTENSION_ERROR(HttpStatus.BAD_REQUEST, "FILE_003", "유효하지 않은 파일 확장자입니다."),
+    _FILE_DOWNLOAD_ERROR(HttpStatus.BAD_REQUEST, "FILE_004", "파일 다운로드에 실패했습니다."),
+    _INVALID_S3_KEY(HttpStatus.BAD_REQUEST, "FILE_005", "유효하지 않은 S3 key 입니다."),
 
     // Room
     _ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "ROOM400", "존재하지 않는 방입니다."),
