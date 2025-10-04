@@ -17,7 +17,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Configuration
 public class S3Config {
 
-    @Value("${spring.cloud.aws.region.static}")
+    @Value("${spring.cloud.aws.region}")
     private String region;
 
     @Value("${spring.cloud.aws.s3.bucket}")
