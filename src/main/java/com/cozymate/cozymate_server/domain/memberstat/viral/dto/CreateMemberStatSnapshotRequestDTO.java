@@ -1,5 +1,6 @@
-package com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.request;
+package com.cozymate.cozymate_server.domain.memberstat.viral.dto;
 
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.dto.request.LifestyleInput;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.AnswerValueValid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -10,19 +11,8 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.Builder;
 
-
 @Builder(toBuilder = true)
-public record CreateMemberStatRequestDTO(
-    @NotBlank(message = "학번은 필수입니다.")
-    @Size(min = 2, max = 2, message = "학번은 2글자입니다.")
-    String admissionYear,
-    @NotNull
-    @Size(min = 1, max = 1, message = "한자리 숫자를 입력해주세요")
-    String numOfRoommate,
-    @NotEmpty(message = "기숙사 이름은 필수입니다.")
-    String dormName,
-    @NotEmpty(message = "합격여부는 필수입니다.")
-    String dormJoiningStatus,
+public record CreateMemberStatSnapshotRequestDTO(
     @NotNull(message = "기상시간은 필수입니다.")
     @Min(0)
     @Max(23)
@@ -86,8 +76,7 @@ public record CreateMemberStatRequestDTO(
     @NotBlank(message = "mbti는 필수입니다.")
     @AnswerValueValid(questionKey = "mbti")
     @Size(max = 4, min = 4)
-    String mbti,
-    String selfIntroduction
-)implements LifestyleInput {
+    String mbti
+) implements LifestyleInput {
 
 }

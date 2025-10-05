@@ -25,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -38,7 +39,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // JWT 검증을 제외할 URL 목록
     private static final List<String> EXCLUDE_URLS = List.of(
-        "/auth/sign-in","/admin/auth/login","/admin/auth/callback"
+        "/auth/sign-in",
+        "/admin/auth/**",
+        "/admin/auth/callback",
+        "/viral/**"
     );
 
     // 임시 토큰으로만 접근 가능한 URL 목록
@@ -181,8 +185,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // 요청 URL이 제외할 URL 목록에 있는지 확인
     private boolean shouldExclude(HttpServletRequest request) {
-        return EXCLUDE_URLS.stream().anyMatch(url -> request.getRequestURI().equals(url));
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+        for (String pattern : EXCLUDE_URLS) {
+            if (new AntPathRequestMatcher(pattern).matches(request)) {
+                return true;
+            }
+        }
+        return false;
     }
+
 
     // 회원이 아닌 임시 토큰으로 접근 가능한 URL 목록에 해당하는지 확인
     private boolean isNotAllowNoMember(HttpServletRequest request) {
