@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
 import com.cozymate.cozymate_server.auth.repository.TokenRepository;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
 import com.cozymate.cozymate_server.domain.message.repository.MessageRepository;
 import com.cozymate.cozymate_server.domain.messageroom.repository.MessageRoomRepository;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepositoryService;
@@ -66,6 +67,7 @@ public class MemberWithdrawService {
     private final InquiryRepository inquiryRepository;
     private final TodoCommandService todoCommandService;
     private final MemberBlockRepository memberBlockRepository;
+    private final ChatRoomRepositoryService chatRoomRepositoryService;
 
 
     /**
@@ -130,6 +132,8 @@ public class MemberWithdrawService {
         memberBlockRepository.deleteAllByMemberIdOrBlockedMemberId(member.getId());
         log.debug("회원 차단 내역 삭제 완료");
 
+        chatRoomRepositoryService.deleteAllChatRoomMemberByMemberId(member.getId());
+        log.debug("채팅 방 참여 내역 삭제 완료");
     }
 
     /**
