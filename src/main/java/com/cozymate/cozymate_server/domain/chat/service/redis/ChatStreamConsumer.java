@@ -74,8 +74,6 @@ public class ChatStreamConsumer implements InitializingBean, DisposableBean {
 
         // 3. 서버 메모리 내에서 Subscription 관리
         dbSubscriptions.put(chatRoomId, dbSub);
-
-        log.info("ChatRoom {} 메시지 소비 시작", chatRoomId);
     }
 
     /**
@@ -101,9 +99,6 @@ public class ChatStreamConsumer implements InitializingBean, DisposableBean {
                 chatStreamService.ackStream(
                     chatStreamService.generateDbConsumerGroup(), record);
             }
-
-            log.info("DB 저장 완료 [room:{}] recordId: {}", chatStreamDTO.chatRoomId(),
-                record.getId().getValue());
         } catch (Exception e) {
             log.error("DB 저장 실패: {}", e.getMessage(), e);
         }

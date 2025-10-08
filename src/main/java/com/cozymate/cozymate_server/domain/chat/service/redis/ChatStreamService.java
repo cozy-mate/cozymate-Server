@@ -183,9 +183,7 @@ public class ChatStreamService {
 
         // 펜딩 메시지가 없는 경우, 최신 50개만 남겨둔다
         if (pendingSummary.getTotalPendingMessages() == 0) {
-            log.info("Stream : {}, ConsumerGroup : {}, 펜딩 데이터가 없어요.", streamKey, consumerGroup);
             redisTemplate.opsForStream().trim(streamKey, 50);
-            log.info("Stream {}: 메시지 50개 제외 전부 삭제 (모든 그룹 PEL empty)", streamKey);
             return;
         }
 
@@ -224,9 +222,9 @@ public class ChatStreamService {
                 );
             }
 
-            log.info("Stream {} trim 성공. minId={}", streamKey, minId);
+            log.info("Stream : {} trim 성공. minId : {}", streamKey, minId);
         } catch (Exception e) {
-            log.warn("Stream {}: trim 실패. minId={}, 이유={}", streamKey, minId, e.getMessage());
+            log.warn("Stream : {} trim 실패. minId : {}, 이유 : {}", streamKey, minId, e.getMessage());
         }
     }
 

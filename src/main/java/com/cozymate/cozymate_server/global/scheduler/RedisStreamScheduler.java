@@ -27,7 +27,6 @@ public class RedisStreamScheduler {
     @Scheduled(fixedDelay = 1000 * 60 * 5) // 5분
     public void trimStreams() {
         List<String> chatStreamKeyList = chatStreamService.getAllChatRoomStreamKeyList();
-        log.info("조회된 chatSteramKey의 수 : {}", chatStreamKeyList.size());
 
         for (String streamKey : chatStreamKeyList) {
             String dbConsumerGroup = chatStreamService.generateDbConsumerGroup();
@@ -43,7 +42,6 @@ public class RedisStreamScheduler {
     public void processPendingMessages() {
         try {
             List<String> chatStreamKeyList = chatStreamService.getAllChatRoomStreamKeyList();
-            log.info("조회된 chatStreamKey의 수 : {}", chatStreamKeyList.size());
 
             for (String streamKey : chatStreamKeyList) {
                 String consumer = chatStreamService.generateDbConsumer();
@@ -52,7 +50,6 @@ public class RedisStreamScheduler {
                     streamKey, chatStreamService.generateDbConsumerGroup(), consumer);
 
                 if (pendingMessages.isEmpty()) {
-                    log.info("pending message가 없습니다. [consumer] : {}", consumer);
                     continue;
                 }
 
@@ -88,7 +85,7 @@ public class RedisStreamScheduler {
                     recordIdList);
             }
         } catch (Exception e) {
-            log.error("PEL 조회 실패", e);
+            log.error("pending message 처리중 예외 발생", e);
         }
     }
 }
