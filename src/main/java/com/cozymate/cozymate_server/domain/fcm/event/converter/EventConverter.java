@@ -1,5 +1,7 @@
 package com.cozymate.cozymate_server.domain.fcm.event.converter;
 
+import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO;
+import com.cozymate.cozymate_server.domain.fcm.event.SentChatEvent;
 import com.cozymate.cozymate_server.domain.messageroom.MessageRoom;
 import com.cozymate.cozymate_server.domain.fcm.event.AcceptedJoinEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.QuitRoomEvent;
@@ -83,6 +85,14 @@ public class EventConverter {
             .recipient(recipient)
             .content(content)
             .messageRoom(messageRoom)
+            .build();
+    }
+
+    public static SentChatEvent toSentChatEvent(CreateChatRequestDTO createChatRequestDTO) {
+        return SentChatEvent.builder()
+            .chatRoomId(createChatRequestDTO.chatRoomId())
+            .memberId(createChatRequestDTO.memberId())
+            .content(createChatRequestDTO.content())
             .build();
     }
 }

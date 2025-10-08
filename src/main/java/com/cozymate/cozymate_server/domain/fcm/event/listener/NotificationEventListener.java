@@ -1,5 +1,10 @@
 package com.cozymate.cozymate_server.domain.fcm.event.listener;
 
+import com.cozymate.cozymate_server.domain.chatroom.ChatRoomMember;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomMemberRepository;
+import com.cozymate.cozymate_server.global.websocket.repository.WebSocketSessionRepository;
+import com.cozymate.cozymate_server.domain.fcm.event.SentChatEvent;
+import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
 import com.cozymate.cozymate_server.domain.messageroom.MessageRoom;
 import com.cozymate.cozymate_server.domain.fcm.dto.push.content.FcmPushContentDTO;
 import com.cozymate.cozymate_server.domain.fcm.event.AcceptedInvitationEvent;
@@ -11,6 +16,7 @@ import com.cozymate.cozymate_server.domain.fcm.event.RejectedJoinEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.RequestedJoinRoomEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.SentMessageEvent;
 import com.cozymate.cozymate_server.domain.fcm.event.SentInvitationEvent;
+import com.cozymate.cozymate_server.domain.sqs.dto.FcmSQSMessage;
 import com.cozymate.cozymate_server.domain.sqs.dto.SQSMessageResult;
 import com.cozymate.cozymate_server.domain.sqs.service.SQSMessageSender;
 import com.cozymate.cozymate_server.domain.sqs.service.SQSMessageCreator;
@@ -25,12 +31,20 @@ import com.cozymate.cozymate_server.domain.notificationlog.repository.Notificati
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationEventListener {
@@ -39,6 +53,11 @@ public class NotificationEventListener {
     private final SQSMessageSender sqsMessageSender;
     private final SQSMessageCreator sqsMessageCreator;
     private final NotificationLogRepositoryService notificationLogRepositoryService;
+    private final WebSocketSessionRepository webSocketSessionRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
+    private final MemberRepositoryService memberRepositoryService;
+
+    private static final int BATCH_SIZE = 200;
 
     @Async
     @TransactionalEventListener
@@ -298,8 +317,7 @@ public class NotificationEventListener {
             requester, room, NotificationType.REJECT_ROOM_JOIN);
 
         // 알림 저장
-        notificationLogRepositoryService.createNotificationLog(
-            sqsMessageResult.notificationLog());
+        notificationLogRepositoryService.createNotificationLog(sqsMessageResult.notificationLog());
 
         // sqs 전송
         if (!sqsMessageResult.fcmSQSMessageList().isEmpty()) {
@@ -319,12 +337,75 @@ public class NotificationEventListener {
             recipient, event.content(), messageRoom, NotificationType.ARRIVE_MESSAGE);
 
         // 알림 저장
-        notificationLogRepositoryService.createNotificationLog(
-            sqsMessageResult.notificationLog());
+        notificationLogRepositoryService.createNotificationLog(sqsMessageResult.notificationLog());
 
         // sqs 전송
         if (!sqsMessageResult.fcmSQSMessageList().isEmpty()) {
             sqsMessageSender.sendMessage(sqsMessageResult.fcmSQSMessageList());
         }
+    }
+
+    @Async
+    @EventListener
+    public void sendNotification(SentChatEvent sentChatEvent) {
+        // 해당 채팅방에 소켓 연결되어 있는 사용자 clientId 조회 in redis
+        Set<String> subscribingMembers = webSocketSessionRepository.getSubscribingMembersInChatRoom(
+            String.valueOf(sentChatEvent.chatRoomId()));
+
+        // 채팅방의 알림 수신 허용 사용자 전체 조회
+        List<ChatRoomMember> chatRoomMembers = chatRoomMemberRepository.findFetchMemberByChatRoomId(
+            sentChatEvent.chatRoomId());
+
+        // 채팅방에 소켓 연결 안되어 있고, 알림 수신 허용인 사용자 추출
+        List<Member> notSubscribing = chatRoomMembers.stream()
+            .map(ChatRoomMember::getMember)
+            .filter(m -> !subscribingMembers.contains(m.getClientId()))
+            .toList();
+
+        Member sender = memberRepositoryService.getMemberByIdOrThrow(sentChatEvent.memberId());
+
+        List<SQSMessageResult> results = sqsMessageCreator.createWithChatRoomId(
+            sender, notSubscribing, sentChatEvent.content(), sentChatEvent.chatRoomId(),
+            NotificationType.ARRIVE_CHAT);
+
+        List<FcmSQSMessage> fcmSqsMessageList = results.stream()
+            .flatMap(r -> r.fcmSQSMessageList().stream())
+            .toList();
+
+        ObjectMapper om = new ObjectMapper();
+        try {
+            String s = om.writeValueAsString(fcmSqsMessageList);
+            int byteSize = s.getBytes(StandardCharsets.UTF_8).length;
+            log.info("SQS 메시지 바이트 크기: {} bytes, 메시지 개수: {}", byteSize, fcmSqsMessageList.size());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        /**
+         * 테스트 결과, 닉네임 최대 8글자, 채팅 content 300자 기준 dto 1개당 1212.25bytes
+         * SQS 최대 메시지 크기 = 256 KiB = 262,144 bytes
+         * 약 리스트 사이즈 216까지 가능
+         * firebase sdk의 send_each 최대 500개까지 가능하고 SQS 메시지 하나 당 크기 고려해서 BATCH_SIZE 200으로 설정
+         */
+            if (!fcmSqsMessageList.isEmpty()) {
+                if (fcmSqsMessageList.size() > BATCH_SIZE) {
+                    List<List<FcmSQSMessage>> batchList = new ArrayList<>();
+                    for (int start = 0; start < fcmSqsMessageList.size(); start += BATCH_SIZE) {
+                        int end = start + BATCH_SIZE;
+
+                        if (end > fcmSqsMessageList.size()) {
+                            end = fcmSqsMessageList.size();
+                        }
+
+                        batchList.add(fcmSqsMessageList.subList(start, end));
+                    }
+
+                    batchList.forEach(
+                        fcmSQSMessages -> sqsMessageSender.sendMessage(fcmSQSMessages)
+                    );
+                } else {
+                    sqsMessageSender.sendMessage(fcmSqsMessageList);
+                }
+            }
     }
 }
