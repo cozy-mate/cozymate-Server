@@ -63,6 +63,6 @@ public class MemberRepositoryService {
 
     public Member getMemberByIdOrSocketThrow(Long memberId) {
         return memberRepository.findById(memberId)
-            .orElseThrow(() -> new WebSocketException(ErrorStatus._MEMBER_NOT_FOUND)); // TODO : 소켓 예외 처리로 수정
+            .orElseThrow(() -> new WebSocketException(ErrorStatus._MEMBER_NOT_FOUND));
     }
 }
