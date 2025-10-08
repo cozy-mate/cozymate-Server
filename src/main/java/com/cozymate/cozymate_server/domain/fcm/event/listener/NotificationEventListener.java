@@ -31,7 +31,6 @@ import com.cozymate.cozymate_server.domain.notificationlog.repository.Notificati
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
