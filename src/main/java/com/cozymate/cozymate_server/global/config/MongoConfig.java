@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @Configuration
 @EnableMongoRepositories(
     basePackages = "com.cozymate.cozymate_server.domain.chat.repository"
-
 )
 public class MongoConfig {
 
