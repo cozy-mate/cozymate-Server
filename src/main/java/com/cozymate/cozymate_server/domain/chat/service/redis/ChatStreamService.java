@@ -258,19 +258,19 @@ public class ChatStreamService {
     public void createStreamConsumerGroup(String streamKey, String consumerGroupName) {
         // Stream 존재 하지 않으면, MKSTREAM 옵션을 통해 만들고, ConsumerGroup 또한 생성한다
         if (!redisTemplate.hasKey(streamKey)) {
-            RedisAsyncCommands commands = (RedisAsyncCommands) redisTemplate
-                .getConnectionFactory()
-                .getConnection()
-                .getNativeConnection();
+            try (RedisConnection connection = redisTemplate.getConnectionFactory().getConnection()) {
+                RedisAsyncCommands<String, String> commands =
+                    (RedisAsyncCommands<String, String>) connection.getNativeConnection();
 
-            CommandArgs<String, String> args = new CommandArgs<>(StringCodec.UTF8)
-                .add(CommandKeyword.CREATE)
-                .add(streamKey)
-                .add(consumerGroupName)
-                .add("0")
-                .add("MKSTREAM");
+                CommandArgs<String, String> args = new CommandArgs<>(StringCodec.UTF8)
+                    .add(CommandKeyword.CREATE)
+                    .add(streamKey)
+                    .add(consumerGroupName)
+                    .add("0")
+                    .add("MKSTREAM");
 
-            commands.dispatch(CommandType.XGROUP, new StatusOutput(StringCodec.UTF8), args);
+                commands.dispatch(CommandType.XGROUP, new StatusOutput(StringCodec.UTF8), args);
+            }
         } else { // Stream 존재 시
             if (!existStreamConsumerGroup(streamKey, consumerGroupName)) { // 컨슈머 그룹 없으면 생성
                 redisTemplate.opsForStream()
