@@ -60,8 +60,7 @@ public class StompInterceptor implements ChannelInterceptor {
 
                 eventPublisher.publishEvent(new StompSubEvent(Long.parseLong(chatRoomId)));
             }
-        }
-        else if (StompCommand.SEND.equals(command)) {
+        } else if (StompCommand.SEND.equals(command)) {
             log.info("[StompInterceptor][{}] Stomp인터셉터 => clientId : {}", command, clientId);
         }
 
@@ -70,13 +69,13 @@ public class StompInterceptor implements ChannelInterceptor {
 
     private void validateCanSubscribe(String clientId, String chatRoomId) {
         Member member = memberRepository.findByClientId(clientId)
-            .orElseThrow(() -> new MessageDeliveryException("토픽 Sub중, member not found"));
+            .orElseThrow(() -> new MessageDeliveryException("해당 사용자를 찾을 수 없어 SUBSCRIBE 할 수 없습니다."));
 
         ChatRoom chatRoom = chatRoomRepository.findById(Long.parseLong(chatRoomId))
-            .orElseThrow(() -> new MessageDeliveryException("sub하려는 채팅방이 존재하지 않음"));
+            .orElseThrow(() -> new MessageDeliveryException("SUBSCRIBE하려는 채팅방이 존재하지 않습니다."));
 
         if (!member.getUniversity().getId().equals(chatRoom.getUniversity().getId())) {
-            throw new MessageDeliveryException("다른 대학의 채팅방 sub 불가");
+            throw new MessageDeliveryException("다른 대학의 채팅방은 SUBSCRIBE 할 수 없습니다.");
         }
     }
 }
