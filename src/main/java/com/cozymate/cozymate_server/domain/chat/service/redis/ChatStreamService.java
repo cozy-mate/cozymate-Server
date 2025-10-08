@@ -141,7 +141,7 @@ public class ChatStreamService {
     public void ackStream(String consumerGroupName, MapRecord<String, Object, Object> record) {
         Long acknowledge = redisTemplate.opsForStream().acknowledge(consumerGroupName, record);
 
-        log.info("CousumerGroup : {}, ack 성공 수 : {}", consumerGroupName, acknowledge);
+        log.info("ConsumerGroup : {}, ack 성공 수 : {}", consumerGroupName, acknowledge);
     }
 
     /**
@@ -151,7 +151,7 @@ public class ChatStreamService {
         Long acknowledge = redisTemplate.opsForStream()
             .acknowledge(streamKey, consumerGroupName, recordIds.toArray(new String[0]));
 
-        log.info("CousumerGroup : {}, ack 성공 수 : {}", consumerGroupName, acknowledge);
+        log.info("ConsumerGroup : {}, ack 성공 수 : {}", consumerGroupName, acknowledge);
     }
 
     /**
