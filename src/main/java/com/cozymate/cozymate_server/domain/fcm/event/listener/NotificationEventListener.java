@@ -377,20 +377,11 @@ public class NotificationEventListener {
          */
         if (!fcmSqsMessageList.isEmpty()) {
             if (fcmSqsMessageList.size() > BATCH_SIZE) {
-                List<List<FcmSQSMessage>> batchList = new ArrayList<>();
                 for (int start = 0; start < fcmSqsMessageList.size(); start += BATCH_SIZE) {
-                    int end = start + BATCH_SIZE;
+                    int end = Math.min(start + BATCH_SIZE, fcmSqsMessageList.size());
 
-                    if (end > fcmSqsMessageList.size()) {
-                        end = fcmSqsMessageList.size();
-                    }
-
-                    batchList.add(fcmSqsMessageList.subList(start, end));
+                    sqsMessageSender.sendMessage(fcmSqsMessageList.subList(start, end));
                 }
-
-                batchList.forEach(
-                    fcmSQSMessages -> sqsMessageSender.sendMessage(fcmSQSMessages)
-                );
             } else {
                 sqsMessageSender.sendMessage(fcmSqsMessageList);
             }
