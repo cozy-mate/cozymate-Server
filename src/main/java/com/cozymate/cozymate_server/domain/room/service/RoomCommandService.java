@@ -40,6 +40,7 @@ import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.Comparator;
@@ -79,6 +80,7 @@ public class RoomCommandService {
     private final MateRepositoryService mateRepositoryService;
     private final MemberStatCacheService memberStatCacheService;
     private final NotificationLogCommandService notificationLogCommandService;
+    private final EntityManager entityManager;
 
     @Transactional
     public RoomDetailResponseDTO createPrivateRoom(PrivateRoomCreateRequestDTO request,
@@ -245,6 +247,20 @@ public class RoomCommandService {
     }
 
     private void deleteRoomDatas(Long roomId) {
+        Feed feed = feedRepository.findByRoomId(roomId);
+        List<Long> posts = postRepository.findByFeedId(feed.getId()).stream()
+            .map(Post::getId)
+            .toList();
+
+        for (Long postId : posts) {
+            postCommentRepository.deleteAllByPostId(postId);
+            postImageRepository.deleteAllByPostId(postId);
+        }
+
+        postRepository.deleteByFeedId(feed.getId());
+        feedRepository.deleteByRoomId(roomId);
+        entityManager.flush();
+
         roomLogRepository.deleteAllByRoomId(roomId);
         todoRepository.deleteAllByRoomId(roomId);
         roleRepository.deleteAllByRoomId(roomId);
@@ -252,18 +268,6 @@ public class RoomCommandService {
         ruleRepositoryService.deleteRuleListByRoomId(roomId);
         roomFavoriteRepository.deleteAllByRoomId(roomId);
         roomHashtagRepository.deleteAllByRoomId(roomId);
-
-        // 피드 삭제 로직
-        if (feedRepository.existsByRoomId(roomId)) {
-            Feed feed = feedRepository.findByRoomId(roomId);
-            List<Post> posts = postRepository.findByFeedId(feed.getId());
-            for (Post post : posts) {
-                postCommentRepository.deleteAllByPostId(post.getId());
-                postImageRepository.deleteAllByPostId(post.getId());
-            }
-            postRepository.deleteByFeedId(feed.getId());
-            feedRepository.deleteByRoomId(roomId);
-        }
     }
 
     @Transactional
