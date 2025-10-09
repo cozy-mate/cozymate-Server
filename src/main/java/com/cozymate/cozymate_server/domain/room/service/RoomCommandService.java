@@ -248,18 +248,20 @@ public class RoomCommandService {
 
     private void deleteRoomDatas(Long roomId) {
         Feed feed = feedRepository.findByRoomId(roomId);
-        List<Long> posts = postRepository.findByFeedId(feed.getId()).stream()
-            .map(Post::getId)
-            .toList();
+        if (feed != null) {
+            List<Long> posts = postRepository.findByFeedId(feed.getId()).stream()
+                .map(Post::getId)
+                .toList();
 
-        for (Long postId : posts) {
-            postCommentRepository.deleteAllByPostId(postId);
-            postImageRepository.deleteAllByPostId(postId);
+            for (Long postId : posts) {
+                postCommentRepository.deleteAllByPostId(postId);
+                postImageRepository.deleteAllByPostId(postId);
+            }
+
+            postRepository.deleteByFeedId(feed.getId());
+            feedRepository.deleteByRoomId(roomId);
+            entityManager.flush();
         }
-
-        postRepository.deleteByFeedId(feed.getId());
-        feedRepository.deleteByRoomId(roomId);
-        entityManager.flush();
 
         roomLogRepository.deleteAllByRoomId(roomId);
         todoRepository.deleteAllByRoomId(roomId);
