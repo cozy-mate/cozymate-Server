@@ -1,7 +1,6 @@
 package com.cozymate.cozymate_server.domain.chat.converter;
 
 import com.cozymate.cozymate_server.domain.chat.Chat;
-import com.cozymate.cozymate_server.domain.chat.dto.redis.ChatStreamDTO;
 import com.cozymate.cozymate_server.domain.chat.dto.request.CreateChatRequestDTO;
 import com.cozymate.cozymate_server.domain.chat.dto.redis.ChatPubDTO;
 import com.cozymate.cozymate_server.domain.chat.dto.response.ChatListResponseDTO;
@@ -12,39 +11,35 @@ import java.util.List;
 
 public class ChatConverter {
 
-    public static Chat toDocument(ChatStreamDTO chatStreamDTO, LocalDateTime createdAt,
-        Long sequence) {
+    public static Chat toDocument(CreateChatRequestDTO createChatRequestDTO) {
         return Chat.builder()
-            .chatRoomId(Long.valueOf(chatStreamDTO.chatRoomId()))
-            .memberId(chatStreamDTO.memberId())
-            .content(chatStreamDTO.content())
-            .createdAt(createdAt)
-            .sequence(sequence)
+            .chatRoomId(Long.valueOf(createChatRequestDTO.chatRoomId()))
+            .memberId(createChatRequestDTO.memberId())
+            .content(createChatRequestDTO.content())
+            .createdAt(LocalDateTime.now())
             .build();
     }
 
-    public static ChatPubDTO toChatPubDTO(CreateChatRequestDTO createChatRequestDTO,
-        MemberCachingDTO memberCachingDTO) {
+    public static ChatPubDTO toChatPubDTO(Chat chat, MemberCachingDTO memberCachingDTO) {
         return ChatPubDTO.builder()
-            .chatRoomId(createChatRequestDTO.chatRoomId())
+            .chatRoomId(chat.getChatRoomId())
             .persona(memberCachingDTO.persona())
-            .memberId(createChatRequestDTO.memberId())
+            .memberId(chat.getMemberId())
             .nickname(memberCachingDTO.nickname())
-            .content(createChatRequestDTO.content())
-            .createdAt(LocalDateTime.now())
-            .sequence(0l)
+            .content(chat.getContent())
+            .createdAt(chat.getCreatedAt())
             .build();
     }
 
     public static ChatResponseDTO toChatResponseDTO(Chat chat, String nickname, Integer persona) {
         return ChatResponseDTO.builder()
+            .chatId(chat.getId())
             .chatRoomId(chat.getChatRoomId())
             .persona(persona)
             .memberId(chat.getMemberId())
             .nickname(nickname)
             .content(chat.getContent())
             .createdAt(chat.getCreatedAt())
-            .sequence(chat.getSequence())
             .build();
     }
 

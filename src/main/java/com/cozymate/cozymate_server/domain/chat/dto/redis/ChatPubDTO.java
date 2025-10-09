@@ -10,8 +10,7 @@ public record ChatPubDTO(
     Long memberId,
     String nickname,
     String content,
-    LocalDateTime createdAt, // db에 저장될 createdAt와 약간의 오차 있음
-    Long sequence // pub sequence는 0 고정
+    LocalDateTime createdAt
 ) {
 
 }

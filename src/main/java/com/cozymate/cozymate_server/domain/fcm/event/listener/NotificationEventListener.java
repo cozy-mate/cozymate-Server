@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -342,7 +341,7 @@ public class NotificationEventListener {
     }
 
     @Async
-    @EventListener
+    @TransactionalEventListener
     public void sendNotification(SentChatEvent sentChatEvent) {
         // 해당 채팅방에 소켓 연결되어 있는 사용자 clientId 조회 in redis
         Set<String> subscribingMembers = webSocketSessionRepository.getSubscribingMembersInChatRoom(

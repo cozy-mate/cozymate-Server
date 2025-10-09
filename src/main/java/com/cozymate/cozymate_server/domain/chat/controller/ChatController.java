@@ -39,14 +39,15 @@ public class ChatController {
         return ResponseEntity.ok(ApiResponse.onSuccess(ChatPubDTO.builder().build()));
     }
 
-    @Operation(summary = "[베로] 과거 채팅 조회", description = "조회된 채팅 중 가장 이전 채팅의 LocalDateTime과 sequence를 파라미터로 넘겨주세요")
+    @Operation(summary = "[베로] 이전 채팅 조회", description = "조회된 채팅 중 가장 이전 채팅의 LocalDateTime과 sequence를 파라미터로 넘겨주세요")
     @GetMapping("/chats/chatrooms/{chatRoomId}")
     public ResponseEntity<ApiResponse<ChatListResponseDTO>> getChatList(
         @AuthenticationPrincipal MemberDetails memberDetails, @PathVariable Long chatRoomId,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastChatTime,
-        @RequestParam Long sequence) {
+        @RequestParam String chatId
+    ) {
         return ResponseEntity.ok(ApiResponse.onSuccess(
             chatService.getChatListBeforeLastChatTime(memberDetails.member(), chatRoomId,
-                lastChatTime, sequence)));
+                lastChatTime, chatId)));
     }
 }

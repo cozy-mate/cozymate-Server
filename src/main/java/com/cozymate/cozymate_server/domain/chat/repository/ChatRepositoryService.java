@@ -17,9 +17,14 @@ public class ChatRepositoryService {
         chatRepository.save(chat);
     }
 
-    public List<Chat> getChatListByRange(Long chatRoomId, LocalDateTime enterTime,
-        LocalDateTime lastChatTime, Long sequence, PageRequest pageRequest) {
-        return chatRepository.findChatsInRange(chatRoomId, enterTime, lastChatTime, sequence,
+    public List<Chat> getChatListInRange(Long chatRoomId, LocalDateTime enterTime,
+        LocalDateTime lastChatTime, String chatId, PageRequest pageRequest) {
+        return chatRepository.findChatsInRange(chatRoomId, enterTime, lastChatTime, chatId,
             pageRequest);
+    }
+
+    public List<Chat> getChatListAfterEnterTime(Long chatRoomId, LocalDateTime enterTime,
+        PageRequest pageRequest) {
+        return chatRepository.findChatsAfterEnterTime(chatRoomId, enterTime, pageRequest);
     }
 }

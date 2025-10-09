@@ -19,5 +19,4 @@ public class Chat {
     private Long memberId;    // 메시지 보낸 사람
     private String content;     // 메시지 내용
     private LocalDateTime createdAt;  // 생성 시간
-    private Long sequence;   // redis stream에서 할당된 값
 }
