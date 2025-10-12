@@ -220,6 +220,9 @@ public enum ErrorStatus implements BaseErrorCode {
     // VIRAL
     _VIRAL_CODE_GENERATING_EXCESS(HttpStatus.BAD_REQUEST, "VIRAL500","바이럴 코드 사용 초과"),
     _VIRAL_CODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIRAL404","바이럴 코드로 사용자의 값을 찾을 수 없습니다."),
+
+    // DORMITORY MENU
+    _DORMITORY_MENU_NOT_FOUND(HttpStatus.BAD_REQUEST, "DORMITORYMENU400", "식단을 찾을 수 없습니다.")
     ;
 
     private final HttpStatus httpStatus;
