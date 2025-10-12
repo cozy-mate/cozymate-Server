@@ -4,7 +4,6 @@ import com.cozymate.cozymate_server.domain.dormitory.DormitoryMenu;
 import java.time.DayOfWeek;
 import lombok.Builder;
 
-@Builder
 public record DormitoryMenuResponseDTO(
     String breakfast,
     String lunch,
