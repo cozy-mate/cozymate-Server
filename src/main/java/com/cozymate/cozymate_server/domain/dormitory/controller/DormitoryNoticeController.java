@@ -25,7 +25,7 @@ public class DormitoryNoticeController {
     private final DormitoryNoticeService dormitoryNoticeService;
 
     @GetMapping("/notice/preview")
-    @Operation(summary = "[바니] 중요 공지사항 3개 조회", description = "isImportant=true인 최신 공지 3개를 조회합니다.")
+    @Operation(summary = "[바니] 공지사항 미리보기 조회", description = "최신 공지 3개를 조회합니다.")
     public ResponseEntity<ApiResponse<List<DormitoryNoticeResponseDTO>>> getPreviewNoticeList(
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {

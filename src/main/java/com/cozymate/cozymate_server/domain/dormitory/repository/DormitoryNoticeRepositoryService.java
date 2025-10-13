@@ -13,11 +13,11 @@ public class DormitoryNoticeRepositoryService {
 
     private final DormitoryNoticeRepository dormitoryNoticeRepository;
 
-    public List<DormitoryNotice> getPreviewNotices() {
-        return dormitoryNoticeRepository.findTop3ByIsImportantTrueOrderByCreatedAtDesc();
+    public List<DormitoryNotice> getPreviewNoticeList() {
+        return dormitoryNoticeRepository.findTop3ByOrderByCreatedAtDesc();
     }
 
-    public Page<DormitoryNotice> getNoticePage(int page, int size) {
+    public Page<DormitoryNotice> getNoticeList(int page, int size) {
         return dormitoryNoticeRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
     }
 

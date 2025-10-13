@@ -19,14 +19,14 @@ public class DormitoryNoticeService {
     private final DormitoryNoticeRepositoryService dormitoryNoticeRepositoryService;
 
     public List<DormitoryNoticeResponseDTO> getPreviewNoticeList(Member member) {
-        return dormitoryNoticeRepositoryService.getPreviewNotices()
+        return dormitoryNoticeRepositoryService.getPreviewNoticeList()
             .stream()
             .map(DormitoryNoticeResponseDTO::from)
             .toList();
     }
 
     public PageResponseDto<List<DormitoryNoticeResponseDTO>> getNoticeList(Member member, int page, int size) {
-        Page<DormitoryNotice> noticePage = dormitoryNoticeRepositoryService.getNoticePage(page, size);
+        Page<DormitoryNotice> noticePage = dormitoryNoticeRepositoryService.getNoticeList(page, size);
 
         List<DormitoryNoticeResponseDTO> content = noticePage.getContent()
             .stream()
