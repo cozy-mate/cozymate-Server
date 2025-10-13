@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +51,17 @@ public class ViralController {
         }
         return ResponseEntity.ok(
             ApiResponse.onSuccess(createdDto)
+        );
+    }
+
+    @GetMapping("/count")
+    @Operation(summary = "[말즈] 바이럴 테스트 참여 수 API")
+    @SwaggerApiError({})
+    public ResponseEntity<ApiResponse<Long>> getNumberOfParticipants() {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                snapshotService.getNumberOfViralSnapshots()
+            )
         );
     }
 }

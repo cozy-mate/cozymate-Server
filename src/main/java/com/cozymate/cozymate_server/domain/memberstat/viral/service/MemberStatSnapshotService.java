@@ -31,6 +31,10 @@ public class MemberStatSnapshotService {
     private final MemberStatSnapshotRepository repository;
     private final EntityManager entityManager;
 
+    @Transactional(readOnly = true)
+    public Long getNumberOfViralSnapshots(){
+        return repository.count();
+    }
     @Transactional
     public CreateViralSnapshotDTO create(CreateMemberStatSnapshotRequestDTO dto) {
         MemberStatSnapshot snapshot = createSnapshot(dto);
