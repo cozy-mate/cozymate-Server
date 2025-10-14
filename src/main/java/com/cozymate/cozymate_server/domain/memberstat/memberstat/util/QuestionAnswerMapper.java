@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstat.memberstat.util;
 
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.enums.StatKey;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,8 +22,6 @@ public class QuestionAnswerMapper {
 
     private static Map<String, List<String>> QUESTION_ANSWER_MAP;
     private static final String JSON_FILE = "memberstat/question_answer.json";
-    private static final String AM = "오전";
-    private static final String PM = "오후";
 
     private static final Set<String> MULTI_VALUE_QUESTION = Set.of("personalities",
         "sleepingHabits");
@@ -87,29 +86,6 @@ public class QuestionAnswerMapper {
             .map(index -> mapValue(key, index))
             .collect(Collectors.toList());
     }
-
-    public static Integer convertTimeToInteger(String meridian, Integer hour) {
-        if (meridian.equals(AM)) {
-            return hour % 12;
-        }
-        return (hour % 12) + 12;
-    }
-
-    public static String calculateMeridian(Integer hour) {
-        if (hour < 12) {
-            return AM;
-        }
-        return PM;
-    }
-
-    public static Integer calculateHour(Integer hour) {
-        int value = hour % 12;
-        if (value == 0) {
-            return 12;
-        }
-        return value;
-    }
-
     public static List<Integer> getIndicesFromBitMask(int bitmask) {
         List<Integer> indices = new ArrayList<>();
         int index = 0;
@@ -192,5 +168,18 @@ public class QuestionAnswerMapper {
         return options;
     }
 
+    private static int countOptions(String key) {
+        List<String> options = QUESTION_ANSWER_MAP.get(key);
+        if (options == null) {
+            log.error("key is not in file: {}", key);
+            throw new GeneralException(ErrorStatus._MEMBERSTAT_FILE_READ_ERROR);
+        }
+        return options.size();
+    }
+
+    public static int gapOf(StatKey statKey) {
+        int n = countOptions(statKey.raw());
+        return (n >= 2) ? (n - 1) : 1;
+    }
 }
 
