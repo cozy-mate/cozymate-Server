@@ -1,6 +1,7 @@
 package com.cozymate.cozymate_server.domain.dormitory.service;
 
 import com.cozymate.cozymate_server.domain.dormitory.DormitoryMenu;
+import com.cozymate.cozymate_server.domain.dormitory.converter.DormitoryMenuConverter;
 import com.cozymate.cozymate_server.domain.dormitory.dto.response.DormitoryMenuResponseDTO;
 import com.cozymate.cozymate_server.domain.dormitory.repository.DormitoryMenuRepositoryService;
 import com.cozymate.cozymate_server.domain.member.Member;
@@ -19,6 +20,6 @@ public class DormitoryMenuService {
     public DormitoryMenuResponseDTO getMenuByDate(Member member, LocalDate date) {
         DormitoryMenu menu = dormitoryMenuRepositoryService.getDormitoryMenuByDateOrThrow(date);
 
-        return DormitoryMenuResponseDTO.of(menu, date.getDayOfWeek());
+        return DormitoryMenuConverter.toDormitoryMenuResponseDTO(menu, date.getDayOfWeek());
     }
 }

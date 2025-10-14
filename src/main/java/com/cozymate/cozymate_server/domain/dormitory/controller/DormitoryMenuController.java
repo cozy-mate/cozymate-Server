@@ -29,7 +29,7 @@ public class DormitoryMenuController {
     @SwaggerApiError({
         ErrorStatus._DORMITORY_MENU_NOT_FOUND
     })
-    public ResponseEntity<ApiResponse<DormitoryMenuResponseDTO>> getTodayMenu(
+    public ResponseEntity<ApiResponse<DormitoryMenuResponseDTO>> getMenuByDate(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
