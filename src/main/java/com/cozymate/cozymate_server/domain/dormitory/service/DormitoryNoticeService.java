@@ -25,8 +25,10 @@ public class DormitoryNoticeService {
             .toList();
     }
 
-    public PageResponseDto<List<DormitoryNoticeResponseDTO>> getNoticeList(Member member, int page, int size) {
-        Page<DormitoryNotice> noticePage = dormitoryNoticeRepositoryService.getNoticeList(page, size);
+    public PageResponseDto<List<DormitoryNoticeResponseDTO>> getNoticeList(Member member, int page, int size, boolean isImportant) {
+        Page<DormitoryNotice> noticePage = isImportant
+            ? dormitoryNoticeRepositoryService.getImportantNoticeList(page, size)
+            : dormitoryNoticeRepositoryService.getNoticeList(page, size);
 
         List<DormitoryNoticeResponseDTO> content = noticePage.getContent()
             .stream()

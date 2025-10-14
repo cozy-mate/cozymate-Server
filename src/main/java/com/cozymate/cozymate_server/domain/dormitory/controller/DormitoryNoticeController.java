@@ -35,15 +35,16 @@ public class DormitoryNoticeController {
     }
 
     @GetMapping("/notice")
-    @Operation(summary = "[바니] 전체 공지사항 조회", description = "공지사항을 최신순으로 전체 조회합니다.")
+    @Operation(summary = "[바니] 전체 공지사항 조회", description = "공지사항을 최신순으로 조회합니다. isImportant 값에 따라 중요 공지사항(true) 또는 일반 공지사항(false)을 선택할 수 있습니다.")
     public ResponseEntity<ApiResponse<PageResponseDto<List<DormitoryNoticeResponseDTO>>>> getNoticeList(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-        @RequestParam(defaultValue = "10") @Positive int size
+        @RequestParam(defaultValue = "10") @Positive int size,
+        @RequestParam boolean isImportant
     ) {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
-                dormitoryNoticeService.getNoticeList(memberDetails.member(), page, size))
+                dormitoryNoticeService.getNoticeList(memberDetails.member(), page, size, isImportant))
         );
     }
 

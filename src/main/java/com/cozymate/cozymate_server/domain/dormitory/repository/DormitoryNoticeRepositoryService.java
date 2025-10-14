@@ -18,7 +18,11 @@ public class DormitoryNoticeRepositoryService {
     }
 
     public Page<DormitoryNotice> getNoticeList(int page, int size) {
-        return dormitoryNoticeRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
+        return dormitoryNoticeRepository.findAllByIsImportantFalseOrderByCreatedAtDesc(PageRequest.of(page, size));
+    }
+
+    public Page<DormitoryNotice> getImportantNoticeList(int page, int size) {
+        return dormitoryNoticeRepository.findAllByIsImportantTrueOrderByCreatedAtDesc(PageRequest.of(page, size));
     }
 
 }

@@ -11,6 +11,9 @@ public interface DormitoryNoticeRepository extends JpaRepository<DormitoryNotice
     // 최신 공지 3개
     List<DormitoryNotice> findTop3ByOrderByCreatedAtDesc();
 
-    // 전체 공지 최신 순
-    Page<DormitoryNotice> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    // 전체 일반 공지 최신 순
+    Page<DormitoryNotice> findAllByIsImportantFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    // 전체 중요 공지 최신 순
+    Page<DormitoryNotice> findAllByIsImportantTrueOrderByCreatedAtDesc(Pageable pageable);
 }
