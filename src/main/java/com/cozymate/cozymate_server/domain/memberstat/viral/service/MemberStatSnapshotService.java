@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstat.viral.service;
 
-import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.util.MemberMatchRateCalculator;
+import com.cozymate.cozymate_server.domain.memberstat.calculator.MatchRateCalculator;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.FieldInstanceResolver;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.MemberStatComparator;
@@ -30,6 +30,7 @@ public class MemberStatSnapshotService {
 
     private final MemberStatSnapshotRepository repository;
     private final EntityManager entityManager;
+    private final MatchRateCalculator matchRateCalculator;
 
     @Transactional
     public CreateViralSnapshotDTO create(CreateMemberStatSnapshotRequestDTO dto) {
@@ -53,7 +54,7 @@ public class MemberStatSnapshotService {
             FieldInstanceResolver.extractAllLifestyleFields(sharer.getLifestyle()));
         Map<String, String> criteriaMap = toStringMap(
             FieldInstanceResolver.extractAllLifestyleFields(criteria.getLifestyle()));
-        Integer matchRate = MemberMatchRateCalculator.calculateLifestyleMatchRate(
+        Integer matchRate = matchRateCalculator.calculateMatchRate(
             sharer.getLifestyle(),criteria.getLifestyle()
         );
 
