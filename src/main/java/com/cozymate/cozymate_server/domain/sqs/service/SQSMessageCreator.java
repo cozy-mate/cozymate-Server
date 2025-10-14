@@ -132,6 +132,24 @@ public class SQSMessageCreator {
             notificationLog, messageRoom);
     }
 
+    /**
+     * ARRIVE_CHAT
+     */
+    public List<SQSMessageResult> createWithChatRoomId(Member sender, List<Member> recipientList,
+        String chatContent, Long chatRoomId, NotificationType notificationType) {
+
+        List<List<Fcm>> fcmList = recipientList.stream()
+            .map(m -> getFcmList(m))
+            .toList();
+
+        String notificationContent = getContent(sender, notificationType, chatContent);
+
+        return fcmList.stream()
+            .map(f -> getMessageResultWithChatRoomId(f, notificationContent, notificationType,
+                chatRoomId))
+            .toList();
+    }
+
 
     private String getContent(Member member, Room room, NotificationType notificationType) {
         return notificationType.generateContent(FcmPushContentDTO.create(member, room));
@@ -224,7 +242,8 @@ public class SQSMessageCreator {
     }
 
     private SQSMessageResult getMessageResultWithMessageRoomId(List<Fcm> fcmList, String content,
-        NotificationType notificationType, NotificationLog notificationLog, MessageRoom messageRoom) {
+        NotificationType notificationType, NotificationLog notificationLog,
+        MessageRoom messageRoom) {
 
         List<FcmSQSMessage> fcmSQSMessageList = fcmList.stream()
             .map(fcm -> {
@@ -244,6 +263,31 @@ public class SQSMessageCreator {
         SQSMessageResult sqsMessageResult = SQSMessageResult.builder()
             .fcmSQSMessageList(fcmSQSMessageList)
             .notificationLog(notificationLog)
+            .build();
+
+        return sqsMessageResult;
+    }
+
+    private SQSMessageResult getMessageResultWithChatRoomId(List<Fcm> fcmList, String content,
+        NotificationType notificationType, Long chatRoomId) {
+
+        List<FcmSQSMessage> fcmSQSMessageList = fcmList.stream()
+            .map(fcm -> {
+                String token = fcm.getToken();
+
+                FcmSQSMessage fcmSqsMessage = FcmSQSMessage.builder()
+                    .title(NOTIFICATION_TITLE)
+                    .body(content)
+                    .actionType(String.valueOf(notificationType))
+                    .deviceToken(token)
+                    .chatRoomId(chatRoomId.toString())
+                    .build();
+
+                return fcmSqsMessage;
+            }).toList();
+
+        SQSMessageResult sqsMessageResult = SQSMessageResult.builder()
+            .fcmSQSMessageList(fcmSQSMessageList)
             .build();
 
         return sqsMessageResult;

@@ -19,6 +19,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,35 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Slf4j
 @RestControllerAdvice(annotations = {RestController.class})
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
+
+    // 클라이언트는 "/user/queue/errors" 경로를 필수 구독
+    @MessageExceptionHandler
+    @SendToUser(destinations = "/queue/errors")
+    public ApiResponse<Void> webSocketException(WebSocketException e) {
+        return ApiResponse.onFailure(e.getCode().getReasonHttpStatus().getCode(),
+            e.getCode().getMessage(), null);
+    }
+
+    // 클라이언트는 "/user/queue/errors" 경로를 필수 구독
+    @MessageExceptionHandler
+    @SendToUser(destinations = "/queue/errors")
+    public ApiResponse<Map<String, String>> handleValidationException(
+        org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException e) {
+        Map<String, String> errors = new LinkedHashMap<>();
+
+        e.getBindingResult().getFieldErrors()
+            .forEach(fieldError -> {
+                String fieldName = fieldError.getField();
+                String errorMessage = Optional.ofNullable(fieldError.getDefaultMessage())
+                    .orElse("");
+                errors.merge(fieldName, errorMessage,
+                    (existingErrorMessage, newErrorMessage) -> existingErrorMessage + ", "
+                        + newErrorMessage);
+            });
+
+        return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(),
+            ErrorStatus._BAD_REQUEST.getMessage(), errors);
+    }
 
     // Bean Validation 제약 조건 위반 시 발생하는 예외를 처리
     @ExceptionHandler

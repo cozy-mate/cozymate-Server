@@ -4,6 +4,7 @@ import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import com.cozymate.cozymate_server.global.response.exception.WebSocketException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -56,4 +57,12 @@ public class MemberRepositoryService {
         memberRepository.save(member);
     }
 
+    public List<Member> getMemberListByIds(List<Long> memberIds) {
+        return memberRepository.findAllById(memberIds);
+    }
+
+    public Member getMemberByIdOrSocketThrow(Long memberId) {
+        return memberRepository.findById(memberId)
+            .orElseThrow(() -> new WebSocketException(ErrorStatus._MEMBER_NOT_FOUND));
+    }
 }

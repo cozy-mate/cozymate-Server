@@ -94,10 +94,10 @@ public class SecurityConfig {
 
                 .requestMatchers(
                     "/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config", "/swagger-resources/**")
-                    .permitAll()
+                .permitAll()
                 .requestMatchers(
-                    "/admin/auth/**", "/auth/sign-in", "/viral/create", "/viral/**")
-                    .permitAll()
+                    "/admin/auth/**", "/auth/sign-in", "/viral/create", "/viral/**", "/ws/**")
+                .permitAll()
                 .anyRequest()
                 .authenticated());
 
