@@ -39,6 +39,7 @@ public class MemberService {
     private final MailAuthenticationRepositoryService mailAuthenticationRepositoryService;
     private final SignUpNotificationService signUpNotificationService;
     private final MemberRepositoryService memberRepositoryService;
+    private final MemberCacheService memberCacheService;
 
     /**
      * 닉네임 유효성 검사 메서드
@@ -126,6 +127,13 @@ public class MemberService {
             requestDTO.birthday(),
             requestDTO.majorName()
         );
+
+        try {
+            memberCacheService.saveMemberCachingDTO(member.getId(),
+                MemberConverter.toMemberCachingDTO(member.getNickname(), member.getPersona()));
+        } catch (Exception e) {
+            log.warn("사용자 id : {}, 사용자 정보 수정 중, 캐시 저장 실패 : {}", member.getId(), e.getMessage());
+        }
     }
 
     /**
@@ -141,6 +149,13 @@ public class MemberService {
 
         mailService.sendCustomMailToAdmin(mailSubject, withdrawReason);
         memberWithdrawService.withdraw(memberDetails.member());
+
+        try {
+            memberCacheService.deleteMemberCachingDTO(memberDetails.member().getId());
+        } catch (Exception e) {
+            log.warn("사용자 id : {}, 사용자 탈퇴 중, 캐시 삭제 실패 : {}", memberDetails.member().getId(),
+                e.getMessage());
+        }
     }
 
 }

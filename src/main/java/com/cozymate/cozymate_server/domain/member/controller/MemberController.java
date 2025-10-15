@@ -1,14 +1,12 @@
 package com.cozymate.cozymate_server.domain.member.controller;
 
 import com.cozymate.cozymate_server.auth.userdetails.MemberDetails;
-import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberDetailResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.MemberUniversityInfoResponseDTO;
 import com.cozymate.cozymate_server.domain.member.dto.response.SignInResponseDTO;
-import com.cozymate.cozymate_server.domain.member.service.MemberCacheService;
 import com.cozymate.cozymate_server.domain.member.service.MemberService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -45,7 +43,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
-    private final MemberCacheService memberCacheService;
 
     @GetMapping("/check-nickname")
     @Operation(summary = "[말즈] 닉네임 유효성 검증",
@@ -134,10 +131,6 @@ public class MemberController {
         @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         memberService.update(memberDetails.member(), requestDTO);
-
-        memberCacheService.saveMemberCachingDTO(memberDetails.member().getId(),
-            MemberConverter.toMemberCachingDTO(requestDTO.nickname(), requestDTO.persona()));
-
         return ResponseEntity.ok(ApiResponse.onSuccess(true));
     }
 
@@ -147,9 +140,6 @@ public class MemberController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid WithdrawRequestDTO withdrawRequestDTO) {
         memberService.withdraw(withdrawRequestDTO, memberDetails);
-
-        memberCacheService.deleteMemberCachingDTO(memberDetails.member().getId());
-
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
 
