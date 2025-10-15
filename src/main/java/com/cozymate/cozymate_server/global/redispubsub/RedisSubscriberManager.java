@@ -26,7 +26,7 @@ public class RedisSubscriberManager {
 
     @EventListener
     public void subscribeChatRoom(StompSubEvent event) {
-        log.info("Stomp Subscribe 감지 : 레디스의 chatroom:{} topic 구독을 시도합니다.", event.chatRoomId());
+        log.debug("Stomp Subscribe 감지 : 레디스의 chatroom:{} topic 구독을 시도합니다.", event.chatRoomId());
         Long chatRoomId = event.chatRoomId();
 
         activeMemberCount.compute(chatRoomId, (id, count) -> {
@@ -34,11 +34,11 @@ public class RedisSubscriberManager {
                 ChannelTopic channelTopic = new ChannelTopic("chatroom:" + id);
                 container.addMessageListener(messageListenerAdapter, channelTopic);
                 topicMap.put(id, channelTopic);
-                log.info("레디스의 chatroom:{} topic 구독을 성공했습니다.", event.chatRoomId());
+                log.debug("레디스의 chatroom:{} topic 구독을 성공했습니다.", event.chatRoomId());
                 return 1;
             } else {
                 int newCount = count + 1;
-                log.info(
+                log.debug(
                     "이미 레디스의 chatroom:{} topic 구독이 되어 있는 서버 프로세스입니다. 해당 서버 프로세스 기준 활성 사용자 수를 1 증가 -> 현재 활성 수 : {}",
                     event.chatRoomId(), newCount);
                 return newCount;
@@ -48,14 +48,14 @@ public class RedisSubscriberManager {
 
     @EventListener
     public void unsubscribeChatRoom(StompDisconnectEvent event) {
-        log.info("Stomp Disconnect 감지 : 레디스의 chatroom:{} topic 구독 해제를 시도합니다.", event.chatRoomId());
+        log.debug("Stomp Disconnect 감지 : 레디스의 chatroom:{} topic 구독 해제를 시도합니다.", event.chatRoomId());
         Long chatRoomId = event.chatRoomId();
 
         activeMemberCount.computeIfPresent(chatRoomId, (id, count) -> {
             int remain = count - 1;
             if (remain == 0) {
                 ChannelTopic channelTopic = topicMap.remove(chatRoomId);
-                log.info(
+                log.debug(
                     "해당 서버 프로레스에서 더 이상 해당 채팅방에 연결된 사용자가 없습니다. 레디스의 chatroom:{} topic 구독 해제를 시도합니다.",
                     event.chatRoomId());
 
@@ -65,10 +65,10 @@ public class RedisSubscriberManager {
                 }
 
                 container.removeMessageListener(messageListenerAdapter, channelTopic);
-                log.info("레디스의 chatroom:{} topic 구독 해제를 성공했습니다.", event.chatRoomId());
+                log.debug("레디스의 chatroom:{} topic 구독 해제를 성공했습니다.", event.chatRoomId());
                 return null; // map에서 제거
             } else {
-                log.info("아직 해당 서버 프로세스 기준 활성 수가 {}입니다. 레디스 chatroom:{} topic 구독을 유지합니다.", remain,
+                log.debug("아직 해당 서버 프로세스 기준 활성 수가 {}입니다. 레디스 chatroom:{} topic 구독을 유지합니다.", remain,
                     event.chatRoomId());
                 return remain;
             }
