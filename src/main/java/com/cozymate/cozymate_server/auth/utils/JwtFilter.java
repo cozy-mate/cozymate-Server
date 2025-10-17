@@ -45,12 +45,14 @@ public class JwtFilter extends OncePerRequestFilter {
         "/viral/**"
     );
 
-    // 임시 토큰으로만 접근 가능한 URL 목록
+    // 임시 토큰으로 접근 가능한 URL 목록
     private static final List<String> NOT_MEMBER_URLS = List.of(
         "/members/mail",
         "/members/mail/verify",
         "/university/get-list",
-        "/university/get-info"
+        "/university/get-info",
+        "/members/sign-up-direct",
+        "/members/check-nickname"
     );
     // 임시 토큰으로만 접근 가능한 URL 목록
     private static final List<String> PRE_MEMBER_URLS = List.of(
