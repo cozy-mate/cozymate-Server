@@ -18,6 +18,7 @@ import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
 import com.cozymate.cozymate_server.domain.member.validator.MemberValidator;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
+import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import com.cozymate.cozymate_server.domain.university.validator.UniversityValidator;
 import lombok.RequiredArgsConstructor;
@@ -127,10 +128,14 @@ public class MemberService {
 
         memberValidator.checkNickname(requestDTO.nickname());
         memberValidator.checkClientId(clientId);
+        University university = universityRepositoryService.getUniversityByIdOrThrow(
+            requestDTO.universityId());
+
+        universityValidator.checkMajorName(university, requestDTO.majorName());
 
         Member member = MemberConverter.toMember(
             clientId,
-            universityRepositoryService.getUniversityByIdOrThrow(requestDTO.universityId()),
+            university,
             requestDTO.majorName(),
             requestDTO.nickname(),
             Gender.getValue(requestDTO.gender()),
@@ -138,15 +143,10 @@ public class MemberService {
             requestDTO.persona()
         );
         member = memberRepositoryService.createMember(member);
-        log.info("[MemberService.signUp] Non-University Verify Member SignUp Success: memberId={}",
-            member.getId());
 
         memberStatPreferenceCommandService.savePreferences(
             member.getId(),
             requestDTO.memberStatPreferenceDto().preferenceList());
-
-        log.info("[MemberService.signUp] Non-University Verify Member Preferences Saved: memberId={}",
-            member.getId());
 
 //        signUpNotificationService.sendSignUpNotification(member);
         // 기존 회원으로 로그인 처리

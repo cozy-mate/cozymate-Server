@@ -13,7 +13,10 @@ import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public record SignUpNonUniversityVerifyRequestDTO(
+    @NotNull(message = "null일 수 없습니다.")
     Long universityId,
+    @NotNull(message = "null일 수 없습니다.")
+    @NotEmpty(message = "비어 있을 수 없습니다.")
     @BannedWordValid
     String majorName,
     @NotNull(message = "null일 수 없습니다.")
