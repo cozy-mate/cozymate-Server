@@ -27,6 +27,28 @@ public class MemberConverter {
             .majorName(majorName)
             .build();
     }
+    public static Member toMember(
+        String clientId,
+        University university,
+        String majorName,
+        String nickname,
+        Gender gender,
+        LocalDate birthDay,
+        Integer persona
+    ) {
+        return Member.builder()
+            .clientId(clientId)
+            .socialType(ClientIdMaker.getSocialTypeInClientId(clientId))
+            .university(university)
+            .majorName(majorName)
+            .nickname(nickname)
+            .gender(gender)
+            .birthDay(birthDay)
+            .persona(persona)
+            .role(Role.USER)
+            .isBanned(false)
+            .build();
+    }
 
 
     public static SignInResponseDTO toSignInResponseDTO(
