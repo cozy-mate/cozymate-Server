@@ -1,10 +1,10 @@
 package com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.service;
 
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
+import com.cozymate.cozymate_server.domain.memberstat.calculator.MatchRateCalculator;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.LifestyleMatchRate;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.redis.service.LifestyleMatchRateCacheService;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepositoryService;
-import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.util.MemberMatchRateCalculator;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 
@@ -30,6 +30,9 @@ public class LifestyleMatchRateService {
     private final MemberStatRepository memberStatRepository;
     private final UniversityRepository universityRepository;
     private final LifestyleMatchRateCacheService lifestyleMatchRateCacheService;
+
+    private final MatchRateCalculator matchRateCalculator;
+
 
     private static final Integer NO_EQUALITY = null;
 
@@ -107,7 +110,7 @@ public class LifestyleMatchRateService {
     }
 
     private LifestyleMatchRate createMatchRate(MemberStat memberA, MemberStat memberB) {
-        int matchRate = MemberMatchRateCalculator.calculateLifestyleMatchRate(
+        int matchRate = matchRateCalculator.calculateMatchRate(
             memberA.getLifestyle(), memberB.getLifestyle());
 
         return new LifestyleMatchRate(memberA.getMember().getId(), memberB.getMember().getId(),
