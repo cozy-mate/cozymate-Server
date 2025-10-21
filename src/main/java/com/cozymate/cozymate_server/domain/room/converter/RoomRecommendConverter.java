@@ -9,11 +9,11 @@ import org.apache.commons.lang3.tuple.Pair;
 public class RoomRecommendConverter {
 
     public static RoomRecommendationResponseDTO toRoomRecommendationResponse(Room room,
-        Pair<Long, Integer> pair, List<PreferenceMatchCountDTO> preferenceMatchCountList, List<String> hashtags) {
+        Pair<Long, Integer> pair, List<PreferenceMatchCountDTO> preferenceMatchCountList) {
         return RoomRecommendationResponseDTO.builder()
             .roomId(pair.getLeft())
             .name(room.getName())
-            .hashtags(hashtags)
+            .description(room.getDescription())
             .equality(pair.getRight())
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(room.getNumOfArrival())
@@ -22,11 +22,11 @@ public class RoomRecommendConverter {
     }
 
     public static RoomRecommendationResponseDTO toRoomRecommendationResponseWhenNoMemberStat(Room room,
-        List<PreferenceMatchCountDTO> preferenceMatchCountList, List<String> hashtags) {
+        List<PreferenceMatchCountDTO> preferenceMatchCountList) {
         return RoomRecommendationResponseDTO.builder()
             .roomId(room.getId())
             .name(room.getName())
-            .hashtags(hashtags)
+            .description(room.getDescription())
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(room.getNumOfArrival())
             .preferenceMatchCountList(preferenceMatchCountList)

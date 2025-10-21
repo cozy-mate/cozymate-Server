@@ -14,7 +14,6 @@ import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.converter.RoomFavoriteConverter;
 import com.cozymate.cozymate_server.domain.roomfavorite.dto.response.RoomFavoriteResponseDTO;
 import com.cozymate.cozymate_server.domain.roomfavorite.repository.RoomFavoriteRepositoryService;
-import com.cozymate.cozymate_server.domain.roomhashtag.service.RoomHashtagQueryService;
 import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -36,7 +35,6 @@ public class RoomFavoriteQueryService {
     private final MateRepository mateRepository;
     private final MemberStatPreferenceQueryService memberStatPreferenceQueryService;
     private final LifestyleMatchRateService lifestyleMatchRateService;
-    private final RoomHashtagQueryService roomHashtagQueryService;
     private final RoomFavoriteRepositoryService roomFavoriteRepositoryService;
 
     public PageResponseDto<List<RoomFavoriteResponseDTO>> getFavoriteRoomList(Member member,
@@ -73,9 +71,6 @@ public class RoomFavoriteQueryService {
         // 로그인 사용자의 member stat
         MemberStat memberStat = member.getMemberStat();
 
-        Map<Long, List<String>> roomHashtagsMap = roomHashtagQueryService.getRoomHashtagsByRooms(
-            findFavoriteRoomList);
-
         List<RoomFavoriteResponseDTO> favoriteRoomResponseList = findFavoriteRoomList.stream()
             .map(room -> {
                 List<Mate> mates = roomIdMatesMap.get(room.getId());
@@ -98,12 +93,9 @@ public class RoomFavoriteQueryService {
                 // 로그인 사용자와 방 일치율 계산
                 Integer roomEquality = RoomStatUtil.getCalculateRoomEquality(equalityMap);
 
-                // 방 해시태그 조회
-                List<String> roomHashTags = roomHashtagsMap.getOrDefault(room.getId(), List.of());
-
                 return RoomFavoriteConverter.toRoomFavoriteResponseDTO(
                     roomFavoriteIdMap.get(room), room, roomEquality,
-                    preferenceStatsMatchCountList, roomHashTags, mates.size()
+                    preferenceStatsMatchCountList, mates.size()
                 );
             })
             .toList();

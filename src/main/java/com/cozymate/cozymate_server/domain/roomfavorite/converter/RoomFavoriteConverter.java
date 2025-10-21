@@ -17,15 +17,14 @@ public class RoomFavoriteConverter {
     }
 
     public static RoomFavoriteResponseDTO toRoomFavoriteResponseDTO(Long roomFavoriteId, Room room,
-        Integer roomEquality, List<PreferenceMatchCountDTO> preferenceStatsMatchCountList,
-        List<String> roomHashTags, Integer numOfArrival) {
+        Integer roomEquality, List<PreferenceMatchCountDTO> preferenceStatsMatchCountList, Integer numOfArrival) {
         return RoomFavoriteResponseDTO.builder()
             .roomFavoriteId(roomFavoriteId)
             .roomId(room.getId())
             .equality(roomEquality)
             .name(room.getName())
             .preferenceMatchCountList(preferenceStatsMatchCountList)
-            .hashtags(roomHashTags)
+            .description(room.getDescription())
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(numOfArrival)
             .build();
