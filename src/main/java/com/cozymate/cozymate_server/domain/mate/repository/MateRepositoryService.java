@@ -29,4 +29,13 @@ public class MateRepositoryService {
             .orElseThrow(() -> new GeneralException(ErrorStatus._NOT_ROOM_MATE));
     }
 
+    public Optional<Mate> getMateByRoomIdAndMemberIdAndStatus(Long roomId, Long memberId, EntryStatus status) {
+        return mateRepository.findByRoomIdAndMemberIdAndEntryStatus(roomId, memberId, status);
+    }
+
+    public void delete(Mate mate) {
+        mateRepository.delete(mate);
+
+    }
+
 }
