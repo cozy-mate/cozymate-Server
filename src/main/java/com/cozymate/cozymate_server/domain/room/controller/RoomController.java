@@ -61,8 +61,7 @@ public class RoomController {
     @Operation(summary = "[바니]공개 방 생성 기능", description = "방이름, 프로필이미지, 인원수, 한줄 소개(선택)를 입력합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
-        ErrorStatus._ROOM_ALREADY_EXISTS,
-        ErrorStatus._DUPLICATE_HASHTAGS
+        ErrorStatus._ROOM_ALREADY_EXISTS
     })
     public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> createPublicRoom(
         @Valid @RequestBody PublicRoomCreateRequestDTO request,
