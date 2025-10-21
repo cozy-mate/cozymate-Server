@@ -7,6 +7,7 @@ import com.cozymate.cozymate_server.domain.mail.repository.MailAuthenticationRep
 import com.cozymate.cozymate_server.domain.mail.service.MailService;
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.converter.MemberConverter;
+import com.cozymate.cozymate_server.domain.member.dto.request.SignUpNonUniversityVerifyRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.SignUpRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.UpdateRequestDTO;
 import com.cozymate.cozymate_server.domain.member.dto.request.WithdrawRequestDTO;
@@ -17,8 +18,9 @@ import com.cozymate.cozymate_server.domain.member.enums.Gender;
 import com.cozymate.cozymate_server.domain.member.repository.MemberRepositoryService;
 import com.cozymate.cozymate_server.domain.member.validator.MemberValidator;
 import com.cozymate.cozymate_server.domain.memberstatpreference.service.MemberStatPreferenceCommandService;
+import com.cozymate.cozymate_server.domain.university.University;
+import com.cozymate.cozymate_server.domain.university.repository.UniversityRepositoryService;
 import com.cozymate.cozymate_server.domain.university.validator.UniversityValidator;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,8 @@ public class MemberService {
     private final MailAuthenticationRepositoryService mailAuthenticationRepositoryService;
     private final SignUpNotificationService signUpNotificationService;
     private final MemberRepositoryService memberRepositoryService;
+
+    private final UniversityRepositoryService universityRepositoryService;
 
     /**
      * 닉네임 유효성 검사 메서드
@@ -106,6 +110,45 @@ public class MemberService {
             signUpRequestDTO.memberStatPreferenceDto().preferenceList());
 
         signUpNotificationService.sendSignUpNotification(member);
+        // 기존 회원으로 로그인 처리
+        return authService.signInByExistingMember(member.getClientId());
+    }
+
+
+    /**
+     * 사용자 회원가입 메서드
+     *
+     * @param clientId   필터추출한 clientId
+     * @param requestDTO 회원가입 요청 정보를 담은 DTO
+     * @return 로그인 결과를 담은 DTO
+     */
+    @Transactional
+    public SignInResponseDTO signUp(String clientId,
+        SignUpNonUniversityVerifyRequestDTO requestDTO) {
+
+        memberValidator.checkNickname(requestDTO.nickname());
+        memberValidator.checkClientId(clientId);
+        University university = universityRepositoryService.getUniversityByIdOrThrow(
+            requestDTO.universityId());
+
+        universityValidator.checkMajorName(university, requestDTO.majorName());
+
+        Member member = MemberConverter.toMember(
+            clientId,
+            university,
+            requestDTO.majorName(),
+            requestDTO.nickname(),
+            Gender.getValue(requestDTO.gender()),
+            requestDTO.birthday(),
+            requestDTO.persona()
+        );
+        member = memberRepositoryService.createMember(member);
+
+        memberStatPreferenceCommandService.savePreferences(
+            member.getId(),
+            requestDTO.memberStatPreferenceDto().preferenceList());
+
+//        signUpNotificationService.sendSignUpNotification(member);
         // 기존 회원으로 로그인 처리
         return authService.signInByExistingMember(member.getClientId());
     }
