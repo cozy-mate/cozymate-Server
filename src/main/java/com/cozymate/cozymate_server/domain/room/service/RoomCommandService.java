@@ -270,7 +270,7 @@ public class RoomCommandService {
 
         roomValidator.checkRoomManager(mate);
 
-        room.updateRoom(request.name(), request.persona());
+        room.update(request.name(), request.persona(), request.description());
         roomRepositoryService.save(room);
 
         return roomQueryService.getRoomById(roomId, memberId);

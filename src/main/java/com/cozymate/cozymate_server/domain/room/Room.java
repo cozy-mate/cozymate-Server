@@ -80,6 +80,9 @@ public class Room extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private University university;
 
+    @Size(max = 50)
+    private String description;
+
     public void arrive() {
         numOfArrival++;
     }
@@ -94,9 +97,10 @@ public class Room extends BaseTimeEntity {
         }
     }
 
-    public void updateRoom(String newRoomName, Integer newProfileImage) {
-        this.name = newRoomName;
-        this.profileImage = newProfileImage;
+    public void update(String name, Integer profileImage, String description) {
+        this.name = name;
+        this.profileImage = profileImage;
+        this.description = description;
     }
 
     public void changeToPublicRoom(Gender gender, University university) {
