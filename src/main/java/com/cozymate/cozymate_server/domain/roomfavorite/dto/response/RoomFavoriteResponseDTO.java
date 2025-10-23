@@ -11,6 +11,7 @@ public record RoomFavoriteResponseDTO(
     Long roomId,
     String name,
     List<PreferenceMatchCountDTO> preferenceMatchCountList,
+    List<String> hashtags,
     String description,
     Integer maxMateNum,
     Integer numOfArrival

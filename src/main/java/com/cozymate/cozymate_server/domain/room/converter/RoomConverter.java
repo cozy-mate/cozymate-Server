@@ -94,6 +94,7 @@ public class RoomConverter {
         Integer arrivalMateNum,
         String dormitoryName,
         String roomType,
+        List<String> hashtagList,
         String description,
         Integer equality,
         MemberStatDifferenceListResponseDTO difference
@@ -112,6 +113,7 @@ public class RoomConverter {
             arrivalMateNum,
             dormitoryName,
             roomType,
+            hashtagList,
             description,
             equality,
             difference

@@ -5,6 +5,7 @@ import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.roomfavorite.RoomFavorite;
 import com.cozymate.cozymate_server.domain.roomfavorite.dto.response.RoomFavoriteResponseDTO;
+import java.util.Collections;
 import java.util.List;
 
 public class RoomFavoriteConverter {
@@ -24,6 +25,7 @@ public class RoomFavoriteConverter {
             .equality(roomEquality)
             .name(room.getName())
             .preferenceMatchCountList(preferenceStatsMatchCountList)
+            .hashtags(Collections.emptyList())
             .description(room.getDescription())
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(numOfArrival)

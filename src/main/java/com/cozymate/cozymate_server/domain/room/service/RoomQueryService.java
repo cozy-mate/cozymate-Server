@@ -28,6 +28,7 @@ import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -193,6 +194,7 @@ public class RoomQueryService {
                     room.getNumOfArrival(),
                     getDormitoryName(managerMate),
                     room.getRoomType().toString(),
+                    Collections.emptyList(),
                     room.getDescription(),
                     roomEquality,
                     MemberStatConverter.toMemberStatDifferenceResponseDTO(
@@ -357,6 +359,7 @@ public class RoomQueryService {
             room.getNumOfArrival(),
             getDormitoryName(managerMate),
             room.getRoomType().toString(),
+            Collections.emptyList(),
             room.getDescription(),
             roomEquality,
             MemberStatConverter.toMemberStatDifferenceResponseDTO(

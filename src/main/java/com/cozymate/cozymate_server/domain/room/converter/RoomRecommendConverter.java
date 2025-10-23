@@ -3,6 +3,7 @@ package com.cozymate.cozymate_server.domain.room.converter;
 import com.cozymate.cozymate_server.domain.room.dto.response.PreferenceMatchCountDTO;
 import com.cozymate.cozymate_server.domain.room.Room;
 import com.cozymate.cozymate_server.domain.room.dto.response.RoomRecommendationResponseDTO;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -13,6 +14,7 @@ public class RoomRecommendConverter {
         return RoomRecommendationResponseDTO.builder()
             .roomId(pair.getLeft())
             .name(room.getName())
+            .hashtags(Collections.emptyList())
             .description(room.getDescription())
             .equality(pair.getRight())
             .maxMateNum(room.getMaxMateNum())
@@ -26,6 +28,7 @@ public class RoomRecommendConverter {
         return RoomRecommendationResponseDTO.builder()
             .roomId(room.getId())
             .name(room.getName())
+            .hashtags(Collections.emptyList())
             .description(room.getDescription())
             .maxMateNum(room.getMaxMateNum())
             .numOfArrival(room.getNumOfArrival())
