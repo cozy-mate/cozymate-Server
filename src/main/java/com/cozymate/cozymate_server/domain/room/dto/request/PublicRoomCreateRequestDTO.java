@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Builder;
 import org.hibernate.validator.constraints.Range;
 
@@ -19,6 +20,7 @@ public record PublicRoomCreateRequestDTO (
     @NotNull(message = "방 인원수 선택은 필수입니다.")
     @Range(min=2, max=6, message = "방 인원은 2~6명 사이여야 합니다.")
     Integer maxMateNum,
+    List<String> hashtagList,
     @Size(max=50, message = "방 한줄소개는 최대 50글자입니다.")
     String description
 ) { }
