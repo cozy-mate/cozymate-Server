@@ -58,11 +58,10 @@ public class RoomController {
     }
 
     @PostMapping("/create-public")
-    @Operation(summary = "[바니]공개 방 생성 기능", description = "방이름, 프로필이미지, 인원수, 해시태그(1-3개)를 입력합니다.")
+    @Operation(summary = "[바니]공개 방 생성 기능", description = "방이름, 프로필이미지, 인원수, 한줄 소개(선택)를 입력합니다.")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
-        ErrorStatus._ROOM_ALREADY_EXISTS,
-        ErrorStatus._DUPLICATE_HASHTAGS
+        ErrorStatus._ROOM_ALREADY_EXISTS
     })
     public ResponseEntity<ApiResponse<RoomDetailResponseDTO>> createPublicRoom(
         @Valid @RequestBody PublicRoomCreateRequestDTO request,
@@ -210,7 +209,7 @@ public class RoomController {
     }
 
     @PatchMapping("/{roomId}")
-    @Operation(summary = "[바니] 방 정보 수정", description = "해당 roomId의 정보를 수정합니다. (초대방은 방 이름만, 공개방은 방이름/해시태그 수정)")
+    @Operation(summary = "[바니] 방 정보 수정", description = "해당 roomId의 정보를 수정합니다. (방 이름, 프로필 이미지, 한줄소개)")
     @SwaggerApiError({
         ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._ROOM_NOT_FOUND,

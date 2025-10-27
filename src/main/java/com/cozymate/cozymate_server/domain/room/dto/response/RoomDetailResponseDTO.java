@@ -18,6 +18,7 @@ public record RoomDetailResponseDTO(
     String dormitoryName,
     String roomType,
     List<String> hashtagList,
+    String description,
     Integer equality,
     MemberStatDifferenceListResponseDTO difference
 ) {

@@ -10,6 +10,7 @@ public record RoomRecommendationResponseDTO(
     Long roomId,
     String name,
     List<String> hashtags,
+    String description,
     Integer equality,
     Integer numOfArrival,
     Integer maxMateNum,
