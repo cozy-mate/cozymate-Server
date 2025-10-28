@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.memberstat.viral.controller;
 
 import com.cozymate.cozymate_server.domain.memberstat.viral.dto.CreateMemberStatSnapshotRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.viral.dto.CreateViralSnapshotDTO;
+import com.cozymate.cozymate_server.domain.memberstat.viral.dto.LifestyleSnapshotResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.viral.service.MemberStatSnapshotService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -61,6 +62,20 @@ public class ViralController {
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 snapshotService.getNumberOfViralSnapshots()
+            )
+        );
+    }
+
+    @GetMapping("/lifestyle-snapshot")
+    @Operation(summary = "[말즈] 바이럴 테스트 snapshot 조회 API")
+    @SwaggerApiError({})
+    public ResponseEntity<ApiResponse<LifestyleSnapshotResponseDTO>> getNumberOfParticipants(
+        @RequestParam(name = "viralCode") String viralCode
+    ) {
+
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                snapshotService.findLifestyleSnapshot(viralCode)
             )
         );
     }
