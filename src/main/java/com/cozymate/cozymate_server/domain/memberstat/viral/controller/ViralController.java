@@ -69,7 +69,7 @@ public class ViralController {
     @GetMapping("/lifestyle-snapshot")
     @Operation(summary = "[말즈] 바이럴 테스트 snapshot 조회 API")
     @SwaggerApiError({})
-    public ResponseEntity<ApiResponse<LifestyleSnapshotResponseDTO>> getNumberOfParticipants(
+    public ResponseEntity<ApiResponse<LifestyleSnapshotResponseDTO>> getLifestyleSnapshot(
         @RequestParam(name = "viralCode") String viralCode
     ) {
 
