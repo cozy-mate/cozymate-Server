@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.memberstat.viral.MemberStatSnapshot;
 import com.cozymate.cozymate_server.domain.memberstat.viral.converter.MemberStatSnapshotConverter;
 import com.cozymate.cozymate_server.domain.memberstat.viral.dto.CreateViralSnapshotDTO;
 import com.cozymate.cozymate_server.domain.memberstat.viral.dto.CreateMemberStatSnapshotRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.viral.dto.LifestyleSnapshotResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.viral.repository.MemberStatSnapshotRepository;
 
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -65,6 +66,15 @@ public class MemberStatSnapshotService {
         ComparisonResult result = compareMaps(sharerMap, criteriaMap, matchRate);
 
         return buildCompareDto(criteria.getViralCode(), result);
+    }
+
+    @Transactional(readOnly = true)
+    public LifestyleSnapshotResponseDTO findLifestyleSnapshot(String  viralCode) {
+        MemberStatSnapshot snapshot = repository.findByViralCode(viralCode);
+        if (snapshot == null) {
+            throw new GeneralException(ErrorStatus._VIRAL_CODE_NOT_FOUND);
+        }
+        return MemberStatSnapshotConverter.toLifestyleSnapshotResponseDTO(snapshot.getLifestyle());
     }
 
     private CreateViralSnapshotDTO createEmptyListAndOnlyCode(String viralCode) {
