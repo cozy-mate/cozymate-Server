@@ -62,6 +62,7 @@ public class SecurityConfig {
                         CorsConfiguration configuration = new CorsConfiguration();
                         configuration.setAllowedOrigins(Arrays.asList(
                             "https://admin-cozymate.web.app",
+                            "https://cozymate-official.web.app ",
                             "http://localhost:5173"
                         ));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
