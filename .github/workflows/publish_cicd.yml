@@ -10,9 +10,11 @@ jobs:
     name: CI
     runs-on: ubuntu-latest
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.PRODUCTION_AWS_REGION }}
+      # --- 임시 수정 (11/18)---
+      # AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+      # AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
+      # AWS_REGION: ${{ secrets.PRODUCTION_AWS_REGION }}
+      # ----------------------
       ECR_REPOSITORY: ${{ secrets.PRODUCTION_ECR_REPOSITORY }}
       ECR_URI: ${{ secrets.PRODUCTION_ECR_URI }}
       SUBMODULE_TOKEN: ${{ secrets.SUBMODULE_ACTION_TOKEN }}
@@ -53,9 +55,26 @@ jobs:
         with:
           arguments: clean build -x test
 
+      # 임시 수정 (11/18)
+      # - name: Login to Amazon ECR
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@v1
+      # ----------------------
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4 # 최신 버전 사용
+        with:
+          aws-access-key-id: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }} # Secret 참조
+          aws-secret-access-key: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }} # Secret 참조
+          aws-region: ${{ secrets.PRODUCTION_AWS_REGION }} # Secret 참조
+
+      # [수정된 Step] ECR 로그인 (v2 업데이트 및 마스킹 옵션 추가)
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2 # v2 이상으로 업데이트!
+        with:
+          # 이 옵션을 추가하여 Docker 비밀번호가 로그에 노출되는 것을 방지합니다.
+          mask-for-cmd: true
 
       ## Main Branch Build
       - name: Build, Tag (Main Branch)
