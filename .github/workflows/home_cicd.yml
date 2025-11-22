@@ -1,0 +1,100 @@
+name: HomeServer CI/CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "develop" ]
+
+permissions:
+  contents: read
+  packages: write   # GHCR push에 필요
+
+concurrency:
+  group: production-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    env:
+      SUBMODULE_TOKEN: ${{ secrets.SUBMODULE_ACTION_TOKEN }}
+      IMAGE_TAG: ${{ github.sha }}
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }} # <owner>/<repo>
+
+    outputs:
+      image: ${{ steps.set-image-output.outputs.image }}
+
+    steps:
+      # 코드 + 서브모듈 한 번에 체크아웃
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          token: ${{ env.SUBMODULE_TOKEN }}
+          submodules: recursive
+
+      # JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Gradle 빌드 + 캐시
+      - name: Build with Gradle (no tests)
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: clean build -x test
+          # 캐시 읽기/쓰기 모두 허용 (원하면 정책 조정 가능)
+          cache-read-only: false
+
+      # GHCR 로그인
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 빌드 + 푸시 (캐시 포함)
+      - name: Build and Push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          build-args: |
+            SPRING_PROFILE=prod
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # CD job에 넘길 이미지 문자열 출력
+      - name: Set image output
+        id: set-image-output
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+
+  cd:
+    needs: ci
+    name: CD
+    runs-on: ubuntu-latest
+    env:
+      HOME_HOST: ${{ secrets.HOME_HOST }}
+      SSH_KEY: ${{ secrets.HOME_SSH_KEY }}
+      IMAGE_TAG: ${{ github.sha }}
+      IMAGE: ${{ needs.ci.outputs.image }}
+
+    steps:
+      - name: Deploy to EC2 (Main Branch)
+        if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.HOME_HOST }}
+          username: dsga
+          key: ${{ env.SSH_KEY }}
+          script: |
+            cd /dsga/project/cozymate
+            ./deploy.sh ${{ env.IMAGE_TAG }}
