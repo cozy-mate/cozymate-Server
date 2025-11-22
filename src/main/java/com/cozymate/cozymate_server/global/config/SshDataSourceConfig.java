@@ -32,7 +32,7 @@ public class SshDataSourceConfig {
     @Bean("dataSource")
     @Primary
     public DataSource dataSource(DataSourceProperties properties) {
-        String url = properties.getUrl().replace("localhost", databaseEndpoint);
+        String url = properties.getUrl();
         url = url.replace("[forwardedPort]", String.valueOf(3306));
         Integer forwardedPort = null;
 
