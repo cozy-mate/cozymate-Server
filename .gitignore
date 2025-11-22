@@ -41,9 +41,11 @@ out/
 src/main/resources/application-local.yml
 src/main/resources/application-dev.yml
 src/main/resources/application-prod.yml
+src/main/resources/application-home.yml
 src/test/resources/application-local.yml
 src/test/resources/application-dev.yml
 src/test/resources/application-prod.yml
+src/test/resources/application-home.yml
 src/test/resources/application.yml
 
 ## SQL Initialization Code ##
