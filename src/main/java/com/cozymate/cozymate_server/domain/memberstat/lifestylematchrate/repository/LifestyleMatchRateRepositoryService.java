@@ -43,4 +43,8 @@ public class LifestyleMatchRateRepositoryService {
         List<LifestyleMatchRate> lifestyleMatchRateList) {
         bulkRepository.saveAllWithUpsert(lifestyleMatchRateList);
     }
+
+    public void deleteAllByMemberId(Long memberId) {
+        repository.deleteAllByMemberId(memberId);
+    }
 }

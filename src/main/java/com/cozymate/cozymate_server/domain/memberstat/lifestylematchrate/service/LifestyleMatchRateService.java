@@ -7,7 +7,6 @@ import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.redis.s
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
-
 import com.cozymate.cozymate_server.domain.university.University;
 import com.cozymate.cozymate_server.domain.university.repository.UniversityRepository;
 import java.util.ArrayList;
@@ -83,6 +82,20 @@ public class LifestyleMatchRateService {
                         gender)));
     }
 
+    public void deleteAllMatchRateByMemberId(Long memberId) {
+        List<LifestyleMatchRate> rates =
+            lifestyleMatchRateRepositoryService.getLifestyleMatchRateListBySingleMemberId(memberId);
+
+        if (rates.isEmpty()) {
+            log.debug("[matchRate] no match-rate to delete for memberId={}", memberId);
+            return;
+        }
+        // 2) 캐시에서 지우기
+        lifestyleMatchRateCacheService.deleteAllRelatedTo(memberId);
+
+        // 3) DB에서 지우기
+        lifestyleMatchRateRepositoryService.deleteAllByMemberId(memberId);
+    }
     private void calculateAllLifeStyleMatchRateWithSameUniversityAndGender(University university,
         Gender gender) {
         List<MemberStat> memberStatList = memberStatRepository.findByMemberUniversityAndGender(
