@@ -81,21 +81,13 @@ public class LifestyleMatchRateCacheService {
         String key = generateKey(memberA, memberB);
         redisTemplate.delete(key);
     }
-
-    private String generateKey(Long memberA, Long memberB) {
-        long first = Math.min(memberA, memberB);
-        long second = Math.max(memberA, memberB);
-        return PREFIX + first + DELIM + second;
-    }
     public void deleteAllRelatedTo(Long memberId) {
-        // 1. 패턴 기반 키 조회
         String pattern1 = PREFIX + memberId + DELIM + ALL;
         String pattern2 = PREFIX + ALL + DELIM + memberId;
 
         Set<String> keys1 = redisTemplate.keys(pattern1);
         Set<String> keys2 = redisTemplate.keys(pattern2);
 
-        // 2. 합집합 후 삭제
         Set<String> allKeys = new HashSet<>();
         if (keys1 != null) allKeys.addAll(keys1);
         if (keys2 != null) allKeys.addAll(keys2);
@@ -103,6 +95,12 @@ public class LifestyleMatchRateCacheService {
         if (!allKeys.isEmpty()) {
             redisTemplate.delete(allKeys);
         }
+    }
+
+    private String generateKey(Long memberA, Long memberB) {
+        long first = Math.min(memberA, memberB);
+        long second = Math.max(memberA, memberB);
+        return PREFIX + first + DELIM + second;
     }
 
 }
