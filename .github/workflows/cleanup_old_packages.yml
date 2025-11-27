@@ -1,0 +1,22 @@
+name: Cleanup old GitHub Packages
+
+on:
+  schedule:
+    - cron: '0 3 * * 0' # 매주 일요일 새벽 3시
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Delete old package versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'cozymate-server'
+          package-type: 'container'
+          min-versions-to-keep: 2
+          delete-only-pre-release-versions: false
