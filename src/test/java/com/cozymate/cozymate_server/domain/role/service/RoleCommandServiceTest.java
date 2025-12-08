@@ -193,8 +193,6 @@ public class RoleCommandServiceTest {
             given(roleRepositoryService.getRoleOrThrow(any(Long.class)))
                 .willReturn(role);
             willDoNothing()
-                .given(todoCommandService).deleteTodoByRoleId(any(Role.class));
-            willDoNothing()
                 .given(roleRepositoryService).deleteRole(any(Role.class));
         }
 

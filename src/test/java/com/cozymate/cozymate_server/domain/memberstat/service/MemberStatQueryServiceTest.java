@@ -264,7 +264,7 @@ public class MemberStatQueryServiceTest {
 
             // when
             MemberStatPageResponseDTO<List<?>> response =
-                memberStatQueryService.getMemberStatList(viewer, filterList, pageable);
+                memberStatQueryService.getMemberStatList(viewer, filterList, pageable,true);
 
             // then
             assertThat(response.page()).isEqualTo(0);
@@ -297,7 +297,7 @@ public class MemberStatQueryServiceTest {
 
             // when
             MemberStatPageResponseDTO<List<?>> response =
-                memberStatQueryService.getMemberStatList(viewer, filterList, pageable);
+                memberStatQueryService.getMemberStatList(viewer, filterList, pageable,true);
 
             // then
             assertThat(response.page()).isEqualTo(0);
@@ -334,7 +334,7 @@ public class MemberStatQueryServiceTest {
 
             // when
             MemberStatPageResponseDTO<List<?>> response =
-                memberStatQueryService.getMemberStatList(viewer, filterList, pageable);
+                memberStatQueryService.getMemberStatList(viewer, filterList, pageable,true);
 
             // then
             assertThat(response.page()).isEqualTo(0);
@@ -351,7 +351,7 @@ public class MemberStatQueryServiceTest {
 
             // when & then
             assertThatThrownBy(
-                () -> memberStatQueryService.getMemberStatList(viewer, filterList, pageable))
+                () -> memberStatQueryService.getMemberStatList(viewer, filterList, pageable,true))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage(ErrorStatus._MEMBERSTAT_NOT_EXISTS.getMessage());
         }

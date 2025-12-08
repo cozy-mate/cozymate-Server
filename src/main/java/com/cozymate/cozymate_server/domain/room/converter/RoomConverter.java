@@ -42,6 +42,7 @@ public class RoomConverter {
             .numOfArrival(1)
             .gender(gender)
             .university(university)
+            .description(request.description())
             .build();
     }
 
@@ -94,6 +95,7 @@ public class RoomConverter {
         String dormitoryName,
         String roomType,
         List<String> hashtagList,
+        String description,
         Integer equality,
         MemberStatDifferenceListResponseDTO difference
     ) {
@@ -112,6 +114,7 @@ public class RoomConverter {
             dormitoryName,
             roomType,
             hashtagList,
+            description,
             equality,
             difference
         );

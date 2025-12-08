@@ -13,6 +13,7 @@ import com.cozymate.cozymate_server.domain.postcomment.PostComment;
 import com.cozymate.cozymate_server.domain.postcomment.PostCommentRepository;
 import com.cozymate.cozymate_server.domain.postimage.PostImage;
 import com.cozymate.cozymate_server.domain.postimage.PostImageRepository;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
@@ -62,16 +63,16 @@ public class PostQueryService {
     }
 
 
-    public List<PostSummaryDTO> getPosts(Member member, Long roomId, Pageable pageable) {
+    public PageResponseDto<List<PostSummaryDTO>> getPosts(Member member, Long roomId, Pageable pageable) {
 
         if(!mateRepository.existsByMemberIdAndRoomId(member.getId(),roomId)){
             throw new GeneralException(ErrorStatus._MATE_OR_ROOM_NOT_FOUND);
         }
 
         Feed feed = feedRepository.findByRoomId(roomId);
-        Page<Post> postList = postRepository.findByFeedIdOrderByCreatedAtDesc(feed.getId(),pageable);
+        Page<Post> postPage = postRepository.findByFeedIdOrderByCreatedAtDesc(feed.getId(),pageable);
 
-        return postList.stream().map(
+        List<PostSummaryDTO> postList = postPage.stream().map(
             post->postConverter.toSummaryDto(
                 post,
                 postImageRepository.findByPostId(post.getId()).isEmpty() ?
@@ -79,5 +80,11 @@ public class PostQueryService {
                 postCommentRepository.countByPostId(post.getId())
             )
         ).toList();
+
+        return PageResponseDto.<List<PostSummaryDTO>>builder()
+            .page(postPage.getNumber())
+            .hasNext(postPage.hasNext())
+            .result(postList)
+            .build();
     }
 }

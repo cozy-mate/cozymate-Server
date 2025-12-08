@@ -71,9 +71,6 @@ public enum ErrorStatus implements BaseErrorCode {
     _MISMATCH_UNIVERSITY(HttpStatus.BAD_REQUEST, "ROOM417", "일치하지 않는 학교입니다."),
 
 
-    // Hashtag
-    _DUPLICATE_HASHTAGS(HttpStatus.BAD_REQUEST, "HASHTAG400", "중복된 해시태그는 입력할 수 없습니다."),
-
     // University 관련 에러
     _UNIVERSITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "UNIVERSITY400", "대학을 찾을 수 없습니다."),
     _UNIVERSITY_BINDING_FAIL(HttpStatus.BAD_REQUEST, "UNIVERSITY401", "대학교 바인딩 실패"),
@@ -221,6 +218,8 @@ public enum ErrorStatus implements BaseErrorCode {
     _VIRAL_CODE_GENERATING_EXCESS(HttpStatus.BAD_REQUEST, "VIRAL500","바이럴 코드 사용 초과"),
     _VIRAL_CODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIRAL404","바이럴 코드로 사용자의 값을 찾을 수 없습니다."),
 
+    // DORMITORY MENU
+    _DORMITORY_MENU_NOT_FOUND(HttpStatus.BAD_REQUEST, "DORMITORYMENU400", "식단을 찾을 수 없습니다."),
 
     // CHATROOM
     _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "해당 채팅방을 찾을 수 없습니다."),

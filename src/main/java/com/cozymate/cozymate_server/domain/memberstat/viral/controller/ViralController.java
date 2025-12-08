@@ -2,6 +2,7 @@ package com.cozymate.cozymate_server.domain.memberstat.viral.controller;
 
 import com.cozymate.cozymate_server.domain.memberstat.viral.dto.CreateMemberStatSnapshotRequestDTO;
 import com.cozymate.cozymate_server.domain.memberstat.viral.dto.CreateViralSnapshotDTO;
+import com.cozymate.cozymate_server.domain.memberstat.viral.dto.LifestyleSnapshotResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.viral.service.MemberStatSnapshotService;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +52,33 @@ public class ViralController {
         }
         return ResponseEntity.ok(
             ApiResponse.onSuccess(createdDto)
+        );
+    }
+
+    @GetMapping("/count")
+    @Operation(summary = "[말즈] 바이럴 테스트 참여 수 API")
+    @SwaggerApiError({})
+    public ResponseEntity<ApiResponse<Long>> getNumberOfParticipants() {
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                snapshotService.getNumberOfViralSnapshots()
+            )
+        );
+    }
+
+    @GetMapping("/lifestyle-snapshot")
+    @Operation(summary = "[말즈] 바이럴 테스트 snapshot 조회 API")
+    @SwaggerApiError({
+        ErrorStatus._VIRAL_CODE_NOT_FOUND
+    })
+    public ResponseEntity<ApiResponse<LifestyleSnapshotResponseDTO>> getLifestyleSnapshot(
+        @RequestParam(name = "viralCode") String viralCode
+    ) {
+
+        return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                snapshotService.findLifestyleSnapshot(viralCode)
+            )
         );
     }
 }

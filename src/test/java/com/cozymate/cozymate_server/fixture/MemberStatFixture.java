@@ -85,31 +85,28 @@ public class MemberStatFixture {
     public static CreateMemberStatRequestDTO 정상_생성_요청_DTO() {
         return CreateMemberStatRequestDTO.builder()
             .admissionYear("23")
-            .numOfRoommate(2)
-            .dormitoryName("기숙사 A")
-            .acceptance("합격")
-            .wakeUpMeridian("오전")
+            .numOfRoommate("2")
+            .dormName("기숙사 A")
+            .dormJoiningStatus("합격")
             .wakeUpTime(7)
-            .sleepingMeridian("오전")
             .sleepingTime(1)
-            .turnOffMeridian("오전")
-            .turnOffTime(12)
-            .smoking("비흡연자")
-            .sleepingHabit(List.of("코골이", "뒤척임"))
-            .airConditioningIntensity(2)
-            .heatingIntensity(2)
+            .turnOffTime(0)
+            .smokingStatus("비흡연자")
+            .sleepingHabits(List.of("코골이", "뒤척임"))
+            .coolingIntensity("약하게 틀어요")
+            .heatingIntensity("약하게 틀어요")
             .lifePattern("아침형 인간")
             .intimacy("어느정도 친하게 지내요")
-            .canShare("휴지정도는 빌려줄 수 있어요")
-            .isPlayGame("보이스 채팅도 해요")
-            .isPhoneCall("급한 전화만 해요")
-            .studying("매일 해요")
-            .intake("배달음식도 먹어요")
-            .cleanSensitivity(3)
-            .noiseSensitivity(3)
+            .sharingStatus("휴지정도는 빌려줄 수 있어요")
+            .gamingStatus("보이스 채팅도 해요")
+            .callingStatus("급한 전화만 해요")
+            .studyingStatus("매일 해요")
+            .eatingStatus("배달음식도 먹어요")
+            .cleannessSensitivity("보통이에요")
+            .noiseSensitivity("보통이에요")
             .cleaningFrequency("일주일에 한 번 해요")
             .drinkingFrequency("한 달에 한 두번 마셔요")
-            .personality(List.of("조용해요", "부지런해요"))
+            .personalities(List.of("조용해요", "부지런해요"))
             .mbti("INTJ")
             .selfIntroduction("안녕하세요, 저는 조용한 사람입니다.")
             .build();
@@ -124,7 +121,7 @@ public class MemberStatFixture {
 
     public static CreateMemberStatRequestDTO 실패_잘못된_smoking() {
         return 정상_생성_요청_DTO().toBuilder()
-            .smoking("존재하지 않는 흡연 상태") // `QuestionAnswerMapper`에서 찾을 수 없는 값
+            .smokingStatus("존재하지 않는 흡연 상태") // `QuestionAnswerMapper`에서 찾을 수 없는 값
             .build();
     }
 

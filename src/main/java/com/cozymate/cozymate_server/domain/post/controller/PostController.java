@@ -7,11 +7,14 @@ import com.cozymate.cozymate_server.domain.post.dto.PostUpdateDTO;
 import com.cozymate.cozymate_server.domain.post.dto.PostDetailDTO;
 import com.cozymate.cozymate_server.domain.post.service.PostCommandService;
 import com.cozymate.cozymate_server.domain.post.service.PostQueryService;
+import com.cozymate.cozymate_server.global.common.PageResponseDto;
 import com.cozymate.cozymate_server.global.response.ApiResponse;
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.utils.SwaggerApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -118,12 +121,13 @@ public class PostController {
         ErrorStatus._MATE_OR_ROOM_NOT_FOUND
     })
     @GetMapping("/{roomId}")
-    public ResponseEntity<ApiResponse<List<PostSummaryDTO>>> getPosts(
+    public ResponseEntity<ApiResponse<PageResponseDto<List<PostSummaryDTO>>>> getPosts(
         @AuthenticationPrincipal MemberDetails memberDetails,
         @PathVariable Long roomId,
-        @RequestParam(defaultValue = "0") int page
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "10") @Positive int size
     ) {
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(
             ApiResponse.onSuccess(
                 postQueryService.getPosts(memberDetails.member(),roomId,pageable)));

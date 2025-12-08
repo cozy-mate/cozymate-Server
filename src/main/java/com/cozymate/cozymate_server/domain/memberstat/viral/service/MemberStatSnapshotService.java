@@ -1,6 +1,6 @@
 package com.cozymate.cozymate_server.domain.memberstat.viral.service;
 
-import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.util.MemberMatchRateCalculator;
+import com.cozymate.cozymate_server.domain.memberstat.calculator.MatchRateCalculator;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.enums.DifferenceStatus;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.FieldInstanceResolver;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.util.MemberStatComparator;
@@ -9,6 +9,7 @@ import com.cozymate.cozymate_server.domain.memberstat.viral.MemberStatSnapshot;
 import com.cozymate.cozymate_server.domain.memberstat.viral.converter.MemberStatSnapshotConverter;
 import com.cozymate.cozymate_server.domain.memberstat.viral.dto.CreateViralSnapshotDTO;
 import com.cozymate.cozymate_server.domain.memberstat.viral.dto.CreateMemberStatSnapshotRequestDTO;
+import com.cozymate.cozymate_server.domain.memberstat.viral.dto.LifestyleSnapshotResponseDTO;
 import com.cozymate.cozymate_server.domain.memberstat.viral.repository.MemberStatSnapshotRepository;
 
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
@@ -30,7 +31,12 @@ public class MemberStatSnapshotService {
 
     private final MemberStatSnapshotRepository repository;
     private final EntityManager entityManager;
+    private final MatchRateCalculator matchRateCalculator;
 
+    @Transactional(readOnly = true)
+    public Long getNumberOfViralSnapshots(){
+        return repository.count();
+    }
     @Transactional
     public CreateViralSnapshotDTO create(CreateMemberStatSnapshotRequestDTO dto) {
         MemberStatSnapshot snapshot = createSnapshot(dto);
@@ -53,13 +59,22 @@ public class MemberStatSnapshotService {
             FieldInstanceResolver.extractAllLifestyleFields(sharer.getLifestyle()));
         Map<String, String> criteriaMap = toStringMap(
             FieldInstanceResolver.extractAllLifestyleFields(criteria.getLifestyle()));
-        Integer matchRate = MemberMatchRateCalculator.calculateLifestyleMatchRate(
+        Integer matchRate = matchRateCalculator.calculateMatchRate(
             sharer.getLifestyle(),criteria.getLifestyle()
         );
 
         ComparisonResult result = compareMaps(sharerMap, criteriaMap, matchRate);
 
         return buildCompareDto(criteria.getViralCode(), result);
+    }
+
+    @Transactional(readOnly = true)
+    public LifestyleSnapshotResponseDTO findLifestyleSnapshot(String  viralCode) {
+        MemberStatSnapshot snapshot = repository.findByViralCode(viralCode);
+        if (snapshot == null) {
+            throw new GeneralException(ErrorStatus._VIRAL_CODE_NOT_FOUND);
+        }
+        return MemberStatSnapshotConverter.toLifestyleSnapshotResponseDTO(snapshot.getLifestyle());
     }
 
     private CreateViralSnapshotDTO createEmptyListAndOnlyCode(String viralCode) {
