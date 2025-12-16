@@ -297,6 +297,20 @@ public enum NotificationType {
             return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
                 createDTO.getContent(), createDTO.getMessageRoom().getId());
         }
+    },
+
+    ARRIVE_CHAT(NotificationCategory.COZY_HOME) {
+        @Override
+        public String generateContent(FcmPushContentDTO fcmPushContentDTO) {
+            return fcmPushContentDTO.member().getNickname() + " : "
+                + fcmPushContentDTO.content();
+        }
+
+        @Override
+        public NotificationLog generateNotificationLog(NotificationLogCreateDTO createDTO) {
+            return NotificationLogConverter.toEntity(createDTO.getRecipientMember(), getCategory(),
+                createDTO.getContent(), createDTO.getMessageRoom().getId());
+        }
     }
     ;
 

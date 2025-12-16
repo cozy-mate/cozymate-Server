@@ -86,7 +86,6 @@ public class MemberController {
             "}" +
             "</code>"
     )
-
     @SwaggerApiError({
         ErrorStatus._MEMBER_BINDING_FAIL
     })
@@ -192,7 +191,6 @@ public class MemberController {
         @AuthenticationPrincipal MemberDetails memberDetails,
         @Valid WithdrawRequestDTO withdrawRequestDTO) {
         memberService.withdraw(withdrawRequestDTO, memberDetails);
-
         return ResponseEntity.ok(ApiResponse.onSuccess("회원 탈퇴가 완료되었습니다."));
     }
 
