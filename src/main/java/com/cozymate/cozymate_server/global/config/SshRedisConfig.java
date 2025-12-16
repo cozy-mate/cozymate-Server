@@ -27,7 +27,7 @@ public class SshRedisConfig {
     private String noSshTunneling;
 
     @Value("${ssh_tunnel.redis_tunnel_endpoint}")
-    private String redisTunnelEndppoint;
+    private String redisTunnelEndpoint;
     @Value("${ssh_tunnel.redis_endpoint}")
     private String redisEndpoint;
 
@@ -44,8 +44,8 @@ public class SshRedisConfig {
 
         // SSH 터널을 통해 Redis에 연결해야 할 경우
         if (noSshTunneling.equals("false")) {
-            Integer forwardedPort = initializer.buildSshConnection(redisTunnelEndppoint, redisPort);
-            host = redisTunnelEndppoint;
+            Integer forwardedPort = initializer.buildSshConnection(redisTunnelEndpoint, redisPort);
+            host = redisTunnelEndpoint;
             port = forwardedPort;
         }
 

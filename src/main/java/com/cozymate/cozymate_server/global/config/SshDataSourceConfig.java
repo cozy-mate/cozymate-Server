@@ -25,7 +25,7 @@ public class SshDataSourceConfig {
     private boolean noSshTunneling;
 
     @Value("${ssh_tunnel.database_tunnel_endpoint}")
-    private String databaseTunnelEndppoint;
+    private String databaseTunnelEndpoint;
     @Value("${ssh_tunnel.database_endpoint}")
     private String databaseEndpoint;
     @Value("${ssh_tunnel.database_port}")
@@ -40,9 +40,9 @@ public class SshDataSourceConfig {
         // SSH 터널을 통해 RDS에 연결해야 할 경우
         if (!noSshTunneling) {
             // 터널링 사용하는 경우: 로컬 포트로 바꿔 끼우기
-            int forwardedPort = initializer.buildSshConnection(databaseTunnelEndppoint, databasePort);
+            int forwardedPort = initializer.buildSshConnection(databaseTunnelEndpoint, databasePort);
             url = url
-                .replace("[host]", databaseTunnelEndppoint)
+                .replace("[host]", databaseTunnelEndpoint)
                 .replace("[port]", String.valueOf(forwardedPort));
         } else {
             // 터널 없이 infra-mysql 로 직접 붙는 경우
