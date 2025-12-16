@@ -13,18 +13,17 @@ import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Component
-@ConfigurationProperties(prefix = "ssh")
 @Validated
 @Setter
 public class SshTunnelConfig {
 
-    @Value("${spring.cloud.aws.ec2.remote_jump_host}")
-    private String remoteJumpHost;
-    @Value("${spring.cloud.aws.ec2.ssh_port}")
+    @Value("${ssh_tunnel.host}")
+    private String host;
+    @Value("${ssh_tunnel.port}")
     private int sshPort;
-    @Value("${spring.cloud.aws.ec2.user}")
+    @Value("${ssh_tunnel.user}")
     private String user;
-    @Value("${spring.cloud.aws.ec2.private_key_path}")
+    @Value("${ssh_tunnel.private_key_path}")
     private String privateKeyPath;
 
     private Session session;
@@ -40,25 +39,29 @@ public class SshTunnelConfig {
         Integer forwardPort = null;
 
         try {
-            log.info("SSH  {}@{}:{}  with {}", user, remoteJumpHost, sshPort, privateKeyPath);
-            JSch jsch = new JSch();
+            log.info("SSH {}@{}:{}", user, host, sshPort);
 
-            jsch.addIdentity(privateKeyPath);
-            session = jsch.getSession(user, remoteJumpHost, sshPort);
+            JSch jsch = new JSch();
+            session = jsch.getSession(user, host, sshPort);
             session.setConfig("StrictHostKeyChecking", "no");
+
+            // pem 기반 인증 먼저 확인
+            log.info("Using private key auth: {}", privateKeyPath);
+            jsch.addIdentity(privateKeyPath);
 
             log.info("Starting SSH session connection...");
             session.connect();
             log.info("SSH session connected");
 
             forwardPort = session.setPortForwardingL(0, endpoint, port);
-            log.info("Port forwarding created on local port {} to remote port {}", forwardPort,
-                port);
+            log.info("Port forwarding created on local port {} to remote port {}", forwardPort, port);
+
         } catch (JSchException e) {
-            log.error(e.getMessage());
+            log.error("SSH 연결 실패", e);
             this.destroy();
             throw new RuntimeException(e);
         }
+
         return forwardPort;
     }
 

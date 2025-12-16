@@ -94,8 +94,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 .requestMatchers(
-                    "/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config", "/swagger-resources/**")
-                .permitAll()
+                    "/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config", "/swagger-resources/**", "/actuator/health")
+                    .permitAll()
                 .requestMatchers(
                     "/admin/auth/**", "/auth/sign-in", "/viral/create", "/viral/**", "/ws/**")
                 .permitAll()
