@@ -3,24 +3,22 @@ package com.cozymate.cozymate_server.domain.memberstat.memberstat.repository;
 
 import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.member.enums.Gender;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
+import com.cozymate.cozymate_server.global.response.exception.GeneralException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Component;
-import org.springframework.data.domain.Pageable;
-
-import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
-import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
-import com.cozymate.cozymate_server.global.response.exception.GeneralException;
-
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -151,7 +149,22 @@ public class MemberStatRepositoryService {
      * 새로운 MemberStat 저장
      */
     public MemberStat createMemberStat(MemberStat memberStat) {
-        return memberStatRepository.save(memberStat);
+        if (memberStat.getMember() == null || memberStat.getMember().getId() == null) {
+            throw new GeneralException(ErrorStatus._MEMBER_NOT_FOUND);
+        }
+
+        Long memberId = memberStat.getMember().getId();
+
+        // 선검사
+        if (memberStatRepository.existsByMemberId(memberId)) {
+            throw new GeneralException(ErrorStatus._MEMBERSTAT_EXISTS);
+        }
+
+        try {
+            return memberStatRepository.save(memberStat);
+        } catch (DataIntegrityViolationException e) {
+            throw new GeneralException(ErrorStatus._MEMBERSTAT_EXISTS);
+        }
     }
 
     /**

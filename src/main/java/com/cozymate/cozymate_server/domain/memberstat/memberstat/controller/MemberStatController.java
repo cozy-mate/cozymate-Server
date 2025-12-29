@@ -54,6 +54,7 @@ public class MemberStatController {
             + "성격은 다중 선택 변경되었으므로, 배열로 보내주시면 됩니다."
     )
     @SwaggerApiError({
+        ErrorStatus._MEMBER_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_EXISTS,
         ErrorStatus._UNIVERSITY_NOT_FOUND,
         ErrorStatus._MEMBERSTAT_MERIDIAN_NOT_VALID
