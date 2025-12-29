@@ -53,9 +53,12 @@ jobs:
         with:
           arguments: clean build -x test
 
+      # 임시 수정 (11/18)
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-for-cmd: true
 
       ## Main Branch Build
       - name: Build, Tag (Main Branch)

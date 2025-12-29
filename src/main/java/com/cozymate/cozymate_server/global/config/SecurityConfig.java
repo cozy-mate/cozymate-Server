@@ -62,6 +62,7 @@ public class SecurityConfig {
                         CorsConfiguration configuration = new CorsConfiguration();
                         configuration.setAllowedOrigins(Arrays.asList(
                             "https://admin-cozymate.web.app",
+                            "https://cozymate-official.web.app",
                             "http://localhost:5173"
                         ));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
@@ -93,11 +94,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 .requestMatchers(
-                    "/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config", "/swagger-resources/**")
+                    "/", "/swagger-ui/**", "/v3/api-docs/**", "/v2/swagger-config", "/swagger-resources/**", "/actuator/health")
                     .permitAll()
                 .requestMatchers(
-                    "/admin/auth/**", "/auth/sign-in", "/viral/create", "/viral/**")
-                    .permitAll()
+                    "/admin/auth/**", "/auth/sign-in", "/viral/create", "/viral/**", "/ws/**")
+                .permitAll()
                 .anyRequest()
                 .authenticated());
 

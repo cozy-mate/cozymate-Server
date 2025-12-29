@@ -1,6 +1,9 @@
 package com.cozymate.cozymate_server.domain.member.service;
 
 import com.cozymate.cozymate_server.auth.repository.TokenRepository;
+import com.cozymate.cozymate_server.domain.chatroom.repository.ChatRoomRepositoryService;
+import com.cozymate.cozymate_server.domain.message.repository.MessageRepository;
+import com.cozymate.cozymate_server.domain.messageroom.repository.MessageRoomRepository;
 import com.cozymate.cozymate_server.domain.fcm.repository.FcmRepositoryService;
 import com.cozymate.cozymate_server.domain.inquiry.repository.InquiryRepository;
 import com.cozymate.cozymate_server.domain.mail.repository.MailAuthenticationRepository;
@@ -69,6 +72,7 @@ public class MemberWithdrawService {
     private final InquiryRepository inquiryRepository;
     private final TodoCommandService todoCommandService;
     private final MemberBlockRepository memberBlockRepository;
+    private final ChatRoomRepositoryService chatRoomRepositoryService;
 
     private final ApplicationEventPublisher publisher;
 
@@ -143,6 +147,8 @@ public class MemberWithdrawService {
                 MemberStatExtractor.extractAnswers(stat)
             )
         ));
+        chatRoomRepositoryService.deleteAllChatRoomMemberByMemberId(member.getId());
+        log.debug("채팅 방 참여 내역 삭제 완료");
     }
 
     /**

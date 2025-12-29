@@ -92,6 +92,16 @@ dependencies {
 
     implementation "software.amazon.awssdk:apache-client"
 
+    // Web Socket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // MongoDB
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    // Retry
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework:spring-aspects'
+
 }
 
 tasks.named('test') {

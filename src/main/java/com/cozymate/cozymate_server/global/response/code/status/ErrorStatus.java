@@ -219,7 +219,15 @@ public enum ErrorStatus implements BaseErrorCode {
     _VIRAL_CODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIRAL404","바이럴 코드로 사용자의 값을 찾을 수 없습니다."),
 
     // DORMITORY MENU
-    _DORMITORY_MENU_NOT_FOUND(HttpStatus.BAD_REQUEST, "DORMITORYMENU400", "식단을 찾을 수 없습니다.")
+    _DORMITORY_MENU_NOT_FOUND(HttpStatus.BAD_REQUEST, "DORMITORYMENU400", "식단을 찾을 수 없습니다."),
+
+    // CHATROOM
+    _CHATROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOM400", "해당 채팅방을 찾을 수 없습니다."),
+    _CHATROOM_CAN_NOT_JOIN(HttpStatus.BAD_REQUEST, "CHATROOM401", "해당 채팅방에 참여할 수 없습니다."),
+
+    // CHATROOMMEMBER
+    _CHATROOMMEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHATROOMMEMBER400", "해당 채팅방에 속한 사용자가 아닙니다."),
+
     ;
 
     private final HttpStatus httpStatus;

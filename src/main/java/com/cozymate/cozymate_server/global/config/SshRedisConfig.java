@@ -1,5 +1,6 @@
 package com.cozymate.cozymate_server.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,15 +23,21 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class SshRedisConfig {
 
     private final SshTunnelConfig initializer;
+    private final ObjectMapper objectMapper;
 
     @Value("${server}")
-    private String isServer;
+    private String noSshTunneling;
 
-    @Value("${spring.cloud.aws.ec2.redis_endpoint}")
+    @Value("${ssh_tunnel.redis_tunnel_endpoint}")
+    private String redisTunnelEndpoint;
+    @Value("${ssh_tunnel.redis_endpoint}")
     private String redisEndpoint;
 
-    @Value("${spring.cloud.aws.ec2.redis_port}")
+    @Value("${ssh_tunnel.redis_port}")
     private int redisPort;
+
+    @Value("${ssh_tunnel.redis_db}")
+    private int redisDatabase;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
@@ -38,15 +45,17 @@ public class SshRedisConfig {
         int port = redisPort;
 
         // SSH 터널을 통해 Redis에 연결해야 할 경우
-        if (isServer.equals("false")) {
-            Integer forwardedPort = initializer.buildSshConnection(redisEndpoint, redisPort);
-            host = "localhost";
+        if (noSshTunneling.equals("false")) {
+            Integer forwardedPort = initializer.buildSshConnection(redisTunnelEndpoint, redisPort);
+            host = redisTunnelEndpoint;
             port = forwardedPort;
         }
 
-        log.info("Redis connection through SSH: host={}, port={}", host, port);
+        log.info("Redis connection through SSH: host={}, port={}, database={}", host, port, redisDatabase);
 
-        return new LettuceConnectionFactory(host, port);
+        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(host, port);
+        connectionFactory.setDatabase(redisDatabase);
+        return connectionFactory;
     }
 
     @Bean
@@ -55,7 +64,9 @@ public class SshRedisConfig {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
         return redisTemplate;
     }
 }
