@@ -16,10 +16,14 @@ import com.cozymate.cozymate_server.domain.memberblock.repository.MemberBlockRep
 import com.cozymate.cozymate_server.domain.memberfavorite.repository.MemberFavoriteRepository;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.repository.LifestyleMatchRateRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.event.MemberStatDeleteEvent;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service.MemberStatCacheService;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.util.MemberStatExtractor;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepository;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.repository.MemberStatRepositoryService;
 import com.cozymate.cozymate_server.domain.memberstatpreference.repository.MemberStatPreferenceRepository;
+import com.cozymate.cozymate_server.domain.message.repository.MessageRepository;
+import com.cozymate.cozymate_server.domain.messageroom.repository.MessageRoomRepository;
 import com.cozymate.cozymate_server.domain.notificationlog.repository.NotificationLogRepositoryService;
 import com.cozymate.cozymate_server.domain.post.Post;
 import com.cozymate.cozymate_server.domain.post.repository.PostRepository;
@@ -33,6 +37,7 @@ import com.cozymate.cozymate_server.domain.todo.service.TodoCommandService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,6 +74,8 @@ public class MemberWithdrawService {
     private final MemberBlockRepository memberBlockRepository;
     private final ChatRoomRepositoryService chatRoomRepositoryService;
 
+    private final ApplicationEventPublisher publisher;
+
 
     /**
      * 회원 탈퇴 로직을 처리하는 메서드. 관련된 모든 데이터를 삭제한 뒤, 최종적으로 회원 정보를 삭제한다.
@@ -98,7 +105,7 @@ public class MemberWithdrawService {
         roomFavoriteRepository.deleteByMember(member);
         log.debug("찜 삭제 완료");
 
-        deleteMemberStat(member.getId());
+        Optional<MemberStat> memberStat = deleteMemberStat(member.getId());
 
         memberStatPreferenceRepository.deleteByMemberId(member.getId());
         lifestyleMatchRateRepository.deleteAllByMemberId(member.getId());
@@ -132,6 +139,14 @@ public class MemberWithdrawService {
         memberBlockRepository.deleteAllByMemberIdOrBlockedMemberId(member.getId());
         log.debug("회원 차단 내역 삭제 완료");
 
+        memberStat.ifPresent(stat -> publisher.publishEvent(
+            new MemberStatDeleteEvent(
+                member.getUniversity().getId(),
+                member.getGender().toString(),
+                member.getId(),
+                MemberStatExtractor.extractAnswers(stat)
+            )
+        ));
         chatRoomRepositoryService.deleteAllChatRoomMemberByMemberId(member.getId());
         log.debug("채팅 방 참여 내역 삭제 완료");
     }
@@ -198,12 +213,13 @@ public class MemberWithdrawService {
     /**
      * redis 에서 MemberStat 삭제하고, DB에서 삭제
      */
-    private void deleteMemberStat(Long memberId){
+    private Optional<MemberStat> deleteMemberStat(Long memberId){
         Optional<MemberStat> memberStat = memberStatRepositoryService.getMemberStatOptional(memberId);
 
         if(memberStat.isPresent()){
-            memberStatCacheService.delete(memberStat.get());
             memberStatRepository.deleteByMemberId(memberId);
         }
+
+        return memberStat;
     }
 }

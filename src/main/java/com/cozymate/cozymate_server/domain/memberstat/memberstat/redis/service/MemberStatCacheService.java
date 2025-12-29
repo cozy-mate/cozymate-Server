@@ -1,14 +1,19 @@
 package com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.service;
 
-import com.cozymate.cozymate_server.domain.member.Member;
 import com.cozymate.cozymate_server.domain.memberstat.lifestylematchrate.redis.service.LifestyleMatchRateCacheService;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.MemberStat;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.command.DeleteCommand;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.command.SaveCommand;
+import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.command.UpdateCommand;
 import com.cozymate.cozymate_server.domain.memberstat.memberstat.redis.util.MemberStatExtractor;
-
 import com.cozymate.cozymate_server.global.response.code.status.ErrorStatus;
 import com.cozymate.cozymate_server.global.response.exception.GeneralException;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +22,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,336 +34,318 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MemberStatCacheService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final LifestyleMatchRateCacheService lifestyleMatchRateCacheService;
+    private final StringRedisTemplate redis;
+    private final LifestyleMatchRateCacheService lifestyleMatchRateCacheService; // ← 필드 참조
 
-    private static final String POOL_KEY_PREFIX = "pool:university:";
-    private static final String LIFESTYLE_KEY_PREFIX = "lifestyle:university:";
-    private static final String GENDER_KEY = ":gender:";
-    private static final String LIFESTYLE_DELIMITER = ":";
-
-    private static final String HASROOM_KEY = ":hasroom";
+    private static final String POOL_PREFIX = "pool:university:%s:gender:%s";
+    private static final String LIFESTYLE_PREFIX = "lifestyle:university:%s:%s:%s";
+    private static final String HASROOM_KEY = "pool:university:%s:gender:%s:hasroom";
     private static final Set<String> MULTI_VALUE_QUESTION = Set.of("personalities",
         "sleepingHabits");
 
+    private DefaultRedisScript<Long> upsertScript;  // SADD pool + removes + adds
+    private DefaultRedisScript<Long> deleteScript;  // SREM pool + SREM lifestyles
 
-    /**
-     * 사용자의 MemberStat 기반 Redis 캐시 전체 초기 등록 - Pool + Lifestyle + UniversityStat 항목을 기준으로 Set에 삽입
-     */
-    public void save(MemberStat memberStat) {
-        Long universityId = memberStat.getMember().getUniversity().getId();
-        String gender = memberStat.getMember().getGender().toString();
-        Long userId = memberStat.getMember().getId();
+    @PostConstruct
+    void initScripts() {
+        String upsert =
+            "local uid = ARGV[1]\n" +
+                "local remN = tonumber(ARGV[2])\n" +
+                "local addN = tonumber(ARGV[3])\n" +
+                "redis.call('SADD', KEYS[1], uid)\n" +
+                "for i=1,remN do redis.call('SREM', KEYS[1+i], uid) end\n" +
+                "for i=1,addN do redis.call('SADD', KEYS[1+remN+i], uid) end\n" +
+                "return 1\n";
+        upsertScript = new DefaultRedisScript<>(upsert, Long.class);
 
-        addToMemberPool(universityId, gender, userId);
-
-        Map<String, String> extractedAnswers = MemberStatExtractor.extractAnswers(memberStat);
-        for (Map.Entry<String, String> entry : extractedAnswers.entrySet()) {
-            if (entry.getValue().isBlank()) {
-                throw new GeneralException(ErrorStatus._MEMBERSTAT_PARAMETER_NOT_VALID);
-            }
-            if (MULTI_VALUE_QUESTION.contains(entry.getKey())) {
-                addMultiValues(universityId, entry.getKey(), entry.getValue(), userId);
-                continue;
-            }
-            addToLifestyle(universityId, entry.getKey(), entry.getValue(), userId);
-        }
+        String del =
+            "local uid = ARGV[1]\n" +
+                "redis.call('SREM', KEYS[1], uid)\n" +
+                "for i=2,#KEYS do redis.call('SREM', KEYS[i], uid) end\n" +
+                "return 1\n";
+        deleteScript = new DefaultRedisScript<>(del, Long.class);
     }
 
-    /**
-     * 기존 MemberStat과 변경된 MemberStat 비교 기반 캐시 수정 (SREM/SADD)
-     */
-    public void update(Member member, MemberStat oldStat, MemberStat newStat) {
-        Map<String, String> oldAnswers = MemberStatExtractor.extractAnswers(oldStat);
-        Map<String, String> newAnswers = MemberStatExtractor.extractAnswers(newStat);
 
-        for (Map.Entry<String, String> entry : newAnswers.entrySet()) {
-            String key = entry.getKey();
-            String newValue = entry.getValue();
-            String oldValue = oldAnswers.get(key);
+    public void saveByArgs(
+        SaveCommand command) {
+        String poolKey = poolKey(command.universityId(), command.gender());
+        List<String> addKeys = expandLifestyleKeys(command.universityId(), command.answers());
+        List<String> keys = new ArrayList<>(1 + addKeys.size());
+        keys.add(poolKey);
+        keys.addAll(addKeys);
 
-            if (newValue == null || newValue.isBlank()) {
-                throw new GeneralException(ErrorStatus._MEMBERSTAT_PARAMETER_NOT_VALID);
-            }
-
-            if (oldValue.equals(newValue)) {
-                continue;
-            }
-
-            if (MULTI_VALUE_QUESTION.contains(key)) {
-                removeMultiValues(member.getUniversity().getId(), key, oldValue, newValue,
-                    member.getId());
-                addMultiValues(member.getUniversity().getId(), key, newValue, member.getId());
-                continue;
-            }
-
-            removeLifestyle(member.getUniversity().getId(), key, oldValue, member.getId());
-            addToLifestyle(member.getUniversity().getId(), key, newValue, member.getId());
-        }
+        redis.execute(upsertScript, keys,
+            encodeMemberId(command.memberId()),
+            "0",
+            String.valueOf(addKeys.size()));
     }
 
-    /**
-     * 필터 조건 기반 사용자 ID → 매칭률 Map 반환 (정렬 포함)
-     */
+    public void updateByArgs(UpdateCommand command) {
+        String poolKey = poolKey(command.universityId(), command.gender());
+        Diff diff = diffKeys(command.universityId(), command.oldAnswers(), command.newAnswers());
+
+        List<String> keys = new ArrayList<>(1 + diff.removes().size() + diff.adds().size());
+        keys.add(poolKey);
+        keys.addAll(diff.removes());
+        keys.addAll(diff.adds());
+
+        redis.execute(upsertScript, keys,
+            encodeMemberId(command.memberId()),
+            String.valueOf(diff.removes().size()),
+            String.valueOf(diff.adds().size()));
+    }
+
+    public void deleteByArgs(DeleteCommand command) {
+        String poolKey = poolKey(command.universityId(), command.gender());
+        List<String> lifestyleKeys = expandLifestyleKeys(command.universityId(), command.answers());
+
+        List<String> keys = new ArrayList<>(1 + lifestyleKeys.size());
+        keys.add(poolKey);
+        keys.addAll(lifestyleKeys);
+
+        redis.execute(deleteScript, keys, encodeMemberId(command.memberId()));
+    }
+
+    /* ===== 부가 기능 (hasRoom) ===== */
+
+    public void addUserToHasRoom(Long universityId, String gender, Long memberId) {
+        redis.opsForSet().add(hasRoomKey(universityId, gender), encodeMemberId(memberId.toString()));
+    }
+
+    public void removeUserFromHasRoom(Long universityId, String gender, Long memberId){
+        redis.opsForSet().remove(hasRoomKey(universityId, gender), encodeMemberId(memberId.toString()));
+    }
+
+    /* ===== 읽기/필터 (필요시 S*STORE로 서버측 교집합 가능) ===== */
+
     public Map<Long, Integer> filterUsersWithAttributeList(Long universityId, String gender,
         MemberStat memberStat, List<String> filterList, Boolean hasRoom) {
         Map<String, List<?>> filterMap = MemberStatExtractor.toFilterMap(memberStat, filterList);
         List<Long> filteredUserList = filterUsers(universityId, gender, filterMap, hasRoom);
 
-        return lifestyleMatchRateCacheService.findMatchRates(memberStat.getMember().getId(),
-                filteredUserList)
+        return lifestyleMatchRateCacheService
+            .findMatchRates(memberStat.getMember().getId(), filteredUserList)
             .entrySet().stream()
-            .sorted((a, b) -> b.getValue() - a.getValue())
+            .sorted(Comparator.comparingInt(Map.Entry<Long, Integer>::getValue).reversed())
             .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (a, b) -> a,
-                LinkedHashMap::new
-            ));
+                Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
     }
 
-    public void delete(MemberStat memberStat) {
-        Long universityId = memberStat.getMember().getUniversity().getId();
-        String gender = memberStat.getMember().getGender().toString();
-        Long memberId = memberStat.getMember().getId();
-
-        // 1. 기본 풀에서 제거
-        String poolKey = generatePoolKey(universityId, gender);
-        redisTemplate.opsForSet().remove(poolKey, memberId.toString());
-
-        // 2. 라이프스타일 Set에서 제거
-        Map<String, String> extractedAnswers = MemberStatExtractor.extractAnswers(memberStat);
-        for (Map.Entry<String, String> entry : extractedAnswers.entrySet()) {
-            String question = entry.getKey();
-            String answer = entry.getValue();
-
-            if (answer.isBlank()) {
-                continue;
-            }
-
-            if (MULTI_VALUE_QUESTION.contains(question)) {
-                for (String val : answer.split(",")) {
-                    if (!val.isBlank()) {
-                        String lifestyleKey = generateLifestyleKey(universityId, question,
-                            val.trim());
-                        redisTemplate.opsForSet().remove(lifestyleKey, memberId.toString());
-                    }
-                }
-            } else {
-                String lifestyleKey = generateLifestyleKey(universityId, question, answer);
-                redisTemplate.opsForSet().remove(lifestyleKey, memberId.toString());
-            }
-        }
-
-        // 3. 매칭률 캐시도 삭제
-        lifestyleMatchRateCacheService.deleteAllRelatedTo(memberId);
-    }
-
-    /**
-     * 방 참여자 Set에 사용자 추가
-     */
-    public void addUserToHasRoom(Long universityId, String gender, Long userId) {
-        String hasRoomKey = generateHasRoomKey(universityId, gender);
-        redisTemplate.opsForSet().add(hasRoomKey, userId.toString());
-    }
-
-    /**
-     * 방 참여자 Set에서 사용자 제거
-     */
-    public void removeUserFromHasRoom(Long universityId, String gender, Long userId) {
-        String hasRoomKey = generateHasRoomKey(universityId, gender);
-        redisTemplate.opsForSet().remove(hasRoomKey, userId.toString());
-    }
-
-    /**
-     * 필터 조건 기반 사용자 ID 리스트 필터링 - 각 조건별 Union 후, 전체 조건에 대해 교집합 수행
-     */
-    private List<Long> filterUsers(Long universityId, String gender, Map<String, List<?>> filters,
-        Boolean hasRoom) {
-        List<Set<Object>> groupedKeyResults = new ArrayList<>();
-
-        Set<Object> basePool = getBasePool(universityId, gender);
+    private List<Long> filterUsers(Long universityId, String gender,
+        Map<String, List<?>> filters, Boolean hasRoom) {
+        Set<String> basePool = getBasePool(universityId, gender);
         if (basePool == null || basePool.isEmpty()) {
             return Collections.emptyList();
         }
-        groupedKeyResults.add(basePool);
 
-        for (Map.Entry<String, List<?>> entry : filters.entrySet()) {
-            Set<Object> unioned = getUnionedSetPerFilter(universityId, entry.getKey(),
-                entry.getValue());
-            if (unioned == null || unioned.isEmpty()) {
+        List<Set<String>> groups = new ArrayList<>();
+        groups.add(basePool);
+
+        for (Map.Entry<String, List<?>> e : filters.entrySet()) {
+            Set<String> u = getUnionedSetPerFilter(universityId, e.getKey(), e.getValue());
+            if (u == null || u.isEmpty()) {
                 return Collections.emptyList();
             }
-            groupedKeyResults.add(unioned);
+            groups.add(u);
         }
 
-        Set<Object> result = intersectGroupedResults(groupedKeyResults);
+        Set<String> result = intersectInMemory(groups);
 
-        // 방 참여자 제외
-        if (hasRoom) {
+        if (Boolean.TRUE.equals(hasRoom)) {
             return excludeUsersInHasRoom(result, universityId, gender);
         }
-
-        return result.stream().map(Object::toString).map(Long::valueOf).toList();
+        return result.stream().map(Long::valueOf).toList();
     }
 
-    /**
-     * 방 있는 사람을 제외하는 메소드
-     **/
-    private List<Long> excludeUsersInHasRoom(Set<Object> result, Long universityId, String gender) {
-        Set<Object> hasRoomSet = getUsersInHasRoom(universityId, gender);
+    private Set<String> getBasePool(Long universityId, String gender) {
+        Set<String> m = redis.opsForSet().members(poolKey(universityId, gender));
+        if (m == null) {
+            return Collections.emptySet();
+        }
+        return m.stream()
+            .map(this::normalizeUserId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());    }
 
-        if (hasRoomSet.isEmpty()) {
+    private Set<String> getUnionedSetPerFilter(Long universityId, String key, List<?> values) {
+        List<String> keys = values.stream()
+            .filter(Objects::nonNull)
+            .map(v -> lifestyleKey(universityId, key, v.toString().trim()))
+            .toList();
+        if (keys.isEmpty()) {
+            return null;
+        }
+
+        Set<String> acc = new HashSet<>();
+        for (String k : keys) {
+            Set<String> m = redis.opsForSet().members(k);
+            if (m != null) {
+                m.stream()
+                    .map(this::normalizeUserId)
+                    .filter(Objects::nonNull)
+                    .forEach(acc::add);
+            }
+        }
+        return acc;
+    }
+
+
+    private Set<String> intersectInMemory(List<Set<String>> sets) {
+        Iterator<Set<String>> it = sets.iterator();
+        Set<String> res = new HashSet<>(it.next());
+        while (it.hasNext()) {
+            res.retainAll(it.next());
+            if (res.isEmpty()) {
+                break;
+            }
+        }
+        return res;
+    }
+
+    private List<Long> excludeUsersInHasRoom(Set<String> result, Long universityId, String gender) {
+        Set<String> hasRoomSet = redis.opsForSet().members(hasRoomKey(universityId, gender));
+        if (hasRoomSet == null || hasRoomSet.isEmpty()) {
             return result.stream()
-                .map(Object::toString)
+                .map(this::normalizeUserId)
+                .filter(Objects::nonNull)
                 .map(Long::valueOf)
                 .toList();
         }
 
-        Set<Long> resultSet = result.stream()
-            .map(Object::toString)
-            .map(Long::valueOf)
-            .collect(Collectors.toSet());
-
-        Set<Long> hasRoomIdSet = hasRoomSet.stream()
-            .map(Object::toString)
-            .map(Long::valueOf)
-            .collect(Collectors.toSet());
-
-        resultSet.removeAll(hasRoomIdSet);
-
-        return new ArrayList<>(resultSet);
-    }
-
-    /**
-     * Pool Key 기반 사용자 Set 조회
-     */
-    private Set<Object> getBasePool(Long universityId, String gender) {
-        String poolKey = generatePoolKey(universityId, gender);
-        return redisTemplate.opsForSet().members(poolKey).stream()
-            .map(Object::toString)
-            .filter(s -> s.matches("\\d+")) // 숫자인 것만
-            .collect(Collectors.toSet());
-    }
-
-    /**
-     * 필터 조건 키 목록을 기반으로 Redis Set Union 결과 반환
-     */
-    private Set<Object> getUnionedSetPerFilter(Long universityId, String key, List<?> values) {
-        List<String> keys = values.stream()
+        Set<String> normalizedResult = result.stream()
+            .map(this::normalizeUserId)
             .filter(Objects::nonNull)
-            .map(val -> generateLifestyleKey(universityId, key, val.toString()))
-            .toList();
+            .collect(Collectors.toSet());
 
-        if (keys.isEmpty()) {
+        Set<String> normalizedHasRoom = hasRoomSet.stream()
+            .map(this::normalizeUserId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        normalizedResult.removeAll(normalizedHasRoom);
+
+        return normalizedResult.stream()
+            .map(Long::valueOf)
+            .toList();
+    }
+
+    /* ===== 키/유틸 ===== */
+
+    private String poolKey(Long universityId, String gender) {
+        return String.format(POOL_PREFIX, universityId, gender);
+    }
+
+    private String hasRoomKey(Long universityId, String gender) {
+        return String.format(HASROOM_KEY, universityId, gender);
+    }
+
+    private String lifestyleKey(Long universityId, String questionKey, String answerValue) {
+        return String.format(LIFESTYLE_PREFIX, universityId, questionKey, answerValue);
+    }
+
+    private List<String> expandLifestyleKeys(Long universityId, Map<String, String> answers) {
+        List<String> keys = new ArrayList<>();
+        for (Map.Entry<String, String> e : answers.entrySet()) {
+            final String q = e.getKey();
+            final String raw = norm(e.getValue());
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+
+            if (MULTI_VALUE_QUESTION.contains(q)) {
+                for (String v : toSet(raw)) {
+                    keys.add(lifestyleKey(universityId, q, v));
+                }
+            } else {
+                keys.add(lifestyleKey(universityId, q, raw));
+            }
+        }
+        return keys;
+    }
+
+    private Diff diffKeys(Long universityId, Map<String, String> oldAns,
+        Map<String, String> newAns) {
+        List<String> removes = new ArrayList<>();
+        List<String> adds = new ArrayList<>();
+
+        for (String q : newAns.keySet()) {
+            String oldRaw = norm(oldAns.get(q));
+            String newRaw = norm(newAns.get(q));
+            if (newRaw == null || newRaw.isBlank()) {
+                throw new GeneralException(ErrorStatus._MEMBERSTAT_PARAMETER_NOT_VALID);
+            }
+            if (Objects.equals(oldRaw, newRaw)) {
+                continue;
+            }
+
+            if (MULTI_VALUE_QUESTION.contains(q)) {
+                Set<String> o = toSet(oldRaw);
+                Set<String> n = toSet(newRaw);
+                for (String v : diff(o, n)) {
+                    removes.add(lifestyleKey(universityId, q, v));
+                }
+                for (String v : diff(n, o)) {
+                    adds.add(lifestyleKey(universityId, q, v));
+                }
+            } else {
+                if (oldRaw != null && !oldRaw.isBlank()) {
+                    removes.add(lifestyleKey(universityId, q, oldRaw));
+                }
+                adds.add(lifestyleKey(universityId, q, newRaw));
+            }
+        }
+        return new Diff(removes, adds);
+    }
+
+    private Set<String> diff(Set<String> a, Set<String> b) {
+        Set<String> r = new HashSet<>(a);
+        r.removeAll(b);
+        return r;
+    }
+
+    private Set<String> toSet(String csv) {
+        if (csv == null || csv.isBlank()) {
+            return Collections.emptySet();
+        }
+        String[] parts = csv.split(",");
+        Set<String> s = new HashSet<>();
+        for (String p : parts) {
+            String v = norm(p);
+            if (v != null && !v.isBlank()) {
+                s.add(v);
+            }
+        }
+        return s;
+    }
+
+    private String norm(String v) {
+        return v == null ? null : v.trim();
+    }
+
+    private String encodeMemberId(String memberId) {
+        if (memberId == null) {
             return null;
         }
-        return redisTemplate.opsForSet().union(keys.get(0), keys.subList(1, keys.size()));
+        return "\"" + memberId + "\"";
     }
 
-    /**
-     * Set 목록 간 메모리 교집합 수행
-     */
-    private Set<Object> intersectGroupedResults(List<Set<Object>> sets) {
-        Set<Object> result = sets.get(0);
-        for (int i = 1; i < sets.size(); i++) {
-            result.retainAll(sets.get(i));
-            if (result.isEmpty()) {
-                break;
-            }
+    private String normalizeUserId(String raw) {
+        if (raw == null) return null;
+        String v = raw.trim();
+
+        if (v.length() >= 2 && v.startsWith("\"") && v.endsWith("\"")) {
+            v = v.substring(1, v.length() - 1).trim();
         }
-        return result;
-    }
 
-    /**
-     * 기본 Pool Key 생성
-     */
-    private String generatePoolKey(Long universityId, String gender) {
-        return POOL_KEY_PREFIX + universityId + GENDER_KEY + gender;
-    }
-
-    /**
-     * 방 참여 여부 Key 생성
-     */
-    private String generateHasRoomKey(Long universityId, String gender) {
-        return generatePoolKey(universityId, gender) + HASROOM_KEY;
-    }
-
-    /**
-     * Lifestyle Set Key 생성
-     */
-    private String generateLifestyleKey(Long universityId, String questionKey, String answerValue) {
-        return generateLifestyleKeyPrefix(universityId, questionKey) + answerValue;
-    }
-
-    /**
-     * Lifestyle Set Key prefix
-     */
-    private String generateLifestyleKeyPrefix(Long universityId, String questionKey) {
-        return LIFESTYLE_KEY_PREFIX + universityId + LIFESTYLE_DELIMITER + questionKey
-            + LIFESTYLE_DELIMITER;
-    }
-
-    /**
-     * Pool Set에 사용자 추가
-     */
-    private void addToMemberPool(Long universityId, String gender, Long userId) {
-        String poolKey = generatePoolKey(universityId, gender);
-        redisTemplate.opsForSet().add(poolKey, userId.toString());
-    }
-
-    /**
-     * Lifestyle 항목별 Set에 사용자 추가
-     */
-    private void addToLifestyle(Long universityId, String questionKey, String answerValue,
-        Long userId) {
-        String lifestyleKey = generateLifestyleKey(universityId, questionKey, answerValue);
-        redisTemplate.opsForSet().add(lifestyleKey, userId.toString());
-    }
-
-    /**
-     * 복수 값 항목 (bitmask) 분해 후 Set에 추가
-     */
-    private void addMultiValues(Long universityId, String questionKey, String answerValues,
-        Long userId) {
-        for (String v : answerValues.split(",")) {
-            if (!v.isBlank()) {
-                addToLifestyle(universityId, questionKey, v.trim(), userId);
-            }
+        if (!v.matches("\\d+")) {
+            return null;
         }
+        return v;
     }
+    private record Diff(
+        List<String> removes,
+        List<String> adds) {
 
-    /**
-     * Lifestyle 항목 Set에서 사용자 제거
-     */
-    private void removeLifestyle(Long universityId, String questionKey, String answerValue,
-        Long userId) {
-        String keyToRemove = generateLifestyleKey(universityId, questionKey, answerValue);
-        redisTemplate.opsForSet().remove(keyToRemove, userId.toString());
-    }
-
-    /**
-     * 복수 값 항목 수정 시 이전 값들 중 제거할 항목 삭제
-     */
-    private void removeMultiValues(Long universityId, String questionKey, String oldValue,
-        String newValue, Long userId) {
-        Set<String> oldSet = Set.of(oldValue.split(","));
-        Set<String> newSet = Set.of(newValue.split(","));
-
-        for (String val : oldSet) {
-            if (!val.isBlank() && !newSet.contains(val)) {
-                removeLifestyle(universityId, questionKey, val.trim(), userId);
-            }
-        }
-    }
-
-
-    /**
-     * 방 참여자 Set 조회
-     */
-    private Set<Object> getUsersInHasRoom(Long universityId, String gender) {
-        String hasRoomKey = generateHasRoomKey(universityId, gender);
-        return redisTemplate.opsForSet().members(hasRoomKey);
     }
 }
-
