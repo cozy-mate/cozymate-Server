@@ -1,9 +1,9 @@
-name: HomeServer CI/CD
+name: Main CI/CD
 
 on:
   workflow_dispatch:
   push:
-    branches: [ "develop" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -66,14 +66,15 @@ jobs:
             SPRING_PROFILE=prod
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
   cd:
     needs: ci
     name: CD
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to HomeServer (Main Branch)
-        if: github.ref == 'refs/heads/develop'
+      - name: Deploy to HomeServer (Staging Branch)
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOME_HOST }}
@@ -82,5 +83,5 @@ jobs:
           key: ${{ secrets.HOME_SSH_KEY }}
           passphrase: ${{ secrets.HOME_SSH_KEY_PASSPHRASE }}
           script: |
-            cd /home/dsga/project/cozymate/deploy
-            ./deploy.sh ${{ env.IMAGE_TAG }}
+            cd /home/cozymate/deploy
+            ./deploy_main.sh ${{ env.IMAGE_TAG }}
